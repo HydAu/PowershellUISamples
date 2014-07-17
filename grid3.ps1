@@ -10,7 +10,6 @@
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
-// inline callback class 
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
@@ -42,7 +41,14 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
-New-Module -ScriptBlock {
+function PromptGrid(
+	[System.Collections.IList] $data, 
+	[Object] $caller = $null 
+	){
+
+  if ($caller -eq $null ){
+    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+  }
 
 [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | out-null
 [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | out-null
@@ -78,39 +84,44 @@ $f.Controls.Add( $grid )
 
 
 $button.add_Click({
-#  http://msdn.microsoft.com/en-us/library/system.windows.forms.datagrid.isselected%28v=vs.110%29.aspx
+# http://msdn.microsoft.com/en-us/library/system.windows.forms.datagridviewrow.cells%28v=vs.110%29.aspx
+# [System.Windows.Forms.DataGridViewSelectedRowCollection]$rows = $grid.SelectedRows
+# $str = ''
+#[System.Windows.Forms.DataGridViewRow]$row = $null 
+# 
+#[System.Windows.Forms.DataGridViewSelectedCellCollection] $selected_cells = $grid.SelectedCells; 
+$caller.Data =  0
+
+# for ($counter = 0; $counter -lt ($grid.Rows.Count);$counter++) { 
+
+$caller.Data = $caller.Data + 10 
+# }
+#foreach ($row in $rows) { 
+#$str +=  $row.Cells[0].Value
+#
+#}
 if ($grid.IsSelected(0)){
- $caller.Data = 1; 
+ $caller.Data = 11; 
+} else { 
+ $caller.Data = 42; 
+
 }
+ $caller.Data = $str
 $f.Close()
 
 })
 
-function Edit-Object([Object]$obj, [Object]$caller) {
 
 
+$grid.DataSource =  $data
+$f.ShowDialog([Win32Window ] ($caller)) | out-null
 
-  if ($caller -eq $null ){
-    write-output '.'
-    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  } else { 
-    write-output '?'
-  }
-
-
-$grid.DataSource =  $obj
-$f.ShowDialog() | out-null
-
-  $f.Topmost = $True
+$f.Topmost = $True
 
 
 $f.refresh()
-}
 
-Export-ModuleMember -Function Edit-Object
-Export-ModuleMember -Variable caller
-
-} | out-null
+} 
  
 
 function display_result{
@@ -126,15 +137,17 @@ foreach ($key in $result.keys){
   $array.Add($o)
 }
 
-$caller = $null
-$ret = (Edit-Object $array $caller)
-write-output @('->', $caller.Handle) 
+$process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$ret = (PromptGrid $array $process_window)
+write-output @('->', $process_window.Data) 
 }
 
 $data = @{ 1= @('wind', 'blows...'); 
            2 = @('fire',  'burns...');
            3 = @('water',  'falls...')
         }
+
+$DebugPreference = 'Continue'
 
 display_result $data
 

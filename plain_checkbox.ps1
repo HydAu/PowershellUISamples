@@ -212,6 +212,9 @@ $DebugPreference = 'Continue'
 $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 PromptAuto "" "" $process_window
+
+write-output @('->', $process_window.Data) 
+
   if($process_window.Data -ne $RESULT_CANCEL) {
     write-debug ('Selection is : {0}' -f  , $process_window.Message )
   } else { 
