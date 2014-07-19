@@ -33,11 +33,11 @@ public class Win32Window : IWin32Window
 
 # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/CheckedListBoxItemCheckevent.htm
 
-function PromptAuto(
+function PromptCheckedList
+{
+     Param(
 	[String] $title, 
-	[String] $message, 
-	[Object] $caller = $null 
-	){
+	[String] $message)
 
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic') 
@@ -56,15 +56,7 @@ function PromptAuto(
   $f.SuspendLayout()
   $i.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 11, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
   $i.FormattingEnabled = $true;
-  $i.Items.AddRange(@(
-            'Lorem',
-            'ipsum',
-            'dolor',
-            'sit',
-            'amet',
-            'consectetur',
-            'adipiscing',
-            'elit'));
+  $i.Items.AddRange(( $message -split '[ ,]+' ));
 
   $i.Location = New-Object System.Drawing.Point(17, 12)
   $i.Name = 'inputCheckedListBox'
@@ -128,27 +120,18 @@ function PromptAuto(
   $f.KeyPreview = $True
 
   $f.Topmost = $True
-  if ($caller -eq $null ){
-    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  }
+  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
   $f.Add_Shown( { $f.Activate() } )
 
   [Void] $f.ShowDialog([Win32Window ] ($caller) )
   $F.Dispose()
-  write-output $caller.Message
-  return $caller.Data
+  $result = $caller.Message
+  $caller = $null
+  return $result
 }
 
 $DebugPreference = 'Continue'
-$process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$result = PromptCheckedList ''  'Lorem ipsum dolor sit amet, consectetur adipisicing elit' 
 
-PromptAuto "" "" $process_window
-
-write-output @('->', $process_window.Data) 
-
-  if($process_window.Data -ne $RESULT_CANCEL) {
-    write-debug ('Selection is : {0}' -f  , $process_window.Message )
-  } else { 
-    write-debug ('Result is : {0} ({1})' -f $Readable.Item($process_window.Data) , $process_window.Data )
-  }
+write-debug ('Selection is : {0}' -f  , $result )
