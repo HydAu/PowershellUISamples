@@ -1,60 +1,33 @@
-  $RESULT_OK = 0
-  $RESULT_CANCEL = 2
-  $Readable = @{ 
-    $RESULT_OK = 'OK' 
-    $RESULT_CANCEL = 'CANCEL'
-  } 
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 
+function PromptGrid{
 
-
-Add-Type -TypeDefinition @"
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private int _data;
-    private string _message;
-
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-    public string Message
-    {
-        get { return _message; }
-        set { _message = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
-}
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
-
-function PromptGrid(
-	[System.Collections.IList] $data, 
-	[Object] $caller = $null 
-	){
-
-  if ($caller -eq $null ){
-    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  }
+param ([System.Collections.IList] $data)
 
 [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | out-null
 [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | out-null
 [System.Reflection.Assembly]::LoadWithPartialName('System.Data') | out-null
 [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')  | out-null
 
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 $f = New-Object System.Windows.Forms.Form
 $f.Text = 'how do we open these stones? '
@@ -66,7 +39,7 @@ $System_Drawing_Size = New-Object System.Drawing.Size
 $grid.DataBindings.DefaultDataSourceUpdateMode = 0
 $grid.HeaderForeColor = [System.Drawing.Color]::FromArgb(255,0,0,0)
 
-$grid.Name = "dataGrid1"
+$grid.Name = 'dataGrid1'
 $grid.DataMember = ''
 $grid.TabIndex = 0
 $System_Drawing_Point = New-Object System.Drawing.Point
@@ -116,20 +89,72 @@ foreach ($key in $result.keys){
   $o = New-Object PSObject   
   $o | add-member Noteproperty 'Substance'  $value[0]
   $o | add-member Noteproperty 'Action' $value[1]
+
   $array.Add($o)
 }
 
-$process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$ret = (PromptGrid $array $process_window)
-write-output @('->', $process_window.Data) 
+$ret = PromptGrid $array 
 }
+
+  $RESULT_OK = 0
+  $RESULT_CANCEL = 2
+  $Readable = @{ 
+    $RESULT_OK = 'OK' 
+    $RESULT_CANCEL = 'CANCEL'
+  } 
+
+
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
+    private string _message;
+
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+    public string Message
+    {
+        get { return _message; }
+        set { _message = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+$DebugPreference = 'Continue'
 
 $data = @{ 1= @('wind', 'blows...'); 
            2 = @('fire',  'burns...');
            3 = @('water',  'falls...')
         }
 
-$DebugPreference = 'Continue'
+$array = New-Object System.Collections.ArrayList
 
-display_result $data
+foreach ($key in $data.keys){
+  $value = $data[$key]
+  $o = New-Object PSObject   
+  $o | add-member Noteproperty 'Substance'  $value[0]
+  $o | add-member Noteproperty 'Action' $value[1]
+
+  $array.Add($o)
+}
+
+$ret = PromptGrid $array 
 

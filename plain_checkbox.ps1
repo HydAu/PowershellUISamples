@@ -1,48 +1,24 @@
-  $RESULT_OK = 0
-  $RESULT_CANCEL = 2
-  $Readable = @{ 
-    $RESULT_OK = 'OK' 
-    $RESULT_CANCEL = 'CANCEL'
-  } 
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 
-
-
-Add-Type -TypeDefinition @"
-using System;
-using System.Windows.Forms;
-// inline callback class 
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private int _data;
-    private string _message;
-
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-    public string Message
-    {
-        get { return _message; }
-        set { _message = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
-}
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
-#  http://www.java2s.com/Code/CSharp/GUI-Windows-Form/Radiobuttoncheckchangedevent.htm
-function PromptAuto(
+function PromptCheckRadioDemo(
 	[String] $title, 
 	[String] $message, 
 	[Object] $caller = $null 
@@ -196,22 +172,62 @@ function PromptAuto(
 
 
   $f.Topmost = $True
-  if ($caller -eq $null ){
-    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  }
 
   $f.Add_Shown( { $f.Activate() } )
 
   [Void] $f.ShowDialog([Win32Window ] ($caller) )
-  $F.Dispose()
+  $f.Dispose()
 
   return $caller.Data
 }
 
+Add-Type -TypeDefinition @"
+using System;
+using System.Windows.Forms;
+
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
+    private string _message;
+
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+    public string Message
+    {
+        get { return _message; }
+        set { _message = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+
 $DebugPreference = 'Continue'
+
+  $RESULT_OK = 0
+  $RESULT_CANCEL = 2
+  $Readable = @{ 
+    $RESULT_OK = 'OK' 
+    $RESULT_CANCEL = 'CANCEL'
+  } 
+
 $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptAuto "" "" $process_window
+PromptCheckRadioDemo "" "" $process_window
 
 write-output @('->', $process_window.Data) 
 
