@@ -1,25 +1,3 @@
-<#
-Currently in the "Deployment automation scripts"
-
-Sitecore-Zero-Downtime-Part1-CMS-Auth ps1
-Sitecore-Zero-Downtime-Part2-CDS-FarmA-B.ps1.txt
-There are two prompt functions
-
-function promptSetRollback($title, $message)
-function promptForContinueAuto($title, $message)
-
-They offer a choice of three options 
-These Powershell functions behave differently based on the host.
-In particular  with console host they prompt the used i mainframe style:
-
-Do deployment step ...
-Please choose how to execute next action ...
-[M] Manual  [A] Auto  [C] Cancel  [?] Help (default is "M"):
-
-This example shows how optionally enable ui, because the script is only run locally.
-
-#>
-
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
@@ -47,6 +25,17 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+$DebugPreference = "Continue"
+$RESULT_POSITIVE = 0
+$RESULT_NEGATIVE = 1
+$RESULT_CANCEL = 2
+
+$Readable = @{ 
+	$RESULT_NEGATIVE = 'NO!'; 
+	$RESULT_POSITIVE = 'YES!' ; 
+	$RESULT_CANCEL = 'MAYBE...'
+	} 
 
 
 
@@ -98,17 +87,10 @@ function PromptAuto(
 
 [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
+
 $f = New-Object System.Windows.Forms.Form 
 $f.Text = $title
 
-$RESULT_MANUAL = 0
-$RESULT_AUTOMATIC = 1
-$RESULT_CANCEL = 2
-$Readable = @{ 
-	$RESULT_AUTOMATIC = 'AUTOMATIC'; 
-	$RESULT_MANUAL = 'MANUAL' ; 
-	$RESULT_CANCEL = 'CANCEL'
-	} 
 
 $f.Size = New-Object System.Drawing.Size(650,120) 
 $f.StartPosition = 'CenterScreen'
@@ -116,8 +98,8 @@ $f.StartPosition = 'CenterScreen'
 $f.KeyPreview = $True
 $f.Add_KeyDown({
 
-	if     ($_.KeyCode -eq 'M')       { $caller.Data = $RESULT_MANUAL }
-	elseif ($_.KeyCode -eq 'A')       { $caller.Data = $RESULT_AUTOMATIC }
+	if     ($_.KeyCode -eq 'M')       { $caller.Data = $RESULT_POSITIVE }
+	elseif ($_.KeyCode -eq 'A')       { $caller.Data = $RESULT_NEGATIVE }
 	elseif ($_.KeyCode -eq 'Escape')  { $caller.Data = $RESULT_CANCEL }
 	else                              { return }  
 	$f.Close()
@@ -127,21 +109,21 @@ $f.Add_KeyDown({
 $b1 = New-Object System.Windows.Forms.Button
 $b1.Location = New-Object System.Drawing.Size(50,40)
 $b1.Size = New-Object System.Drawing.Size(75,23)
-$b1.Text = 'Manual'
-$b1.Add_Click({ $caller.Data = $RESULT_MANUAL; $f.Close(); })
+$b1.Text = 'Yes!'
+$b1.Add_Click({ $caller.Data = $RESULT_POSITIVE; $f.Close(); })
 $f.Controls.Add($b1)
 
 $b2 = New-Object System.Windows.Forms.Button
 $b2.Location = New-Object System.Drawing.Size(125,40)
 $b2.Size = New-Object System.Drawing.Size(75,23)
-$b2.Text = 'Automatic'
-$b2.Add_Click({ $caller.Data = $RESULT_AUTOMATIC; $f.Close(); })
+$b2.Text = 'No!'
+$b2.Add_Click({ $caller.Data = $RESULT_NEGATIVE; $f.Close(); })
 $f.Controls.Add($b2)
 
 $b3 = New-Object System.Windows.Forms.Button
 $b3.Location = New-Object System.Drawing.Size(200,40)
 $b3.Size = New-Object System.Drawing.Size(75,23)
-$b3.Text = 'Cancel'
+$b3.Text = 'Maybe'
 $b3.Add_Click({$caller.Data =  $RESULT_CANCEL ; $f.Close()})
 $f.Controls.Add($b3)
 
@@ -161,8 +143,6 @@ $f.Add_Shown( { $f.Activate() } )
 
 [Void] $f.ShowDialog([Win32Window ] ($caller) )
 
-# NOTE: set $DebugPreference = "Continue" to reveal debug messages
-write-debug ("Result is : {0} ({1})" -f $Readable.Item($caller.Data) , $caller.Data )
 
 return $caller.Data
 }
@@ -172,23 +152,10 @@ return $caller.Data
 $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 
-$title = 'Do deployment step one' 
-$message =  "Please select how to execute next action"
-
-# PromptAuto $title $message
-promptForContinueAuto  $title $message $true $process_window 
+$title = 'Question' 
+$message =  "Continue to Next step?"
 
 
-$title = 'Do deployment step two' 
-$message =  "Kindly select how to execute next action"
-promptForContinueAuto  $title $message $true $process_window 
+$result = promptForContinueAuto  $title $message $true $process_window 
 
-$title = 'Do deployment step three' 
-$message =  "Would you choose how to execute next action"
-promptForContinueAuto  $title $message $true
-
-
-$title = 'Do deployment step four' 
-$message =  "Please choose how to execute next action"
-
-promptForContinueAuto  $title $message
+write-debug ("Result is : {0} ({1})" -f $Readable.Item($process_window.Data) , $process_window.Data )
