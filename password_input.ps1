@@ -25,30 +25,30 @@ $RESULT_CANCEL = 2
 
 function PromptPassword(
 	[String] $title, 
-	[String] $message,
+	[String] $user,
         [Object] $caller
 	){
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
+        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
 
-$f = New-Object System.Windows.Forms.Form 
-$f.MaximizeBox = $false;
-$f.MinimizeBox = $false;
-$f.Text = $title
+        $f = New-Object System.Windows.Forms.Form 
+        $f.MaximizeBox = $false;
+        $f.MinimizeBox = $false;
+        $f.Text = $title
 
-         $l1 = New-Object System.Windows.Forms.Label
-         $l1.Location = New-Object System.Drawing.Size(10,20) 
-         $l1.Size = New-Object System.Drawing.Size(100,20) 
-         $l1.Text = 'Username'
-         $f.Controls.Add($l1) 
+        $l1 = New-Object System.Windows.Forms.Label
+        $l1.Location = New-Object System.Drawing.Size(10,20) 
+        $l1.Size = New-Object System.Drawing.Size(100,20) 
+        $l1.Text = 'Username'         
+        $f.Controls.Add($l1) 
 
         $f.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 10, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
   
         $t1 = new-object System.Windows.Forms.TextBox
         $t1.Location = new-object System.Drawing.Point(120, 20)
         $t1.Size = new-object System.Drawing.Size(140, 20)
-        $t1.Text = '';
+        $t1.Text = $user;
         $t1.Name = 'txtUser';
         $f.Controls.Add($t1);
 
@@ -151,11 +151,11 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
-$title = 'Question' 
-$message =  "User:"
+$title = 'Enter credentials' 
+$user =  'admin'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptPassword -title $title -message $message -caller $caller
+PromptPassword -title $title -user $user -caller $caller
 if ($caller.Data -ne $RESULT_CANCEL) {
 write-debug ("Result is : {0} / {1}  " -f  $caller.TxtUser , $caller.TxtPassword )
 }
