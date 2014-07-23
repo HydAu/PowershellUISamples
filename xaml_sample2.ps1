@@ -1,17 +1,55 @@
+#requires -version 2
 
 # origin: http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/EmbeddedCodeinWindowxaml.htm
 # origin: http://stackoverflow.com/questions/5863209/compile-wpf-xaml-using-add-type-of-powershell-without-using-powerboots
-#requires -version 2
+# http://msdn.microsoft.com/en-us/library/System.Windows.Media.Colors%28v=vs.110%29.aspx
+$result = ''
 $pink = ([System.Windows.Media.Colors]::Pink)
 $white = ([System.Windows.Media.Colors]::White)
 $orange = ([System.Windows.Media.Colors]::Orange)
 $brown = ([System.Windows.Media.Colors]::Brown)
+
 $colors = @{
-'Steve Buscemi' = $pink;
+'Steve Buscemi' = ([System.Windows.Media.Colors]::Pink);
 'Larry Dimmick' = $white;
 'Quentin Tarantino' = $brown;
 'Tim Roth' = $orange;
  }
+
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
+    private string _message;
+
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+    public string Message
+    {
+        get { return _message; }
+        set { _message = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
 
 
 Add-Type -AssemblyName PresentationFramework
@@ -50,35 +88,25 @@ Add-Type -AssemblyName PresentationFramework
 </Window>
 "@
 
-Clear-Host
 $reader=(New-Object System.Xml.XmlNodeReader $xaml)
 $target=[Windows.Markup.XamlReader]::Load($reader)
+  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 foreach ($button in @("button01" , "button00", "button10", "button11")) {
        $control=$target.FindName($button)
        $eventMethod=$control.add_click
-$eventMethod.Invoke({
-       param(
-            [Object] $sender, 
-            [System.Windows.RoutedEventArgs ] $eventargs 
-         )
-
-$target.Title=("You will be  Mr. {0} {1} {2}" -f 
-
-$sender.Content.ToString(),
-$sender.Background.ToString(),
-'x'
-# ($colors[$sender.Content.ToString()]).ToString()
-)
-# $colors[[System.Windows.Media.Colors]::Pink).ToString()])
-# $colors[$sender.Background.ToString()]) 
-# ([System.Windows.Media.Colors]::Pink).ToString() )
-$sender.Background = new-Object System.Windows.Media.SolidColorBrush($colors[$sender.Content.ToString()])
-
-# [System.Windows.Media.Colors]::Pink);
-
-})
+       $eventMethod.Invoke({
+           param(
+              [Object] $sender, 
+              [System.Windows.RoutedEventArgs ] $eventargs 
+           )
+           $who = $sender.Content.ToString()
+           Write-Host -ForegroundColor Yellow ($who )
+           $color = $colors[$who ]
+           $target.Title=("You will be  Mr. {0}" -f  $color )
+           $sender.Background = new-Object System.Windows.Media.SolidColorBrush($color)
+           
+        })
 }
-
+$target | get-member
 $target.ShowDialog() | out-null 
-# $colors   |format-table -autosize
