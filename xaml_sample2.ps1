@@ -3,7 +3,6 @@
 # origin: http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/EmbeddedCodeinWindowxaml.htm
 # origin: http://stackoverflow.com/questions/5863209/compile-wpf-xaml-using-add-type-of-powershell-without-using-powerboots
 # http://msdn.microsoft.com/en-us/library/System.Windows.Media.Colors%28v=vs.110%29.aspx
-$result = ''
 $pink = ([System.Windows.Media.Colors]::Pink)
 $white = ([System.Windows.Media.Colors]::White)
 $orange = ([System.Windows.Media.Colors]::Orange)
@@ -15,6 +14,7 @@ $colors = @{
 'Quentin Tarantino' = $brown;
 'Tim Roth' = $orange;
  }
+$result = @{ }
 
 
 Add-Type -TypeDefinition @"
@@ -101,12 +101,17 @@ foreach ($button in @("button01" , "button00", "button10", "button11")) {
               [System.Windows.RoutedEventArgs ] $eventargs 
            )
            $who = $sender.Content.ToString()
-           Write-Host -ForegroundColor Yellow ($who )
            $color = $colors[$who ]
-           $target.Title=("You will be  Mr. {0}" -f  $color )
+           # $target.Title=("You will be  Mr. {0}" -f  $color)
            $sender.Background = new-Object System.Windows.Media.SolidColorBrush($color)
+           $result[ $who  ] = $true
+           write-debug $who
            
         })
+
 }
-$target | get-member
+$DebugPreference = 'Continue'
+
 $target.ShowDialog() | out-null 
+# confirm the $result
+# $result | format-table
