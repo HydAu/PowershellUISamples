@@ -68,71 +68,58 @@ function PromptCheckedList
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Data') 
   $f = New-Object System.Windows.Forms.Form 
   $f.Text = $title
-  $treeFood = New-Object  System.Windows.Forms.TreeView 
+  $t = New-Object  System.Windows.Forms.TreeView 
   $components = new-object System.ComponentModel.Container 
   $f.SuspendLayout();
-<#
-  $f.add_Dispose({
-param ([boolan] $disposing)
-            if( $disposing )
-            {
-                if ($components -ne $null) 
-                {
-                    $components.Dispose()
-                }
-            }
-           $f.Super.Dispose( $disposing )
+  $t.Font  = new-object System.Drawing.Font('Tahoma', 10.25, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
+
+  $i = new-Object System.Windows.Forms.ImageList($components)
+  $i.Images.Add([System.Drawing.SystemIcons]::Application)
+  $t.ImageList = $i
+
+
+  $t.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
+        -bor [System.Windows.Forms.AnchorStyles]::Left) `
+        -bor [System.Windows.Forms.AnchorStyles]::Right)
+  $t.ImageIndex = -1
+  $t.Location = new-object System.Drawing.Point(4, 5)
+  $t.Name = "treeFood"
+  $t.SelectedImageIndex = -1
+  $t.Size = new-object System.Drawing.Size(284, 256)
+  $t.TabIndex = 1;
+  $t_AfterSelect =  $t.add_AfterSelect
+  $t_AfterSelect.Invoke({
+    param(
+    [Object] $sender, 
+    [System.Windows.Forms.TreeViewEventArgs] $eventargs 
+    )
+    if ($eventargs.Action -eq [System.Windows.Forms.TreeViewAction]::ByMouse)
+    {
+        write-host $eventargs.Node.FullPath
+    }
 
 })
 
-#>
-
-$treeFood.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
-                -bor [System.Windows.Forms.AnchorStyles]::Left) `
-                -bor [System.Windows.Forms.AnchorStyles]::Right)
-            $treeFood.ImageIndex = -1
-            $treeFood.Location = new-object System.Drawing.Point(4, 5)
-            $treeFood.Name = "treeFood"
-            $treeFood.SelectedImageIndex = -1
-            $treeFood.Size = new-object System.Drawing.Size(284, 256)
-            $treeFood.TabIndex = 1;
-            $treeFood_AfterSelect =  $treeFood.add_AfterSelect
-            $treeFood_AfterSelect.Invoke({
-            param(
-            [Object] $sender, 
-            [System.Windows.Forms.TreeViewEventArgs] $eventargs 
-            )
-            if ($eventargs.Action -eq [System.Windows.Forms.TreeViewAction]::ByMouse)
-            {
-                write-host $eventargs.Node.FullPath
-            }
-
-})
-            # new System.Windows.Forms.TreeViewEventHandler(this.treeFood_AfterSelect);
-            # TreeViewExample
-            $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
-            $f.ClientSize = new-object System.Drawing.Size(292, 266)
-            $f.Controls.AddRange(@( $treeFood)) 
-            $f.Name = "TreeViewExample"
-            $f.Text = "TreeView Example" 
-            $TreeViewExample_Load = $f.add_Load
-            $TreeViewExample_Load.Invoke({
-            param(
-            [Object] $sender, 
-            [System.EventArgs] $eventargs 
-            )
-
-            
-            $node = $treeFood.Nodes.Add("Fruits") 
-            $node.Nodes.Add("Apple") 
-            $node.Nodes.Add("Peach") 
-            $pie_node = $node.Nodes.Add("Pie") 
-            $pie_node.Nodes.Add("Cheese")
-            $pie_node.Nodes.Add("Strawberry")
-            
-            $node = $treeFood.Nodes.Add("Vegetables");
-            $node.Nodes.Add("Tomato");
-            $node.Nodes.Add("Eggplant");
+ $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
+ $f.ClientSize = new-object System.Drawing.Size(292, 266)
+ $f.Controls.AddRange(@( $t)) 
+ $f.Name = "TreeViewExample"
+ $f.Text = "TreeView Example" 
+ $f_Load = $f.add_Load
+ $f_Load.Invoke({
+   param(
+    [Object] $sender, 
+    [System.EventArgs] $eventargs 
+   )
+    
+    $node = $t.Nodes.Add("Fruits") 
+    $node.Nodes.Add("Apple") 
+    $node.Nodes.Add("Peach") 
+    
+    $node = $t.Nodes.Add("Vegetables")
+    $node.Nodes.Add("Tomato")
+    $node.Nodes.Add("Eggplant")
+     
      
 })
 
@@ -140,7 +127,7 @@ $treeFood.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Wind
 
   $f.Name = 'Form1'
   $f.Text = 'TreeView Sample'
-  $treeFood.ResumeLayout($false)
+  $t.ResumeLayout($false)
 
   $f.ResumeLayout($false)
 
@@ -155,7 +142,7 @@ $treeFood.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Wind
 
   [Void] $f.ShowDialog([Win32Window ] ($caller) )
 
-  $treeFood.Dispose()
+  $t.Dispose()
   $f.Dispose()
   $result = $caller.Message
   $caller = $null
