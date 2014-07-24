@@ -95,7 +95,8 @@ function PromptCheckedList
     )
     if ($eventargs.Action -eq [System.Windows.Forms.TreeViewAction]::ByMouse)
     {
-        write-host $eventargs.Node.FullPath
+       $worker.RunWorkerAsync() 
+       # write-host $eventargs.Node.FullPath
     }
 
 })
@@ -125,6 +126,34 @@ function PromptCheckedList
 
   $f.ResumeLayout($false)
 
+# http://www.dotnetperls.com/backgroundworker
+
+$worker = new-object System.ComponentModel.BackgroundWorker
+$worker.WorkerReportsProgress = $false;
+$worker.WorkerSupportsCancellation = $false;
+$worker_DoWork  = $worker.Add_DoWork 
+$worker_DoWork.Invoke({
+    param(
+    [Object] $sender, 
+    [System.Windows.Forms.DoWorkEventArgs] $eventargs 
+    )
+})
+
+$worker_RunWorkerCompleted = $worker.Add_RunWorkerCompleted 
+$worker_RunWorkerCompleted.Invoke({
+    param(
+    [Object] $sender, 
+    [System.ComponentModel.RunWorkerCompletedEventArgs] $eventargs 
+    )
+
+   $child_proc  = [System.Diagnostics.Process]::Start('notepad',"$env:windir\system32\drivers\etc\hosts")
+   $child_proc.WaitForExit()
+
+	
+})
+
+
+
   $f.Name = 'Form1'
   $f.Text = 'TreeView Sample'
   $t.ResumeLayout($false)
@@ -153,4 +182,3 @@ $DebugPreference = 'Continue'
 $result = PromptCheckedList ''  'Lorem ipsum dolor sit amet, consectetur adipisicing elit' 
 
 write-debug ('Selection is : {0}' -f  , $result )
-
