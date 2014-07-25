@@ -25,17 +25,17 @@ public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
     private int _data;
-    private string _message;
+    private string _script_directory;
 
     public int Data
     {
         get { return _data; }
         set { _data = value; }
     }
-    public string Message
+    public string ScriptDirectory
     {
-        get { return _message; }
-        set { _message = value; }
+        get { return _script_directory; }
+        set { _script_directory = value; }
     }
 
     public Win32Window(IntPtr handle)
@@ -56,7 +56,9 @@ public class Win32Window : IWin32Window
 function PromptTreeView
 {
      Param(
-	[String] $title)
+	[String] $title,
+	[Object] $caller= $null
+)
 
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic') 
@@ -74,6 +76,24 @@ function PromptTreeView
 
   $i = new-Object System.Windows.Forms.ImageList($components)
   $i.Images.Add([System.Drawing.SystemIcons]::Application)
+  # read the script directory from the caller 
+  $script_path  = $caller.ScriptDirectory 
+  if ($script_path  -eq '' -or $script_path  -eq $null) {
+    write-debug ('Failed to read {0} ' -f 'ScriptDirectory')	
+    try {
+      $invocation = Get-ScriptDirectory 
+    } catch [Exception] {
+           # slurp the exception 
+    }
+    if ($script_path -eq '' -or $script_path -eq $null )  { 
+      $script_path = get-location 
+    }
+  }
+  foreach ($n in @(1,2,3)){
+  $image_path =  ( '{0}\color{1}.gif' -f $script_path ,  $n )
+  $image = [System.Drawing.Image]::FromFile($image_path)
+  $i.Images.Add($image) 
+  }
   $t.ImageList = $i
 
 
@@ -113,11 +133,14 @@ function PromptTreeView
    )
     
     $node = $t.Nodes.Add("Fruits") 
-    $node.Nodes.Add("Apple") 
+    $apple = $node.Nodes.Add("Apple") 
+    $apple.ImageIndex  = 1
+
     $node.Nodes.Add("Peach") 
     
     $node = $t.Nodes.Add("Vegetables")
-    $node.Nodes.Add("Tomato")
+    $tomato = $node.Nodes.Add("Tomato")
+    $tomato.ImageIndex  = 2 
     $node.Nodes.Add("Eggplant")
      
      
@@ -164,7 +187,9 @@ $worker_RunWorkerCompleted.Invoke({
   $f.KeyPreview = $false
 
   $f.Topmost = $True
+if ($caller -eq $null ){
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+}
 
   $f.Add_Shown( { $f.Activate() } )
 
@@ -177,7 +202,27 @@ $worker_RunWorkerCompleted.Invoke({
   return $result
 }
 
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
+}
+
 $DebugPreference = 'Continue'
-$result = PromptTreeView 'Items' 
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$caller.ScriptDirectory = Get-ScriptDirectory
+$result = PromptTreeView 'Items'  $caller 
 
 write-debug ('Selection is : {0}' -f  , $result )
