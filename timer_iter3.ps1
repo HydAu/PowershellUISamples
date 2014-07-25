@@ -211,22 +211,24 @@ $f.Controls.AddRange(@( $label1))
 $f.Name = 'MyClockForm';
 $f.Text = 'My Clock';
 
-
+# This was added - it does not belong to the original Form
 $eventMethod=$label1.add_click
-
 $eventMethod.Invoke({$f.Text="You clicked my label $((Get-Date).ToString('G'))"})
 
-# this does not work yet
-$timer1.Add_Elapsed({
+# This silently ceases to work 
+$f.Add_Load({
+  param ([Object] $sender, [System.EventArgs] $eventArgs )
+    $timer1.Interval = 1000 
+    $timer1.Start()
+    $timer1.Enabled = $true
 
+}) 
+
+$timer1.Add_Elapsed({
      $label1.Text = [System.DateTime]::Now.ToString()
 })
 
-$timer1.Interval = 1000 
-$timer1.Start()
-$timer1.Enabled = $true
-
-
+# This loudly ceases to start the timer "theTimer"
 $global:timer = New-Object System.Timers.Timer
 $global:timer.Interval = 1000
 Register-ObjectEvent -InputObject $global:timer -EventName Elapsed -SourceIdentifier theTimer -Action {AddToLog('') }
