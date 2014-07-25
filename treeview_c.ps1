@@ -53,11 +53,10 @@ public class Win32Window : IWin32Window
 
 # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/CheckedListBoxItemCheckevent.htm
 
-function PromptCheckedList
+function PromptTreeView
 {
      Param(
-	[String] $title, 
-	[String] $message)
+	[String] $title)
 
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
   [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic') 
@@ -179,6 +178,6 @@ $worker_RunWorkerCompleted.Invoke({
 }
 
 $DebugPreference = 'Continue'
-$result = PromptCheckedList ''  'Lorem ipsum dolor sit amet, consectetur adipisicing elit' 
+$result = PromptTreeView 'Items' 
 
 write-debug ('Selection is : {0}' -f  , $result )
