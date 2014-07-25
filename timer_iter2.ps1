@@ -138,9 +138,9 @@ namespace MyClock
         }
 
 
-    public new DialogResult ShowDialog(IWin32Window owner){
-        caller = owner ; 
-        return base.ShowDialog(owner); 
+    public new DialogResult ShowDialog(IWin32Window caller){
+        this.caller = caller ; 
+        return base.ShowDialog(caller); 
     }
     }
 }
