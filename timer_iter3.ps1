@@ -222,11 +222,24 @@ $timer1.Add_Elapsed({
      $label1.Text = [System.DateTime]::Now.ToString()
 })
 
-
 $timer1.Interval = 1000 
 $timer1.Start()
-
 $timer1.Enabled = $true
+
+
+$global:timer = New-Object System.Timers.Timer
+$global:timer.Interval = 1000
+Register-ObjectEvent -InputObject $global:timer -EventName Elapsed -SourceIdentifier theTimer -Action {AddToLog('') }
+$global:timer.Start()
+$global:timer.Enabled = $true
+
+
+function AddToLog()
+{
+param ([string] $text )
+
+     $label1.Text = [System.DateTime]::Now.ToString()
+}
 
 $f.ResumeLayout($false)
 $f.Topmost = $True
