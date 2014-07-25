@@ -204,27 +204,35 @@ $label1.TabIndex = 0
 $label1.Text = [System.DateTime]::Now.ToString()
 $label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 
+
+$f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
+$f.ClientSize = new-object System.Drawing.Size(292, 69) 
+$f.Controls.AddRange(@( $label1))
+$f.Name = 'MyClockForm';
+$f.Text = 'My Clock';
+
+
 $eventMethod=$label1.add_click
+
 $eventMethod.Invoke({$f.Text="You clicked my label $((Get-Date).ToString('G'))"})
 
-$action = {
-      $label1.Text = [System.DateTime]::Now.ToString()
-    $timer.start()
- }
-# $start = Register-ObjectEvent -InputObject $timer -SourceIdentifier TimerElapsed -EventName Elapsed -Action $action
+# this does not work yet
+$timer1.Add_Elapsed({
+
+     $label1.Text = [System.DateTime]::Now.ToString()
+})
+
+
 $timer1.Interval = 1000 
 $timer1.Start()
+
 $timer1.Enabled = $true
 
-$f.Controls.Add($label1) 
 $f.ResumeLayout($false)
 $f.Topmost = $True
 
-if ($caller -eq $null ){
-  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-}
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-$caller.Data = $RESULT_CANCEL;
 $f.Add_Shown( { $f.Activate() } )
 
 [void] $f.ShowDialog([Win32Window ] ($caller) )
