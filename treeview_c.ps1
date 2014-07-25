@@ -77,22 +77,18 @@ function PromptTreeView
   $i = new-Object System.Windows.Forms.ImageList($components)
   $i.Images.Add([System.Drawing.SystemIcons]::Application)
   # read the script directory from the caller 
-  $script_path  = $caller.ScriptDirectory 
-  if ($script_path  -eq '' -or $script_path  -eq $null) {
-    write-debug ('Failed to read {0} ' -f 'ScriptDirectory')	
-    try {
-      $invocation = Get-ScriptDirectory 
+   try {
+     $script_path  = $caller.ScriptDirectory 
     } catch [Exception] {
-           # slurp the exception 
+           # slurp the exception - debug code omitted            
     }
     if ($script_path -eq '' -or $script_path -eq $null )  { 
       $script_path = get-location 
-    }
-  }
+   }
   foreach ($n in @(1,2,3)){
-  $image_path =  ( '{0}\color{1}.gif' -f $script_path ,  $n )
-  $image = [System.Drawing.Image]::FromFile($image_path)
-  $i.Images.Add($image) 
+    $image_path =  ( '{0}\color{1}.gif' -f $script_path ,  $n )
+    $image = [System.Drawing.Image]::FromFile($image_path)
+    $i.Images.Add($image) 
   }
   $t.ImageList = $i
 
