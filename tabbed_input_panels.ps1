@@ -19,6 +19,7 @@
 #THE SOFTWARE.
 
 # http://www.java2s.com/Code/CSharpAPI/System.Windows.Forms/TabControlControlsAdd.htm
+# with sizes adjusted to run the focus demo
 function PromptWithTabs(
 	[String] $title, 
         [Object] $caller
@@ -44,7 +45,7 @@ function PromptWithTabs(
         $panel2.Location = new-object System.Drawing.Point(4, 22)
         $panel2.Name = "tabPage2"
         $panel2.Padding = new-object System.Windows.Forms.Padding(3)
-        $panel2.Size = new-object System.Drawing.Size(259, 47)
+        $panel2.Size = new-object System.Drawing.Size(259, 52)
         $panel2.TabIndex = 1
         $panel2.Text = "Input Tab"
 
@@ -55,7 +56,7 @@ function PromptWithTabs(
 
         $l1 = New-Object System.Windows.Forms.Label
         $l1.Location = New-Object System.Drawing.Size(72,32) 
-        $l1.Size = New-Object System.Drawing.Size(100,10) 
+        $l1.Size = New-Object System.Drawing.Size(100,16) 
         $l1.Text = ''         
 
         $l1.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 8, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
@@ -67,22 +68,22 @@ function PromptWithTabs(
             [Object] $sender, 
             [System.EventArgs] $eventargs 
             )
-          if ($sender.Text.length -eq 0) {
-          $l1.Text = 'Please enter the data first'
-         #   [System.Windows.Forms.MessageBox]::Show('Please enter the data first') 
-       
-          $tab_contol1.SelectedIndex = 1
-          $sender.Select()
-          $result =  $sender.Focus()
-#        $f.ActiveControl = $sender
-}
-}) 
+            if ($sender.Text.length -eq 0) {
+              $l1.Text = 'Input required'
+              # [System.Windows.Forms.MessageBox]::Show('Input required') 
+              $tab_contol1.SelectedIndex = 1
+              $sender.Select()
+              $result =  $sender.Focus()
+            } else {  
+              $l1.Text = ''
+            } 
+         }) 
 
         $panel1.Controls.Add($button1)
         $panel1.Location = new-object System.Drawing.Point(4, 22)
         $panel1.Name = "tabPage1"
         $panel1.Padding = new-object System.Windows.Forms.Padding(3)
-        $panel1.Size = new-object System.Drawing.Size(259, 47)
+        $panel1.Size = new-object System.Drawing.Size(259, 52)
         $panel1.TabIndex = 0
         $panel1.Text = "Action Tab"
 
@@ -98,6 +99,7 @@ function PromptWithTabs(
             [Object] $sender, 
             [System.EventArgs] $eventargs 
             )
+            $caller.Message = $textbox1.Text
             [System.Windows.Forms.MessageBox]::Show($textbox1.Text);
         }
         $button1.Add_Click($button1_Click)
@@ -109,18 +111,17 @@ function PromptWithTabs(
         $tab_contol1.SelectedIndex = 1
         $textbox1.Select()
         $textbox1.Enabled  = $true
-        $tab_contol1.Size = new-object System.Drawing.Size(267, 83)
+        $tab_contol1.Size = new-object System.Drawing.Size(267, 88)
         $tab_contol1.TabIndex = 0
         
         $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
-        $f.ClientSize = new-object System.Drawing.Size(292, 103)
+        $f.ClientSize = new-object System.Drawing.Size(292, 108)
         $f.Controls.Add($tab_contol1)
         $panel2.ResumeLayout($false)
         $panel2.PerformLayout()
         $panel1.ResumeLayout($false)
         $tab_contol1.ResumeLayout($false)
         $f.ResumeLayout($false)
-        # $textbox1.Focus()
         $f.ActiveControl = $textbox1
 
         $f.Topmost = $true
@@ -142,8 +143,7 @@ public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
     private int _data;
-    private string _txtUser;
-    private string _txtPassword;
+    private string _message;
 
     public int Data
     {
@@ -152,15 +152,10 @@ public class Win32Window : IWin32Window
     }
 
 
-    public string TxtUser
+    public string Message
     {
-        get { return _txtUser; }
-        set { _txtUser = value; }
-    }
-    public string TxtPassword
-    {
-        get { return _txtPassword; }
-        set { _txtPassword = value; }
+        get { return _message; }
+        set { _message = value; }
     }
 
     public Win32Window(IntPtr handle)
@@ -177,11 +172,8 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
-$title = 'Enter credentials' 
-$user =  'admin'
+$title = 'Enter Message' 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptWithTabs -title $title -user $user -caller $caller
-if ($caller.Data -ne $RESULT_CANCEL) {
-write-debug ("Result is : {0} / {1}  " -f  $caller.TxtUser , $caller.TxtPassword )
-}
+PromptWithTabs -title $title -caller $caller
+write-debug ("Message is : {0} " -f  $caller.Message )
