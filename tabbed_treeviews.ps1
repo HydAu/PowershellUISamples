@@ -22,40 +22,52 @@
 # with sizes adjusted to run the focus demo
 function TabsWithTreeViews(
 	[String] $title, 
-        [Object] $caller
+  [Object] $caller
 	){
 
-        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
+  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
 
-        $f = New-Object System.Windows.Forms.Form 
-        $f.Text = $title
+  $f = New-Object System.Windows.Forms.Form 
+  $f.Text = $title
 
-        $panel2 = new-object System.Windows.Forms.TabPage
-        $panel1 = new-object System.Windows.Forms.TabPage
-        $tab_contol1 = new-object System.Windows.Forms.TabControl
-        $panel2.SuspendLayout()
-        $panel1.SuspendLayout()
-        $tab_contol1.SuspendLayout()
-        $f.SuspendLayout()
+  $panel2 = new-object System.Windows.Forms.TabPage
+  $panel1 = new-object System.Windows.Forms.TabPage
+  $tab_contol1 = new-object System.Windows.Forms.TabControl
+  $panel2.SuspendLayout()
+  $panel1.SuspendLayout()
+  $tab_contol1.SuspendLayout()
+  $f.SuspendLayout()
 
-        $panel2.Location = new-object System.Drawing.Point(4, 22)
-        $panel2.Name = "tabPage2"
-        $panel2.Padding = new-object System.Windows.Forms.Padding(3)
-        $panel2.Size = new-object System.Drawing.Size(259, 352)
-        $panel2.AutoSize  = $true
-        $panel2.TabIndex = 1
-        $panel2.Text = "Source Node"
-<#
-        $l1 = New-Object System.Windows.Forms.Label
-        $l1.Location = New-Object System.Drawing.Point(72,32) 
-        $l1.Size = New-Object System.Drawing.Size(100,16) 
-        $l1.Text = ''         
+  $panel2.Location = new-object System.Drawing.Point(4, 22)
+  $panel2.Name = "tabPage2"
+  $panel2.Padding = new-object System.Windows.Forms.Padding(3)
+  $panel2.Size = new-object System.Drawing.Size(259, 352)
+  $panel2.AutoSize  = $true
+  $panel2.TabIndex = 1
+  $panel2.Text = "Source Node"
 
-        $l1.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 8, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
-#        $panel2.Controls.Add($l1) 
+  $l1 = New-Object System.Windows.Forms.Label
+  $l1.Location = New-Object System.Drawing.Point(8,12) 
+  $l1.Size = New-Object System.Drawing.Size(220,16) 
+  $l1.Text = 'enter status message here'
 
-#>
+  $l1.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 8, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
+
+  $groupBox1 = New-Object System.Windows.Forms.GroupBox
+
+  $groupBox1.SuspendLayout()
+
+  $groupBox1.Controls.AddRange( @($l1 ))
+  $groupBox1.Location = New-Object System.Drawing.Point(8,230)
+  $groupBox1.Name = 'groupBox1'
+  $groupBox1.Size = New-Object System.Drawing.Size(244,32) 
+  $groupBox1.TabIndex = 0
+  $groupBox1.TabStop = $false
+  $groupBox1.Text = 'status'
+
+
+  $panel2.Controls.Add($groupBox1) 
 
   $t2 = New-Object  System.Windows.Forms.TreeView 
   $t2.Font  = new-object System.Drawing.Font('Tahoma', 10.25, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
@@ -66,8 +78,8 @@ function TabsWithTreeViews(
 
 
   $t2.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
-        -bor [System.Windows.Forms.AnchorStyles]::Left) `
-        -bor [System.Windows.Forms.AnchorStyles]::Right)
+  -bor [System.Windows.Forms.AnchorStyles]::Left) `
+  -bor [System.Windows.Forms.AnchorStyles]::Right)
   $t2.ImageIndex = -1
   $t2.Location = new-object System.Drawing.Point(4, 5)
   $t2.Name = "treeFood"
@@ -103,12 +115,12 @@ function TabsWithTreeViews(
 })
 
 
-        $panel1.Location = new-object System.Drawing.Point(4, 22)
-        $panel1.Name = "tabPage1"
-        $panel1.Padding = new-object System.Windows.Forms.Padding(3)
-        $panel1.Size = new-object System.Drawing.Size(259, 252)
-        $panel1.TabIndex = 0
-        $panel1.Text = "Destination Node"
+  $panel1.Location = new-object System.Drawing.Point(4, 22)
+  $panel1.Name = "tabPage1"
+  $panel1.Padding = new-object System.Windows.Forms.Padding(3)
+  $panel1.Size = new-object System.Drawing.Size(259, 252)
+  $panel1.TabIndex = 0
+  $panel1.Text = "Destination Node"
 
   $t1 = New-Object  System.Windows.Forms.TreeView 
   $t1.Font  = new-object System.Drawing.Font('Tahoma', 10.25, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
@@ -116,8 +128,8 @@ function TabsWithTreeViews(
   $t1.ImageList = $i
 
   $t1.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
-        -bor [System.Windows.Forms.AnchorStyles]::Left) `
-        -bor [System.Windows.Forms.AnchorStyles]::Right)
+  -bor [System.Windows.Forms.AnchorStyles]::Left) `
+  -bor [System.Windows.Forms.AnchorStyles]::Right)
   $t1.ImageIndex = -1
   $t1.Location = new-object System.Drawing.Point(4, 5)
   $t1.Name = "treeFood"
@@ -150,35 +162,35 @@ function TabsWithTreeViews(
 
 
 
-        $tab_contol1.Controls.Add($panel1)
-        $tab_contol1.Controls.Add($panel2)
+  $tab_contol1.Controls.Add($panel1)
+  $tab_contol1.Controls.Add($panel2)
 
-        $tab_contol1.Location = new-object System.Drawing.Point(13, 13)
-        $tab_contol1.Name = "tabControl1"
-        $tab_contol1.SelectedIndex = 1
-        $tab_contol1.Size = new-object System.Drawing.Size(267, 288)
-        $tab_contol1.TabIndex = 0
-        
-        $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
-        $f.ClientSize = new-object System.Drawing.Size(292, 308)
-        $f.Controls.Add($tab_contol1)
-        $panel2.ResumeLayout($false)
-        $panel2.PerformLayout()
-        $panel1.ResumeLayout($false)
-        $tab_contol1.ResumeLayout($false)
-        $f.ResumeLayout($false)
-        # $f.ActiveControl = $textbox1
+  $tab_contol1.Location = new-object System.Drawing.Point(13, 13)
+  $tab_contol1.Name = "tabControl1"
+  $tab_contol1.SelectedIndex = 1
+  $tab_contol1.Size = new-object System.Drawing.Size(267, 288)
+  $tab_contol1.TabIndex = 0
+  
+  $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
+  $f.ClientSize = new-object System.Drawing.Size(292, 308)
+  $f.Controls.Add($tab_contol1)
+  $panel2.ResumeLayout($false)
+  $panel2.PerformLayout()
+  $panel1.ResumeLayout($false)
+  $tab_contol1.ResumeLayout($false)
+  $f.ResumeLayout($false)
+  # $f.ActiveControl = $textbox1
 
-        $f.Topmost = $true
-
-
-        $f.Add_Shown( { $f.Activate() } )
-        $f.KeyPreview = $True
+  $f.Topmost = $true
 
 
-        [Void] $f.ShowDialog([Win32Window ] ($caller) )
+  $f.Add_Shown( { $f.Activate() } )
+  $f.KeyPreview = $True
 
-        $f.Dispose() 
+
+  [Void] $f.ShowDialog([Win32Window ] ($caller) )
+
+  $f.Dispose() 
 }
 
 Add-Type -TypeDefinition @"
@@ -192,32 +204,32 @@ public class Win32Window : IWin32Window
 
     public int Data
     {
-        get { return _data; }
-        set { _data = value; }
+  get { return _data; }
+  set { _data = value; }
     }
 
 
     public string Message
     {
-        get { return _message; }
-        set { _message = value; }
+  get { return _message; }
+  set { _message = value; }
     }
 
     public Win32Window(IntPtr handle)
     {
-        _hWnd = handle;
+  _hWnd = handle;
     }
 
     public IntPtr Handle
     {
-        get { return _hWnd; }
+  get { return _hWnd; }
     }
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
-$title = 'Enter Message' 
+$title = 'Settings Transfer' 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 TabsWithTreeViews -title $title -caller $caller
