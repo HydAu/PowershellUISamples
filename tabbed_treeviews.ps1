@@ -91,11 +91,11 @@ function TabsWithTreeViews(
   $panel2.Controls.AddRange(@($t2)) 
 
  # http://msdn.microsoft.com/en-us/library/system.windows.forms.tabpage.visiblechanged%28v=vs.110%29.aspx
- $panel2.add_VisibleChanged({
-   param(
-    [Object] $sender, 
-    [System.EventArgs] $eventargs 
-   )
+   $panel2.add_VisibleChanged({
+     param(
+      [Object] $sender, 
+      [System.EventArgs] $eventargs 
+      )
     $t2.SuspendLayout()
     $t2.Nodes.Clear()    
     $node = $t2.Nodes.Add('Source Environment') 
@@ -140,12 +140,11 @@ function TabsWithTreeViews(
   $t1.TabIndex = 1;
   $panel1.Controls.AddRange(@($t1)) 
 
- # http://msdn.microsoft.com/en-us/library/system.windows.forms.tabpage.visiblechanged%28v=vs.110%29.aspx
- $panel1.add_VisibleChanged({
-   param(
-    [Object] $sender, 
-    [System.EventArgs] $eventargs 
-   )
+   $panel1.add_VisibleChanged({
+       param(
+          [Object] $sender, 
+          [System.EventArgs] $eventargs 
+       )
     $t1.SuspendLayout()
     $t1.Nodes.Clear()    
     $node = $t1.Nodes.Add('Target Environment') 
@@ -158,9 +157,6 @@ function TabsWithTreeViews(
     $t1.ResumeLayout($false)
     $t1.PerformLayout()     
 })
-
-
-
 
   $tab_contol1.Controls.Add($panel1)
   $tab_contol1.Controls.Add($panel2)
@@ -179,7 +175,6 @@ function TabsWithTreeViews(
   $panel1.ResumeLayout($false)
   $tab_contol1.ResumeLayout($false)
   $f.ResumeLayout($false)
-  # $f.ActiveControl = $textbox1
 
   $f.Topmost = $true
 
