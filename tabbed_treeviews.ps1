@@ -20,7 +20,7 @@
 
 # http://www.java2s.com/Code/CSharpAPI/System.Windows.Forms/TabControlControlsAdd.htm
 # with sizes adjusted to run the focus demo
-function PromptWithTabs(
+function TabsWithTreeViews(
 	[String] $title, 
         [Object] $caller
 	){
@@ -42,65 +42,112 @@ function PromptWithTabs(
         $panel2.Location = new-object System.Drawing.Point(4, 22)
         $panel2.Name = "tabPage2"
         $panel2.Padding = new-object System.Windows.Forms.Padding(3)
-        $panel2.Size = new-object System.Drawing.Size(259, 52)
+        $panel2.Size = new-object System.Drawing.Size(259, 352)
+        $panel2.AutoSize  = $true
         $panel2.TabIndex = 1
         $panel2.Text = "Source Node"
-
+<#
         $l1 = New-Object System.Windows.Forms.Label
-        $l1.Location = New-Object System.Drawing.Size(72,32) 
+        $l1.Location = New-Object System.Drawing.Point(72,32) 
         $l1.Size = New-Object System.Drawing.Size(100,16) 
         $l1.Text = ''         
 
         $l1.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 8, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
-        $panel2.Controls.Add($l1) 
+#        $panel2.Controls.Add($l1) 
 
+#>
 
-        $t = New-Object  System.Windows.Forms.TreeView 
-  $t.Font  = new-object System.Drawing.Font('Tahoma', 10.25, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
+  $t2 = New-Object  System.Windows.Forms.TreeView 
+  $t2.Font  = new-object System.Drawing.Font('Tahoma', 10.25, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
 
   $i = new-Object System.Windows.Forms.ImageList($components)
   $i.Images.Add([System.Drawing.SystemIcons]::Application)
-  $t.ImageList = $i
+  $t2.ImageList = $i
 
 
-  $t.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
+  $t2.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
         -bor [System.Windows.Forms.AnchorStyles]::Left) `
         -bor [System.Windows.Forms.AnchorStyles]::Right)
-  $t.ImageIndex = -1
-  $t.Location = new-object System.Drawing.Point(4, 5)
-  $t.Name = "treeFood"
-  $t.SelectedImageIndex = -1
-  $t.Size = new-object System.Drawing.Size(284, 256)
-  $t.TabIndex = 1;
-  $panel2.Controls.AddRange(@($t)) 
+  $t2.ImageIndex = -1
+  $t2.Location = new-object System.Drawing.Point(4, 5)
+  $t2.Name = "treeFood"
+  $t2.SelectedImageIndex = -1
+  $t2.Size = new-object System.Drawing.Size(284, 224)
 
+  $t2.AutoSize  = $true
+  $t2.TabIndex = 1;
+  $panel2.Controls.AddRange(@($t2)) 
+
+ # http://msdn.microsoft.com/en-us/library/system.windows.forms.tabpage.visiblechanged%28v=vs.110%29.aspx
  $panel2.add_VisibleChanged({
    param(
     [Object] $sender, 
     [System.EventArgs] $eventargs 
    )
-    
-    $node = $t.Nodes.Add("Fruits") 
-    $apple = $node.Nodes.Add("Apple") 
-    $apple.ImageIndex  = 1
+    $t2.SuspendLayout()
+    $t2.Nodes.Clear()    
+    $node = $t2.Nodes.Add('Source Environment') 
+    $server = $node.Nodes.Add('Test Server') 
+    $databases = $server.Nodes.Add('Databases')
+    $server.Nodes.Add('DB 1')
+    $server.Nodes.Add('DB 2')
 
-    $node.Nodes.Add("Peach") 
-    
-    $node = $t.Nodes.Add("Vegetables")
-    $tomato = $node.Nodes.Add("Tomato")
-    $tomato.ImageIndex  = 2 
-    $node.Nodes.Add("Eggplant")
-     
-     
+    $server.Nodes.Add('Application') 
+    $sites = $server.Nodes.Add('IIS Web Sites')
+
+    $sites.Nodes.Add('Site 1')
+    $sites.Nodes.Add('Site 2')
+    $sites.Nodes.Add('Site 3')
+    $t2.ResumeLayout($false)
+    $t2.PerformLayout()     
 })
 
 
         $panel1.Location = new-object System.Drawing.Point(4, 22)
         $panel1.Name = "tabPage1"
         $panel1.Padding = new-object System.Windows.Forms.Padding(3)
-        $panel1.Size = new-object System.Drawing.Size(259, 52)
+        $panel1.Size = new-object System.Drawing.Size(259, 252)
         $panel1.TabIndex = 0
         $panel1.Text = "Destination Node"
+
+  $t1 = New-Object  System.Windows.Forms.TreeView 
+  $t1.Font  = new-object System.Drawing.Font('Tahoma', 10.25, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
+
+  $t1.ImageList = $i
+
+  $t1.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
+        -bor [System.Windows.Forms.AnchorStyles]::Left) `
+        -bor [System.Windows.Forms.AnchorStyles]::Right)
+  $t1.ImageIndex = -1
+  $t1.Location = new-object System.Drawing.Point(4, 5)
+  $t1.Name = "treeFood"
+  $t1.SelectedImageIndex = -1
+  $t1.Size = new-object System.Drawing.Size(284, 224)
+
+  $t1.AutoSize  = $true
+  $t1.TabIndex = 1;
+  $panel1.Controls.AddRange(@($t1)) 
+
+ # http://msdn.microsoft.com/en-us/library/system.windows.forms.tabpage.visiblechanged%28v=vs.110%29.aspx
+ $panel1.add_VisibleChanged({
+   param(
+    [Object] $sender, 
+    [System.EventArgs] $eventargs 
+   )
+    $t1.SuspendLayout()
+    $t1.Nodes.Clear()    
+    $node = $t1.Nodes.Add('Target Environment') 
+    $node.Nodes.Add('Database Server') 
+    $node.Nodes.Add('Application Server') 
+    $sites = $node.Nodes.Add('Web Server')
+    $sites.Nodes.Add('Site 1')
+    $sites.Nodes.Add('Site 2')
+    $sites.Nodes.Add('Site 3')
+    $t1.ResumeLayout($false)
+    $t1.PerformLayout()     
+})
+
+
 
 
         $tab_contol1.Controls.Add($panel1)
@@ -109,11 +156,11 @@ function PromptWithTabs(
         $tab_contol1.Location = new-object System.Drawing.Point(13, 13)
         $tab_contol1.Name = "tabControl1"
         $tab_contol1.SelectedIndex = 1
-        $tab_contol1.Size = new-object System.Drawing.Size(267, 88)
+        $tab_contol1.Size = new-object System.Drawing.Size(267, 288)
         $tab_contol1.TabIndex = 0
         
         $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
-        $f.ClientSize = new-object System.Drawing.Size(292, 108)
+        $f.ClientSize = new-object System.Drawing.Size(292, 308)
         $f.Controls.Add($tab_contol1)
         $panel2.ResumeLayout($false)
         $panel2.PerformLayout()
@@ -173,5 +220,5 @@ $DebugPreference = 'Continue'
 $title = 'Enter Message' 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptWithTabs -title $title -caller $caller
-write-debug ("Message is : {0} " -f  $caller.Message )
+TabsWithTreeViews -title $title -caller $caller
+# write-debug ("Message is : {0} " -f  $caller.Message )
