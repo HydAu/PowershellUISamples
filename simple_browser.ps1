@@ -90,62 +90,6 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Runtime.InteropServices.dll', 'System.Net.dll'
 
 
-<#
-public class Form1 : Form
-{
-    private System.Windows.Forms.WebBrowser webBrowser1;
-
-    public Form1()
-    {
-        InitializeComponent();
-        webBrowser1.Navigate("http://localhost:8088/app#/users/sign-in");
-
-    }
-    private void InitializeComponent()
-    {
-        this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-        this.webBrowser1.Navigated += webBrowser1_Navigated;
-        this.SuspendLayout();
-        // 
-        // webBrowser1
-        // 
-        this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-        this.webBrowser1.Name = "webBrowser1";
-        this.webBrowser1.Size = new System.Drawing.Size(600, 600);
-        this.webBrowser1.TabIndex = 0;
-        // 
-        // Form1
-        // 
-        this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-        this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(600, 600);
-        this.Controls.Add(this.webBrowser1);
-        this.Text = "Split Window";
-        this.ResumeLayout(false);
-    }
-    // Updates the URL in TextBoxAddress upon navigation.
-    private void webBrowser1_Navigated(object sender,
-        WebBrowserNavigatedEventArgs e)
-    {
-        // wait for the user to successfully log in 
-        // e.g. arrive at Environment page which route is
-        // '/app#/environments'
-        // then capture the global cookies
-        string globalcookies =  Form1Helper.GetGlobalCookies(webBrowser1.Url.ToString());          
-        Console.WriteLine(String.Format("{0}->{1}", webBrowser1.Url.ToString(),globalcookies.ToString()));
-    }
-
-    [STAThread]
-    static void Main()
-    {
-        Application.EnableVisualStyles();
-        Application.Run(new Form1());
-    }
-
-}
-#>
-
 function promptForContinueWithCookies(
 	[String] $login_url = $null,
 	[Object] $caller= $null
@@ -163,8 +107,8 @@ $components = new-object System.ComponentModel.Container
 
 
         $browser = new-object System.Windows.Forms.WebBrowser
-  #      $browser.Navigated = $webBrowser1_Navigated
         $f.SuspendLayout();
+
         # webBrowser1
         $browser.Dock = [System.Windows.Forms.DockStyle]::Fill
         $browser.Location = new-object System.Drawing.Point(0, 0)
@@ -181,22 +125,17 @@ $components = new-object System.ComponentModel.Container
 
 
 
-# This silently ceases to work 
 $f.Add_Load({
   param ([Object] $sender, [System.EventArgs] $eventArgs )
 $browser.Navigate($login_url);
 }) 
-# $webBrowser1_Navigated = 
- $browser.Add_Navigated(
+
+$browser.Add_Navigated(
 {
 
   param ([Object] $sender, [System.Windows.Forms.WebBrowserNavigatedEventArgs] $eventArgs )
         # wait for the user to successfully log in 
-        # e.g. arrive at $caller.Url route
-        # '/app#/environments'
         # then capture the global cookies and sent to $caller
-        # string globalcookies =  Form1Helper.GetGlobalCookies(webBrowser1.Url.ToString());          
-
         $url = $browser.Url.ToString()
         if ($caller -ne $null -and $url -ne $null -and $url -match $caller.Url ) {  
             $caller.Cookies = $caller.GetGlobalCookies($url)
@@ -207,8 +146,6 @@ $browser.Navigate($login_url);
 $f.ResumeLayout($false)
 $f.Topmost = $True
 
-# $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
 $f.Add_Shown( { $f.Activate() } )
 
 [void] $f.ShowDialog([Win32Window ] ($caller) )
@@ -218,9 +155,10 @@ $f.Add_Shown( { $f.Activate() } )
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $service_host = 'http://localhost:8088'
 $login_route = 'app#/users/sign-in' 
-$caller.Url =  'app#/environments'
 $login_url = ('{0}/{1}' -f $service_host , $login_route)
-write-output $login_url
+
+$caller.Url =  'app#/environments'
 
 promptForContinueWithCookies $login_url $caller
+
 write-host ("{0}->{1}" -f , $caller.Url, $caller.Cookies)
