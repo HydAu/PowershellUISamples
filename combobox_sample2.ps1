@@ -1,62 +1,72 @@
 # http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/HandlesComboBoxItemSelectedevents.htm
-# http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/iftheuserhasenteredtextintotheComboBoxinstead.htm
-# origin: http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/EmbeddedCodeinWindowxaml.htm
-# origin: http://stackoverflow.com/questions/5863209/compile-wpf-xaml-using-add-type-of-powershell-without-using-powerboots
 
 #requires -version 2
 
-
-#  SelectionChanged="ComboBox_SelectionChanged"
-Add-Type -AssemblyName PresentationFramework
-[xml]$xaml = 
-@"
+$items = @(
+   'Apple' ,
+   'Banana' ,
+   'Orange' ,
+   'Pineapple' ,
+   'Plum'
+   ) 
+$selected = @{ }
+$context = @'
 <Window
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  Title="Window1" Height="300" Width="408">
+  Title="Window1" Height="60" Width="200">
     <StackPanel>
-    <ComboBox Name="comboBox" IsEditable="True" Margin="5">
-            <ComboBoxItem Name="Item_1" Content="ComboBox Item 1" IsSelected="True" />
-            <ComboBoxItem Name="Item_2" Content="ComboBox Item 2"/>
-            <ComboBoxItem Name="Item_3" Content="ComboBox Item 3"/>
-            <ComboBoxItem Name="Item_4" Content="ComboBox Item 4"/>
-            <ComboBoxItem Name="Item_5" Content="ComboBox Item 5"/>
+    <ComboBox Name="comboBox" IsEditable="False" Margin="5">
+'@
+$cnt = 1
+$items | foreach-object {  $name = "Item_${cnt}" ; $cnt ++ ; $context +="<ComboBoxItem Name='${name}' Content='$_'/>" } 
+$context += @'
         </ComboBox>
     </StackPanel>
 </Window>
-"@
+'@
+
+
+Add-Type -AssemblyName PresentationFramework 
+[xml]$xaml = $context 
 
 Clear-Host
 $reader=(New-Object System.Xml.XmlNodeReader $xaml)
 $target=[Windows.Markup.XamlReader]::Load($reader)
+$handler = {
+      param ([object] $sender,  # System.Windows.Controls.ComboboxItem
+                                # http://msdn.microsoft.com/en-us/library/system.windows.controls.comboboxitem_properties%28v=vs.110%29.aspx
+             [System.Windows.RoutedEventArgs] $eventargs )
+      $sender.Background = [ System.Windows.Media.Brushes]::Red
+      $target.Title = ( 'Added {0} ' -f $sender.Content ) 
+      $selected[ $sender.Content  ]  = $true
 
+  }
 
 foreach ($item in ("Item_1", "Item_5", "Item_2","Item_3","Item_4") ){
-  
-  write-output ('Wiring {0} ?' -f $item )
   $combobox_item_control = $target.FindName($item)
-  $eventMethod2 = $combobox_item_control.add_Selected
-  $eventMethod2.Invoke( {
-      param ([object] $sender,  # System.Windows.Controls.ComboboxItem
-             [System.Windows.RoutedEventArgs] $e )
-
-      $target.Title = ( "Hello {0} " -f $sender.Name.ToString() ) 
-
-  })
+  $eventargsventMethod2 = $combobox_item_control.add_Selected
+  $eventargsventMethod2.Invoke( $handler )
   $combobox_item_control = $null 
 }
 
+<#
+
+# TODO - handle IsEditable='true' addl. event
+
 $combobox_control = $target.FindName('comboBox')
-$eventMethod0 = $combobox_control.add_SelectionChanged
-$eventMethod0.Invoke({
+$combobox_handler = $combobox_control.add_SelectionChanged
+$combobox_handler.Invoke({
    param (
     [object] $sender, 
-    [System.Windows.Controls.SelectionChangedEventArgs] $e )
+    [System.Windows.Controls.SelectionChangedEventArgs] $eventargs )
 
-    write-host ("Additional event {0} routed from '{1}' to Powershell" -f $e.GetType().ToString() , $sender.ToString())
+    write-host ("Additional event {0} routed from '{1}' to Powershell" -f $eventargs.GetType().ToString() , $sender.ToString())
 })
 
-
+#>
 
 
 $target.ShowDialog() | out-null 
+write-output 'Selected items:'
+$items | where-object {$selected.ContainsKey( $_ ) }
