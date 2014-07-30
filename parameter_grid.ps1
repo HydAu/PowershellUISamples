@@ -17,6 +17,16 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
+#
+[CmdletBinding()]
+param ( [string] $string_param1 = '' , 
+        [string] $string_param2 = '' , 
+        [string] $string_param3 = '' , 
+        [boolean] $boolean_param = $false,
+        [int] $int_param
+    )
+
+
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
@@ -37,7 +47,6 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-
  
 function Edit_Parameters {
      Param(
@@ -46,52 +55,36 @@ function Edit_Parameters {
 	[Object] $caller= $null
     )
 
-[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | out-null
-[System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | out-null
-[System.Reflection.Assembly]::LoadWithPartialName('System.Data') | out-null
-[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')  | out-null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | out-null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | out-null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.Data') | out-null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')  | out-null
 
+  $f = New-Object System.Windows.Forms.Form
+  $f.SuspendLayout();
 
-$f = New-Object System.Windows.Forms.Form
-$f.Text = $title
-$f.AutoSize  = $true 
-$grid = New-Object System.Windows.Forms.DataGridView
+  $f.Text = $title
+  $f.AutoSize  = $true 
+  $grid = New-Object System.Windows.Forms.DataGridView
+  $grid.Autosize = $true
+  $grid.DataBindings.DefaultDataSourceUpdateMode = 0
 
-$System_Drawing_Size = New-Object System.Drawing.Size
-$grid.DataBindings.DefaultDataSourceUpdateMode = 0
+  $grid.Name = 'dataGrid1'
+  $grid.DataMember = ''  
+  $grid.TabIndex = 0
+  $grid.Location = new-object System.Drawing.Point(13,50)
+  $grid.Dock = [System.Windows.Forms.DockStyle]::Fill
 
-$grid.Name = "dataGrid1"
-$grid.DataMember = ''
-$grid.TabIndex = 0
-$System_Drawing_Point = New-Object System.Drawing.Point
-$System_Drawing_Point.X = 13;
-$System_Drawing_Point.Y = 48 ;
-$grid.Location = $System_Drawing_Point
-$grid.Dock = [System.Windows.Forms.DockStyle]::Fill
+  $grid.ColumnCount = 2
+  $grid.Columns[0].Name = 'Parameter Name'
+  $grid.Columns[1].Name = 'Value'
 
-            $grid.ColumnCount = 2;
-            $grid.Columns[0].Name = "Parameter Name";
-            $grid.Columns[1].Name = "Value";
-<#
+  $parameters.Keys | foreach-object {
+            $row1 = @( $_,  $parameters[$_])
+            $grid.Rows.Add($row1)
+  }
 
-            $grid.Columns[0].Name = "Parameter Name";
-            $grid.Columns[1].Name = "Value";
-            $row1 = @( "Number", 1000 );
-            $grid.Rows.Add($row1);
-            $row2 = @(  "String", "2000" );
-            $grid.Rows.Add($row2);
-            $row3 = @(  "String", "Product 3" );
-            $grid.Rows.Add($row3);
-            $row4 = @( "Boolean", $true );
-            $grid.Rows.Add($row4);
-#>
-
-$p.Keys | foreach-object {
-            $row1 = @( $_,  $p[$_]);
-            $grid.Rows.Add($row1);
-}
-
-            $grid.Columns[0].ReadOnly = $true;
+  $grid.Columns[0].ReadOnly = $true;
 
   foreach ($row in $grid.Rows){
              $row.cells[0].Style.BackColor = [System.Drawing.Color]::LightGray 
@@ -99,67 +92,56 @@ $p.Keys | foreach-object {
              $row.cells[1].Style.Font = New-Object System.Drawing.Font('Lucida Console', 9)
       }
 
-$button = New-Object System.Windows.Forms.Button
-$button.Text = 'Run'
-$button.Dock = [System.Windows.Forms.DockStyle]::Bottom
+  $button = New-Object System.Windows.Forms.Button
+  $button.Text = 'Run'
+  $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
  
-$f.Controls.Add( $button )
-$f.Controls.Add( $grid )
+  $f.Controls.Add( $button )
+  $f.Controls.Add( $grid )
+  $grid.ResumeLayout($false)
+  $f.ResumeLayout($false)
 
+  $button.add_Click({
 
-$button.add_Click({
-
-  foreach ($row in $grid.Rows){
-
-    if (($row.cells[0].Value -ne $null -and $row.cells[0].Value -ne '' ) -and ($row.cells[1].Value -eq $null -or $row.cells[1].Value -eq '')) { 
-             $row.cells[0].Style.ForeColor = [System.Drawing.Color]::Red 
-             $grid.CurrentCell  = $row.cells[1]
-      return;
+    foreach ($row in $grid.Rows){
+      if (($row.cells[0].Value -ne $null -and $row.cells[0].Value -ne '' ) -and ($row.cells[1].Value -eq $null -or $row.cells[1].Value -eq '')) { 
+        $row.cells[0].Style.ForeColor = [System.Drawing.Color]::Red 
+        $grid.CurrentCell  = $row.cells[1]
+        return;
+      }
+      write-host ( '{0} = {1}' -f $row.cells[0].Value, $row.cells[1].Value)
     }
-    write-host ( '{0} = {1}' -f $row.cells[0].Value, $row.cells[1].Value)
-}
-$f.Close()
+    $f.Close()
 
-})
+  })
 
-$f.ShowDialog() | out-null
-$f.Topmost = $True
-$f.refresh()
-$f.Dispose()
+  $f.ShowDialog($caller) | out-null
+  $f.Topmost = $True
+  $f.refresh()
+  $f.Dispose()
 } 
 
-function test {
-    [CmdletBinding()]
-    param (
-        [string] $string_param1 = '' , 
-        [string] $string_param2 = '' , 
-        [string] $string_param3 = '' , 
-        [boolean] $boolean_param = $false,
-        [int] $int_param
-    )
-    # Get the command name
-    # http://stackoverflow.com/questions/21559724/getting-all-named-parameters-from-powershell-including-empty-and-set-ones
-    $CommandName = $PSCmdlet.MyInvocation.InvocationName;
-    # Get the list of parameters for the command
-    $ParameterList = (Get-Command -Name $CommandName).Parameters;
-    $parameters = @{}
-    # Grab each parameter value, using Get-Variable
-    foreach ($Parameter in $ParameterList) {
+# Evaluate what name parameters were defined for run
+# http://stackoverflow.com/questions/21559724/getting-all-named-parameters-from-powershell-including-empty-and-set-ones
 
-      $value = Get-Variable -Name $Parameter.Values.Name -ErrorAction SilentlyContinue;
+# Get the command name
+$CommandName = $PSCmdlet.MyInvocation.InvocationName
+    
+# Get the list of parameters for the command
+$ParameterList = (Get-Command -Name $CommandName).Parameters
+$parameters = @{}
+foreach ($Parameter in $ParameterList) {
+  # Grab each parameter value, using Get-Variable
+  $value = Get-Variable -Name $Parameter.Values.Name -ErrorAction SilentlyContinue
+} 
 
-    }
+$parameters = @{ }
+$value | foreach-object {$parameters[$_.Name] = $_.Value } 
 
- $p = @{ }
- $value | foreach-object {$p[$_.Name] = $_.Value } 
- # $p.Keys | foreach-object {write-output ("{0} = '{1}'" -f   $_, $p[$_])}
- $p.GetType().Name
- Edit_Parameters -parameters ($p) -caller $caller -title  'Enter options: '
-}
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
- $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+Edit_Parameters -parameters ($parameters) -caller $caller -title 'Provide parameters: '
 
-test -boolean_param $true -string_param1 'this' -string_param3 'test' -int_param 42
 return
 
 
