@@ -96,7 +96,7 @@ function Edit_Parameters {
   $button.Text = 'Run'
   $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
  
-  $f.Controls.Add( $button )
+  $f.Controls.Add( $button) 
   $f.Controls.Add( $grid )
   $grid.ResumeLayout($false)
   $f.ResumeLayout($false)
@@ -104,13 +104,16 @@ function Edit_Parameters {
   $button.add_Click({
 
     foreach ($row in $grid.Rows){
+      # do not close the form if some parameters are not entered
       if (($row.cells[0].Value -ne $null -and $row.cells[0].Value -ne '' ) -and ($row.cells[1].Value -eq $null -or $row.cells[1].Value -eq '')) { 
         $row.cells[0].Style.ForeColor = [System.Drawing.Color]::Red 
         $grid.CurrentCell  = $row.cells[1]
         return;
       }
-      write-host ( '{0} = {1}' -f $row.cells[0].Value, $row.cells[1].Value)
     }
+      # TODO: return $caller.HashData
+      # write-host ( '{0} = {1}' -f $row.cells[0].Value, $row.cells[1].Value)
+
     $f.Close()
 
   })
@@ -134,12 +137,11 @@ foreach ($Parameter in $ParameterList) {
   # Grab each parameter value, using Get-Variable
   $value = Get-Variable -Name $Parameter.Values.Name -ErrorAction SilentlyContinue
 } 
-
+write-output '...'
+# Convert to Hashtable - 
 $parameters = @{ }
 $value | foreach-object {$parameters[$_.Name] = $_.Value } 
-
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
 Edit_Parameters -parameters ($parameters) -caller $caller -title 'Provide parameters: '
 
 return
