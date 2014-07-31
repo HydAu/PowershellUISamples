@@ -21,37 +21,35 @@ Add-Type -AssemblyName PresentationFramework
 </Window>
 "@
 Clear-Host
+
 $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
 $canvas = $target.FindName("Canvas1")
-$alldata = @{}
-function save_orig{
-  param ([String] $name)
-  $data = @{}
-  $control = $target.FindName($name)
-  $data['fill'] =  $control.Fill.Color
-  $data['ZIndex'] =   [System.Windows.Controls.Canvas]::GetZIndex($control)
-  
-  return $data
-}
+$polygon_data = @{}
 
-$alldata['Polygon1'] = (save_orig('Polygon1'))
-$alldata['Polygon2'] = (save_orig('Polygon2'))
-$alldata['Polygon3'] = (save_orig('Polygon3'))
+function save_orig_design{
+  param ([String] $name)
+  $control = $target.FindName($name)
+  return @{
+      'fill'   =  ( $control.Fill.Color ); 
+      'ZIndex' =  ( [System.Windows.Controls.Canvas]::GetZIndex($control) )
+  }
+}
+  $polygon_data['Polygon1'] = (save_orig_design('Polygon1'))  
+  $polygon_data['Polygon2'] = (save_orig_design('Polygon2'))
+  $polygon_data['Polygon3'] = (save_orig_design('Polygon3'))
+
+
+# TODO :
+# $canvas.Add_Initialized ...
 
 function restore_orig {
-  param (
-          [String] $name )
-$data = $alldata[$name]
-$data.Keys | % {write-host $_}
+  param ( [String] $name )
 
-[String] $fill = $alldata[$name]['fill']
-[Int] $ZIndex = $alldata[$name]['ZIndex']
-
-  $control = $target.FindName($name)
-  $color = [System.Windows.Media.ColorConverter]::ConvertFromString($fill)
-  $control.Fill = new-Object System.Windows.Media.SolidColorBrush($color)
-  [System.Windows.Controls.Canvas]::SetZIndex($control,[Object] $ZIndex)
+  $control = $target.FindName( $name )
+  $color = [System.Windows.Media.ColorConverter]::ConvertFromString( [String] $polygon_data[$name]['fill'] )
+  $control.Fill = new-Object System.Windows.Media.SolidColorBrush( $color )
+  [System.Windows.Controls.Canvas]::SetZIndex($control, [Object] $polygon_data[$name]['ZIndex'])
 
 }
 
@@ -62,25 +60,22 @@ param (
 
  )
 
+  @('Polygon1', 'Polygon2', 'Polygon3') | % { restore_orig( $_) }
 
+  # Highlight sender
+  $sender.Fill = new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Orange)
+  # uncomment to reveal a distortion
+  # $sender.Stroke = new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Black)
 
-restore_orig( 'Polygon1' )
-restore_orig( 'Polygon2' )
-restore_orig( 'Polygon3' )
+  # Bring sender to front
+  [System.Windows.Controls.Canvas]::SetZIndex($sender,[Object]100)
+  $target.Title="Hello $($sender.Name)"
 
-# Highlight $sender
-$sender.Fill = new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Orange)
-# uncomment to reveal a distortion
-# $sender.Stroke = new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Black)
-
-# Bring $sender to front
-[System.Windows.Controls.Canvas]::SetZIndex($sender,[Object]100)
-$target.Title="Hello $($sender.Name)"
 }
 
-foreach ($item in ("Polygon1", "Polygon2", "Polygon3") ){
+foreach ($item in ('Polygon1', 'Polygon2', 'Polygon3') ){
   $control = $target.FindName($item)
-  $eventMethod=$control.add_MouseDown
+  $eventMethod = $control.add_MouseDown
   $eventMethod.Invoke( $handler )
   $control = $null 
 }
