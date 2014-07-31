@@ -24,26 +24,33 @@ Clear-Host
 $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
 $canvas = $target.FindName("Canvas1")
-
+$alldata = @{}
 function save_orig{
+  param ([String] $name)
+  $data = @{}
+  $control = $target.FindName($name)
+  $data['fill'] =  $control.Fill.Color
+  $data['ZIndex'] =   [System.Windows.Controls.Canvas]::GetZIndex($control)
   
-  $control = $target.FindName('Polygon1')
-  write-output $control.Fill
-  write-output [System.Windows.Controls.Canvas]::SetZIndex($control)
+  return $data
 }
-function restore_orig{
+function restore_orig {
+  param (
+          [String] $name )
+write-host $alldata.GetType()
+write-host "Name=${name}"
+$alldata.Keys | % {write-host $_}
+$data = $alldata[$name]
+write-host $data.GetType()
+$data.Keys | % {write-host $_}
 
-  $control = $target.FindName('Polygon1')
-  $control.Fill =  new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Blue)
-  [System.Windows.Controls.Canvas]::SetZIndex($control,[Object] 40)
 
-  $control = $target.FindName('Polygon2')
-  $control.Fill =  new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Green)
-  [System.Windows.Controls.Canvas]::SetZIndex($control,[Object] 30)
+[String] $fill = $alldata[$name]['fill']
+[Int] $ZIndex = $alldata[$name]['ZIndex']
 
-  $control = $target.FindName('Polygon3')
-  $control.Fill =  new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Red)
-  [System.Windows.Controls.Canvas]::SetZIndex(($target.FindName('Polygon3')),[Object] 20)
+  $color = [System.Windows.Media.Color]::FromRgb([byte]($fill -band 0xff0000) , 0, 0)
+  $control.Fill =  new-Object System.Windows.Media.SolidColorBrush($color)
+  [System.Windows.Controls.Canvas]::SetZIndex($control,[Object] $ZIndex)
 
 }
 
@@ -51,9 +58,13 @@ $handler = {
 param (
     [Object]  $sender, 
     [System.Windows.Input.MouseButtonEventArgs] $e 
+
  )
 
-restore_orig
+
+$alldata['Polygon1'] = (save_orig('Polygon1'))
+# write-host $data.GetType()
+restore_orig( 'Polygon1' )
 
 # Highlight $sender
 $sender.Fill = new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Orange)
@@ -64,7 +75,7 @@ $sender.Fill = new-Object System.Windows.Media.SolidColorBrush([System.Windows.M
 [System.Windows.Controls.Canvas]::SetZIndex($sender,[Object]100)
 $target.Title="Hello $($sender.Name)"
 }
-save_orig
+
 foreach ($item in ("Polygon1", "Polygon2", "Polygon3") ){
   $control = $target.FindName($item)
   $eventMethod=$control.add_MouseDown
