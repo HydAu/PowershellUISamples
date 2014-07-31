@@ -34,22 +34,23 @@ function save_orig{
   
   return $data
 }
+
+$alldata['Polygon1'] = (save_orig('Polygon1'))
+$alldata['Polygon2'] = (save_orig('Polygon2'))
+$alldata['Polygon3'] = (save_orig('Polygon3'))
+
 function restore_orig {
   param (
           [String] $name )
-write-host $alldata.GetType()
-write-host "Name=${name}"
-$alldata.Keys | % {write-host $_}
 $data = $alldata[$name]
-write-host $data.GetType()
 $data.Keys | % {write-host $_}
-
 
 [String] $fill = $alldata[$name]['fill']
 [Int] $ZIndex = $alldata[$name]['ZIndex']
 
-  $color = [System.Windows.Media.Color]::FromRgb([byte]($fill -band 0xff0000) , 0, 0)
-  $control.Fill =  new-Object System.Windows.Media.SolidColorBrush($color)
+  $control = $target.FindName($name)
+  $color = [System.Windows.Media.ColorConverter]::ConvertFromString($fill)
+  $control.Fill = new-Object System.Windows.Media.SolidColorBrush($color)
   [System.Windows.Controls.Canvas]::SetZIndex($control,[Object] $ZIndex)
 
 }
@@ -62,9 +63,10 @@ param (
  )
 
 
-$alldata['Polygon1'] = (save_orig('Polygon1'))
-# write-host $data.GetType()
+
 restore_orig( 'Polygon1' )
+restore_orig( 'Polygon2' )
+restore_orig( 'Polygon3' )
 
 # Highlight $sender
 $sender.Fill = new-Object System.Windows.Media.SolidColorBrush([System.Windows.Media.Colors]::Orange)
