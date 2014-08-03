@@ -1,3 +1,5 @@
+$syncHash = $null 
+
 function DecodeDigitalPID($digitalProductId)
 {
 	$decryptionLength = 14
@@ -144,4 +146,21 @@ $psCmd.Runspace = $newRunspace
 
 }
 
+# http://learn-powershell.net/2012/10/14/powershell-and-wpf-writing-data-to-a-ui-from-a-different-runspace/
+Function Update-Window {
+    Param (
+        $Title,
+        $Content,
+        [switch]$AppendContent
+    )
+    $syncHash.textbox.Dispatcher.invoke([action]{
+        $syncHash.Window.Title = $title
+        If ($PSBoundParameters['AppendContent']) {
+            $syncHash.TextBox.AppendText($Content)
+        } Else {
+            $syncHash.TextBox.Text = $Content
+        }
+    },
+    "Normal")
+}
 Get-WindowsProduct
