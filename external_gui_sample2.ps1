@@ -67,7 +67,7 @@ $newRunspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
 $syncHash.xaml = $xaml_prototype
 $syncHash.Data = @()
 
-##      Getting values
+## Getting values
 $regPath = 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion'
 $binArray = $(Get-ItemProperty -Path $regPath).DigitalProductId[52..66]
 $x64 = [System.Environment]::Is64BitOperatingSystem
@@ -77,45 +77,48 @@ $syncHash.Data += $(Get-ItemProperty -Path $regPath).EditionID
 $syncHash.Data += switch ($x64) { $true {'x86-64'}; $false {'x86-32'}}
 $syncHash.Data += $(Get-ItemProperty -Path $regPath).ProductId
 $syncHash.Data += DecodeDigitalPID($binArray)
+
+# create a script object 
+$psCmd = [PowerShell]::Create().AddScript({ 
   
-##  Read XAML
+## Read XAML
 $reader = New-Object -TypeName 'System.Xml.XmlNodeReader' -ArgumentList $syncHash.xaml
 
 $Form = [Windows.Markup.XamlReader]::Load($reader)
-##      Store Form Objects In PowerShell
+## Store Form Objects In PowerShell
 $labels = $txtblks = @()
 $syncHash.xaml.SelectNodes("//*[@Name]") | ForEach-Object -Process {
-		$element = $Form.FindName($_.Name)
-		switch -Regex ($_.Name)		{
-			'lbl*'          { $labels  += $element }
-			'txt*'          { $txtblks += $element }
-			'btnExit'       { $btnExit  = $element }
-			'mainLabel' { $lblMain  = $element }
-		}
+	$element = $Form.FindName($_.Name)
+	switch -Regex ($_.Name)		{
+		'lbl*'      { $labels  += $element }
+		'txt*'      { $txtblks += $element }
+		'btnExit'   { $btnExit  = $element }
+		'mainLabel' { $lblMain  = $element }
+	}
 }
-##      add an event handler to allow the window to be dragged using the left mouse button
+## add an event handler to allow the window to be dragged using the left mouse button
 $eventHandler_LeftButtonDown = [Windows.Input.MouseButtonEventHandler]{ $Form.DragMove() }
 $lblMain.add_MouseLeftButtonDown($eventHandler_LeftButtonDown)
-##  Paint elements with color
-##  Paint elements with color
+## Paint elements with color
 $color_shading = {
-		$txtblks | ForEach-Object -Process { $_.Background = '#FFFFECA8' }
-		$labels  | ForEach-Object -Process { $_.Background = '#FF98D6EB' }
-		$lblMain.Background = '#FF168DE2'
+	$txtblks | ForEach-Object -Process { $_.Background = '#FFFFECA8' }
+	$labels  | ForEach-Object -Process { $_.Background = '#FF98D6EB' }
+	$lblMain.Background = '#FF168DE2'
 }
+## Paint elements with monochrome
 $monochrome_shading = {
-		$txtblks | ForEach-Object -Process { $_.Background = '#FFECECEC' }
-		$labels  | ForEach-Object -Process { $_.Background = '#FFC4C4C4' }
-		$lblMain.Background = '#FF6F6F6F'
+	$txtblks | ForEach-Object -Process { $_.Background = '#FFECECEC' }
+	$labels  | ForEach-Object -Process { $_.Background = '#FFC4C4C4' }
+	$lblMain.Background = '#FF6F6F6F'
 }
 
-##      Add events to Form Objects
+## Add events to Form Objects
 $btnExit.add_Click({ $Form.Close() })
-##      Make the mouse act like something is happening
+## Make the mouse act like something is happening
 $btnExit.add_MouseEnter({ & $monochrome_shading })
-##      Switch back to regular mouse
+## Switch back to regular mouse
 $btnExit.add_MouseLeave({ & $color_shading })
-##      Initialize form
+## Initialize form
 for ($i = 0; $i -lt $txtblks.Count; $i++){
 	$tb = $txtblks[$i]
 	$lb = $labels[$i]
@@ -130,11 +133,15 @@ for ($i = 0; $i -lt $txtblks.Count; $i++){
 		$_.HorizontalAlignment = [System.Windows.HorizontalAlignment]::Left
 	}
 }
-
+## Initially display Form in color
 & $color_shading 
 ## Shows the form
 [void]$Form.ShowDialog()
+})
+
+$psCmd.Runspace = $newRunspace
+[void]$psCmd.BeginInvoke()
 
 }
- 
+
 Get-WindowsProduct
