@@ -21,7 +21,7 @@ $so = [hashtable]::Synchronized(@{
 	'Window'  = [System.Windows.Window] $null ;
 	'TextBox' = [System.Windows.Controls.TextBox] $null ;
 	})
-$so.Result = 'none'
+$so.Result = ''
 $rs =[runspacefactory]::CreateRunspace()
 $rs.ApartmentState = 'STA'
 $rs.ThreadOptions = 'ReuseThread'
@@ -68,37 +68,43 @@ $target.ShowDialog() | out-null
 })
 
 function send_text { 
-    # NOTE - host-specific method signature:
-	# 
     Param (
         $content,
         [switch] $append
     )
-	# WARNING - do not do the following line to escape
-	# Exception calling "FindName" with "1" argument(s): 
+	# WARNING - uncommenting the following line leads to exception  
 	# "The calling thread cannot access this object because a different thread owns it."
 	# $so.Textbox = $so.Window.FindName("textbox")
-    $so.Textbox.Dispatcher.invoke([action]{
+
+    # NOTE - host-specific method signature:
+    $so.Textbox.Dispatcher.invoke([System.Action]{
        
-        If ($PSBoundParameters['append_content']) {
+        if ($PSBoundParameters['append_content']) {
             $so.TextBox.AppendText($content)
-        } Else {
+        } else {
             $so.TextBox.Text = $content
         }
 		$so.Result = $so.TextBox.Text 
-    },
-    'Normal')
+    }, 'Normal')
 }
-# TODO - synchronize
+
+function close_dialog { 
+    $so.Window.Dispatcher.invoke([action]{
+       $so.Window.Close()
+    }, 'Normal')
+}
 
 $run_script.Runspace = $rs
 Clear-Host
 
 $data = $run_script.BeginInvoke()
+
+# TODO - synchronize properly
+
 start-sleep 1
 write-host $so.Result
 send_text -Content 'The qick red focks jumped over the lasy brown dog.'
-$cnt = 100
+$cnt = 10
 [bool] $done = $false
 while (($cnt  -ne 0 ) -and -not $done) {
   write-output ('Text: {0} ' -f $so.Result )
@@ -106,10 +112,12 @@ while (($cnt  -ne 0 ) -and -not $done) {
     $done = $true;
   } 
   else {
-    start-sleep 1
+    start-sleep 10
   }   
   $cnt --
 }
+close_dialog
+
 if ( -not $done ){
     write-output 'Time is up!'
 } else { 
