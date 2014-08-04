@@ -63,7 +63,6 @@ $so.TextBox = $control
 $event = $control.Add_TextChanged
 $event.Invoke( $handler )
 
-$eventMethod.Invoke($handler)
 $target.ShowDialog() | out-null 
 })
 
