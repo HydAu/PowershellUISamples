@@ -15,6 +15,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #requires -version 2
+Add-Type -AssemblyName PresentationFramework
 
 $so = [hashtable]::Synchronized(@{ 
         'Result'  = [string] '';
@@ -47,13 +48,11 @@ Add-Type -AssemblyName PresentationFramework
               <Label FontWeight="Bold" Background="Blue" Foreground="White">
                 The CheckBox
               </Label>
+              <StackPanel Orientation="Horizontal">
+                <Image Name="wait_clock" Visibility="Collapsed" Width="10" Margin="2" Source="C:\developer\sergueik\powershell_ui_samples\loading_data.png"/>
               <TextBlock Padding="10" TextWrapping="WrapWithOverflow" Width="200" Name="tooltip_textbox">
                 please wait...
               </TextBlock>
-              <Line Stroke="Black" StrokeThickness="1" X2="200"/>
-              <StackPanel Orientation="Horizontal">
-                <Image Width="10" Margin="2" Source="C:\developer\sergueik\powershell_ui_samples\loading_data.png"/>
-                <Label FontWeight="Bold">Press F1 for more help.</Label>
               </StackPanel>
             </StackPanel>
            </ToolTip>
@@ -67,6 +66,7 @@ $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
 $so.Window  = $target
 $control = $target.FindName("tooltip")
+$so.Indicator = $target.FindName("wait_clock")
 $contents = $target.FindName("tooltip_textbox")
 $so.Control = $control 
 $so.Contents = $contents
@@ -74,7 +74,9 @@ $handler_opened = {
   param ( 
     [Object]  $sender, 
     [System.Windows.RoutedEventArgs] $eventargs  
-	)
+    )
+        $so.Contents.Text = 'please wait...'
+        $so.Indicator.Visibility = 'Visible'
 	$so.NeedData  = $true
         $so.Result = ''
 }
@@ -89,6 +91,7 @@ $handler_closed = {
 
 [System.Management.Automation.PSMethod] $event_opened = $control.Add_Opened
 [System.Management.Automation.PSMethod] $event_closed = $control.Add_Closed
+
 $event_opened.Invoke( $handler_opened )
 $event_closed.Invoke( $handler_closed)
 $target.ShowDialog() | out-null 
@@ -101,6 +104,9 @@ function send_text {
     )
 
     # NOTE - host-specific method signature:
+    $so.Indicator.Dispatcher.invoke([System.Action]{
+        $so.Indicator.Visibility = 'Collapsed'
+    }, 'Normal')
     $so.Contents.Dispatcher.invoke([System.Action]{
        
         if ($PSBoundParameters['append_content']) {
@@ -110,6 +116,7 @@ function send_text {
         }
 	$so.Result = $so.Contents.Text
     }, 'Normal')
+
 }
 
 
@@ -121,6 +128,7 @@ While (-Not $handle.IsCompleted) {
     Start-Sleep -Milliseconds 100
     if ($so.NeedData -and -not $so.HaveData){ 
       write-output ('Need to provide data' )
+      Start-Sleep -Milliseconds 10
       send_text -Content (Date)
       write-output ('Sent {0}' -f $so.Result )
       $so.HaveData = $true
