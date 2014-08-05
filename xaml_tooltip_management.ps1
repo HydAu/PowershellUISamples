@@ -16,9 +16,28 @@
 #THE SOFTWARE.
 #requires -version 2
 Add-Type -AssemblyName PresentationFramework
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
+}
 
 $so = [hashtable]::Synchronized(@{ 
         'Result'  = [string] '';
+        'ScriptDirectory'  = [string] '';
+
 	'Window'  = [System.Windows.Window] $null ;
 	'Control' = [System.Windows.Controls.ToolTip] $null ;
 	'Contents' = [System.Windows.Controls.TextBox] $null ;
@@ -26,6 +45,8 @@ $so = [hashtable]::Synchronized(@{
 	'HaveData' = [bool] $false ;
 
 	})
+$so.ScriptDirectory = Get-ScriptDirectory
+
 $so.Result = ''
 $rs =[runspacefactory]::CreateRunspace()
 $rs.ApartmentState = 'STA'
@@ -38,26 +59,27 @@ Add-Type -AssemblyName PresentationFramework
 [xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
   Title="About WPF" 
-  Background="Gray" Width="240" Height="100">
+  Background="LightGray" Height="190" Width="168">
         <Canvas>
-        <CheckBox>
-          CheckBox
-          <CheckBox.ToolTip>
+
+        <Image Opacity=".7" Source="$('{0}\{1}' -f $so.ScriptDirectory, 'clock.jpg' )" 
+               Width="150">
+          <Image.ToolTip>
             <ToolTip Name="tooltip">
             <StackPanel>
               <Label FontWeight="Bold" Background="Blue" Foreground="White">
                 The CheckBox
               </Label>
               <StackPanel Orientation="Horizontal">
-                <Image Name="wait_clock" Visibility="Collapsed" Width="10" Margin="2" Source="C:\developer\sergueik\powershell_ui_samples\loading_data.png"/>
+                <Image Name="hourglass" Visibility="Collapsed" Width="20" Margin="2" Source="$('{0}\{1}' -f $so.ScriptDirectory, 'hourglass.jpg' )"/>
               <TextBlock Padding="10" TextWrapping="WrapWithOverflow" Width="200" Name="tooltip_textbox">
                 please wait...
               </TextBlock>
               </StackPanel>
             </StackPanel>
            </ToolTip>
-          </CheckBox.ToolTip>
-        </CheckBox>
+          </Image.ToolTip>
+        </Image>
         </Canvas>
 </Window>
 "@
@@ -66,7 +88,7 @@ $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
 $so.Window  = $target
 $control = $target.FindName("tooltip")
-$so.Indicator = $target.FindName("wait_clock")
+$so.Indicator = $target.FindName("hourglass")
 $contents = $target.FindName("tooltip_textbox")
 $so.Control = $control 
 $so.Contents = $contents
