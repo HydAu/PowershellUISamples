@@ -100,7 +100,7 @@ Clear-Host
 $data = $run_script.BeginInvoke()
 
 # TODO - synchronize properly
-
+# http://stackoverflow.com/questions/10330446/how-to-know-when-a-control-or-window-has-been-rendered-drawn-in-wpf
 start-sleep 1
 write-host $so.Result
 send_text -Content 'The qick red focks jumped over the lasy brown dog.'
