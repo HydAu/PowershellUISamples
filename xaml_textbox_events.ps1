@@ -15,6 +15,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #requires -version 2
+Add-Type -AssemblyName PresentationFramework
 
 $so = [hashtable]::Synchronized(@{ 
     'Result'  = '';
