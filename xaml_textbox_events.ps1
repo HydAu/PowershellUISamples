@@ -15,6 +15,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 #requires -version 2
+Add-Type -AssemblyName PresentationFramework
 
 $so = [hashtable]::Synchronized(@{ 
     'Result'  = '';
@@ -63,7 +64,6 @@ $so.TextBox = $control
 $event = $control.Add_TextChanged
 $event.Invoke( $handler )
 
-$eventMethod.Invoke($handler)
 $target.ShowDialog() | out-null 
 })
 
