@@ -55,20 +55,17 @@ $rs.ThreadOptions = 'ReuseThread'
 $rs.Open()
 $rs.SessionStateProxy.SetVariable('so', $so)          
 
- # uncomment the below at final stage
- $run_script = [PowerShell]::Create().AddScript({    
+$run_script = [PowerShell]::Create().AddScript({    
 
-# Load Assemblies
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 
-# Create new Objects
 $objForm = New-Object System.Windows.Forms.Form
 $objNotifyIcon = New-Object System.Windows.Forms.NotifyIcon
 $objContextMenu = New-Object System.Windows.Forms.ContextMenu
 $ExitMenuItem = New-Object System.Windows.Forms.MenuItem
 $AddContentMenuItem = New-Object System.Windows.Forms.MenuItem
 
-$ConfigFile = "NotifyApp.config"
+$ConfigFile = ('{0}\{1}' -f $so.ScriptDirectory, 'NotifyApp.config' )
 
 function Read-Config
 {
@@ -77,22 +74,21 @@ If(Test-Path $ConfigFile)
 {
 $ConfigData = Get-Content $ConfigFile
 $i = 0
-Foreach($line in $ConfigData)
+foreach($line in $ConfigData)
 {
-If($line.Length -gt 0)
-{
-$line = $line.Split(",")
-$Name = $line[0]
-$FilePath = $line[1]
-# Add object from the Config file to the Context Menu with the Build-ContextMenu Function
-$objContextMenu | Build-ContextMenu -index $i -text $Name -Action $FilePath
-$i++
-}
+  if($line.Length -gt 0){
+    $line = $line.Split(",")
+    $Name = $line[0]
+    $FilePath = $line[1]
+    # Add object from the Config file to the Context Menu with the Build-ContextMenu Function
+    $objContextMenu | Build-ContextMenu -index $i -text $Name -Action $FilePath
+    $i++
+  }
 }
 }
 else
 {
-Add-ConfigContent
+# Add-ConfigContent
 }
 
 # Create the Add Config content Menu Item
@@ -149,6 +145,7 @@ $ContextMenu.MenuItems.Add($MyMenuItem) | Out-Null
 
 Function Add-ConfigContent
 {
+<#
 $objOpen = New-Object System.Windows.Forms.OpenFileDialog
 $objOpen.Title = "Choose files to add"
 $objOpen.Multiselect = $true
@@ -159,7 +156,7 @@ foreach($File in $addFiles)
 {
 $FileName = (Split-Path $file -Leaf).Split(".")[0]
 "$FileName,"+[char]34+$File+[char]34 | out-File -FilePath $ConfigFile -Append
-}
+}#>
 Read-Config
 }
 
@@ -178,23 +175,24 @@ $objForm.Visible = $false
 $objForm.WindowState = "minimized"
 $objForm.ShowInTaskbar = $false
 $objForm.add_Closing({ $objForm.ShowInTaskBar = $False })
-# Show the Form - Keep it open
-# This Line must be Last
+$objContextMenu.Add_Popup({Read-Config})
 $objForm.ShowDialog()
- # uncomment the below at final stage
-
 })
 
 $run_script.Runspace = $rs
  Clear-Host
-
+$cnt = 0
 $handle = $run_script.BeginInvoke()
 write-output 'started...'
-While (-Not $handle.IsCompleted) {
-write-output 'continue...'
-    Start-Sleep -Milliseconds 100
+$ConfigFile = ('{0}\{1}' -f $so.ScriptDirectory, 'NotifyApp.config' )
+Set-Content -path $ConfigFile -value ''
+While (-Not $handle.IsCompleted -and $cnt -lt 4) {
+write-output ("Finished {0} item ..."  -f $cnt ) 
+write-output ("Finished {0} item ..." -f $cnt ) | out-file -FilePath $ConfigFile -Append -encoding ascii
+    Start-Sleep -Milliseconds 10000
+$cnt ++
 }
-$run_script.EndInvoke($handle)
+$run_script.EndInvoke($handle) | out-null
 
 $rs.Close()
 
