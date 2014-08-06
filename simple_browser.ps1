@@ -120,7 +120,7 @@ $components = new-object System.ComponentModel.Container
         $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
         $f.ClientSize = new-object System.Drawing.Size(600, 600)
         $f.Controls.Add($browser)
-        $f.Text = "Login to octoput"
+        $f.Text = "Login to octopus"
         $f.ResumeLayout($false)
 
 

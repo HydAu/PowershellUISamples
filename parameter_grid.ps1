@@ -80,7 +80,7 @@ function Edit_Parameters {
   $grid.Columns[1].Name = 'Value'
 
   $parameters.Keys | foreach-object {
-            $row1 = @( $_,  $parameters[$_])
+            $row1 = @( $_,  $parameters[$_].ToString())
             $grid.Rows.Add($row1)
   }
 
@@ -112,7 +112,7 @@ function Edit_Parameters {
       }
     }
       # TODO: return $caller.HashData
-      # write-host ( '{0} = {1}' -f $row.cells[0].Value, $row.cells[1].Value)
+      # write-host ( '{0} = {1}' -f $row.cells[0].Value, $row.cells[1].Value.ToString())
 
     $f.Close()
 
