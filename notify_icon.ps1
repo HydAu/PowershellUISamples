@@ -1,5 +1,3 @@
-# https://sites.google.com/site/assafmiron/MiscScripts/exchangebackupsummery2
-
 #Copyright (c) 2014 Serguei Kouzmine
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -16,10 +14,12 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
+
+# https://sites.google.com/site/assafmiron/MiscScripts/exchangebackupsummery2
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 #requires -version 2
 Add-Type -AssemblyName PresentationFramework
 
-# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
     $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
@@ -39,10 +39,17 @@ function Get-ScriptDirectory
 
 $so = [hashtable]::Synchronized(@{ 
         'Result'  = [string] '';
+        'ConfigFile'  = [string] '';
         'ScriptDirectory'  = [string] '';
-	'Window'  = [System.Windows.Window] $null ;
-	'Control' = [System.Windows.Controls.ToolTip] $null ;
-	'Contents' = [System.Windows.Controls.TextBox] $null ;
+	'Form'  = [System.Windows.Forms.Form] $null ;
+	'NotifyIcon' = [System.Windows.Controls.ToolTip] $null ;
+
+        # http://msdn.microsoft.com/en-us/library/system.windows.forms.contextmenu(v=vs.110).aspx
+# OnPopup System.EventArgs
+# OnCollapse System.EventArgs
+# Show System.Windows.Forms.Control System.Drawing.Point
+# MergeMenu System.Windows.Forms.MenuItem
+	'ContextMenu' = [System.Windows.Forms.ContextMenu] $null ;
 	'NeedData' = [bool] $false ;
 	'HaveData' = [bool] $false ;
 
@@ -57,56 +64,46 @@ $rs.SessionStateProxy.SetVariable('so', $so)
 
 $run_script = [PowerShell]::Create().AddScript({    
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 
-$objForm = New-Object System.Windows.Forms.Form
-$objNotifyIcon = New-Object System.Windows.Forms.NotifyIcon
-$objContextMenu = New-Object System.Windows.Forms.ContextMenu
-$ExitMenuItem = New-Object System.Windows.Forms.MenuItem
+$f = New-Object System.Windows.Forms.Form
+$so.Form  = $f
+$notify_icon = New-Object System.Windows.Forms.NotifyIcon
+$so.NotifyIcon = $notify_icon
+$context_menu = New-Object System.Windows.Forms.ContextMenu
+$exit_menu_item = New-Object System.Windows.Forms.MenuItem
 $AddContentMenuItem = New-Object System.Windows.Forms.MenuItem
 
-$ConfigFile = ('{0}\{1}' -f $so.ScriptDirectory, 'NotifyApp.config' )
+$build_log = ('{0}\{1}' -f $so.ScriptDirectory, 'build.log' )
 
-function Read-Config
-{
-$objContextMenu.MenuItems.Clear()
-If(Test-Path $ConfigFile)
-{
-$ConfigData = Get-Content $ConfigFile
-$i = 0
-foreach($line in $ConfigData)
-{
-  if($line.Length -gt 0){
-    $line = $line.Split(",")
-    $Name = $line[0]
-    $FilePath = $line[1]
-    # Add object from the Config file to the Context Menu with the Build-ContextMenu Function
-    $objContextMenu | Build-ContextMenu -index $i -text $Name -Action $FilePath
-    $i++
+function Read-Config {
+  $context_menu.MenuItems.Clear()
+  if(Test-Path $build_log){
+    $ConfigData = Get-Content $build_log
+    $i = 0
+    foreach($line in $ConfigData){
+      if($line.Length -gt 0){
+        $line = $line.Split(",")
+        $Name = $line[0]
+        $FilePath = $line[1]
+        # Powershell style function invocation syntax 
+        $context_menu | Build-ContextMenu -index $i -text $Name -Action $FilePath
+        $i++
+      }
+    }
   }
-}
-}
-else
-{
-# Add-ConfigContent
-}
 
-# Create the Add Config content Menu Item
-$AddContentMenuItem.index = $i+1
-$AddContentMenuItem.Text = "Add Shurtcuts"
-$AddContentMenuItem.add_Click( {Add-ConfigContent} )
 
 # Create an Exit Menu Item
-$ExitMenuItem.Index = $i+2
-$ExitMenuItem.Text = "E&xit"
-$ExitMenuItem.add_Click({
-$objForm.Close()
-$objNotifyIcon.visible = $false
+$exit_menu_item.Index = $i+1
+$exit_menu_item.Text = 'E&xit'
+$exit_menu_item.add_Click({
+$f.Close()
+$notify_icon.visible = $false
 })
 
-# Add the Exit and Add Content Menu Items to the Context Menu
-$objContextMenu.MenuItems.Add($AddContentMenuItem) | Out-Null
-$objContextMenu.MenuItems.Add($ExitMenuItem) | Out-Null
+# Add the Exit Menu Item to the Context Menu
+$context_menu.MenuItems.Add($exit_menu_item) | Out-Null
 }
 
 function new-scriptblock([string]$textofscriptblock)
@@ -115,16 +112,16 @@ function new-scriptblock([string]$textofscriptblock)
 $executioncontext.InvokeCommand.NewScriptBlock($textofscriptblock)
 }
 
-Function Build-ContextMenu
-# Function That Creates a ContexMenuItem and adds it to the Contex Menu
-{
-param ( $index = 0,
-$Text,
-$Action
-)
+# construct objects from the build log file and fill the context Menu
+function Build-ContextMenu {
+  param ( 
+        [int]$index = 0,
+        [string]$Text,
+        [string] $Action
+  )
 begin
 {
-$MyMenuItem = New-Object System.Windows.Forms.MenuItem
+$menu_item = New-Object System.Windows.Forms.MenuItem
 }
 process
 {
@@ -133,68 +130,73 @@ $ContextMenu = $_
 }
 end
 {
-# Create the Menu Item
-$MyMenuItem.Index = $index
-$MyMenuItem.Text = $Text
+# Create the Menu Item$menu_item.Index = $index
+$menu_item.Text = $Text
 $scriptAction = $(new-scriptblock "Invoke-Item $Action")
-$MyMenuItem.add_Click($scriptAction)
-$ContextMenu.MenuItems.Add($MyMenuItem) | Out-Null
+$menu_item.add_Click($scriptAction)
+$ContextMenu.MenuItems.Add($menu_item) | Out-Null
 }
 }
 # http://bytecookie.wordpress.com/2011/12/28/gui-creation-with-powershell-part-2-the-notify-icon-or-how-to-make-your-own-hdd-health-monitor/
 
-Function Add-ConfigContent
-{
-<#
-$objOpen = New-Object System.Windows.Forms.OpenFileDialog
-$objOpen.Title = "Choose files to add"
-$objOpen.Multiselect = $true
-$objOpen.RestoreDirectory = $true
-$objOpen.ShowDialog()
-$addFiles = $objOpen.FileNames
-foreach($File in $addFiles)
-{
-$FileName = (Split-Path $file -Leaf).Split(".")[0]
-"$FileName,"+[char]34+$File+[char]34 | out-File -FilePath $ConfigFile -Append
-}#>
-Read-Config
-}
-
-Read-Config
-
-# Assign an Icon to the Notify Icon object
-$objNotifyIcon.Icon = ('{0}\{1}' -f $so.ScriptDirectory, 'sample.ico' )
-$objNotifyIcon.Text = "Context Menu Test"
+$notify_icon.Icon = ('{0}\{1}' -f $so.ScriptDirectory, 'sample.ico' )
+# 
+$notify_icon.Text = 'Context Menu Test'
 # Assign the Context Menu
-$objNotifyIcon.ContextMenu = $objContextMenu
-$objForm.ContextMenu = $objContextMenu
+$notify_icon.ContextMenu = $context_menu
+$f.ContextMenu = $context_menu
 
 # Control Visibilaty and state of things
-$objNotifyIcon.Visible = $true
-$objForm.Visible = $false
-$objForm.WindowState = "minimized"
-$objForm.ShowInTaskbar = $false
-$objForm.add_Closing({ $objForm.ShowInTaskBar = $False })
-$objContextMenu.Add_Popup({Read-Config})
-$objForm.ShowDialog()
+$notify_icon.Visible = $true
+$f.Visible = $false
+$f.WindowState = 'minimized'
+$f.ShowInTaskbar = $false
+$f.add_Closing({ $f.ShowInTaskBar = $False })
+$context_menu.Add_Popup({Read-Config})
+$f.ShowDialog()
 })
 
-$run_script.Runspace = $rs
- Clear-Host
-$cnt = 0
-$handle = $run_script.BeginInvoke()
-write-output 'started...'
-$ConfigFile = ('{0}\{1}' -f $so.ScriptDirectory, 'NotifyApp.config' )
-Set-Content -path $ConfigFile -value ''
-While (-Not $handle.IsCompleted -and $cnt -lt 4) {
-write-output ("Finished {0} item ..."  -f $cnt ) 
-write-output ("Finished {0} item ..." -f $cnt ) | out-file -FilePath $ConfigFile -Append -encoding ascii
-    Start-Sleep -Milliseconds 10000
-$cnt ++
+function send_text { 
+    Param (
+        [String] $title = 'script',
+        [String] $message,
+        [int]    $timeout = 10 ,
+        [switch] $append
+    )
+
+    $so.NotifyIcon.ShowBalloonTip($timeout, $title , $message, [System.Windows.Forms.ToolTipIcon]::Info)
+    write-output  -InputObject  ( '{0}:{1}' -f $title,  $message)
 }
-$run_script.EndInvoke($handle) | out-null
+
+
+
+# -- main program -- 
+clear-host
+$run_script.Runspace = $rs
+
+$cnt = 0
+$total = 4
+$handle = $run_script.BeginInvoke()
+
+start-sleep 1
+
+send_text -title 'script' -message 'Starting...' -timeout 10 
+$so.ConfigFile = $build_log = ('{0}\{1}' -f $so.ScriptDirectory, 'build.log' )
+set-Content -path $build_log -value ''
+
+While (-Not $handle.IsCompleted -and $cnt -lt $total) {
+  start-sleep -Milliseconds 10000
+  $cnt ++
+  send_text -title 'script' -message ("Finished {0} of {1} items..."  -f $cnt, $total  )  -timeout 10 
+  write-output ("Subtask {0} ..." -f $cnt ) | out-file -FilePath $build_log -Append -encoding ascii
+}
+
+# TODO - collapse, close,  displose 
+$so.Form.Close()
+
+$run_script.EndInvoke($handle) | out-null 
+
 
 $rs.Close()
-
-
+write-output 'All finished' 
 
