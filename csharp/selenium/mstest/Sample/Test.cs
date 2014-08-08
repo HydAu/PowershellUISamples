@@ -47,6 +47,7 @@ namespace SeleniumTests
         {
          // DesiredCapabilities capability = DesiredCapabilities.Firefox();
          // TODO:
+         // error CS0117: 'OpenQA.Selenium.Remote.DesiredCapabilities' dos not contain a definition for 'PhantomJSDriver' [C:\developer\sergueik\powers
          // DesiredCapabilities capability = DesiredCapabilities.PhantomJSDriver();
          // driver = new RemoteWebDriver(new Uri("http://127.0.0.1:4444/wd/hub"), capability );
 
