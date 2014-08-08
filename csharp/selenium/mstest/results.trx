@@ -1,20 +1,20 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<TestRun id="2bfc6eda-d0aa-4769-9a44-40eb4d0cf68e" name="sergueik@SERGUEIK42 2014-08-08 15:20:18" runUser="sergueik42\sergueik" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <TestSettings name="Default Test Settings" id="347c0cf1-4b0c-46fb-88fe-c3b386813ee0">
-    <Deployment userDeploymentRoot="C:\developer\sergueik\powershell_ui_samples\csharp\selenium\mstest" useDefaultDeploymentRoot="false" runDeploymentRoot="sergueik_SERGUEIK42 2014-08-08 15_20_18" />
+<TestRun id="9427ed66-8849-433d-9138-9318a2be2265" name="sergueik@SERGUEIK42 2014-08-08 18:59:50" runUser="sergueik42\sergueik" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <TestSettings name="Default Test Settings" id="7a8e06f4-a8cd-4df0-840f-9008eaac665a">
+    <Deployment userDeploymentRoot="C:\developer\sergueik\powershell_ui_samples\csharp\selenium\mstest" useDefaultDeploymentRoot="false" runDeploymentRoot="sergueik_SERGUEIK42 2014-08-08 18_59_50" />
     <Execution>
       <TestTypeSpecific />
       <AgentRule name="Execution Agents">
       </AgentRule>
     </Execution>
   </TestSettings>
-  <Times creation="2014-08-08T15:20:18.8751497-04:00" queuing="2014-08-08T15:20:19.1189273-04:00" start="2014-08-08T15:20:19.1640713-04:00" finish="2014-08-08T15:20:31.4733353-04:00" />
+  <Times creation="2014-08-08T18:59:50.7257395-04:00" queuing="2014-08-08T18:59:51.1932307-04:00" start="2014-08-08T18:59:51.2554291-04:00" finish="2014-08-08T19:00:00.1197043-04:00" />
   <ResultSummary outcome="Completed">
     <Counters total="1" executed="1" passed="1" error="0" failed="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
   </ResultSummary>
   <TestDefinitions>
     <UnitTest name="Test_1" storage="sample\bin\debug\sample.dll" id="622f180d-db9d-c94f-886a-190becfed416">
-      <Execution id="425ba262-ed1b-4ea1-8cab-1c050f00df18" />
+      <Execution id="5642a7b8-cb6c-460b-a6dd-2cade0c749dd" />
       <TestMethod codeBase="C:/developer/sergueik/powershell_ui_samples/csharp/selenium/mstest/Sample/bin/Debug/Sample.DLL" adapterTypeName="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestAdapter, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.Adapter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" className="SeleniumTests.SeleniumTest, Sample, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" name="Test_1" />
     </UnitTest>
   </TestDefinitions>
@@ -23,10 +23,10 @@
     <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
   </TestLists>
   <TestEntries>
-    <TestEntry testId="622f180d-db9d-c94f-886a-190becfed416" executionId="425ba262-ed1b-4ea1-8cab-1c050f00df18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="622f180d-db9d-c94f-886a-190becfed416" executionId="5642a7b8-cb6c-460b-a6dd-2cade0c749dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
   </TestEntries>
   <Results>
-    <UnitTestResult executionId="425ba262-ed1b-4ea1-8cab-1c050f00df18" testId="622f180d-db9d-c94f-886a-190becfed416" testName="Test_1" computerName="SERGUEIK42" duration="00:00:09.4857863" startTime="2014-08-08T15:20:19.1630681-04:00" endTime="2014-08-08T15:20:28.8389321-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="425ba262-ed1b-4ea1-8cab-1c050f00df18">
+    <UnitTestResult executionId="5642a7b8-cb6c-460b-a6dd-2cade0c749dd" testId="622f180d-db9d-c94f-886a-190becfed416" testName="Test_1" computerName="SERGUEIK42" duration="00:00:08.2779540" startTime="2014-08-08T18:59:51.2554291-04:00" endTime="2014-08-08T18:59:59.8036963-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5642a7b8-cb6c-460b-a6dd-2cade0c749dd">
     </UnitTestResult>
   </Results>
 </TestRun>

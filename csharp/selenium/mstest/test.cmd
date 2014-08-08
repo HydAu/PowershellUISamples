@@ -1,5 +1,6 @@
 PATH=%PATH%;c:\Windows\Microsoft.NET\Framework\v4.0.30319
 PATH=%PATH%;c:\Program Files\Microsoft Visual Studio 10.0\Common7\IDE
+PATH=%PATH%;C:\tools\phantomjs
 FOR /F "TOKENS=*" %%. in ('dir /b/ad "%USERNAME%_%COMPUTERNAME%*"') DO @echo %%. & start cmd /c rd /s/q "%%."
 msbuild.exe mstest.sln /t:clean,build
 del /q %CD%\results.trx

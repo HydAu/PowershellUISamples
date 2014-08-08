@@ -12,6 +12,7 @@ using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using OpenQA.Selenium.IE;
+using OpenQA.Selenium.PhantomJS;
 
 // TODO : App.config 
 namespace SeleniumTests
@@ -23,7 +24,7 @@ namespace SeleniumTests
     {
 
 	private static IWebDriver driver;
-	private static StringBuilder verificationErrors;
+	private static StringBuilder verificationErrors = new StringBuilder();
         private string baseURL;
         private bool acceptNextAlert = true;
 
@@ -44,10 +45,14 @@ namespace SeleniumTests
         [TestInitialize()]
         public void MyTestInitialize()
         {
-          DesiredCapabilities capability = DesiredCapabilities.Firefox();
-          // driver = new RemoteWebDriver(
-          // new Uri("http://172.26.4.45:4444/hub/"), capability );
-            driver = new FirefoxDriver();
+         // DesiredCapabilities capability = DesiredCapabilities.Firefox();
+         // TODO:
+         // DesiredCapabilities capability = DesiredCapabilities.PhantomJSDriver();
+         // driver = new RemoteWebDriver(new Uri("http://127.0.0.1:4444/wd/hub"), capability );
+
+         driver = new PhantomJSDriver();
+         Assert.IsNotNull(driver );
+
          driver.Url =  baseURL = "http://www.wikipedia.org";
          driver.Manage().Timeouts().ImplicitlyWait( TimeSpan.FromSeconds(10 )) ;
          verificationErrors = new StringBuilder();
