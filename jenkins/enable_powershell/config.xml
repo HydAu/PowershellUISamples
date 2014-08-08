@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <actions/>
+  <description>Changing PowerShell Script execution Policy to enabled.&#13;
+
+	Enabling Remoting&#13;
+
+	&#13;
+
+	</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.jvnet.jenkins.plugins.nodelabelparameter.NodeParameterDefinition plugin="nodelabelparameter@1.5.1">
+          <name>Select the node to run the script</name>
+          <description>Enable PowerShell Scripting and Remoting </description>
+          <allowedSlaves>
+            <string>ALL (no restriction)</string>
+          </allowedSlaves>
+          <defaultSlaves>
+            <string>master</string>
+          </defaultSlaves>
+          <triggerIfResult>multiSelectionDisallowed</triggerIfResult>
+          <allowMultiNodeSelection>false</allowMultiNodeSelection>
+          <triggerConcurrentBuilds>false</triggerConcurrentBuilds>
+          <ignoreOfflineNodes>false</ignoreOfflineNodes>
+          <nodeEligibility class="org.jvnet.jenkins.plugins.nodelabelparameter.node.AllNodeEligibility"/>
+        </org.jvnet.jenkins.plugins.nodelabelparameter.NodeParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@echo OFF
+
+	echo Updating environment on %COMPUTERNAME%
+
+	
+
+	
+
+	set TARGET_EXECUTIONPOLICY=Unrestricted
+
+	echo Changing PowerShell Script execution Policy
+
+	
+
+	call C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% "&amp;{Param([string] $targetExecutionPolicy) Set-ExecutionPolicy $TargetExecutionPolicy; write-output (get-ExecutionPolicy -list )}" -targetExecutionPolicy %TARGET_EXECUTIONPOLICY%
+
+	
+
+	if ERRORLEVEL 1 echo "Insufficient rights of the service" &amp;&amp; exit /b 1
+
+	
+
+	echo Enabling Powershell Remoting
+
+	call C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% "&amp;{Enable-PSRemoting -Force } "
+
+	
+
+	if ERRORLEVEL 1 echo "Insufficient rights of the service" &amp;&amp; exit /b 1
+
+	
+
+	REM generate and run a test script
+
+	set external_script=test.ps1
+
+	if not exist %external_script% goto :EOF
+
+	powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% -f %external_script%
+
+	
+
+	
+
+	</command>
+    </hudson.tasks.BatchFile>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.2">
+      <command>write-output 'POWERSHELL IS ENABLED'</command>
+    </hudson.plugins.powershell.PowerShell>
+    <hudson.tasks.BatchFile>
+      <command>@echo OFF
+
+	echo computer=%computername%
+
+	
+
+	set TARGET_EXECUTIONPOLICY=Unrestricted
+
+	echo Changing PowerShell Script execution Policy
+
+	
+
+	call C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% "&amp;{Param([string] $targetExecutionPolicy) Set-ExecutionPolicy $TargetExecutionPolicy; write-output (get-ExecutionPolicy -list )}" -targetExecutionPolicy %TARGET_EXECUTIONPOLICY%
+
+	if ERRORLEVEL 1 echo "Insufficient Privileges" &amp;&amp; exit /b 1
+
+	echo Enabling Powershell Remoting
+
+	call C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% "&amp;{Enable-PSRemoting -Force } "
+
+	REM generate and run a test script
+
+	set external_script=test.ps1
+
+	echo write-output 'POWERSHELL IS ENABLED' &gt; %external_script%
+
+	if not exist %external_script% goto :EOF
+
+	powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% -f %external_script%
+
+	</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
