@@ -1,6 +1,45 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 Param (
         [switch] $browser
 )
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
+}
 
 # http://poshcode.org/1942
 function Assert {
@@ -47,9 +86,13 @@ $shared_assemblies =  @(
     'ThoughtWorks.Selenium.IntegrationTests.dll',
     'Moq.dll'
 )
+$env:SHARED_ASSEMBLIES_PATH =  'c:\developer\sergueik\csharp\SharedAssemblies'
+$env:SCREENSHOT_PATH =  'C:\developer\sergueik\powershell_ui_samples' 
 
-$shared_assemblies_folder = 'c:\developer\sergueik\csharp\SharedAssemblies'
-pushd $shared_assemblies_folder
+
+$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+$screenshot_path = $env:SCREENSHOT_PATH
+pushd $shared_assemblies_path
 $shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
 popd
 
@@ -64,7 +107,7 @@ if ($PSBoundParameters['browser']) {
   # port probe omitted
   # also for grid testing 
 
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
   $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
   $driver = new-object OpenQA.Selenium.Remote.RemoteWebDriver($uri , $capability)
 } else {
@@ -91,12 +134,14 @@ $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
 $driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
 $title =  $driver.Title
+
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1 ) } -message $title 
 
-# Take screenshot
+# Take screenshot identifying the browser
+$driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 [OpenQA.Selenium.Screenshot]$screenshot = $driver.GetScreenshot()
-$screenshot_folder_path = 'C:\developer\sergueik\powershell_ui_samples' 
-$screenshot.SaveAsFile(('{0}\{1}' -f $screenshot_folder_path, 'a.png' ), [System.Drawing.Imaging.ImageFormat]::Png)
+
+$screenshot.SaveAsFile(('{0}\{1}' -f $screenshot_path, 'a.png' ), [System.Drawing.Imaging.ImageFormat]::Png)
 
 # Cleanup
 try {
@@ -104,4 +149,3 @@ try {
 } catch [Exception] {
   # Ignore errors if unable to close the browser
 }
-
