@@ -79,7 +79,7 @@ if ($PSBoundParameters['browser']) {
   $options.AddAdditionalCapability("phantomjs.executable.path", $phantomjs_executable_folder);
 
 }  
-
+# http://selenium.googlecode.com/git/docs/api/dotnet/index.html
 [void]$driver.Manage().Timeouts().ImplicitlyWait( [System.TimeSpan]::FromSeconds(10 )) 
 [string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
 $driver.Navigate().GoToUrl(('{0}/' -f $baseURL ))
