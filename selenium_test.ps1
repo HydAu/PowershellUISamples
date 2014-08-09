@@ -4,45 +4,39 @@ Param (
 
 # http://poshcode.org/1942
 function Assert {
-    [CmdletBinding()]
-    param(
-       [Parameter(Position=0,ParameterSetName='Script', Mandatory=$true)]
-       [ScriptBlock]$Script,
-       [Parameter(Position=0,ParameterSetName='Condition', Mandatory=$true)]
-       [bool]$Condition,
-       [Parameter(Position=1,Mandatory=$true)]
-       [string]$message )
+  [CmdletBinding()]
+  param(
+   [Parameter(Position=0,ParameterSetName='Script', Mandatory=$true)]
+   [ScriptBlock]$Script,
+   [Parameter(Position=0,ParameterSetName='Condition', Mandatory=$true)]
+   [bool]$Condition,
+   [Parameter(Position=1,Mandatory=$true)]
+   [string]$message )
      
-       $message = "ASSERT FAILED: $message"
-       if($PSCmdlet.ParameterSetName -eq 'Script') {
-          try {
-             $ErrorActionPreference = 'STOP'
-             $success = &$Script
-          } catch {
-             $success = $false
-             $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
-          }
-       } 
-       if($PSCmdlet.ParameterSetName -eq 'Condition') {
-          try {
-             $ErrorActionPreference = 'STOP'
-             $success = $Condition
-          } catch {
-             $success = $false
-             $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
-          }
-       } 
-
-       if(!$success) {
-          throw $message
-       }
+  $message = "ASSERT FAILED: $message"
+  if($PSCmdlet.ParameterSetName -eq 'Script') {
+    try {
+      $ErrorActionPreference = 'STOP'
+      $success = &$Script
+    } catch {
+      $success = $false
+      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
     }
+  } 
+  if($PSCmdlet.ParameterSetName -eq 'Condition') {
+    try {
+      $ErrorActionPreference = 'STOP'
+      $success = $Condition
+    } catch {
+      $success = $false
+      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
+    }
+  } 
 
-<#
- # HRESULT: 0x80131515
- # http://stackoverflow.com/questions/18801440/powershell-load-dll-got-error-add-type-could-not-load-file-or-assembly-webdr
- # Streams v1.56 - Enumerate alternate NTFS data streams
- #>
+  if(!$success) {
+    throw $message
+  }
+}
 
 $shared_assemblies =  @(
     'WebDriver.dll',
@@ -59,11 +53,17 @@ pushd $shared_assemblies_folder
 $shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
 popd
 
-
 $phantomjs_executable_folder = 'C:\tools\phantomjs'
 
 if ($PSBoundParameters['browser']) {
-  # for grid testing 
+
+  $selemium_driver_folder = 'c:\java\selenium'
+  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
+  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
+  start-sleep 10
+  # port probe omitted
+  # also for grid testing 
+
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
   $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
   $driver = new-object OpenQA.Selenium.Remote.RemoteWebDriver($uri , $capability)
@@ -80,14 +80,10 @@ if ($PSBoundParameters['browser']) {
 
 }  
 
-# http://www.andykelk.net/tech/headless-browser-testing-with-phantomjs-selenium-webdriver-c-nunit-and-mono
-
 [void]$driver.Manage().Timeouts().ImplicitlyWait( [System.TimeSpan]::FromSeconds(10 )) 
-[string]$baseURL = $driver.Url ='http://www.wikipedia.org';
+[string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
 $driver.Navigate().GoToUrl(('{0}/' -f $baseURL ))
-[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox =  $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
-
-# write-output $queryBox.GetType() | format-table -autosize
+[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 
 $queryBox.Clear()
 $queryBox.SendKeys('Selenium')
@@ -95,13 +91,17 @@ $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
 $driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
 $title =  $driver.Title
-
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1 ) } -message $title 
 
+# Take screenshot
+[OpenQA.Selenium.Screenshot]$screenshot = $driver.GetScreenshot()
+$screenshot_folder_path = 'C:\developer\sergueik\powershell_ui_samples' 
+$screenshot.SaveAsFile(('{0}\{1}' -f $screenshot_folder_path, 'a.png' ), [System.Drawing.Imaging.ImageFormat]::Png)
+
+# Cleanup
 try {
   $driver.Quit()
 } catch [Exception] {
   # Ignore errors if unable to close the browser
 }
-# note:
-# https://sepsx.codeplex.com/
+
