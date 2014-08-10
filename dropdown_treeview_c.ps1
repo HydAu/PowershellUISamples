@@ -26,6 +26,7 @@ public class Win32Window : IWin32Window
     private IntPtr _hWnd;
     private int _data;
     private string _script_directory;
+    private string _message;
 
     public int Data
     {
@@ -36,6 +37,11 @@ public class Win32Window : IWin32Window
     {
         get { return _script_directory; }
         set { _script_directory = value; }
+    }
+    public string Message
+    {
+        get { return _message; }
+        set { _message = value; }
     }
 
     public Win32Window(IntPtr handle)
@@ -111,11 +117,10 @@ function PromptTreeView
     [Object] $sender, 
     [System.Windows.Forms.TreeViewEventArgs] $eventargs 
     )
-    if ($eventargs.Action -eq [System.Windows.Forms.TreeViewAction]::ByMouse)
-    {
-                [System.Windows.Forms.MessageBox]::Show($eventargs.Node.Text);
+    if ($eventargs.Action -eq [System.Windows.Forms.TreeViewAction]::ByMouse) {
+        # [System.Windows.Forms.MessageBox]::Show($eventargs.Node.Text);
+        $caller.Message += ('{0},' -f  $eventargs.Node.Text )
     }
-
   })
   $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
   $f.ClientSize = new-object System.Drawing.Size(292, 266)
@@ -128,43 +133,40 @@ function PromptTreeView
     [Object] $sender, 
     [System.EventArgs] $eventargs 
    )
-[System.Windows.Forms.TreeNode] $tn3 = new-object System.Windows.Forms.TreeNode("Node");
+[System.Windows.Forms.TreeNode] $tn1 = new-object System.Windows.Forms.TreeNode("Node");
 
-[DropDownTreeView.DropDownTreeNode] $dtn1 = new-object  DropDownTreeView.DropDownTreeNode("Credentials");
-$dtn1.ComboBox.Items.Add("LocalService");
-$dtn1.ComboBox.Items.Add("LocalSystem ");
-$dtn1.ComboBox.Items.Add("NetworkService");
+[DropDownTreeView.DropDownTreeNode]$dtn1 = new-object  DropDownTreeView.DropDownTreeNode("Credentials");
+$dtn1.ComboBox.Items.AddRange(@("LocalService","LocalSystem ", "NetworkService"));
 $dtn1.ComboBox.SelectedIndex = 0;
 
-[DropDownTreeView.DropDownTreeNode] $dtn2 = new-object DropDownTreeView.DropDownTreeNode ("Install");
+[DropDownTreeView.DropDownTreeNode]$dtn2 = new-object DropDownTreeView.DropDownTreeNode ("Install");
 $installs = @('Typical', 'Compact', 'Custom');
 $dtn2.ComboBox.Items.AddRange($installs);
-
-  $combobox2_DropDownClosed = $dtn2.ComboBox.add_DropDownClosed 
-  $combobox2_DropDownClosed.Invoke({
+$dtn2.ComboBox.SelectedIndex = 0;
+$handler_combobox_closed = {
     param(
     [Object] $sender, 
     [System.EventArgs] $eventargs
     )
-         [System.Windows.Forms.ComboBox] $x = $sender;
-         [System.Windows.Forms.MessageBox]::Show($x.SelectedItem.ToString());
-})
+         try {
+           [System.Windows.Forms.ComboBox]$cb = $sender;
+           [System.Windows.Forms.MessageBox]::Show($cb.SelectedItem.ToString());
+           # $caller.Message += ('{0},' -f $cb.SelectedItem.ToString())
+         } catch [Exception] { 
+         }
+}
+
 
 $t.Nodes.Add($tn1);
-$t.Nodes.Add($dtn1);
 $t.Nodes.Add($dtn2);
+$t.Nodes.Add($dtn1);
 
 $combobox1_DropDownClosed = $dtn1.ComboBox.add_DropDownClosed 
-$combobox1_DropDownClosed.Invoke({
-    param(
-    [Object] $sender, 
-    [System.EventArgs] $eventargs
-    )
-         [System.Windows.Forms.ComboBox] $x = $sender;
-         [System.Windows.Forms.MessageBox]::Show($x.SelectedItem.ToString());
+$combobox1_DropDownClosed.Invoke( $handler_combobox_closed)
 
-})
-     
+$combobox2_DropDownClosed = $dtn2.ComboBox.add_DropDownClosed 
+$combobox2_DropDownClosed.Invoke($handler_combobox_closed)
+
 })
 
 
