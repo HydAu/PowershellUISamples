@@ -95,7 +95,9 @@ $f.Add_Shown( { $f.Activate() } )
 $f.Dispose() 
 }
 
-Add-Type -TypeDefinition @" // "
+Add-Type -TypeDefinition @" 
+
+// "
 using System;
 using System.Windows.Forms;
 public class Win32Window : IWin32Window
