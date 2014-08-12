@@ -17,26 +17,6 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
-
-#Copyright (c) 2014 Serguei Kouzmine
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
 Add-Type -TypeDefinition @"
 
 // "
@@ -186,27 +166,27 @@ namespace ProgressBarHost
 
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
-
-Add-Type -TypeDefinition @"  
-
-// "
-using System;
-using System.Windows.Forms;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _data;
+    private bool _visible;
 
-    public int Data
+    public bool Visible
     {
-        get { return _data; }
-        set { _data = value; }
+        get { return _visible; }
+        set { _visible = value; }
     }
 
     public Win32Window(IntPtr handle)
     {
         _hWnd = handle;
+    }
+
+    private ProgressBarHost.Progress _target;
+    public ProgressBarHost.Progress Target
+    {
+        get { return _target; }
+        set { _target = value; }
     }
 
     public IntPtr Handle
@@ -215,7 +195,54 @@ public class Win32Window : IWin32Window
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
+
+
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
+}
+
+$so = [hashtable]::Synchronized(@{ 
+        'Result'  = [string] '';
+        'Visible'  = [bool] $false;
+        'ScriptDirectory'  = [string] '';
+	'Form'  = [System.Windows.Forms.Form] $null ;
+	'Progress'  = [ProgressBarHost.Progress] $null ;
+	'NeedData' = [bool] $false ;
+	'HaveData' = [bool] $false ;
+
+	})
+
+$so.ScriptDirectory = Get-ScriptDirectory
+
+$rs =[runspacefactory]::CreateRunspace()
+$rs.ApartmentState = 'STA'
+$rs.ThreadOptions = 'ReuseThread'
+$rs.Open()
+$rs.SessionStateProxy.SetVariable('so', $so)          
+
+
+
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
+
+$run_script = [PowerShell]::Create().AddScript({    
+
 
 
 function Progressbar(
@@ -236,7 +263,7 @@ $f.Size = New-Object System.Drawing.Size(650,120)
 $f.StartPosition = 'CenterScreen'
 $components = new-object System.ComponentModel.Container
 $progress_status = new-object ProgressBarHost.Progress
-
+$so.Progress = $progress_status
 $progress_status.Location = new-object System.Drawing.Point(12, 8) 
 $progress_status.Name = "status"
 $progress_status.Size = new-object System.Drawing.Size(272, 88)
@@ -246,13 +273,14 @@ $b1 = New-Object System.Windows.Forms.Button
 $b1.Location = New-Object System.Drawing.Size(140, 152)
 $b1.Size = New-Object System.Drawing.Size(92, 24)
 $b1.Text = 'forward'
-$b1.Add_Click({ $progress_status.PerformStep(); 
+$b1.Add_Click({ $progress_status.PerformStep() 
 if ($progress_status.Maximum -eq $progress_status.Value)
             {
                 $b1.Enabled = false;
             }
 
 })
+
 $f.Controls.Add($b1)
 $f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 14)
 $f.ClientSize = new-object System.Drawing.Size(292, 194)
@@ -260,22 +288,31 @@ $f.Controls.Add($progress_status )
 $f.Topmost = $True
 
 
-$caller.Data = $RESULT_CANCEL;
+$caller.Visible = $true;
+$so.Visible = $caller.Visible
 $f.Add_Shown( { $f.Activate() } )
 
 [Void] $f.ShowDialog([Win32Window ] ($caller) )
 
 $f.Dispose() 
-}
-
-
-<#
-$env:path="${env:path};C:\Windows\Microsoft.NET\Framework\v4.0.30319"
-#>
-
-
-$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+} 
 
 Progressbar -title $title -message $message -caller $caller
-$result = $caller.Data 
-write-debug ("Result is : {0} ({1})" -f $Readable.Item($result) , $result )
+
+})
+
+
+# -- main program -- 
+clear-host
+$run_script.Runspace = $rs
+
+$handle = $run_script.BeginInvoke()
+
+start-sleep 3
+$max_cnt  = 10 
+$cnt = 0 
+while ($cnt -lt $max_cnt) {
+   $cnt ++ 
+    Start-Sleep -Milliseconds 100
+    $so.Progress.PerformStep()
+}
