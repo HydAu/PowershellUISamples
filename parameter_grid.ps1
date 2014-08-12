@@ -28,6 +28,8 @@ param ( [string] $string_param1 = '' ,
 
 
 Add-Type -TypeDefinition @"
+
+// "
 using System;
 using System.Windows.Forms;
 public class Win32Window : IWin32Window

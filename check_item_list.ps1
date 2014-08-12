@@ -19,6 +19,8 @@
 #THE SOFTWARE.
 
 Add-Type -TypeDefinition @"
+
+// "
 using System;
 using System.Windows.Forms;
 public class Win32Window : IWin32Window

@@ -182,6 +182,8 @@ function PromptCheckRadioDemo(
 }
 
 Add-Type -TypeDefinition @"
+
+// "
 using System;
 using System.Windows.Forms;
 
