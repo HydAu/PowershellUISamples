@@ -22,6 +22,8 @@
 # with sizes adjusted to run the focus demo
 
 Add-Type -TypeDefinition @"
+
+// "
 using System;
 using System.Text;
 using System.Net;

@@ -134,7 +134,7 @@ $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
 $driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
 $title =  $driver.Title
-
+# -browser "browserName=safari,version=6.1,platform=OSX,javascriptEnable=true"
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1 ) } -message $title 
 
 # Take screenshot identifying the browser
