@@ -97,12 +97,17 @@ $phantomjs_executable_folder = 'C:\tools\phantomjs'
 
 if ($PSBoundParameters['browser']) {
 
-  $selemium_driver_folder = 'c:\java\selenium'
-  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
-  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
-  start-sleep 10
-  # port probe omitted
-  # also for grid testing 
+  Try { 
+    $connection = (New-Object Net.Sockets.TcpClient)
+    $connection.Connect('127.0.0.1',4444)
+    $connection.Close()
+    }
+  catch {
+    $selemium_driver_folder = 'c:\java\selenium'
+    start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
+    start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
+    start-sleep 10
+  }
 
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
   $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')

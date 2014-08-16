@@ -49,14 +49,29 @@ pushd $shared_assemblies_path
 $shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
 popd
 
-$verificationErrors = new-object System.Text.StringBuilder
 
-# http://yizeng.me/2014/04/25/relationships-between-different-versions-of-selenium/#selenium-phantomjs
 # This is a Selenium RC Poweshell transaction. It can be used to develop Powershell Formatter IDE.
 # Note: Selenium RC (legacy) protocol is not supported by headless drivers (it is not a problem on Linux w/xvfb)
+# http://yizeng.me/2014/04/25/relationships-between-different-versions-of-selenium
 # http://www.studyselenium.com/2014/01/difference-between-selenium-rc-and.html
 
-$selenium = new-object Selenium.DefaultSelenium('localhost', 4444, '*chrome', 'http://www.wikipedia.org/')
+
+Try { 
+    $connection = (New-Object Net.Sockets.TcpClient)
+    $connection.Connect('127.0.0.1',4444)
+    $connection.Close()
+    }
+catch {
+  # https://gist.github.com/empo/958531
+  $selemium_driver_folder = 'c:\java\selenium'
+  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
+  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
+  start-sleep 10
+
+}
+
+$verificationErrors = new-object System.Text.StringBuilder
+$selenium = new-object Selenium.DefaultSelenium('localhost', 4444, '*firefox', 'http://www.wikipedia.org/')
 $selenium.Start()
 $selenium.Open('/')
 $selenium.Click('css=strong')
@@ -68,7 +83,7 @@ $selenium.Click('link=Selenium (software)')
 $selenium.WaitForPageToLoad('30000')
 
 [NUnit.Framework.Assert]::AreEqual($selenium.GetTitle(), 'Selenium (software) - Wikipedia, the free encyclopedia')
-
+start-sleep -seconds 240
 try{
   $selenium.Stop()
 } catch [Exception] {
