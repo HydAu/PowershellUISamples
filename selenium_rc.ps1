@@ -18,11 +18,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-
-Param (
-        [switch] $browser
-)
-
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -37,7 +32,7 @@ $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
     }
     else
     {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf('\'));
     }
 }
 
@@ -56,6 +51,11 @@ popd
 
 $verificationErrors = new-object System.Text.StringBuilder
 
+# http://yizeng.me/2014/04/25/relationships-between-different-versions-of-selenium/#selenium-phantomjs
+# This is a Selenium RC Poweshell transaction. It can be used to develop Powershell Formatter IDE.
+# Note: Selenium RC (legacy) protocol is not supported by headless drivers (it is not a problem on Linux w/xvfb)
+# http://www.studyselenium.com/2014/01/difference-between-selenium-rc-and.html
+
 $selenium = new-object Selenium.DefaultSelenium('localhost', 4444, '*chrome', 'http://www.wikipedia.org/')
 $selenium.Start()
 $selenium.Open('/')
@@ -66,7 +66,7 @@ $selenium.Click('id=searchButton')
 $selenium.WaitForPageToLoad('30000')
 $selenium.Click('link=Selenium (software)')
 $selenium.WaitForPageToLoad('30000')
-# write-output "-->" , $selenium.GetTitle()
+
 [NUnit.Framework.Assert]::AreEqual($selenium.GetTitle(), 'Selenium (software) - Wikipedia, the free encyclopedia')
 
 try{
