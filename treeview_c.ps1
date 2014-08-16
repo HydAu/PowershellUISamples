@@ -110,6 +110,7 @@ function PromptTreeView
     )
     if ($eventargs.Action -eq [System.Windows.Forms.TreeViewAction]::ByMouse)
     {
+       [System.Windows.Forms.MessageBox]::Show($eventargs.Node.FullPath);
        $worker.RunWorkerAsync() 
        # write-host $eventargs.Node.FullPath
     }

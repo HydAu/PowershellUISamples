@@ -9,7 +9,7 @@ using System.Data;
 using System.Runtime.Serialization;
 
 // http://www.codeproject.com/Articles/14544/A-TreeView-Control-with-ComboBox-Dropdown-Nodes
-namespace  DropDownDropDownTreeViewExample
+namespace  DropDownTreeViewExample
 {
 
    public class DropDownTreeViewExample : System.Windows.Forms.Form

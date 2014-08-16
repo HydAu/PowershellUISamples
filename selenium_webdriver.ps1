@@ -81,9 +81,6 @@ $shared_assemblies =  @(
     'WebDriver.dll',
     'WebDriver.Support.dll',
     'Selenium.WebDriverBackedSelenium.dll',
-    'ThoughtWorks.Selenium.Core.dll',
-    'ThoughtWorks.Selenium.UnitTests.dll',
-    'ThoughtWorks.Selenium.IntegrationTests.dll',
     'Moq.dll'
 )
 $env:SHARED_ASSEMBLIES_PATH =  'c:\developer\sergueik\csharp\SharedAssemblies'
@@ -107,7 +104,7 @@ if ($PSBoundParameters['browser']) {
   # port probe omitted
   # also for grid testing 
 
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
   $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
   $driver = new-object OpenQA.Selenium.Remote.RemoteWebDriver($uri , $capability)
 } else {
