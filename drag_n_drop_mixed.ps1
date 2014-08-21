@@ -17,16 +17,36 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
-Add-Type -TypeDefinition @"
 
-// # http://msdn.microsoft.com/en-us/library/system.windows.forms.control.dodragdrop%28v=vs.100%29.aspx
+
+# http://msdn.microsoft.com/en-us/library/system.windows.forms.control.dodragdrop%28v=vs.100%29.aspx
+# modified to System.Windows.Forms.Panel
+
+Add-Type -TypeDefinition @"
 
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
     public class DragNDrop : System.Windows.Forms.Panel
     {
+        private string _message;
+        public string Message
+        {
+            get { 
+                _message = "";
+                List<string>  _items = new List<string>();
+                foreach (object _item in ListDragTarget.Items) {
+                   _items.Add(_item.ToString());
+                }
+                _message = String.Join(",", _items.ToArray() );
+                return _message; 
+           }
+           set { _message = value; }
+        }
+
         private System.Windows.Forms.ListBox ListDragSource;
         private System.Windows.Forms.ListBox ListDragTarget;
         private System.Windows.Forms.CheckBox UseCustomCursorsCheck;
@@ -43,8 +63,10 @@ using System.Windows.Forms;
 
         /// The main entry point for the application.
 
-        public DragNDrop()
+        public DragNDrop(String message)
         {
+            _message = message; 
+            String[] items = _message.Split(new Char[] {',', ' '}) ;
             this.ListDragSource = new System.Windows.Forms.ListBox();
             this.ListDragTarget = new System.Windows.Forms.ListBox();
             this.UseCustomCursorsCheck = new System.Windows.Forms.CheckBox();
@@ -53,9 +75,7 @@ using System.Windows.Forms;
             this.SuspendLayout();
 
             // ListDragSource
-            this.ListDragSource.Items.AddRange(new object[] {"one", "two", "three", "four", 
-                                                                "five", "six", "seven", "eight",
-                                                                "nine", "ten"});
+            this.ListDragSource.Items.AddRange(items);
             this.ListDragSource.Location = new System.Drawing.Point(10, 17);
             this.ListDragSource.Size = new System.Drawing.Size(120, 225);
             this.ListDragSource.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ListDragSource_MouseDown);
@@ -317,13 +337,19 @@ using System.Drawing;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _idx;
+    private int _data;
     private string _script_directory;
+    private string _message;
 
-    public int Idx
+    public int Data
     {
-        get { return _idx; }
-        set { _idx = value; }
+        get { return _data; }
+        set { _data = value; }
+    }
+    public string Message
+    {
+        get { return _message; }
+        set { _message = value; }
     }
 
     public string ScriptDirectory
@@ -364,22 +390,20 @@ param
 $f = New-Object System.Windows.Forms.Form 
 $f.Text = $title
 
-$o = New-Object DragNDrop 
+$panel = New-Object DragNDrop($caller.Message)
 
-
-$f.ClientSize = new-object  System.Drawing.Size(568, 278)
-$f.Controls.AddRange(@( $o )) 
+$f.ClientSize = new-object  System.Drawing.Size(288, 248)
+$f.Controls.AddRange(@( $panel )) 
 $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
 $f.MaximizeBox = $false
 $f.Name = "Form1"
 $f.Text = "Playing with drag and drop"
 
-$o.ResumeLayout($false)
+$panel.ResumeLayout($false)
 $f.ResumeLayout($false)
 
 $f.StartPosition = 'CenterScreen'
 $f.KeyPreview = $false
-
 
 if ($caller -eq $null ){
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
@@ -388,10 +412,12 @@ if ($caller -eq $null ){
   $f.Add_Shown( { $f.Activate() } )
 
   [Void] $f.ShowDialog([Win32Window ] ($caller) )
-
+  $result = $panel.Message
+  $panel.Dispose()
   $f.Dispose()
-  $result = $caller.Message
+
   $caller = $null
+
   return $result
 }
 
@@ -416,9 +442,14 @@ function Get-ScriptDirectory
 $DebugPreference = 'Continue'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $caller.ScriptDirectory = Get-ScriptDirectory
+$data = @(
+   'one','two','three','four','five',
+   'six','seven','nine','ten','eleven'
+)
+$caller.Message = $data -join ','
 $result = PromptWithDragDropNish 'Items'  $caller 
 
-write-debug ('Selection is : {0}' -f  , $result )
+# write-debug ('Selection is : {0}' -f  , $result )
 
-
+$result -split ',' | format-table -autosize
 
