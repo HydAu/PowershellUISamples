@@ -18,21 +18,27 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
+using System.Drawing;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _data;
+    private int _idx;
     private string _script_directory;
-
-    public int Data
+    private System.Drawing.Rectangle _rect; 
+    public System.Drawing.Rectangle Rect
     {
-        get { return _data; }
-        set { _data = value; }
+        get { return _rect; }
+        set { _rect = value; }
     }
+    public int Idx
+    {
+        get { return _idx; }
+        set { _idx = value; }
+    }
+
     public string ScriptDirectory
     {
         get { return _script_directory; }
@@ -50,7 +56,7 @@ public class Win32Window : IWin32Window
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
 
 
 # http://msdn.microsoft.com/en-us/library/system.windows.forms.control.dodragdrop%28v=vs.100%29.aspx
@@ -91,17 +97,11 @@ $f.SuspendLayout()
 $custom_cursor_checkbox = new-object System.Windows.Forms.CheckBox
 
 $list_drag_source.Items.AddRange(@("one", "two", "three", "four",  "five", "six", "seven", "eight", "nine", "ten") )
-
 $list_drag_source.Font =  new-object System.Drawing.Font('Microsoft Sans Serif', 11, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
-
 $list_drag_source.ItemHeight = 24
-
 $list_drag_source.Location = new-object System.Drawing.Point(32, 16)
-
 $list_drag_source.Name = "drag_source" 
-
 $list_drag_source.Size = new-object System.Drawing.Size(176, 196) 
-
 $list_drag_source.TabIndex = 0 
 
 
@@ -111,17 +111,11 @@ $list_drag_source.TabIndex = 0
 
 
 $list_drag_target.AllowDrop = true;
-
 $list_drag_target.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 14, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
-
 $list_drag_target.ItemHeight = 24 
-
 $list_drag_target.Location = new-object System.Drawing.Point(344, 16)
-
 $list_drag_target.Name = "drag_target" 
-
 $list_drag_target.Size =  new-object  System.Drawing.Size(176, 196)
-
 $list_drag_target.TabIndex = 1
 
  
@@ -129,20 +123,12 @@ $list_drag_target.TabIndex = 1
 #  label1
 
 $label1.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-
 $label1.Font =  new-object System.Drawing.Font('Microsoft Sans Serif', 13, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
-
 $label1.Location = new-object  System.Drawing.Point(88, 224)
-
 $label1.Name = "label1";
-
-
 $label1.Size = new-object  System.Drawing.Size(328, 40) 
-
 $label1.TabIndex = 2;
-
 $label1.Text = "Drag and drop names from the list box on the left to the list box on the right";
-
 $label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 
 
@@ -150,21 +136,14 @@ $label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 # Form1
 
 
-$idx =  [System.Windows.Forms.ListBox]::NoMatches
+$caller.Idx = $idx =  [System.Windows.Forms.ListBox]::NoMatches
 $f.AutoScaleBaseSize = new-object  System.Drawing.Size(5, 13)
-
 $f.ClientSize = new-object  System.Drawing.Size(568, 278)
-
 $f.Controls.AddRange(@(   $label1,   $list_drag_target,   $list_drag_source)) 
-
 $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
-
 $drag_box = [System.Drawing.Rectangle]::Empty
 $f.MaximizeBox = $false
-$drag_box = [System.Drawing.Rectangle]::Empty
-
 $f.Name = "Form1"
-
 $f.Text = "Playing with drag and drop"
 
 $list_drag_source.ResumeLayout($false)
@@ -174,7 +153,7 @@ $f.ResumeLayout($false)
 $f.StartPosition = 'CenterScreen'
 $f.KeyPreview = $false
 
-$handler_listbox1_mousedown = {
+$handler_drag_source_MouseDown = {
   param ( 
     [Object]  $sender, 
     [System.Windows.Forms.MouseEventArgs] $eventargs  
@@ -186,21 +165,22 @@ if ($list_drag_source.Items.Count -eq 0) {
 }
   $t = $label1.Text;
 
-  $idx = $list_drag_source.IndexFromPoint($eventargs.X, $eventargs.Y)
-#  $label1.Text = ("Drag and drop item[{0}] ?" -f $idx) 
+$caller.Idx =   $idx = $list_drag_source.IndexFromPoint($eventargs.X, $eventargs.Y)
   $drag_item = $list_drag_source.Items[$idx]
 
-  if (($idx -ne 0 ) -and ( $idx -ne [System.Windows.Forms.ListBox]::NoMatches)) {
+  if ($idx -ne [System.Windows.Forms.ListBox]::NoMatches) {
      # Remember the point where the mouse down occurred. The DragSize indicates
      # the size that the mouse can move before a drag event should be started.    
-               $dragSize = [System.Windows.Forms.SystemInformation]::DragSize
+     $dragSize = [System.Windows.Forms.SystemInformation]::DragSize
      # Create a rectangle using the DragSize, with the mouse position being
      # at the center of the rectangle.
      $x = $eventargs.X - ($dragSize.Width /2 )
      $y = $eventargs.Y- ($dragSize.Height /2)
      $p = new-object System.Drawing.Point($x , $y  )
-
      $drag_box = new-object System.Drawing.Rectangle( $p , $dragSize)
+     $caller.Rect =      $drag_box 
+     $label1.Text = ("Drag and drop item[{0}] ?" -f $idx) 
+
    } else {
      # Reset the rectangle if the mouse is not over an item in the ListBox.
      $drag_box = [System.Drawing.Rectangle]::Empty
@@ -217,9 +197,7 @@ $handler_drag_target_DragDrop = {
   if($eventargs.Data.GetDataPresent([System.Windows.Forms.DataFormats]::StringFormat)) {
 
     $str= $eventargs.Data.GetData([System.Windows.Forms.DataFormats]::StringFormat)
-
-
-
+    $label1.Text = "DSDDDD"
     $list_drag_target.Items.Add($str) 
 
   }
@@ -233,14 +211,14 @@ $handler_drag_target_DragOver = {
     [System.Windows.Forms.DragEventArgs] $eventargs  
     )
 
-           if ( -not $eventargs.Data.GetDataPresent([System.Windows.Forms.DataFormats]::StringFormat)) {
+     if ( -not $eventargs.Data.GetDataPresent([System.Windows.Forms.DataFormats]::StringFormat)) {
 
                 $eventargs.Effect = [System.Windows.Forms.DragDropEffects]::None
                 $label1.Text = "None - no string data." 
                 return 
-            } else {
+      } else {
                 $label1.Text  = "Drops at the end." 
-           }
+   }
 
 #  $eventargs.Effect = [System.Windows.Forms.DragDropEffects]::All
 }
@@ -252,23 +230,17 @@ $handler_list_drag_source_QueryContinueDrag = {
     )
 }
 
-$handler_drag_source_MouseUp = {
-  param ( 
-    [Object]  $sender, 
-    [System.Windows.Forms.MouseEventArgs] $eventargs  
-    )
-
-    $drag_box = [System.Drawing.Rectangle]::Empty
-}
 
 $handler_drag_source_MouseMove = {
   param ( 
     [Object]  $sender, 
     [System.Windows.Forms.MouseEventArgs] $eventargs 
     )
+
 $label1.Text = $eventargs.Button.ToString()
 if (($eventargs.Button -band [System.Windows.Forms.MouseButtons]::Left) -eq [System.Windows.Forms.MouseButtons]::Left) {
-$label1.Text = '1111'
+$label1.Text = (  "idx = {0}" -f $caller.Idx )
+$drag_box  = $caller.Rect 
 if (( $drag_box -ne [System.Drawing.Rectangle]::Empty ) -and  
                     -not $drag_box.Contains($eventargs.X, $eventargs.Y)) {
 
@@ -276,8 +248,8 @@ $label1.Text = '# cursor'
 }
 
 }
-# $label1.Text = $idx
-if ($idx -ne [System.Windows.Forms.ListBox]::NoMatches){
+$idx = $caller.Idx
+if ($idx  -ne [System.Windows.Forms.ListBox]::NoMatches){
 
   $drag_item = $list_drag_source.Items[$idx]
 
@@ -286,58 +258,23 @@ if ($dde1 -eq [System.Windows.Forms.DragDropEffects]::All ) {
 
   $list_drag_source.Items.RemoveAt($list_drag_source.IndexFromPoint($eventargs.X,$eventargs.Y))
 
-<#
-
-if (dropEffect == DragDropEffects.Move) {                        
-                            ListDragSource.Items.RemoveAt(indexOfItemUnderMouseToDrag);
-
-                            // Selects the previous item in the list as long as the list has an item.
-                            if (indexOfItemUnderMouseToDrag > 0)
-                                ListDragSource.SelectedIndex = indexOfItemUnderMouseToDrag -1;
-
-                            else if (ListDragSource.Items.Count > 0)
-                                // Selects the first item.
-                                ListDragSource.SelectedIndex =0;
-                        }
-#>
-
 }
 
 }
 }
 
-$handler_ListDragSource_GiveFeedback = {
-  param ( 
-    [Object]  $sender, 
-    [System.Windows.Forms.GiveFeedbackEventArgs] $eventargs
-    )
-<# 
-            if ($custom_cursor_checkbox.Checked) {
+[System.Management.Automation.PSMethod] $event_MouseDown = $list_drag_source.Add_MouseDown
+[System.Management.Automation.PSMethod] $event_MouseMove  = $list_drag_source.Add_MouseMove 
 
-    // Sets the custom cursor based upon the effect.
-    $eventargs.UseDefaultCursors = false;
-    if (($eventargs.Effect & DragDropEffects.Move) == DragDropEffects.Move)
-        $Cursor.Current = MyNormalCursor;
-    else 
-        $Cursor.Current = MyNoDropCursor;
-            }
-#>
-}
-
-[System.Management.Automation.PSMethod] $event_listbox1_mousedown = $list_drag_source.Add_MouseDown
-
-[System.Management.Automation.PSMethod] $event_drag_target_DragDrop = $list_drag_target.Add_DragDrop
-[System.Management.Automation.PSMethod] $event_drag_target_DragOver = $list_drag_target.Add_DragOver
-
-[System.Management.Automation.PSMethod] $event_drag_target_MouseUp = $list_drag_target.Add_MouseUp
-[System.Management.Automation.PSMethod] $event_drag_target_MouseMove  = $list_drag_target.Add_MouseMove 
+[System.Management.Automation.PSMethod] $event_DragDrop = $list_drag_target.Add_DragDrop
+[System.Management.Automation.PSMethod] $event_DragOver = $list_drag_target.Add_DragOver
 
 
-$event_drag_target_DragDrop.Invoke( $handler_drag_target_DragDrop  )
-$event_drag_target_DragOver.Invoke( $handler_drag_target_DragOver  )
-$event_drag_target_MouseUp.Invoke( $handler_drag_source_MouseUp  )
-$event_drag_target_MouseMove.Invoke( $handler_drag_source_MouseMove  )
-$event_listbox1_mousedown.Invoke( $handler_listbox1_mousedown  )
+
+$event_DragDrop.Invoke( $handler_drag_target_DragDrop  )
+$event_DragOver.Invoke( $handler_drag_target_DragOver  )
+$event_MouseMove.Invoke( $handler_drag_source_MouseMove  )
+$event_MouseDown.Invoke( $handler_drag_source_MouseDown  )
 
 
  $f.Topmost = $True
