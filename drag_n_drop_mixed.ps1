@@ -79,13 +79,11 @@ using System.Text;
             this.ListDragSource.Location = new System.Drawing.Point(10, 17);
             this.ListDragSource.Size = new System.Drawing.Size(120, 225);
             this.ListDragSource.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ListDragSource_MouseDown);
-         //?
-         //   this.ListDragSource.QueryContinueDrag += new System.Windows.Forms.QueryContinueDragEventHandler(this.ListDragSource_QueryContinueDrag);
-         // after commenting this one behavior remains  available 
-         //   this.ListDragSource.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ListDragSource_MouseUp);
-         // this is important one for Drag and Drop
+            this.ListDragSource.QueryContinueDrag += new System.Windows.Forms.QueryContinueDragEventHandler(this.ListDragSource_QueryContinueDrag);
+            this.ListDragSource.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ListDragSource_MouseUp);
+         
             this.ListDragSource.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ListDragSource_MouseMove);
-         //   this.ListDragSource.GiveFeedback += new System.Windows.Forms.GiveFeedbackEventHandler(this.ListDragSource_GiveFeedback);
+            this.ListDragSource.GiveFeedback += new System.Windows.Forms.GiveFeedbackEventHandler(this.ListDragSource_GiveFeedback);
 
             // ListDragTarget
             this.ListDragTarget.AllowDrop = true;
@@ -93,9 +91,8 @@ using System.Text;
             this.ListDragTarget.Size = new System.Drawing.Size(120, 225);
             this.ListDragTarget.DragOver += new System.Windows.Forms.DragEventHandler(this.ListDragTarget_DragOver);
             this.ListDragTarget.DragDrop += new System.Windows.Forms.DragEventHandler(this.ListDragTarget_DragDrop);
-            // after commenting this one behavior remains  available 
-            //this.ListDragTarget.DragEnter += new System.Windows.Forms.DragEventHandler(this.ListDragTarget_DragEnter);
-            //this.ListDragTarget.DragLeave += new System.EventHandler(this.ListDragTarget_DragLeave);
+            this.ListDragTarget.DragEnter += new System.Windows.Forms.DragEventHandler(this.ListDragTarget_DragEnter);
+            this.ListDragTarget.DragLeave += new System.EventHandler(this.ListDragTarget_DragLeave);
 
             // UseCustomCursorsCheck
             this.UseCustomCursorsCheck.Location = new System.Drawing.Point(10, 243);
