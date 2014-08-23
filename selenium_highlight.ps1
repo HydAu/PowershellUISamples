@@ -60,8 +60,7 @@ if ($PSBoundParameters["browser"]) {
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);", $element, "color: yellow; border: 4px solid yellow;")
   start-sleep 3
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);", $element, "")
-  [
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);", $element, "")
+  
   # https://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/WebDriver.Timeouts.html#setScriptTimeout%28long,%20java.util.concurrent.TimeUnit%29
   # void]$selenium.Manage().Timeouts().setScriptTimeout([System.TimeSpan]::FromSeconds(3 ))
   # $result = [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteAsyncScript("arguments[0].tagName;", $element, '')

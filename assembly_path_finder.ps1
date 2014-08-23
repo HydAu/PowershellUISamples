@@ -24,8 +24,8 @@
 # note CodedUI  HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{6077292c-6751-4483-8425-9026bc0187b6}
 
 function read_registry{
-  param ([string] $registry_path = '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall' , 
-         [string] $package_name =  '{6088FCFB-2FA4-3C74-A1D1-F687C5F14A0D}'
+  param ([string] $registry_path,
+         [string] $package_name
 
 )
 
@@ -43,85 +43,48 @@ $values | where-object {$_ -match 'InstallLocation'} | foreach-object {$result =
 popd
 $result
 
-
-}
-
-
-
-# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory
-{
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
-        $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
-        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
-    }
-}
-
-# http://poshcode.org/1942
-function Assert {
-  [CmdletBinding()]
-  param(
-   [Parameter(Position=0,ParameterSetName='Script', Mandatory=$true)]
-   [ScriptBlock]$Script,
-   [Parameter(Position=0,ParameterSetName='Condition', Mandatory=$true)]
-   [bool]$Condition,
-   [Parameter(Position=1,Mandatory=$true)]
-   [string]$message )
-     
-  $message = "ASSERT FAILED: $message"
-  if($PSCmdlet.ParameterSetName -eq 'Script') {
-    try {
-      $ErrorActionPreference = 'STOP'
-      $success = &$Script
-    } catch {
-      $success = $false
-      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
-    }
-  } 
-  if($PSCmdlet.ParameterSetName -eq 'Condition') {
-    try {
-      $ErrorActionPreference = 'STOP'
-      $success = $Condition
-    } catch {
-      $success = $false
-      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
-    }
-  } 
-
-  if(!$success) {
-    throw $message
-  }
 }
 
 $shared_assemblies =  @(
     'Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll'
 )
 
-$env:SHARED_ASSEMBLIES_PATH =  'c:\developer\sergueik\csharp\SharedAssemblies'
-$env:SCREENSHOT_PATH =  'C:\developer\sergueik\powershell_ui_samples' 
-
-
-
-
 $shared_assemblies_path = (  "{0}\{1}" -f   ( read_registry -registry_path '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall' -package_name '{6088FCFB-2FA4-3C74-A1D1-F687C5F14A0D}' ) , 'Common7\IDE\PublicAssemblies' ) 
-$screenshot_path = $env:SCREENSHOT_PATH
+
 pushd $shared_assemblies_path
 $shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
 popd
 
-[Microsoft.VisualStudio.TestTools.UnitTesting.Assert]::AreNotEqual('true', [string]"false") 
+$result =[Microsoft.VisualStudio.TestTools.UnitTesting.Assert]::AreEqual("true", (@('true','false') | select-object -first 1) )
 
-# TODO for nunit.framework.dll 
-# HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-21-52832475-59735490-1501187911-186867\Components\01A9DBD987BE1B05F8AD3F77F95AAEAA
-# HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-21-52832475-59735490-1501187911-186867\Components\2FE4EB3A1F5407F5CA3307D9E2B23146
-# HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-21-52832475-59735490-1501187911-186867\Components\578F65BFDD4B53F46A181A0659D85CD4
-# HKEY_USERS\S-1-5-21-52832475-59735490-1501187911-186867\Software\nunit.org\NUnit\2.6.3
+
+<#
+Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+
+Caption=Microsoft Visual Studio 2010 Service Pack 1
+PackageCode={E36D1CC4-511B-4631-8482-BDBFFCC23F04}
+IdentifyingNumber={ED780CA9-0687-3C12-B439-3369F224941F}
+has blank InstallLocation
+
+Caption=Microsoft Visual Studio 2010 Performance Collection Tools SP1 - ENU
+PackageCode={6E1B280F-80B7-4BFC-B7A1-ADE8457D4D11}
+IdentifyingNumber={170DE2A7-4768-370C-9671-D8D17826EFBF}
+has blank InstallLocation
+
+
+Caption=Microsoft Visual Studio 2010 Premium - ENU
+PackageCode={B3C71C85-BB28-437A-8811-0C36513616B8}
+IdentifyingNumber={6742BE3D-1A59-3BFD-BA20-2FDA866099B8}
+
+
+
+
+Caption=NUnit 2.6.3
+PackageCode={4D5C4AE0-EFFE-4F38-A30D-3CDA440C05E4}
+IdentifyingNumber={002B407D-DE66-4601-A10C-45941586C767}
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{002B407D-DE66-4601-A10C-45941586C767}
+has blank InstallLocation
+
+HKEY_USERS\S-1-5-21-440999728-2294759910-2183037890-1000\Software\nunit.org\NUnit\2.6.3
+
+#>
