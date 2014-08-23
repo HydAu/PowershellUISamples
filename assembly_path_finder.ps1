@@ -30,6 +30,7 @@ function read_registry{
 )
 
 pushd HKLM:
+
 cd -path $registry_path
 $settings = get-childitem -Path . | where-object { $_.Property  -ne $null } | where-object {$_.name -match  $package_name } |   select-object -first 1
 $values = $settings.GetValueNames()
