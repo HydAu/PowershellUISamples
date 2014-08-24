@@ -115,7 +115,7 @@ static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lP
         IntPtr lngPid = System.IntPtr.Zero;
         GetWindowThreadProcessId(hWnd, out lngPid);
         int PID = Convert.ToInt32(/* Marshal.ReadInt32 */ lngPid.ToString());
-        string s = "Save As|Opening";
+        string s = "Save As|Opening|Enter name of file to save to";
         string res = String.Empty;
         Regex r = new Regex(s,
                      RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
@@ -201,7 +201,8 @@ static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lP
             const UInt32 WM_KEYUP = 0x0101;
             const UInt32 VK_RETURN = 0x0D;
             SendMessage(handle, WM_CHAR, new IntPtr(WM_KEYDOWN), IntPtr.Zero);
-            SetText(handle, @"c:\temp\my random filename");
+            SetText(handle, String.Format(@"{0}\{1}{2}", 
+                  Environment.GetEnvironmentVariable("TEMP"), "my random filename", new Random().Next(10)));
             Thread.Sleep(1000);
             SendMessage(handle, WM_CHAR, new IntPtr(VK_RETURN), IntPtr.Zero);
         }
