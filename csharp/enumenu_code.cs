@@ -83,6 +83,11 @@ public class EnumReport
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
 
+[return: MarshalAs(UnmanagedType.Bool)]
+[DllImport("user32.dll", SetLastError = true)]
+static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+
+
     public static string GetText(IntPtr hWnd)
     {
         int length = GetWindowTextLength(hWnd);
@@ -92,10 +97,8 @@ public class EnumReport
     }
     private static string GetWindowClassName(IntPtr hWnd)
     {
-        int nRet;
         StringBuilder ClassName = new StringBuilder(256);
-        //Get the window class name
-        nRet = GetClassName(hWnd, ClassName, ClassName.Capacity);
+        int nRet = GetClassName(hWnd, ClassName, ClassName.Capacity);
         return (nRet != 0) ? ClassName.ToString() : null;
     }
     public static void SetText(IntPtr hWnd, String text)
@@ -112,9 +115,7 @@ public class EnumReport
         IntPtr lngPid = System.IntPtr.Zero;
         GetWindowThreadProcessId(hWnd, out lngPid);
         int PID = Convert.ToInt32(/* Marshal.ReadInt32 */ lngPid.ToString());
-
         string s = "Save As|Opening";
-
         string res = String.Empty;
         Regex r = new Regex(s,
                      RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
@@ -133,23 +134,19 @@ public class EnumReport
                 Console.WriteLine("Window title is " + sToken);
                 Console.WriteLine("Window match " + m.Count.ToString());
                 UInt32 WM_CLOSE = 0x10;
-                //                SendMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                // SendMessage(hWnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
             }
 
         }
         return true;
     }
 
-    // http://msdn.microsoft.com/en-us/library/ms633566%28v=VS.85%29.aspx
-    // http://msdn.microsoft.com/en-us/library/ms633561%28v=vs.85%29.aspx#listing_properties
-    // http://source.winehq.org/source/include/winuser.h
     // http://msdn.microsoft.com/en-us/library/windows/desktop/ms633561%28v=vs.85%29.aspx#retrieving_property
-    // http://bytes.com/topic/c-sharp/answers/558930-really-need-help-sendmessage-wm_getcontrolname 
     public static bool EnumPropsExManaged(IntPtr hWnd, IntPtr lpszString, int hData, int dwData)
     {
         String myManagedString = Marshal.PtrToStringAnsi(lpszString);
         string propName = Marshal.PtrToStringAnsi(lpszString);
-        Console.WriteLine("Property name: " + myManagedString); 
+
         // Continue
         return true;
     }
@@ -168,11 +165,7 @@ public class EnumReport
 
             foreach (System.IntPtr s in sArray)
             {
-                // http://msdn.microsoft.com/en-us/library/windows/desktop/ms633561%28v=vs.85%29.aspx#retrieving_property
-                // GetProp
                 string sChT = GetText(s);
-                Console.WriteLine("see [{0}]", sChT);
-
                 string s2 = "&Save";
                 string res = String.Empty;
                 Regex r = new Regex(s2,
@@ -199,20 +192,26 @@ public class EnumReport
     private static bool EnumWindow(IntPtr handle, IntPtr pointer)
     {
         GCHandle gch = GCHandle.FromIntPtr(pointer);
-        //  TODO:
-        // GetProp(handle, string lpString)
         String window_class_name = GetWindowClassName(handle);
-
+        // Set textbox text - filename to save
         if (string.Compare(window_class_name, "Edit", true, CultureInfo.InvariantCulture) == 0 ) {
-            SetText(handle, @"C:\temp\my random filename");
+            // http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
+            const UInt32 WM_CHAR = 0x0102;
+            const UInt32 WM_KEYDOWN = 0x0100;
+            const UInt32 WM_KEYUP = 0x0101;
+            const UInt32 VK_RETURN = 0x0D;
+            SendMessage(handle, WM_CHAR, new IntPtr(WM_KEYDOWN), IntPtr.Zero);
+            SetText(handle, @"c:\temp\my random filename");
+            Thread.Sleep(1000);
+            SendMessage(handle, WM_CHAR, new IntPtr(VK_RETURN), IntPtr.Zero);
         }
+        // Click 'Save'
         if (string.Compare(window_class_name, "Button", true, CultureInfo.InvariantCulture) == 0 ) {
-            //Set textbox text - filename to save
             string button_text = GetText(handle);
             if (string.Compare(button_text, "&Save", true, CultureInfo.InvariantCulture) == 0) {
                 SetText(handle, "About to click");
                 const UInt32 BM_CLICK = 0x00F5;
-                Thread.Sleep(10000);
+                Thread.Sleep(1000);
                 SendMessage(handle, BM_CLICK, IntPtr.Zero, IntPtr.Zero);
             }
         }
