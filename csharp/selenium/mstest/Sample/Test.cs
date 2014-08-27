@@ -9,10 +9,11 @@ using Moq;
 
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
-using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
-using OpenQA.Selenium.PhantomJS;
+using System.Configuration;
+using System.Configuration.Install;
 
 // TODO : App.config 
 namespace SeleniumTests
@@ -23,17 +24,33 @@ namespace SeleniumTests
     public class SeleniumTest
     {
 
-	private static IWebDriver driver;
-	private static StringBuilder verificationErrors = new StringBuilder();
-        private string baseURL;
-        private bool acceptNextAlert = true;
 
-
-        [ClassCleanup()]
-        public static void MyClassCleanup() { 
+        static string ReadSetting(string key)
+        {
+            string result = null;
             try
             {
-		driver.Quit();
+                var appSettings = ConfigurationManager.AppSettings;
+                result = appSettings[key] ?? "Not Found";
+                Console.WriteLine(result);
+            }
+            catch (ConfigurationErrorsException)
+            {
+                Console.WriteLine("Error reading app settings");
+            }
+            return result;
+        }
+
+
+        private static IWebDriver driver;
+        private static StringBuilder verificationErrors = new StringBuilder();
+
+        [ClassCleanup()]
+        public static void MyClassCleanup()
+        {
+            try
+            {
+                driver.Quit();
             }
             catch (Exception)
             {
@@ -45,88 +62,96 @@ namespace SeleniumTests
         [TestInitialize()]
         public void MyTestInitialize()
         {
-         // DesiredCapabilities capability = DesiredCapabilities.Firefox();
-         // TODO:
-         // error CS0117: 'OpenQA.Selenium.Remote.DesiredCapabilities' dos not contain a definition for 'PhantomJSDriver' [C:\developer\sergueik\powers
-         // DesiredCapabilities capability = DesiredCapabilities.PhantomJSDriver();
-         // driver = new RemoteWebDriver(new Uri("http://127.0.0.1:4444/wd/hub"), capability );
+            string url = ReadSetting("url");
+            DesiredCapabilities capability = DesiredCapabilities.Firefox();
+            //  driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), DesiredCapabilities.Firefox()) ;
+            String phantomjs_executable_folder = ReadSetting("phantomjs_executable_path");
+            driver = new OpenQA.Selenium.PhantomJS.PhantomJSDriver(phantomjs_executable_folder);
 
-         driver = new PhantomJSDriver();
-         Assert.IsNotNull(driver );
-
-         driver.Url =  baseURL = "http://www.wikipedia.org";
-         driver.Manage().Timeouts().ImplicitlyWait( TimeSpan.FromSeconds(10 )) ;
-         verificationErrors = new StringBuilder();
+            driver.Url = "http://localhost:8011/";
+            driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
+            verificationErrors = new StringBuilder();
 
         }
 
         [TestCleanup()]
-        public void MyTestCleanup() { 
+        public void MyTestCleanup()
+        {
 
-	}
+        }
 
         [TestMethod]
+        [TestCategory("US")]
         public void Test_1()
         {
 
             // Arrange
             // Act
-            driver.Navigate().GoToUrl(baseURL + "/");
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
-
-            //Find the Element and create an object so we can use it
-            IWebElement queryBox = driver.FindElement(By.Id("searchInput"));
-            queryBox.Clear();
-            //Work with the Element that's on the page
-            queryBox.SendKeys("Selenium");
-			queryBox.SendKeys(Keys.ArrowDown);
-            queryBox.Submit();
-            driver.FindElement(By.LinkText("Selenium (software)")).Click();
-
-            // Assert
-            Assert.IsTrue(driver.Title.IndexOf("Selenium (software)") > -1, driver.Title);
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_UK"));
+            // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
+            Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Lines") > -1, driver.Title);
         }
 
-        private bool IsElementPresent(By by)
+        [TestMethod]
+        [TestCategory("UK")]
+        public void Test_2()
         {
-            try
-            {
-                driver.FindElement(by);
-                return true;
-            }
-            catch (NoSuchElementException)
-            {
-                return false;
-            }
+
+            // Arrange
+            // Act
+
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_UK"));
+            //Find the Log In link and create an object so we can use it
+            IWebElement queryBox = driver.FindElements(By.ClassName("header"))[0];
+            queryBox.Click();
+            // 
+            driver.FindElement(By.PartialLinkText("To join the fun"));
+            // Assert.IsTrue(), driver.Title);
         }
-        
-        private bool IsAlertPresent()
+
+
+        [TestMethod]
+        [TestCategory("US")]
+        public void Test_3()
         {
-            try
-            {
-                driver.SwitchTo().Alert();
-                return true;
-            }
-            catch (NoAlertPresentException)
-            {
-                return false;
-            }
+
+            // Arrange
+            // Act
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_US"));
+            // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
+            Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Lines") > -1, driver.Title);
         }
-        
-        private string CloseAlertAndGetItsText() {
-            try {
-                IAlert alert = driver.SwitchTo().Alert();
-                string alertText = alert.Text;
-                if (acceptNextAlert) {
-                    alert.Accept();
-                } else {
-                    alert.Dismiss();
-                }
-                return alertText;
-            } finally {
-                acceptNextAlert = true;
-            }
+
+        [TestMethod]
+        [TestCategory("UK")]
+        public void Test_4()
+        {
+
+            // Arrange
+            // Act
+
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_UK"));
+            //Find the Log In link and create an object so we can use it
+            IWebElement queryBox = driver.FindElement(By.ClassName("login-link"));
+            queryBox.Click();
+
+            // 
+            driver.FindElement(By.PartialLinkText("To join the fun"));
+            // Assert.IsTrue(), driver.Title);
         }
+
+        [TestMethod]
+        [TestCategory("US")]
+        public void Test_5()
+        {
+
+            // Arrange
+            // Act
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_US"));
+            // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
+            Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Deals") > -1, driver.Title);
+        }
+
 
     }
 }

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-<!-- https://code.google.com/p/selenium/source/browse/rake-tasks/msbuild/webdriver.msbuild.proj?name=selenium-2.0-alpha-5&r=ae4dd1c0f31409e3fd7cbe5b0500753381e9c84c -->
+  <!-- https://code.google.com/p/selenium/source/browse/rake-tasks/msbuild/webdriver.msbuild.proj?name=selenium-2.0-alpha-5&r=ae4dd1c0f31409e3fd7cbe5b0500753381e9c84c -->
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -35,40 +35,43 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Activities.UnitTesting">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\Microsoft.Activities.UnitTesting.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\Microsoft.Activities.UnitTesting.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Moq">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\Moq.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\Moq.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="WebDriver">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\WebDriver.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\WebDriver.dll</HintPath>
     </Reference>
     <Reference Include="WebDriver.Support">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\WebDriver.Support.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\WebDriver.Support.dll</HintPath>
     </Reference>
     <Reference Include="Selenium.WebDriverBackedSelenium">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\Selenium.WebDriverBackedSelenium.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\Selenium.WebDriverBackedSelenium.dll</HintPath>
     </Reference>
     <Reference Include="ThoughtWorks.Selenium.Core">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\ThoughtWorks.Selenium.Core.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\ThoughtWorks.Selenium.Core.dll</HintPath>
     </Reference>
     <Reference Include="ThoughtWorks.Selenium.IntegrationTests">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\ThoughtWorks.Selenium.IntegrationTests.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\ThoughtWorks.Selenium.IntegrationTests.dll</HintPath>
     </Reference>
     <Reference Include="ThoughtWorks.Selenium.UnitTests">
-      <HintPath>c:\developer\sergueik\csharp\SharedAssemblies\ThoughtWorks.Selenium.UnitTests.dll</HintPath>
+      <HintPath>..\..\..\SharedAssemblies\ThoughtWorks.Selenium.UnitTests.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
+    <!-- the next is not really ncecessary for console app -->
+    <Reference Include="System.Configuration.Install" />
 
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +79,11 @@
       <Visible>False</Visible>
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
