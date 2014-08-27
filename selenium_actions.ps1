@@ -53,15 +53,17 @@ if ($PSBoundParameters["browser"]) {
 }
 
   $verificationErrors = new-object System.Text.StringBuilder
-  $baseURL = 'http://www.google.com'
+  $baseURL = 'http://www.wikipedia.org'
   $selenium.Navigate().GoToUrl($baseURL)
-  # https://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html
-  [OpenQA.Selenium.IWebElement] $element = $selenium.FindElement([OpenQA.Selenium.By]::Id('hplogo'))
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);", $element, 'color: yellow; border: 4px solid yellow;')
-  start-sleep 3
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);", $element, '')
-try {
-  $selenium.Quit()
-} catch [Exception] {
+  [OpenQA.Selenium.Interactions.Actions]  $actions = new-object OpenQA.Selenium.Interactions.Actions($selenium)  
+  $element = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
+
+  $actions.MoveToElement( [OpenQA.Selenium.IWebElement]$element ).Build().Perform();
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = new-object OpenQA.Selenium.Support.UI.WebDriverWait($selenium, [System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 100
+  [OpenQA.Selenium.Remote.RemoteWebElement]  $element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Id("hplogo")))
+  try {
+    $selenium.Quit()
+  }   catch [Exception] {
 }
 [NUnit.Framework.Assert]::AreEqual($verificationErrors.Length, 0)
