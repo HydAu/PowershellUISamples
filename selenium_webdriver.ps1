@@ -138,13 +138,15 @@ $driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click
 $title =  $driver.Title
 # -browser "browserName=safari,version=6.1,platform=OSX,javascriptEnable=true"
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1 ) } -message $title 
+assert -Script { ($driver.SessionId -eq $null )} -message 'non null session id'
 
+<#
 # Take screenshot identifying the browser
 $driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 [OpenQA.Selenium.Screenshot]$screenshot = $driver.GetScreenshot()
 
 $screenshot.SaveAsFile(('{0}\{1}' -f $screenshot_path, 'a.png' ), [System.Drawing.Imaging.ImageFormat]::Png)
-
+#>
 # Cleanup
 try {
   $driver.Quit()

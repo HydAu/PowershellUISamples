@@ -87,7 +87,7 @@ namespace SeleniumTests
 
             // Arrange
             // Act
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_UK"));
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP1"));
             // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
             Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Lines") > -1, driver.Title);
         }
@@ -100,7 +100,7 @@ namespace SeleniumTests
             // Arrange
             // Act
 
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_UK"));
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP1"));
             //Find the Log In link and create an object so we can use it
             IWebElement queryBox = driver.FindElements(By.ClassName("header"))[0];
             queryBox.Click();
@@ -117,7 +117,7 @@ namespace SeleniumTests
 
             // Arrange
             // Act
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_US"));
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP2"));
             // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
             Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Lines") > -1, driver.Title);
         }
@@ -130,7 +130,7 @@ namespace SeleniumTests
             // Arrange
             // Act
 
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_UK"));
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP1"));
             //Find the Log In link and create an object so we can use it
             IWebElement queryBox = driver.FindElement(By.ClassName("login-link"));
             queryBox.Click();
@@ -147,7 +147,7 @@ namespace SeleniumTests
 
             // Arrange
             // Act
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_US"));
+            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP2"));
             // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
             Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Deals") > -1, driver.Title);
         }

@@ -105,9 +105,8 @@ $result = $sr.ReadToEnd()
 
 # Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
 [NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
-Convertfrom-JSON -InputObject $result
+$json_object = Convertfrom-JSON -InputObject $result
 <#
-
 internalKey    : 908cbce8-31cd-4ee9-a154-271c4ff4c22c
 session        : 6f689139-39a2-473a-be2d-34312e37b6d4
 inactivityTime : 1
@@ -115,11 +114,13 @@ proxyId        : http://192.168.0.7:5555
 msg            : slot found !
 success        : True
 #>
+$proxyId = $json_object.proxyId
+$proxyUri = new-object System.Uri($proxyId)
+$proxyUri.Port
+$proxyUri.Host
 try {
   $driver.Quit()
 } catch [Exception] {
   # Ignore errors if unable to close the browser
 }
 return 
-
-
