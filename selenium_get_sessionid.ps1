@@ -102,18 +102,19 @@ $resp = $req.GetResponse()
 $reqstream = $resp.GetResponseStream()
 $sr = new-object System.IO.StreamReader $reqstream
 $result = $sr.ReadToEnd()
-write-host $result
+
+# Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
+[NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
+Convertfrom-JSON -InputObject $result
 <#
-{
-"internalKey":"128fa7be-08cb-4c12-a559-e0bdb9bc6c03",
-"session":"36ce3d1b-5731-40e3-be48-706d76fe5ea1",
-"inactivityTime":95,
-"proxyId":"http://192.168.0.7:5555", # bridged
-"msg":"slot found !",
-"success":true
-}
+
+internalKey    : 908cbce8-31cd-4ee9-a154-271c4ff4c22c
+session        : 6f689139-39a2-473a-be2d-34312e37b6d4
+inactivityTime : 1
+proxyId        : http://192.168.0.7:5555
+msg            : slot found !
+success        : True
 #>
-# Cleanup
 try {
   $driver.Quit()
 } catch [Exception] {
