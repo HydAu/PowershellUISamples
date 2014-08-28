@@ -93,16 +93,32 @@ public class CustomeRemoteDriver : RemoteWebDriver
 [string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
 $driver.Navigate().GoToUrl($baseURL)
 $sessionid =  $driver.GetSessionId()
-
 [NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)
+
 # https://github.com/davglass/selenium-grid-status/blob/master/lib/index.js
+$sessionURL = ("http://127.0.0.1:4444/grid/api/testsession?session={0}" -f $sessionid)
+$req = [System.Net.WebRequest]::Create($sessionURL)
+$resp = $req.GetResponse()
+$reqstream = $resp.GetResponseStream()
+$sr = new-object System.IO.StreamReader $reqstream
+$result = $sr.ReadToEnd()
+write-host $result
+<#
+{
+"internalKey":"128fa7be-08cb-4c12-a559-e0bdb9bc6c03",
+"session":"36ce3d1b-5731-40e3-be48-706d76fe5ea1",
+"inactivityTime":95,
+"proxyId":"http://192.168.0.7:5555", # bridged
+"msg":"slot found !",
+"success":true
+}
+#>
 # Cleanup
 try {
   $driver.Quit()
 } catch [Exception] {
   # Ignore errors if unable to close the browser
 }
-
 return 
 
 
