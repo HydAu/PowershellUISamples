@@ -21,7 +21,7 @@ FOR /F "TOKENS=*" %%. in ('dir /b/ad "%USERNAME%_%COMPUTERNAME%*"') DO @echo %%.
 
 echo >>%CONSOLE_LOG% "start the test" 
 
-mstest.exe /category:%CATEGORY% /testcontainer:Sample.dll /resultsfile:%CD%\results.%CATEGORY%.trx
+mstest.exe /category:%CATEGORY% /testcontainer:Sample\obj\Debug\Sample.dll /resultsfile:%CD%\results.%CATEGORY%.trx
 echo >>%CONSOLE_LOG% "Copy the results to %FINAL_LOG_SHARE%"
 copy /y %CD%\results.%CATEGORY%.trx %FINAL_LOG_SHARE%
 

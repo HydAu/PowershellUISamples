@@ -15,7 +15,7 @@
           <Configuration>
             <CodeCoverage xmlns="">
               <Regular>
-                <CodeCoverageItem binaryFile="MockAny\bin\Debug\MockAny.dll" pdbFile="MockAny\bin\Debug\MockAny.pdb" instrumentInPlace="true" />
+                <CodeCoverageItem binaryFile="Sample\bin\Debug\Sample.dll" pdbFile="Sample\bin\Debug\Sample.pdb" instrumentInPlace="true" />
               </Regular>
             </CodeCoverage>
           </Configuration>
