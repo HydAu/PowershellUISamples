@@ -38,26 +38,28 @@ popd
 # http://stackoverflow.com/questions/15767066/get-session-id-for-a-selenium-remotewebdriver-in-c-sharp
 Add-Type -TypeDefinition @"
 using System;
-
-public class CustomeRemoteDriver : OpenQA.Selenium.Remote.RemoteWebDriver
+using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Support.UI;
+public class CustomeRemoteDriver : RemoteWebDriver
 {
-    // OpenQA.Selenium.IWebDriver 
-    public CustomeRemoteDriver(OpenQA.Selenium.ICapabilities desiredCapabilities)
+    // OpenQA.Selenium.WebDriver  ?
+    public CustomeRemoteDriver(ICapabilities desiredCapabilities)
         : base(desiredCapabilities)
     {
     }
 
-    public CustomeRemoteDriver(OpenQA.Selenium.Remote.ICommandExecutor commandExecutor, OpenQA.Selenium.ICapabilities desiredCapabilities)
+    public CustomeRemoteDriver(ICommandExecutor commandExecutor, ICapabilities desiredCapabilities)
         : base(commandExecutor, desiredCapabilities)
     {
     }
 
-    public CustomeRemoteDriver(Uri remoteAddress, OpenQA.Selenium.ICapabilities desiredCapabilities)
+    public CustomeRemoteDriver(Uri remoteAddress, ICapabilities desiredCapabilities)
         : base(remoteAddress, desiredCapabilities)
     {
     }
 
-    public CustomeRemoteDriver(Uri remoteAddress, OpenQA.Selenium.ICapabilities desiredCapabilities, TimeSpan commandTimeout)
+    public CustomeRemoteDriver(Uri remoteAddress, ICapabilities desiredCapabilities, TimeSpan commandTimeout)
         : base(remoteAddress, desiredCapabilities, commandTimeout)
     {
     }
