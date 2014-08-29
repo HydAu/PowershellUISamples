@@ -99,7 +99,7 @@ public class mainForm : System.Windows.Forms.Form
         this.grdActivity.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.ActivityGridCellFormatting);
         // this.grdActivity.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.grdActivity_CellContentClick);
         this.grdActivity.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.ActivityGridCellPainting);
-
+//http://www.codeproject.com/Articles/154680/A-customizable-NET-WinForms-Message-Box
         this.AutoScaleBaseSize = new System.Drawing.Size(3, 3);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
         this.Controls.AddRange(new System.Windows.Forms.Control[] { this.grdActivity });

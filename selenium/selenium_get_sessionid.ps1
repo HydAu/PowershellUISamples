@@ -123,4 +123,11 @@ try {
 } catch [Exception] {
   # Ignore errors if unable to close the browser
 }
+<#
+a simpler alternative:
+//Assume Wed Driver is initiated properly 
+Cookie cookie= driver.manage().getCookieNamed("JSESSIONID")
+cookie.getValue()
+http://autumnator.wordpress.com/2011/12/22/autoit-sikuli-and-other-tools-with-selenium-grid/
+#>
 return 
