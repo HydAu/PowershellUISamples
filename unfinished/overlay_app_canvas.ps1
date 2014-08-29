@@ -84,14 +84,41 @@ namespace BitmapOther_c
 
     protected override void OnPaint ( PaintEventArgs e )
     {
-      Bitmap BMP = new Bitmap(@"C:\developer\sergueik\powershell_ui_samples\Colorbars.JPG");
+Bitmap Bmp;
+      String BackgroundImage = @"C:\developer\sergueik\powershell_ui_samples\Colorbars.JPG" ;
+    // Paint background image 
+     if (BackgroundImage != null)
+     {
+          Bmp = new Bitmap(BackgroundImage);
+          Bmp.MakeTransparent(Color.White);
+      //      Bmp.MakeTransparent( Bmp.GetPixel(15,25) );
+         Bmp.SetPixel(15,20,Color.Black);
       Point Pt = new Point(20,20);
 
-   //   BMP.SetPixel(15,20,Color.Black);
-      BMP.MakeTransparent( BMP.GetPixel(15,25) );
+//
+  //    e.Graphics.DrawImage(Bmp, Pt);
 
-      e.Graphics.DrawImage(BMP, Pt);
+//          e.Graphics.DrawImage(Bmp, 20,20, Width, Height);
+     }
+
+
       e.Graphics.DrawLine(new Pen(Brushes.GreenYellow,30),60,60,200,60);
+
+      String DetaildImage = @"C:\developer\sergueik\powershell_ui_samples\database.bmp" ;
+          Bmp = new Bitmap(DetaildImage );
+          Bmp.MakeTransparent(Color.White);
+
+
+          e.Graphics.DrawImage(Bmp, 40,10, Bmp.Width/2, Bmp.Height/2);
+          e.Graphics.DrawImage(Bmp, 40,60, Bmp.Width/2, Bmp.Height/2);
+
+      DetaildImage = @"C:\developer\sergueik\powershell_ui_samples\app.bmp" ;
+          Bmp = new Bitmap(DetaildImage );
+          Bmp.MakeTransparent(Color.White);
+
+
+          e.Graphics.DrawImage(Bmp, 70,10, Bmp.Width/2, Bmp.Height/2);
+          e.Graphics.DrawImage(Bmp, 85,25, Bmp.Width/2, Bmp.Height/2);
 
 
       
