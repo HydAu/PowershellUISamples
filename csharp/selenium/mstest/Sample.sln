@@ -1,13 +1,14 @@
-﻿Microsoft Visual Studio Solution File, Format Version 9.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{1ACABC83-DF5A-4942-83CE-615E15DEDCED}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A8AAC6ED-6C92-423C-BE77-0C8F1D191EAA}"
 	ProjectSection(SolutionItems) = preProject
 		Local.testsettings = Local.testsettings
 		Sample.vsmdi = Sample.vsmdi
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{1ACABC83-DF5A-4942-83CE-615E15DEDCED}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
