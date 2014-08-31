@@ -1,3 +1,45 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory {
+  if ($env:SCRIPT_PATH -ne '' -and $env:SCRIPT_PATH -ne $null) {
+    return $env:SCRIPT_PATH
+  }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot;
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+  }
+}
+
+
+
 Add-Type -TypeDefinition @"
 
 using System;
@@ -91,13 +133,8 @@ Bitmap Bmp;
      {
           Bmp = new Bitmap(BackgroundImage);
           Bmp.MakeTransparent(Color.White);
-      //      Bmp.MakeTransparent( Bmp.GetPixel(15,25) );
          Bmp.SetPixel(15,20,Color.Black);
       Point Pt = new Point(20,20);
-
-//
-  //    e.Graphics.DrawImage(Bmp, Pt);
-
 //          e.Graphics.DrawImage(Bmp, 20,20, Width, Height);
      }
 
@@ -208,7 +245,6 @@ $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Proc
 
 $clock = New-Object BitmapOther_c.BitmapOther
 $clock.ShowDialog($process_window) | out-null
-
 
 write-output $process_window.GetHashCode()
 
