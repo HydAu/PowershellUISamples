@@ -19,115 +19,115 @@
 #THE SOFTWARE.
 
 
-Param (
-        [switch] $browser
+param(
+  [switch]$browser
 )
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
-        $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
-        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
-    }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot;
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+  }
 }
 
 # http://poshcode.org/1942
-function Assert {
+function assert {
   [CmdletBinding()]
   param(
-   [Parameter(Position=0,ParameterSetName='Script', Mandatory=$true)]
-   [ScriptBlock]$Script,
-   [Parameter(Position=0,ParameterSetName='Condition', Mandatory=$true)]
-   [bool]$Condition,
-   [Parameter(Position=1,Mandatory=$true)]
-   [string]$message )
-     
+    [Parameter(Position = 0,ParameterSetName = 'Script',Mandatory = $true)]
+    [scriptblock]$Script,
+    [Parameter(Position = 0,ParameterSetName = 'Condition',Mandatory = $true)]
+    [bool]$Condition,
+    [Parameter(Position = 1,Mandatory = $true)]
+    [string]$message)
+
   $message = "ASSERT FAILED: $message"
-  if($PSCmdlet.ParameterSetName -eq 'Script') {
+  if ($PSCmdlet.ParameterSetName -eq 'Script') {
     try {
       $ErrorActionPreference = 'STOP'
-      $success = &$Script
+      $success = & $Script
     } catch {
       $success = $false
-      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
+      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"
     }
-  } 
-  if($PSCmdlet.ParameterSetName -eq 'Condition') {
+  }
+  if ($PSCmdlet.ParameterSetName -eq 'Condition') {
     try {
       $ErrorActionPreference = 'STOP'
       $success = $Condition
     } catch {
       $success = $false
-      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"        
+      $message = "$message`nEXCEPTION THROWN: $($_.Exception.GetType().FullName)"
     }
-  } 
+  }
 
-  if(!$success) {
+  if (!$success) {
     throw $message
   }
 }
 
-$shared_assemblies =  @(
-    'WebDriver.dll',
-    'WebDriver.Support.dll',
-    'Selenium.WebDriverBackedSelenium.dll',
-    'Moq.dll'
+$shared_assemblies = @(
+  'WebDriver.dll',
+  'WebDriver.Support.dll',
+  'Selenium.WebDriverBackedSelenium.dll',
+  'Moq.dll'
 )
-$env:SHARED_ASSEMBLIES_PATH =  'c:\developer\sergueik\csharp\SharedAssemblies'
-$env:SCREENSHOT_PATH =  'C:\developer\sergueik\powershell_ui_samples' 
+$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
+$env:SCREENSHOT_PATH = 'C:\developer\sergueik\powershell_ui_samples'
 
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 $screenshot_path = $env:SCREENSHOT_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 $phantomjs_executable_folder = 'C:\tools\phantomjs'
 
 if ($PSBoundParameters['browser']) {
 
-  Try { 
+  try {
     $connection = (New-Object Net.Sockets.TcpClient)
     $connection.Connect('127.0.0.1',4444)
     $connection.Close()
-    }
+  }
   catch {
     $selemium_driver_folder = 'c:\java\selenium'
-    start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
-    start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
-    start-sleep 10
+    Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
+    Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
+    Start-Sleep 10
   }
 
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
   $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
-  $driver = new-object OpenQA.Selenium.Remote.RemoteWebDriver($uri , $capability)
+  $driver = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
-  $driver = new-object OpenQA.Selenium.PhantomJS.PhantomJSDriver($phantomjs_executable_folder)
-  $driver.Capabilities.SetCapability('ssl-protocol', 'any' );
-  $driver.Capabilities.SetCapability('ignore-ssl-errors', $true);
-  $driver.capabilities.SetCapability("takesScreenshot", $false );
-  $driver.capabilities.SetCapability("userAgent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $driver = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
+  $driver.Capabilities.SetCapability('ssl-protocol','any');
+  $driver.Capabilities.SetCapability('ignore-ssl-errors',$true);
+  $driver.Capabilities.SetCapability("takesScreenshot",$false);
+  $driver.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
 
   # currently unused 
-  $options = new-object OpenQA.Selenium.PhantomJS.PhantomJSOptions
-  $options.AddAdditionalCapability("phantomjs.executable.path", $phantomjs_executable_folder);
+  $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
+  $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder);
 
-}  
+}
 # http://selenium.googlecode.com/git/docs/api/dotnet/index.html
-[void]$driver.Manage().Timeouts().ImplicitlyWait( [System.TimeSpan]::FromSeconds(10 )) 
+[void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
 [string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
-$driver.Navigate().GoToUrl(('{0}/' -f $baseURL ))
+$driver.Navigate().GoToUrl(('{0}/' -f $baseURL))
 [OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 
 $queryBox.Clear()
@@ -135,10 +135,10 @@ $queryBox.SendKeys('Selenium')
 $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
 $driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
-$title =  $driver.Title
+$title = $driver.Title
 # -browser "browserName=safari,version=6.1,platform=OSX,javascriptEnable=true"
-assert -Script { ($title.IndexOf('Selenium (software)') -gt -1 ) } -message $title 
-assert -Script { ($driver.SessionId -eq $null )} -message 'non null session id'
+assert -Script { ($title.IndexOf('Selenium (software)') -gt -1) } -Message $title
+assert -Script { ($driver.SessionId -eq $null) } -Message 'non null session id'
 
 <#
 # Take screenshot identifying the browser
@@ -150,6 +150,6 @@ $screenshot.SaveAsFile(('{0}\{1}' -f $screenshot_path, 'a.png' ), [System.Drawin
 # Cleanup
 try {
   $driver.Quit()
-} catch [Exception] {
+} catch [exception]{
   # Ignore errors if unable to close the browser
 }
