@@ -19,20 +19,20 @@
 #THE SOFTWARE.
 
 
-$shared_assemblies =  @(
-  'WebDriver.dll',  
-  'WebDriver.Support.dll', 
+$shared_assemblies = @(
+  'WebDriver.dll',
+  'WebDriver.Support.dll',
   'Selenium.WebDriverBackedSelenium.dll',
   'nunit.core.dll',
   'nunit.framework.dll'
 )
 
-$env:SHARED_ASSEMBLIES_PATH =  'c:\developer\sergueik\csharp\SharedAssemblies'
+$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 
 pushd $shared_assemblies_path
-$shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 # http://stackoverflow.com/questions/15767066/get-session-id-for-a-selenium-remotewebdriver-in-c-sharp
@@ -69,30 +69,30 @@ public class CustomeRemoteDriver : RemoteWebDriver
         return base.SessionId.ToString();
     }
 } 
-"@ -ReferencedAssemblies 'System.dll', "${shared_assemblies_path}\WebDriver.dll", "${shared_assemblies_path}\WebDriver.Support.dll"
+"@ -ReferencedAssemblies 'System.dll',"${shared_assemblies_path}\WebDriver.dll","${shared_assemblies_path}\WebDriver.Support.dll"
 
 
 
-  Try { 
-    $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect('127.0.0.1',4444)
-    $connection.Close()
-    }
-  catch {
-    $selemium_driver_folder = 'c:\java\selenium'
-    start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
-    start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
-    start-sleep 10
-  }
+try {
+  $connection = (New-Object Net.Sockets.TcpClient)
+  $connection.Connect('127.0.0.1',4444)
+  $connection.Close()
+}
+catch {
+  $selemium_driver_folder = 'c:\java\selenium'
+  Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
+  Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
+  Start-Sleep 10
+}
 
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-  $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
-  $driver = new-object CustomeRemoteDriver($uri , $capability)
+$capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+$uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
+$driver = New-Object CustomeRemoteDriver ($uri,$capability)
 
-[void]$driver.Manage().Timeouts().ImplicitlyWait( [System.TimeSpan]::FromSeconds(10 )) 
+[void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
 [string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
 $driver.Navigate().GoToUrl($baseURL)
-$sessionid =  $driver.GetSessionId()
+$sessionid = $driver.GetSessionId()
 [NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)
 
 # https://github.com/davglass/selenium-grid-status/blob/master/lib/index.js
@@ -100,12 +100,12 @@ $sessionURL = ("http://127.0.0.1:4444/grid/api/testsession?session={0}" -f $sess
 $req = [System.Net.WebRequest]::Create($sessionURL)
 $resp = $req.GetResponse()
 $reqstream = $resp.GetResponseStream()
-$sr = new-object System.IO.StreamReader $reqstream
+$sr = New-Object System.IO.StreamReader $reqstream
 $result = $sr.ReadToEnd()
 
 # Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
 [NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
-$json_object = Convertfrom-JSON -InputObject $result
+$json_object = ConvertFrom-Json -InputObject $result
 <#
 internalKey    : 908cbce8-31cd-4ee9-a154-271c4ff4c22c
 session        : 6f689139-39a2-473a-be2d-34312e37b6d4
@@ -115,12 +115,12 @@ msg            : slot found !
 success        : True
 #>
 $proxyId = $json_object.proxyId
-$proxyUri = new-object System.Uri($proxyId)
+$proxyUri = New-Object System.Uri ($proxyId)
 $proxyUri.Port
 $proxyUri.Host
 try {
   $driver.Quit()
-} catch [Exception] {
+} catch [exception]{
   # Ignore errors if unable to close the browser
 }
 <#
@@ -130,4 +130,4 @@ Cookie cookie= driver.manage().getCookieNamed("JSESSIONID")
 cookie.getValue()
 http://autumnator.wordpress.com/2011/12/22/autoit-sikuli-and-other-tools-with-selenium-grid/
 #>
-return 
+return

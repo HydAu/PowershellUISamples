@@ -3,7 +3,7 @@
 # http://stackoverflow.com/questions/570117/why-is-reflectiononlyassemblyresolve-not-executed-when-trying-to-assembly-reflec
 
 
-[string] $fileToLoad = 'C:\temp\mstest\WebDriverFramework.dll';
+[string]$fileToLoad = 'C:\temp\mstest\WebDriverFramework.dll';
 
 [System.Reflection.AssemblyName ]$assamblyName = [System.Reflection.AssemblyName]::GetAssemblyName($fileToLoad);
 # [System.Reflection.Assembly]::Load($assamblyName)
@@ -17,25 +17,25 @@
 $testSuite = [System.Reflection.Assembly]::ReflectionOnlyLoadFrom("${assembly_path}\CarnivalTestScripts.dll")
 
 $assembly_path = 'C:\temp\mstest'
-$assemblies = @('WebDriverFramework.dll',
-               'CarnivalUS.Core.dll',
-               'CarnivalUK.Core.dll',
-               'CarnivalMobile.Core.dll',
-          'CarnivalTestScripts.dll'
+$assemblies = @( 'WebDriverFramework.dll',
+  'CarnivalUS.Core.dll',
+  'CarnivalUK.Core.dll',
+  'CarnivalMobile.Core.dll',
+  'CarnivalTestScripts.dll'
 )
 
-$assemblies| foreach-object {[void][System.Reflection.Assembly]::ReflectionOnlyLoadFrom(( '{0}\{1}' -f  $assembly_path , $_) )} 
+$assemblies | ForEach-Object { [void][System.Reflection.Assembly]::ReflectionOnlyLoadFrom(('{0}\{1}' -f $assembly_path,$_)) }
 
 try {
   $types = $testSuite.GetTypes()
-  $types | format-list | out-null
-} 
-catch [System.Reflection.ReflectionTypeLoadException] {
+  $types | Format-List | Out-Null
+}
+catch [System.Reflection.ReflectionTypeLoadException]{
 
-  write-output $_.Exception.GetType().FullName; 
-  write-output $_.Exception.Message
-  $_.Exception.LoaderExceptions | foreach-object {write-output $_}
-<# 
+  Write-Output $_.Exception.GetType().FullName;
+  Write-Output $_.Exception.Message
+  $_.Exception.LoaderExceptions | ForEach-Object { Write-Output $_ }
+  <# 
 
   Cannot resolve dependency to assembly 'WebDriverFramework, Version=0.0.16.0,
   Culture=neutral, PublicKeyToken=null' because it has not been preloaded. When
@@ -46,9 +46,9 @@ catch [System.Reflection.ReflectionTypeLoadException] {
 }
 
 $methods = $testSuite.GetTypes().GetMethods()
-$methods | select-object -first 3 | get-member
+$methods | Select-Object -First 3 | Get-Member
 
-$methods| select-object -first 3 | foreach-object {$_.GetCustomAttributes  } 
+$methods | Select-Object -First 3 | ForEach-Object { $_.GetCustomAttributes }
 return
 <#
 

@@ -1,30 +1,30 @@
-Param (
-[switch] $browser
+param(
+  [switch]$browser
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-$Invocation = (Get-Variable MyInvocation -Scope 1).Value
-if ($Invocation.PSScriptRoot) {
-$Invocation.PSScriptRoot
-}
-Elseif ($Invocation.MyCommand.Path) {
-Split-Path $Invocation.MyCommand.Path
-} else {
-$Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
-}
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
 }
 $shared_assemblies = @(
-"WebDriver.dll",
-"WebDriver.Support.dll",
-"Selenium.WebDriverBackedSelenium.dll"
+  "WebDriver.dll",
+  "WebDriver.Support.dll",
+  "Selenium.WebDriverBackedSelenium.dll"
 )
 
 $env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 <# 
@@ -33,30 +33,30 @@ mklink /D phantomjs C:\phantomjs-1.9.7-windows
 symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
 #>
 
-$verificationErrors = new-object System.Text.StringBuilder
+$verificationErrors = New-Object System.Text.StringBuilder
 $baseURL = "http://192.168.0.8:8080"
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
-try { 
-$connection = (New-Object Net.Sockets.TcpClient)
-$connection.Connect("127.0.0.1",4444)
-$connection.Close()
-} catch {
-start-process -filepath "C:\Windows\System32\cmd.exe" -argumentlist "start cmd.exe /c c:\java\selenium\hub.cmd"
-start-process -filepath "C:\Windows\System32\cmd.exe" -argumentlist "start cmd.exe /c c:\java\selenium\node.cmd"
-start-sleep -seconds 10
-}
-$capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-$uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
-$selenium = new-object OpenQA.Selenium.Remote.RemoteWebDriver($uri , $capability)
+  try {
+    $connection = (New-Object Net.Sockets.TcpClient)
+    $connection.Connect("127.0.0.1",4444)
+    $connection.Close()
+  } catch {
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+    Start-Sleep -Seconds 10
+  }
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
-$selenium = new-object OpenQA.Selenium.PhantomJS.PhantomJSDriver($phantomjs_executable_folder)
-$selenium.Capabilities.SetCapability("ssl-protocol", "any" )
-$selenium.Capabilities.SetCapability("ignore-ssl-errors", $true)
-$selenium.capabilities.SetCapability("takesScreenshot", $true )
-$selenium.capabilities.SetCapability("userAgent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
-$options = new-object OpenQA.Selenium.PhantomJS.PhantomJSOptions
-$options.AddAdditionalCapability("phantomjs.executable.path", $phantomjs_executable_folder)
+  $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
+  $selenium.Capabilities.SetCapability("ssl-protocol","any")
+  $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
+  $selenium.Capabilities.SetCapability("takesScreenshot",$true)
+  $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
+  $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
 
@@ -64,26 +64,26 @@ $options.AddAdditionalCapability("phantomjs.executable.path", $phantomjs_executa
 $selenium.Navigate().GoToUrl($baseURL + "")
 $selenium.Navigate().Refresh()
 $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("a.task-link[href='/manage']")).Click()
-start-sleep 3
+Start-Sleep 3
 $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("a[href=pluginManager]")).Click()
 
 # Note: the ExecuteScript return value is not supported by the Selenium Recorder and hence Exporter
 # http://blog.reallysimplethoughts.com/2011/07/08/selenium-ide-and-selenium-2-webdriver/
 # but one still can add one of the below to your script.
 
-[OpenQA.Selenium.IJavaScriptExecutor] $jscript = $selenium
-[string] $title = $jscript.ExecuteScript("return document.title")
-write-output $title
-[string] $title = ([OpenQA.Selenium.IJavaScriptExecutor] $selenium).ExecuteScript("return document.title")
+[OpenQA.Selenium.IJavaScriptExecutor]$jscript = $selenium
+[string]$title = $jscript.ExecuteScript("return document.title")
+Write-Output $title
+[string]$title = ([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("return document.title")
 
-write-output $title
-[string] $title = $selenium.ExecuteScript("return document.title")
-write-output $title
-start-sleep -seconds 10
+Write-Output $title
+[string]$title = $selenium.ExecuteScript("return document.title")
+Write-Output $title
+Start-Sleep -Seconds 10
 
 try {
   $selenium.Quit()
-} catch [Exception] {
+} catch [exception]{
   # Ignore errors if unable to close the browser
 }
 

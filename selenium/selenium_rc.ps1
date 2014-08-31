@@ -21,32 +21,32 @@
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-$Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  if ($Invocation.PSScriptRoot)
+  {
     $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf('\'));
-    }
+  }
 }
 
-$shared_assemblies =  @(
-    'ThoughtWorks.Selenium.Core.dll',
-    'nunit.core.dll',
-    'nunit.framework.dll'
+$shared_assemblies = @(
+  'ThoughtWorks.Selenium.Core.dll',
+  'nunit.core.dll',
+  'nunit.framework.dll'
 )
-$env:SHARED_ASSEMBLIES_PATH =  'c:\developer\sergueik\csharp\SharedAssemblies'
+$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 
@@ -56,38 +56,38 @@ popd
 # http://www.studyselenium.com/2014/01/difference-between-selenium-rc-and.html
 
 
-Try { 
-    $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect('127.0.0.1',4444)
-    $connection.Close()
-    }
+try {
+  $connection = (New-Object Net.Sockets.TcpClient)
+  $connection.Connect('127.0.0.1',4444)
+  $connection.Close()
+}
 catch {
   # https://gist.github.com/empo/958531
   $selemium_driver_folder = 'c:\java\selenium'
-  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
-  start-process -filepath 'C:\Windows\System32\cmd.exe' -argumentlist "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
-  start-sleep 10
+  Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList "start cmd.exe /c ${selemium_driver_folder}\hub.cmd"
+  Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList "start cmd.exe /c ${selemium_driver_folder}\node.cmd"
+  Start-Sleep 10
 
 }
 
-$verificationErrors = new-object System.Text.StringBuilder
-$selenium = new-object Selenium.DefaultSelenium('localhost', 4444, '*firefox', 'http://www.wikipedia.org/')
+$verificationErrors = New-Object System.Text.StringBuilder
+$selenium = New-Object Selenium.DefaultSelenium ('localhost',4444,'*firefox','http://www.wikipedia.org/')
 $selenium.Start()
 $selenium.Open('/')
 $selenium.Click('css=strong')
 $selenium.WaitForPageToLoad('30000')
-$selenium.Type('id=searchInput', 'selenium')
+$selenium.Type('id=searchInput','selenium')
 $selenium.Click('id=searchButton')
 $selenium.WaitForPageToLoad('30000')
 $selenium.Click('link=Selenium (software)')
 $selenium.WaitForPageToLoad('30000')
 
-[NUnit.Framework.Assert]::AreEqual($selenium.GetTitle(), 'Selenium (software) - Wikipedia, the free encyclopedia')
-start-sleep -seconds 240
-try{
+[NUnit.Framework.Assert]::AreEqual($selenium.GetTitle(),'Selenium (software) - Wikipedia, the free encyclopedia')
+Start-Sleep -Seconds 240
+try {
   $selenium.Stop()
-} catch [Exception] {
+} catch [exception]{
   # Ignore errors if unable to close the browser
 }
 
-[NUnit.Framework.Assert]::AreEqual('', $verificationErrors.ToString())
+[NUnit.Framework.Assert]::AreEqual('',$verificationErrors.ToString())
