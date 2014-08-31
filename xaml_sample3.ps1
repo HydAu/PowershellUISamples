@@ -1,19 +1,19 @@
 # http://learn-powershell.net/2012/10/14/powershell-and-wpf-writing-data-to-a-ui-from-a-different-runspace/
 # http://stackoverflow.com/questions/23142137/write-powershell-output-as-it-happens-to-wpf-ui-control?rq=1
-Add-Type –assemblyName PresentationFramework
-Add-Type –assemblyName PresentationCore
-Add-Type –assemblyName WindowsBase
+Add-Type â€“assemblyName PresentationFramework
+Add-Type â€“assemblyName PresentationCore
+Add-Type â€“assemblyName WindowsBase
 
 
 $uiHash = [hashtable]::Synchronized(@{})
-$newRunspace =[runspacefactory]::CreateRunspace()
+$newRunspace = [runspacefactory]::CreateRunspace()
 $newRunspace.ApartmentState = "STA"
 $newRunspace.ThreadOptions = "ReuseThread"
-$newRunspace.Open() 
+$newRunspace.Open()
 $newRunspace.SessionStateProxy.SetVariable('uiHash',$uiHash)
 
-$psCmd = [PowerShell]::Create().AddScript({
-[xml]$xaml = @"
+$psCmd = [powershell]::Create().AddScript({
+    [xml]$xaml = @"
 <Window 
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -40,16 +40,16 @@ $psCmd = [PowerShell]::Create().AddScript({
 </Window>
 "@
 
-$reader = (New-Object System.Xml.XmlNodeReader $xaml)
-$uiHash.Window = [Windows.Markup.XamlReader]::Load($reader)
+    $reader = (New-Object System.Xml.XmlNodeReader $xaml)
+    $uiHash.Window = [Windows.Markup.XamlReader]::Load($reader)
 
-$uiHash.Button = $uiHash.Window.FindName("PatchButton")
-$uiHash.OutputTextBox = $uiHash.Window.FindName("OutputTextBox")
+    $uiHash.Button = $uiHash.Window.FindName("PatchButton")
+    $uiHash.OutputTextBox = $uiHash.Window.FindName("OutputTextBox")
 
-$uiHash.OutputTextBox.Dispatcher.Invoke("Render", [Windows.Input.InputEventHandler]    {$uiHash.OutputTextBox.UpdateLayout()}, $null, $null)
+    $uiHash.OutputTextBox.Dispatcher.Invoke("Render",[Windows.Input.InputEventHandler]{ $uiHash.OutputTextBox.UpdateLayout() },$null,$null)
 
-$uiHash.Window.ShowDialog() | Out-Null
-})
+    $uiHash.Window.ShowDialog() | Out-Null
+  })
 $psCmd.Runspace = $newRunspace
 $data = $psCmd.BeginInvoke()
 

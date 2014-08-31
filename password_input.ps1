@@ -23,90 +23,90 @@
 $RESULT_OK = 0
 $RESULT_CANCEL = 2
 
-function PromptPassword(
-	[String] $title, 
-	[String] $user,
-        [Object] $caller
-	){
+function PromptPassword (
+  [string]$title,
+  [string]$user,
+  [object]$caller
+) {
 
-        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
-        $f = New-Object System.Windows.Forms.Form 
-        $f.MaximizeBox = $false;
-        $f.MinimizeBox = $false;
-        $f.Text = $title
+  $f = New-Object System.Windows.Forms.Form
+  $f.MaximizeBox = $false;
+  $f.MinimizeBox = $false;
+  $f.Text = $title
 
-        $l1 = New-Object System.Windows.Forms.Label
-        $l1.Location = New-Object System.Drawing.Size(10,20) 
-        $l1.Size = New-Object System.Drawing.Size(100,20) 
-        $l1.Text = 'Username'         
-        $f.Controls.Add($l1) 
+  $l1 = New-Object System.Windows.Forms.Label
+  $l1.Location = New-Object System.Drawing.Size (10,20)
+  $l1.Size = New-Object System.Drawing.Size (100,20)
+  $l1.Text = 'Username'
+  $f.Controls.Add($l1)
 
-        $f.Font = new-object System.Drawing.Font('Microsoft Sans Serif', 10, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Point, 0);
-  
-        $t1 = new-object System.Windows.Forms.TextBox
-        $t1.Location = new-object System.Drawing.Point(120, 20)
-        $t1.Size = new-object System.Drawing.Size(140, 20)
-        $t1.Text = $user;
-        $t1.Name = 'txtUser';
-        $f.Controls.Add($t1);
+  $f.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
 
-        $l2 = New-Object System.Windows.Forms.Label
-        $l2.Location = New-Object System.Drawing.Size(10,50) 
-        $l2.Size = New-Object System.Drawing.Size(100,20) 
-        $l2.Text = 'Password'
-        $f.Controls.Add($l2) 
+  $t1 = New-Object System.Windows.Forms.TextBox
+  $t1.Location = New-Object System.Drawing.Point (120,20)
+  $t1.Size = New-Object System.Drawing.Size (140,20)
+  $t1.Text = $user;
+  $t1.Name = 'txtUser';
+  $f.Controls.Add($t1);
 
-        $t2 = new-object System.Windows.Forms.TextBox
-        $t2.Location = new-object System.Drawing.Point(120, 50)
-        $t2.Size = new-object System.Drawing.Size(140, 20)
-        $t2.Text = ''
-        $t2.Name = 'txtPassword'
-        $t2.PasswordChar = '*'
-        $f.Controls.Add($t2)
+  $l2 = New-Object System.Windows.Forms.Label
+  $l2.Location = New-Object System.Drawing.Size (10,50)
+  $l2.Size = New-Object System.Drawing.Size (100,20)
+  $l2.Text = 'Password'
+  $f.Controls.Add($l2)
 
-        $btnOK = new-object System.Windows.Forms.Button
-        $x2 = 20 
-        $y1 = ($t1.Location.Y + $t1.Size.Height + + $btnOK.Size.Height + 20)
-        $btnOK.Location = new-object System.Drawing.Point($x2 , $y1 )
-        $btnOK.Text = "OK";
-        $btnOK.Name = "btnOK";
-        $f.Controls.Add($btnOK);
+  $t2 = New-Object System.Windows.Forms.TextBox
+  $t2.Location = New-Object System.Drawing.Point (120,50)
+  $t2.Size = New-Object System.Drawing.Size (140,20)
+  $t2.Text = ''
+  $t2.Name = 'txtPassword'
+  $t2.PasswordChar = '*'
+  $f.Controls.Add($t2)
 
-        $btnCancel = new-object System.Windows.Forms.Button
-        $x1 = (($f.Size.Width -  $btnCancel.Size.Width) - 20 )
+  $btnOK = New-Object System.Windows.Forms.Button
+  $x2 = 20
+  $y1 = ($t1.Location.Y + $t1.Size.Height + + $btnOK.Size.Height + 20)
+  $btnOK.Location = New-Object System.Drawing.Point ($x2,$y1)
+  $btnOK.Text = "OK";
+  $btnOK.Name = "btnOK";
+  $f.Controls.Add($btnOK);
 
-        $btnCancel.Location = new-object System.Drawing.Point($x1, $y1 );
-        $btnCancel.Text = 'Cancel';
-        $btnCancel.Name = 'btnCancel';
-        $f.Controls.Add($btnCancel);
-        $s1 = ($f.Size.Width -  $btnCancel.Size.Width) - 20
-        $y2 = ($t1.Location.Y + $t1.Size.Height + $btnOK.Size.Height)
+  $btnCancel = New-Object System.Windows.Forms.Button
+  $x1 = (($f.Size.Width - $btnCancel.Size.Width) - 20)
 
-        $f.Size = new-object System.Drawing.Size($f.Size.Width,  (($btnCancel.Location.Y +
-                             $btnCancel.Size.Height + 40)))
+  $btnCancel.Location = New-Object System.Drawing.Point ($x1,$y1);
+  $btnCancel.Text = 'Cancel';
+  $btnCancel.Name = 'btnCancel';
+  $f.Controls.Add($btnCancel);
+  $s1 = ($f.Size.Width - $btnCancel.Size.Width) - 20
+  $y2 = ($t1.Location.Y + $t1.Size.Height + $btnOK.Size.Height)
 
-        $btnCancel.Add_Click({$caller.txtPassword = $null ; $caller.txtUser =  $null ;$f.Close()})
-        $btnOK.Add_Click({$caller.Data = $RESULT_OK;$caller.txtPassword  = $t2.Text ; $caller.txtUser = $t1.Text;  $f.Close()})
+  $f.Size = New-Object System.Drawing.Size ($f.Size.Width,(($btnCancel.Location.Y +
+        $btnCancel.Size.Height + 40)))
 
-$f.Controls.Add($l) 
-$f.Topmost = $true
+  $btnCancel.add_click({ $caller.txtPassword = $null; $caller.txtUser = $null; $f.Close() })
+  $btnOK.add_click({ $caller.Data = $RESULT_OK; $caller.txtPassword = $t2.Text; $caller.txtUser = $t1.Text; $f.Close() })
+
+  $f.Controls.Add($l)
+  $f.Topmost = $true
 
 
-$caller.Data = $RESULT_CANCEL;
-$f.Add_Shown( { $f.Activate() } )
-$f.KeyPreview = $True
-$f.Add_KeyDown({
+  $caller.Data = $RESULT_CANCEL;
+  $f.Add_Shown({ $f.Activate() })
+  $f.KeyPreview = $True
+  $f.Add_KeyDown({
 
-	if ($_.KeyCode -eq 'Escape')  { $caller.Data = $RESULT_CANCEL }
-	else                              { return }  
-	$f.Close()
-})
+      if ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_CANCEL }
+      else { return }
+      $f.Close()
+    })
 
-[Void] $f.ShowDialog([Win32Window ] ($caller) )
+  [void]$f.ShowDialog([win32window ]($caller))
 
-$f.Dispose() 
+  $f.Dispose()
 }
 
 Add-Type -TypeDefinition @"
@@ -151,11 +151,11 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
-$title = 'Enter credentials' 
-$user =  'admin'
+$title = 'Enter credentials'
+$user = 'admin'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptPassword -title $title -user $user -caller $caller
+PromptPassword -Title $title -user $user -caller $caller
 if ($caller.Data -ne $RESULT_CANCEL) {
-write-debug ("Result is : {0} / {1}  " -f  $caller.TxtUser , $caller.TxtPassword )
+  Write-Debug ("Result is : {0} / {1}  " -f $caller.txtUser,$caller.txtPassword)
 }

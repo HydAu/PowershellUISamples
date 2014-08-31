@@ -325,7 +325,7 @@ using System.Text;
         }
     }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
 Add-Type -TypeDefinition @"
 using System;
@@ -366,49 +366,49 @@ public class Win32Window : IWin32Window
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
 
 # http://msdn.microsoft.com/en-us/library/system.windows.forms.control.dodragdrop%28v=vs.100%29.aspx
 
 
 function PromptWithDragDropNish {
-param
-(
+  param
+  (
 
-[String] $title, 
-        [Object] $caller
-)
+    [string]$title,
+    [object]$caller
+  )
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
 
-$f = New-Object System.Windows.Forms.Form 
-$f.Text = $title
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
 
-$panel = New-Object DragNDrop($caller.Message)
+  $panel = New-Object DragNDrop ($caller.Message)
 
-$f.ClientSize = new-object  System.Drawing.Size(288, 248)
-$f.Controls.AddRange(@( $panel )) 
-$f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
-$f.MaximizeBox = $false
-$f.Name = "Form1"
-$f.Text = "Playing with drag and drop"
+  $f.ClientSize = New-Object System.Drawing.Size (288,248)
+  $f.Controls.AddRange(@( $panel))
+  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+  $f.MaximizeBox = $false
+  $f.Name = "Form1"
+  $f.Text = "Playing with drag and drop"
 
-$panel.ResumeLayout($false)
-$f.ResumeLayout($false)
+  $panel.ResumeLayout($false)
+  $f.ResumeLayout($false)
 
-$f.StartPosition = 'CenterScreen'
-$f.KeyPreview = $false
+  $f.StartPosition = 'CenterScreen'
+  $f.KeyPreview = $false
 
-if ($caller -eq $null ){
-  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-}
+  if ($caller -eq $null) {
+    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+  }
 
-  $f.Add_Shown( { $f.Activate() } )
+  $f.Add_Shown({ $f.Activate() })
 
-  [Void] $f.ShowDialog([Win32Window ] ($caller) )
+  [void]$f.ShowDialog([win32window ]($caller))
   $result = $panel.Message
   $panel.Dispose()
   $f.Dispose()
@@ -421,32 +421,32 @@ if ($caller -eq $null ){
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
-        $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
-        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
-    }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot;
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+  }
 }
 
 $DebugPreference = 'Continue'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $caller.ScriptDirectory = Get-ScriptDirectory
 $data = @(
-   'one','two','three','four','five',
-   'six','seven','nine','ten','eleven'
+  'one','two','three','four','five',
+  'six','seven','nine','ten','eleven'
 )
 $caller.Message = $data -join ','
-$result = PromptWithDragDropNish 'Items'  $caller 
+$result = PromptWithDragDropNish 'Items' $caller
 
 # write-debug ('Selection is : {0}' -f  , $result )
 
-$result -split ',' | format-table -autosize
+$result -split ',' | Format-Table -AutoSize
 

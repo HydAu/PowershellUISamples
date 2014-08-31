@@ -89,78 +89,78 @@ public class Win32Window : IWin32Window
 
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Runtime.InteropServices.dll', 'System.Net.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Runtime.InteropServices.dll','System.Net.dll'
 
 
-function promptForContinueWithCookies(
-	[String] $login_url = $null,
-	[Object] $caller= $null
-	)
+function promptForContinueWithCookies (
+  [string]$login_url = $null,
+  [object]$caller = $null
+)
 {
 
-$f = New-Object System.Windows.Forms.Form 
-$f.Text = $title
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
 
-$timer1 = new-object System.Timers.Timer
-$label1 = new-object System.Windows.Forms.Label
+  $timer1 = New-Object System.Timers.Timer
+  $label1 = New-Object System.Windows.Forms.Label
 
-$f.SuspendLayout()
-$components = new-object System.ComponentModel.Container 
-
-
-        $browser = new-object System.Windows.Forms.WebBrowser
-        $f.SuspendLayout();
-
-        # webBrowser1
-        $browser.Dock = [System.Windows.Forms.DockStyle]::Fill
-        $browser.Location = new-object System.Drawing.Point(0, 0)
-        $browser.Name = "webBrowser1"
-        $browser.Size = new-object System.Drawing.Size(600, 600)
-        $browser.TabIndex = 0
-        # Form1 
-        $f.AutoScaleDimensions = new-object System.Drawing.SizeF(6, 13)
-        $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
-        $f.ClientSize = new-object System.Drawing.Size(600, 600)
-        $f.Controls.Add($browser)
-        $f.Text = "Login to octopus"
-        $f.ResumeLayout($false)
+  $f.SuspendLayout()
+  $components = New-Object System.ComponentModel.Container
 
 
+  $browser = New-Object System.Windows.Forms.WebBrowser
+  $f.SuspendLayout();
 
-$f.Add_Load({
-  param ([Object] $sender, [System.EventArgs] $eventArgs )
-$browser.Navigate($login_url);
-}) 
+  # webBrowser1
+  $browser.Dock = [System.Windows.Forms.DockStyle]::Fill
+  $browser.Location = New-Object System.Drawing.Point (0,0)
+  $browser.Name = "webBrowser1"
+  $browser.Size = New-Object System.Drawing.Size (600,600)
+  $browser.TabIndex = 0
+  # Form1 
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
+  $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+  $f.ClientSize = New-Object System.Drawing.Size (600,600)
+  $f.Controls.Add($browser)
+  $f.Text = "Login to octopus"
+  $f.ResumeLayout($false)
 
-$browser.Add_Navigated(
-{
 
-  param ([Object] $sender, [System.Windows.Forms.WebBrowserNavigatedEventArgs] $eventArgs )
-        # wait for the user to successfully log in 
-        # then capture the global cookies and sent to $caller
-        $url = $browser.Url.ToString()
-        if ($caller -ne $null -and $url -ne $null -and $url -match $caller.Url ) {  
-            $caller.Cookies = $caller.GetGlobalCookies($url)
-        }
+
+  $f.add_Load({
+      param([object]$sender,[System.EventArgs]$eventArgs)
+      $browser.Navigate($login_url);
+    })
+
+  $browser.Add_Navigated(
+    {
+
+      param([object]$sender,[System.Windows.Forms.WebBrowserNavigatedEventArgs]$eventArgs)
+      # wait for the user to successfully log in 
+      # then capture the global cookies and sent to $caller
+      $url = $browser.Url.ToString()
+      if ($caller -ne $null -and $url -ne $null -and $url -match $caller.Url) {
+        $caller.Cookies = $caller.GetGlobalCookies($url)
+      }
     }
- )
+  )
 
-$f.ResumeLayout($false)
-$f.Topmost = $True
+  $f.ResumeLayout($false)
+  $f.Topmost = $True
 
-$f.Add_Shown( { $f.Activate() } )
+  $f.Add_Shown({ $f.Activate() })
 
-[void] $f.ShowDialog([Win32Window ] ($caller) )
+  [void]$f.ShowDialog([win32window ]($caller))
 
 }
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $service_host = 'http://localhost:8088'
-$login_route = 'app#/users/sign-in' 
-$login_url = ('{0}/{1}' -f $service_host , $login_route)
+$login_route = 'app#/users/sign-in'
+$login_url = ('{0}/{1}' -f $service_host,$login_route)
 
-$caller.Url =  'app#/environments'
+$caller.Url = 'app#/environments'
 
 promptForContinueWithCookies $login_url $caller
 
-write-host ("{0}->{1}" -f , $caller.Url, $caller.Cookies)
+Write-Host ("{0}->{1}" -f,$caller.Url,$caller.Cookies)

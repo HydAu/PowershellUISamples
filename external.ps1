@@ -1,10 +1,6 @@
 
-
-
-Hope can help
-
 function Out-Form {
-<#
+  <#
     .Synopsis
         Output the results of a command in a Windows Form
     .Description
@@ -13,16 +9,16 @@ function Out-Form {
     
         out-form -title "Services" -data (get-service) -columnNames ("Name", "Status") -columnProperties ("DisplayName", "Status") -actions @{"Start" = {$_.start()}; "Stop" = {$_.stop()};}
     #>
-  param ($title = "", $data = $null, $columnNames = $null, $columnTag,
-         $columnProperties = $null, $actions = $null)
+  param($title = "",$data = $null,$columnNames = $null,$columnTag,
+    $columnProperties = $null,$actions = $null)
   # a little data defaulting/validation
   if ($columnNames -eq $null) {
     $columnNames = $columnProperties
   }
   if ($columnProperties -eq $null -or
-      $columnNames.Count -lt 1 -or
-      $columnNames.Count -ne $columnNames.Count) {
-     
+    $columnNames.Count -lt 1 -or
+    $columnNames.Count -ne $columnNames.Count) {
+
     throw "Data validation failed"
   }
   $numCols = $columnNames.Count
@@ -35,35 +31,35 @@ function Out-Form {
   }
 
   # set up form
-  $form = new-object System.Windows.Forms.Form
-  $form.text = $title
-  $form.size = new-object System.Drawing.Size($width, 400)
-  $panel = new-object System.Windows.Forms.Panel
+  $form = New-Object System.Windows.Forms.Form
+  $form.Text = $title
+  $form.Size = New-Object System.Drawing.Size ($width,400)
+  $panel = New-Object System.Windows.Forms.Panel
   $panel.Dock = "Fill"
   $form.Controls.Add($panel)
 
-  $lv = new-object windows.forms.ListView
+  $lv = New-Object windows.forms.ListView
   $panel.Controls.Add($lv)
 
   # add the buttons
-  $btnPanel = new-object System.Windows.Forms.Panel
+  $btnPanel = New-Object System.Windows.Forms.Panel
   $btnPanel.Height = 40
   $btnPanel.Dock = "Bottom"
   $panel.Controls.Add($btnPanel)
 
-  $btns = new-object System.Collections.ArrayList
+  $btns = New-Object System.Collections.ArrayList
   if ($actions -ne $null) {
     $btnOffset = 20
     foreach ($action in $actions.GetEnumerator()) {
-      $btn = new-object windows.forms.Button
+      $btn = New-Object windows.forms.Button
       $btn.DialogResult = [System.Windows.Forms.DialogResult]"OK"
-      $btn.Text = $action.name
+      $btn.Text = $action.Name
       $btn.Left = $btnOffset
       $btn.Width = 80
       $btn.Top = 10
-      $exprString = '{$lv.SelectedItems | foreach-object { $_.Tag } | foreach-object {' + $action.value + '}}'
-      $scriptBlock = invoke-expression $exprString
-      $btn.add_Click($scriptBlock)
+      $exprString = '{$lv.SelectedItems | foreach-object { $_.Tag } | foreach-object {' + $action.Value + '}}'
+      $scriptBlock = Invoke-Expression $exprString
+      $btn.add_click($scriptBlock)
       $btnPanel.Controls.Add($btn)
       $btnOffset += 100
       $btns += $btn
@@ -72,35 +68,35 @@ function Out-Form {
 
   # create the columns
   $lv.View = [System.Windows.Forms.View]"Details"
-  $lv.Size = new-object System.Drawing.Size($width, 350)
+  $lv.Size = New-Object System.Drawing.Size ($width,350)
   $lv.FullRowSelect = $true
   $lv.GridLines = $true
   $lv.Dock = "Fill"
   foreach ($col in $columnNames) {
-    $lv.Columns.Add($col, 200) > $null
+    $lv.Columns.Add($col,200) > $null
   }
-  
+
   # populate the view
   foreach ($d in $data) {
     $item =
-      new-object System.Windows.Forms.ListViewItem(
-        (invoke-expression ('$d.' + $columnProperties[0])).tostring())
+    New-Object System.Windows.Forms.ListViewItem (
+      (Invoke-Expression ('$d.' + $columnProperties[0])).ToString())
 
     for ($i = 1; $i -lt $columnProperties.Count; $i++) {
       $item.SubItems.Add(
-        (invoke-expression ('$d.' + $columnProperties[$i])).tostring()) > $null
+        (Invoke-Expression ('$d.' + $columnProperties[$i])).ToString()) > $null
     }
     $item.Tag = $d
     $lv.Items.Add($item) > $null
   }
 
-# Added by Bar971.it  
+  # Added by Bar971.it  
   for ($i = 0; $i -lt $columnTag.Count; $i++) {
-    
-    $lv.Columns[$i].Tag = $columnTag[$i] 
-    
+
+    $lv.Columns[$i].Tag = $columnTag[$i]
+
   }
-  
+
   $comparerClassString = @"
 
   using System;
@@ -172,26 +168,26 @@ function Out-Form {
     }
 } 
 "@
-Add-Type -TypeDefinition $comparerClassString `
-  -ReferencedAssemblies (`
-    'System.Windows.Forms', 'System.Drawing')
-      
-$bool = $true
-$columnClick = 
-{  
-  $lv.ListViewItemSorter = New-Object ListViewItemComparer($_.Column, $bool)
-  
-  $bool = !$bool  
-}
-$lv.Add_ColumnClick($columnClick)
-# End Add by Bar971.it
+  Add-Type -TypeDefinition $comparerClassString `
+     -ReferencedAssemblies (`
+       'System.Windows.Forms','System.Drawing')
+
+  $bool = $true
+  $columnClick =
+  {
+    $lv.ListViewItemSorter = New-Object ListViewItemComparer ($_.Column,$bool)
+
+    $bool = !$bool
+  }
+  $lv.Add_ColumnClick($columnClick)
+  # End Add by Bar971.it
 
   # display it
-  $form.Add_Shown( { $form.Activate() } )
+  $form.Add_Shown({ $form.Activate() })
   if ($btns.Count -gt 0) {
     $form.AcceptButton = $btns[0]
   }
-  $form.showdialog()
+  $form.ShowDialog()
 }
 
-out-form -data (get-process) -columnNames ("Name", "ID" ) -columnProperties ("Name", "ID") -columnTag ("Text", "Numeric")
+out-form -data (Get-Process) -columnNames ("Name","ID") -columnProperties ("Name","ID") -columnTag ("Text","Numeric")

@@ -76,16 +76,16 @@ public class EnumReport
     [return: MarshalAs(UnmanagedType.SysUInt)]
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
     static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
-  
+
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
     static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
-    
+
     [DllImport("user32.dll", SetLastError = true)]
     public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, string windowTitle);
 
-[return: MarshalAs(UnmanagedType.Bool)]
-[DllImport("user32.dll", SetLastError = true)]
-static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
 
 
     public static string GetText(IntPtr hWnd)
@@ -101,9 +101,9 @@ static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lP
         int nRet = GetClassName(hWnd, ClassName, ClassName.Capacity);
         return (nRet != 0) ? ClassName.ToString() : null;
     }
+
     public static void SetText(IntPtr hWnd, String text)
     {
-
         UInt32 WM_SETTEXT = 0x000C;
         StringBuilder sb = new StringBuilder(text);
         int result = SendMessage(hWnd, WM_SETTEXT, (IntPtr)sb.Length, (String)sb.ToString());
@@ -111,7 +111,6 @@ static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lP
 
     public static bool Report(IntPtr hWnd, int lParam)
     {
-
         IntPtr lngPid = System.IntPtr.Zero;
         GetWindowThreadProcessId(hWnd, out lngPid);
         int PID = Convert.ToInt32(/* Marshal.ReadInt32 */ lngPid.ToString());
@@ -146,8 +145,6 @@ static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lP
     {
         String myManagedString = Marshal.PtrToStringAnsi(lpszString);
         string propName = Marshal.PtrToStringAnsi(lpszString);
-
-        // Continue
         return true;
     }
 
@@ -194,29 +191,31 @@ static extern bool PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lP
         GCHandle gch = GCHandle.FromIntPtr(pointer);
         String window_class_name = GetWindowClassName(handle);
         // Set textbox text - filename to save
-        if (string.Compare(window_class_name, "Edit", true, CultureInfo.InvariantCulture) == 0 ) {
+        if (string.Compare(window_class_name, "Edit", true, CultureInfo.InvariantCulture) == 0)
+        {
             // http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731%28v=vs.85%29.aspx
             const UInt32 WM_CHAR = 0x0102;
             const UInt32 WM_KEYDOWN = 0x0100;
             const UInt32 WM_KEYUP = 0x0101;
             const UInt32 VK_RETURN = 0x0D;
             SendMessage(handle, WM_CHAR, new IntPtr(WM_KEYDOWN), IntPtr.Zero);
-            SetText(handle, String.Format(@"{0}\{1}{2}", 
+            SetText(handle, String.Format(@"{0}\{1}{2}",
                   Environment.GetEnvironmentVariable("TEMP"), "my random filename", new Random().Next(10)));
             Thread.Sleep(1000);
             SendMessage(handle, WM_CHAR, new IntPtr(VK_RETURN), IntPtr.Zero);
         }
         // Click 'Save'
-        if (string.Compare(window_class_name, "Button", true, CultureInfo.InvariantCulture) == 0 ) {
+        if (string.Compare(window_class_name, "Button", true, CultureInfo.InvariantCulture) == 0)
+        {
             string button_text = GetText(handle);
-            if (string.Compare(button_text, "&Save", true, CultureInfo.InvariantCulture) == 0) {
+            if (string.Compare(button_text, "&Save", true, CultureInfo.InvariantCulture) == 0)
+            {
                 SetText(handle, "About to click");
                 const UInt32 BM_CLICK = 0x00F5;
                 Thread.Sleep(1000);
                 SendMessage(handle, BM_CLICK, IntPtr.Zero, IntPtr.Zero);
             }
         }
-
         List<IntPtr> list = gch.Target as List<IntPtr>;
         if (list == null)
             throw new InvalidCastException("cast exception");

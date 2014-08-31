@@ -149,7 +149,7 @@ namespace MyClock
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 $clock = New-Object MyClock.MyClockForm
 $clock.ShowDialog()

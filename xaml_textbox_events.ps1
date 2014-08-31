@@ -17,21 +17,21 @@
 #requires -version 2
 Add-Type -AssemblyName PresentationFramework
 
-$so = [hashtable]::Synchronized(@{ 
-    'Result'  = '';
-	'Window'  = [System.Windows.Window] $null ;
-	'TextBox' = [System.Windows.Controls.TextBox] $null ;
-	})
+$so = [hashtable]::Synchronized(@{
+    'Result' = '';
+    'Window' = [System.Windows.Window]$null;
+    'TextBox' = [System.Windows.Controls.TextBox]$null;
+  })
 $so.Result = ''
-$rs =[runspacefactory]::CreateRunspace()
+$rs = [runspacefactory]::CreateRunspace()
 $rs.ApartmentState = 'STA'
 $rs.ThreadOptions = 'ReuseThread'
 $rs.Open()
-$rs.SessionStateProxy.SetVariable('so', $so)          
-$run_script = [PowerShell]::Create().AddScript({   
+$rs.SessionStateProxy.SetVariable('so',$so)
+$run_script = [powershell]::Create().AddScript({
 
-Add-Type -AssemblyName PresentationFramework
-[xml]$xaml = @"
+    Add-Type -AssemblyName PresentationFramework
+    [xml]$xaml = @"
 <Window x:Name="Window"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -48,50 +48,50 @@ Add-Type -AssemblyName PresentationFramework
 </Window>
 "@
 
-$reader = (New-Object System.Xml.XmlNodeReader $xaml)
-$target = [Windows.Markup.XamlReader]::Load($reader)
-$so.Window  = $target
-$handler = {
-	param ( 
-    [Object]  $sender, 
-    [System.Windows.Controls.TextChangedEventArgs] $eventargs  
-	)
-	$so.Result  = $sender.Text
+    $reader = (New-Object System.Xml.XmlNodeReader $xaml)
+    $target = [Windows.Markup.XamlReader]::Load($reader)
+    $so.Window = $target
+    $handler = {
+      param(
+        [object]$sender,
+        [System.Windows.Controls.TextChangedEventArgs]$eventargs
+      )
+      $so.Result = $sender.Text
+    }
+    $control = $target.FindName("textbox")
+    $so.TextBox = $control
+
+    $event = $control.Add_TextChanged
+    $event.Invoke($handler)
+
+    $target.ShowDialog() | Out-Null
+  })
+
+function send_text {
+  param(
+    $content,
+    [switch]$append
+  )
+  # WARNING - uncommenting the following line leads to exception  
+  # "The calling thread cannot access this object because a different thread owns it."
+  # $so.Textbox = $so.Window.FindName("textbox")
+
+  # NOTE - host-specific method signature:
+  $so.TextBox.Dispatcher.Invoke([System.Action]{
+
+      if ($PSBoundParameters['append_content']) {
+        $so.TextBox.AppendText($content)
+      } else {
+        $so.TextBox.Text = $content
+      }
+      $so.Result = $so.TextBox.Text
+    },'Normal')
 }
-$control = $target.FindName("textbox")
-$so.TextBox = $control 
 
-$event = $control.Add_TextChanged
-$event.Invoke( $handler )
-
-$target.ShowDialog() | out-null 
-})
-
-function send_text { 
-    Param (
-        $content,
-        [switch] $append
-    )
-	# WARNING - uncommenting the following line leads to exception  
-	# "The calling thread cannot access this object because a different thread owns it."
-	# $so.Textbox = $so.Window.FindName("textbox")
-
-    # NOTE - host-specific method signature:
-    $so.Textbox.Dispatcher.invoke([System.Action]{
-       
-        if ($PSBoundParameters['append_content']) {
-            $so.TextBox.AppendText($content)
-        } else {
-            $so.TextBox.Text = $content
-        }
-		$so.Result = $so.TextBox.Text 
-    }, 'Normal')
-}
-
-function close_dialog { 
-    $so.Window.Dispatcher.invoke([action]{
-       $so.Window.Close()
-    }, 'Normal')
+function close_dialog {
+  $so.Window.Dispatcher.Invoke([action]{
+      $so.Window.Close()
+    },'Normal')
 }
 
 $run_script.Runspace = $rs
@@ -101,26 +101,26 @@ $data = $run_script.BeginInvoke()
 
 # TODO - synchronize properly
 # http://stackoverflow.com/questions/10330446/how-to-know-when-a-control-or-window-has-been-rendered-drawn-in-wpf
-start-sleep 1
-write-host $so.Result
+Start-Sleep 1
+Write-Host $so.Result
 send_text -Content 'The qick red focks jumped over the lasy brown dog.'
 $cnt = 10
-[bool] $done = $false
-while (($cnt  -ne 0 ) -and -not $done) {
-  write-output ('Text: {0} ' -f $so.Result )
-  if ($so.Result -eq 'The quick red fox jumped over the lazy brown dog.' ){ 
+[bool]$done = $false
+while (($cnt -ne 0) -and -not $done) {
+  Write-Output ('Text: {0} ' -f $so.Result)
+  if ($so.Result -eq 'The quick red fox jumped over the lazy brown dog.') {
     $done = $true;
-  } 
+  }
   else {
-    start-sleep 10
-  }   
+    Start-Sleep 10
+  }
   $cnt --
 }
 close_dialog
 
-if ( -not $done ){
-    write-output 'Time is up!'
-} else { 
-    write-output 'Well done!'
+if (-not $done) {
+  Write-Output 'Time is up!'
+} else {
+  Write-Output 'Well done!'
 }
 

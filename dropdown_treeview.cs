@@ -9,10 +9,10 @@ using System.Data;
 using System.Runtime.Serialization;
 
 // http://www.codeproject.com/Articles/14544/A-TreeView-Control-with-ComboBox-Dropdown-Nodes
-namespace  DropDownTreeViewExample
+namespace DropDownTreeViewExample
 {
 
-   public class DropDownTreeViewExample : System.Windows.Forms.Form
+    public class DropDownTreeViewExample : System.Windows.Forms.Form
     {
         internal System.Windows.Forms.TreeView treeFood;
         /// <summary>
@@ -35,16 +35,16 @@ namespace  DropDownTreeViewExample
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if (components != null) 
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
@@ -59,8 +59,8 @@ namespace  DropDownTreeViewExample
             // 
             // treeFood
             // 
-            this.treeFood.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-                | System.Windows.Forms.AnchorStyles.Left) 
+            this.treeFood.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right);
             this.treeFood.ImageIndex = -1;
             this.treeFood.Location = new System.Drawing.Point(4, 5);
@@ -88,7 +88,7 @@ namespace  DropDownTreeViewExample
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() 
+        static void Main()
         {
             Application.Run(new DropDownTreeViewExample());
         }
@@ -96,42 +96,42 @@ namespace  DropDownTreeViewExample
         private void DropDownTreeViewExample_Load(object sender, System.EventArgs e)
         {
 
-DropDownTreeNode tn1 = new DropDownTreeNode("Credentials");
-tn1.ComboBox.Items.Add("LocalService");
-tn1.ComboBox.Items.Add("LocalSystem ");
-tn1.ComboBox.Items.Add("NetworkService");
-tn1.ComboBox.SelectedIndex = 0;
-tn1.ComboBox.DropDownClosed += new System.EventHandler(this.treeFood_AfterComboboxSelect);
-TreeNode tn3 = new TreeNode("Test Node 1");
-DropDownTreeNode tn2 = new DropDownTreeNode("Install");
-string[] installs = new string[]{"Typical", "Compact", "Custom"};
-tn2.ComboBox.Items.AddRange(installs);
-tn2.ComboBox.DropDownClosed += new System.EventHandler(this.treeFood_AfterComboboxSelect);
-// Legal!  This is how you would normally do it.
- treeFood.Nodes.Add(tn3);
+            DropDownTreeNode tn1 = new DropDownTreeNode("Credentials");
+            tn1.ComboBox.Items.Add("LocalService");
+            tn1.ComboBox.Items.Add("LocalSystem ");
+            tn1.ComboBox.Items.Add("NetworkService");
+            tn1.ComboBox.SelectedIndex = 0;
+            tn1.ComboBox.DropDownClosed += new System.EventHandler(this.treeFood_AfterComboboxSelect);
+            TreeNode tn3 = new TreeNode("Test Node 1");
+            DropDownTreeNode tn2 = new DropDownTreeNode("Install");
+            string[] installs = new string[] { "Typical", "Compact", "Custom" };
+            tn2.ComboBox.Items.AddRange(installs);
+            tn2.ComboBox.DropDownClosed += new System.EventHandler(this.treeFood_AfterComboboxSelect);
+            // Legal!  This is how you would normally do it.
+            treeFood.Nodes.Add(tn3);
 
-treeFood.Nodes.Add(tn1);
-// Also legal!  Through inheritance, a DropDownTreeNode is a TreeNode.
-treeFood.Nodes.Add(tn2);
+            treeFood.Nodes.Add(tn1);
+            // Also legal!  Through inheritance, a DropDownTreeNode is a TreeNode.
+            treeFood.Nodes.Add(tn2);
 
         }
 
         private void treeFood_AfterComboboxSelect(Object sender, System.EventArgs e)
         {
-                System.Windows.Forms.ComboBox x = (System.Windows.Forms.ComboBox) sender;
-// sender.SelectedText
-                MessageBox.Show(x.SelectedItem.ToString());
+            System.Windows.Forms.ComboBox x = (System.Windows.Forms.ComboBox)sender;
+            // sender.SelectedText
+            MessageBox.Show(x.SelectedItem.ToString());
         }
 
 
         private void treeFood_AfterSelect(object sender, System.EventArgs e)
         {
-/*
-           if (e.Action == TreeViewAction.ByMouse)
-            {
-                MessageBox.Show(e.Node.FullPath);
-            } 
-*/
+            /*
+                       if (e.Action == TreeViewAction.ByMouse)
+                        {
+                            MessageBox.Show(e.Node.FullPath);
+                        } 
+            */
         }
 
     }
@@ -148,7 +148,7 @@ treeFood.Nodes.Add(tn2);
         /// </summary>
         public DropDownTreeNode()
             : base()
-        {            
+        {
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ treeFood.Nodes.Add(tn2);
         /// <param name="text">The text.</param>
         public DropDownTreeNode(string text)
             : base(text)
-        {            
+        {
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ treeFood.Nodes.Add(tn2);
         /// <param name="children">The children.</param>
         public DropDownTreeNode(string text, TreeNode[] children)
             : base(text, children)
-        {            
+        {
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ treeFood.Nodes.Add(tn2);
         /// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"></see> containing the source and destination of the serialized stream.</param>
         public DropDownTreeNode(SerializationInfo serializationInfo, StreamingContext context)
             : base(serializationInfo, context)
-        {            
+        {
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ treeFood.Nodes.Add(tn2);
         /// <param name="selectedImageIndex">Index of the selected image.</param>
         public DropDownTreeNode(string text, int imageIndex, int selectedImageIndex)
             : base(text, imageIndex, selectedImageIndex)
-        {            
+        {
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ treeFood.Nodes.Add(tn2);
         /// <param name="children">The children.</param>
         public DropDownTreeNode(string text, int imageIndex, int selectedImageIndex, TreeNode[] children)
             : base(text, imageIndex, selectedImageIndex, children)
-        {            
+        {
         }
         #endregion
 
@@ -232,8 +232,8 @@ treeFood.Nodes.Add(tn2);
                 this.m_ComboBox = value;
                 this.m_ComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             }
-        } 
-        #endregion  
+        }
+        #endregion
     }
 
     /// <summary>
@@ -252,7 +252,6 @@ treeFood.Nodes.Add(tn2);
         }
         #endregion
 
-
         // We'll use this variable to keep track of the current node that is being edited.
         // This is set to something (non-null) only if the node's ComboBox is being displayed.
         private DropDownTreeNode m_CurrentNode = null;
@@ -264,14 +263,14 @@ treeFood.Nodes.Add(tn2);
         /// </summary>
         /// <param name="e">A <see cref="T:System.Windows.Forms.TreeNodeMouseClickEventArgs"></see> that contains the event data.</param>
         protected override void OnNodeMouseClick(TreeNodeMouseClickEventArgs e)
-        {            
+        {
             // Are we dealing with a dropdown node?
             if (e.Node is DropDownTreeNode)
             {
                 this.m_CurrentNode = (DropDownTreeNode)e.Node;
 
                 // Need to add the node's ComboBox to the TreeView's list of controls for it to work
-                this.Controls.Add(this.m_CurrentNode.ComboBox);                                        
+                this.Controls.Add(this.m_CurrentNode.ComboBox);
 
                 // Set the bounds of the ComboBox, with a little adjustment to make it look right
                 this.m_CurrentNode.ComboBox.SetBounds(
@@ -283,14 +282,13 @@ treeFood.Nodes.Add(tn2);
                 // Listen to the SelectedValueChanged event of the node's ComboBox
                 this.m_CurrentNode.ComboBox.SelectedValueChanged += new EventHandler(ComboBox_SelectedValueChanged);
                 this.m_CurrentNode.ComboBox.DropDownClosed += new EventHandler(ComboBox_DropDownClosed);
-                
+
                 // Now show the ComboBox
                 this.m_CurrentNode.ComboBox.Show();
                 this.m_CurrentNode.ComboBox.DroppedDown = true;
             }
             base.OnNodeMouseClick(e);
         }
-
 
         /// <summary>
         /// Handles the SelectedValueChanged event of the ComboBox control.
@@ -301,10 +299,7 @@ treeFood.Nodes.Add(tn2);
         void ComboBox_SelectedValueChanged(object sender, EventArgs e)
         {
             HideComboBox();
-            
-
         }
-
 
         /// <summary>
         /// Handles the DropDownClosed event of the ComboBox control.
@@ -318,7 +313,6 @@ treeFood.Nodes.Add(tn2);
             MessageBox.Show(this.SelectedNode.Text.ToString());
         }
 
-
         /// <summary>
         /// Handles the <see cref="E:System.Windows.Forms.Control.MouseWheel"></see> event.
         /// Hides the ComboBox if the user scrolls the mouse wheel.
@@ -330,7 +324,6 @@ treeFood.Nodes.Add(tn2);
             base.OnMouseWheel(e);
         }
 
-
         /// <summary>
         /// Method to hide the currently-selected node's ComboBox
         /// </summary>
@@ -340,7 +333,7 @@ treeFood.Nodes.Add(tn2);
             {
                 // Unregister the event listener
                 this.m_CurrentNode.ComboBox.SelectedValueChanged -= ComboBox_SelectedValueChanged;
-                this.m_CurrentNode.ComboBox.DropDownClosed -= ComboBox_DropDownClosed;                                
+                this.m_CurrentNode.ComboBox.DropDownClosed -= ComboBox_DropDownClosed;
 
                 // Copy the selected text from the ComboBox to the TreeNode
                 this.m_CurrentNode.Text = this.m_CurrentNode.ComboBox.Text;
@@ -355,8 +348,6 @@ treeFood.Nodes.Add(tn2);
                 // And return to the default state (no ComboBox displayed)
                 this.m_CurrentNode = null;
             }
-        
-        }        
+        }
     }
-
 }

@@ -18,90 +18,90 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-function PromptGrid{
+function PromptGrid {
 
-param ([System.Collections.IList] $data)
+  param([System.Collections.IList]$data)
 
-[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | out-null
-[System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | out-null
-[System.Reflection.Assembly]::LoadWithPartialName('System.Data') | out-null
-[System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')  | out-null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | Out-Null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.Data') | Out-Null
+  [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null
 
-$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-$f = New-Object System.Windows.Forms.Form
-$f.Text = 'how do we open these stones? '
-$f.AutoSize  = $true 
-$grid = New-Object System.Windows.Forms.DataGrid
-$grid.PreferredColumnWidth = 100 
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = 'how do we open these stones? '
+  $f.AutoSize = $true
+  $grid = New-Object System.Windows.Forms.DataGrid
+  $grid.PreferredColumnWidth = 100
 
-$System_Drawing_Size = New-Object System.Drawing.Size
-$grid.DataBindings.DefaultDataSourceUpdateMode = 0
-$grid.HeaderForeColor = [System.Drawing.Color]::FromArgb(255,0,0,0)
+  $System_Drawing_Size = New-Object System.Drawing.Size
+  $grid.DataBindings.DefaultDataSourceUpdateMode = 0
+  $grid.HeaderForeColor = [System.Drawing.Color]::FromArgb(255,0,0,0)
 
-$grid.Name = 'dataGrid1'
-$grid.DataMember = ''
-$grid.TabIndex = 0
-$System_Drawing_Point = New-Object System.Drawing.Point
-$System_Drawing_Point.X = 13;
-$System_Drawing_Point.Y = 48 ;
-$grid.Location = $System_Drawing_Point
-$grid.Dock = [System.Windows.Forms.DockStyle]::Fill
- 
-$button = New-Object System.Windows.Forms.Button
-$button.Text = 'Open'
-$button.Dock = [System.Windows.Forms.DockStyle]::Bottom
- 
-$f.Controls.Add( $button )
-$f.Controls.Add( $grid )
+  $grid.Name = 'dataGrid1'
+  $grid.DataMember = ''
+  $grid.TabIndex = 0
+  $System_Drawing_Point = New-Object System.Drawing.Point
+  $System_Drawing_Point.X = 13;
+  $System_Drawing_Point.Y = 48;
+  $grid.Location = $System_Drawing_Point
+  $grid.Dock = [System.Windows.Forms.DockStyle]::Fill
 
+  $button = New-Object System.Windows.Forms.Button
+  $button.Text = 'Open'
+  $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
 
-$button.add_Click({
-# http://msdn.microsoft.com/en-us/library/system.windows.forms.datagridviewrow.cells%28v=vs.110%29.aspx
-
-if ($grid.IsSelected(0)){
- $caller.Data = 42; 
-}
-$f.Close()
-
-})
+  $f.Controls.Add($button)
+  $f.Controls.Add($grid)
 
 
+  $button.add_click({
+      # http://msdn.microsoft.com/en-us/library/system.windows.forms.datagridviewrow.cells%28v=vs.110%29.aspx
 
-$grid.DataSource =  $data
-$f.ShowDialog([Win32Window ] ($caller)) | out-null
+      if ($grid.IsSelected(0)) {
+        $caller.Data = 42;
+      }
+      $f.Close()
 
-$f.Topmost = $True
+    })
 
 
-$f.refresh()
 
-} 
- 
+  $grid.DataSource = $data
+  $f.ShowDialog([win32window ]($caller)) | Out-Null
 
-function display_result{
-param ([Object] $result)
+  $f.Topmost = $True
 
-$array = New-Object System.Collections.ArrayList
 
-foreach ($key in $result.keys){
-  $value = $result[$key]
-  $o = New-Object PSObject   
-  $o | add-member Noteproperty 'Substance'  $value[0]
-  $o | add-member Noteproperty 'Action' $value[1]
+  $f.Refresh()
 
-  $array.Add($o)
 }
 
-$ret = PromptGrid $array 
+
+function display_result {
+  param([object]$result)
+
+  $array = New-Object System.Collections.ArrayList
+
+  foreach ($key in $result.Keys) {
+    $value = $result[$key]
+    $o = New-Object PSObject
+    $o | Add-Member Noteproperty 'Substance' $value[0]
+    $o | Add-Member Noteproperty 'Action' $value[1]
+
+    $array.Add($o)
+  }
+
+  $ret = PromptGrid $array
 }
 
-  $RESULT_OK = 0
-  $RESULT_CANCEL = 2
-  $Readable = @{ 
-    $RESULT_OK = 'OK' 
-    $RESULT_CANCEL = 'CANCEL'
-  } 
+$RESULT_OK = 0
+$RESULT_CANCEL = 2
+$Readable = @{
+  $RESULT_OK = 'OK'
+  $RESULT_CANCEL = 'CANCEL'
+}
 
 
 
@@ -140,21 +140,21 @@ public class Win32Window : IWin32Window
 
 $DebugPreference = 'Continue'
 
-$data = @{ 1= @('wind', 'blows...'); 
-           2 = @('fire',  'burns...');
-           3 = @('water',  'falls...')
-        }
+$data = @{ 1 = @( 'wind','blows...');
+  2 = @( 'fire','burns...');
+  3 = @( 'water','falls...')
+}
 
 $array = New-Object System.Collections.ArrayList
 
-foreach ($key in $data.keys){
+foreach ($key in $data.Keys) {
   $value = $data[$key]
-  $o = New-Object PSObject   
-  $o | add-member Noteproperty 'Substance'  $value[0]
-  $o | add-member Noteproperty 'Action' $value[1]
+  $o = New-Object PSObject
+  $o | Add-Member Noteproperty 'Substance' $value[0]
+  $o | Add-Member Noteproperty 'Action' $value[1]
 
   $array.Add($o)
 }
 
-$ret = PromptGrid $array 
+$ret = PromptGrid $array
 

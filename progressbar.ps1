@@ -195,124 +195,124 @@ public class Win32Window : IWin32Window
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
-        $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
-        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
-    }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot;
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+  }
 }
 
-$so = [hashtable]::Synchronized(@{ 
-        'Result'  = [string] '';
-        'Visible'  = [bool] $false;
-        'ScriptDirectory'  = [string] '';
-	'Form'  = [System.Windows.Forms.Form] $null ;
-	'Progress'  = [ProgressBarHost.Progress] $null ;
-	'NeedData' = [bool] $false ;
-	'HaveData' = [bool] $false ;
+$so = [hashtable]::Synchronized(@{
+    'Result' = [string]'';
+    'Visible' = [bool]$false;
+    'ScriptDirectory' = [string]'';
+    'Form' = [System.Windows.Forms.Form]$null;
+    'Progress' = [ProgressBarHost.Progress]$null;
+    'NeedData' = [bool]$false;
+    'HaveData' = [bool]$false;
 
-	})
+  })
 
 $so.ScriptDirectory = Get-ScriptDirectory
 
-$rs =[runspacefactory]::CreateRunspace()
+$rs = [runspacefactory]::CreateRunspace()
 $rs.ApartmentState = 'STA'
 $rs.ThreadOptions = 'ReuseThread'
 $rs.Open()
-$rs.SessionStateProxy.SetVariable('so', $so)          
+$rs.SessionStateProxy.SetVariable('so',$so)
 
 
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 
-$run_script = [PowerShell]::Create().AddScript({    
+$run_script = [powershell]::Create().AddScript({
 
 
 
-function Progressbar(
-	[String] $title, 
-	[String] $message,
-        [Object] $caller
-	){
+    function Progressbar (
+      [string]$title,
+      [string]$message,
+      [object]$caller
+    ) {
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
-
-
-$f = New-Object System.Windows.Forms.Form 
-$f.Text = $title
+      [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+      [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
 
-$f.Size = New-Object System.Drawing.Size(650,120) 
-$f.StartPosition = 'CenterScreen'
-$components = new-object System.ComponentModel.Container
-$progress_status = new-object ProgressBarHost.Progress
-$so.Progress = $progress_status
-$progress_status.Location = new-object System.Drawing.Point(12, 8) 
-$progress_status.Name = "status"
-$progress_status.Size = new-object System.Drawing.Size(272, 88)
-$progress_status.TabIndex = 0
-
-$b1 = New-Object System.Windows.Forms.Button
-$b1.Location = New-Object System.Drawing.Size(140, 152)
-$b1.Size = New-Object System.Drawing.Size(92, 24)
-$b1.Text = 'forward'
-$b1.Add_Click({ $progress_status.PerformStep() 
-if ($progress_status.Maximum -eq $progress_status.Value)
-            {
-                $b1.Enabled = false;
-            }
-
-})
-
-$f.Controls.Add($b1)
-$f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 14)
-$f.ClientSize = new-object System.Drawing.Size(292, 194)
-$f.Controls.Add($progress_status ) 
-$f.Topmost = $True
+      $f = New-Object System.Windows.Forms.Form
+      $f.Text = $title
 
 
-$caller.Visible = $true;
-$so.Visible = $caller.Visible
-$f.Add_Shown( { $f.Activate() } )
+      $f.Size = New-Object System.Drawing.Size (650,120)
+      $f.StartPosition = 'CenterScreen'
+      $components = New-Object System.ComponentModel.Container
+      $progress_status = New-Object ProgressBarHost.Progress
+      $so.Progress = $progress_status
+      $progress_status.Location = New-Object System.Drawing.Point (12,8)
+      $progress_status.Name = "status"
+      $progress_status.Size = New-Object System.Drawing.Size (272,88)
+      $progress_status.TabIndex = 0
 
-[Void] $f.ShowDialog([Win32Window ] ($caller) )
+      $b1 = New-Object System.Windows.Forms.Button
+      $b1.Location = New-Object System.Drawing.Size (140,152)
+      $b1.Size = New-Object System.Drawing.Size (92,24)
+      $b1.Text = 'forward'
+      $b1.add_click({ $progress_status.PerformStep()
+          if ($progress_status.Maximum -eq $progress_status.Value)
+          {
+            $b1.Enabled = false;
+          }
 
-$f.Dispose() 
-} 
+        })
 
-Progressbar -title $title -message $message -caller $caller
+      $f.Controls.Add($b1)
+      $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,14)
+      $f.ClientSize = New-Object System.Drawing.Size (292,194)
+      $f.Controls.Add($progress_status)
+      $f.Topmost = $True
 
-})
+
+      $caller.Visible = $true;
+      $so.Visible = $caller.Visible
+      $f.Add_Shown({ $f.Activate() })
+
+      [void]$f.ShowDialog([win32window ]($caller))
+
+      $f.Dispose()
+    }
+
+    Progressbar -Title $title -Message $message -caller $caller
+
+  })
 
 
 # -- main program -- 
-clear-host
+Clear-Host
 $run_script.Runspace = $rs
 
 $handle = $run_script.BeginInvoke()
 
-start-sleep 3
-$max_cnt  = 10 
-$cnt = 0 
+Start-Sleep 3
+$max_cnt = 10
+$cnt = 0
 while ($cnt -lt $max_cnt) {
-   $cnt ++ 
-    Start-Sleep -Milliseconds 100
-    $so.Progress.PerformStep()
+  $cnt++
+  Start-Sleep -Milliseconds 100
+  $so.Progress.PerformStep()
 }

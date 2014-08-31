@@ -34,7 +34,7 @@ $colors = @{
 
 # http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/EmbeddedCodeinWindowxaml.htm
 Add-Type -AssemblyName PresentationFramework
-[xml]$xaml = 
+[xml]$xaml =
 @"
 <?xml version="1.0"?>
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Row GridSplitter Example">
@@ -58,31 +58,31 @@ Add-Type -AssemblyName PresentationFramework
 "@
 
 # http://stackoverflow.com/questions/5863209/compile-wpf-xaml-using-add-type-of-powershell-without-using-powerboots
-$reader=(New-Object System.Xml.XmlNodeReader $xaml)
-$target=[Windows.Markup.XamlReader]::Load($reader)
+$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$target = [Windows.Markup.XamlReader]::Load($reader)
 
-foreach ($button in @("button01" , "button00", "button10", "button11")) {
-  $control=$target.FindName($button)
-  $eventMethod=$control.add_click
+foreach ($button in @( "button01","button00","button10","button11")) {
+  $control = $target.FindName($button)
+  $eventMethod = $control.add_click
   $eventMethod.Invoke({
-     param(
-       [Object] $sender, 
-       [System.Windows.RoutedEventArgs ] $eventargs 
-     )
-    $who = $sender.Content.ToString()
-    $color = $colors[$who ]
-    # $target.Title=("You will be  Mr. {0}" -f  $color)
-    $sender.Background = new-Object System.Windows.Media.SolidColorBrush($color)
-    $result[ $who  ] = $true
-    write-debug $who
-  })
+      param(
+        [object]$sender,
+        [System.Windows.RoutedEventArgs ]$eventargs
+      )
+      $who = $sender.Content.ToString()
+      $color = $colors[$who]
+      # $target.Title=("You will be  Mr. {0}" -f  $color)
+      $sender.Background = New-Object System.Windows.Media.SolidColorBrush ($color)
+      $result[$who] = $true
+      Write-Debug $who
+    })
 
 }
 
-$result = @{ }
+$result = @{}
 
 $DebugPreference = 'Continue'
-clear-host
-$target.ShowDialog() | out-null 
+Clear-Host
+$target.ShowDialog() | Out-Null
 # confirm the $result
 # $result | format-table

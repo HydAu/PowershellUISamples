@@ -164,7 +164,7 @@ namespace MyClock
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 Add-Type -TypeDefinition @"
 using System;
@@ -200,75 +200,75 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
-function promptForContinueAuto(
-	[Object] $caller= $null
-	)
+function promptForContinueAuto (
+  [object]$caller = $null
+)
 {
 
-$f = New-Object System.Windows.Forms.Form 
-$f.Text = $title
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
 
-$timer1 = new-object System.Timers.Timer
-$label1 = new-object System.Windows.Forms.Label
+  $timer1 = New-Object System.Timers.Timer
+  $label1 = New-Object System.Windows.Forms.Label
 
-$f.SuspendLayout()
-$components = new-object System.ComponentModel.Container 
-$label1.Font = new-object System.Drawing.Font("Microsoft Sans Serif", 14.25, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Point, [System.Byte]0);
-$label1.ForeColor = [System.Drawing.SystemColors]::Highlight
-$label1.Location = new-object System.Drawing.Point(24, 8)
-$label1.Name = "label1"
-$label1.Size = new-object System.Drawing.Size(224, 48) 
-$label1.TabIndex = 0
-$label1.Text = [System.DateTime]::Now.ToString()
-$label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-
-
-$f.AutoScaleBaseSize = new-object System.Drawing.Size(5, 13)
-$f.ClientSize = new-object System.Drawing.Size(292, 69) 
-$f.Controls.AddRange(@( $label1))
-$f.Name = 'MyClockForm';
-$f.Text = 'My Clock';
-
-# This was added - it does not belong to the original Form
-$eventMethod=$label1.add_click
-$eventMethod.Invoke({$f.Text="You clicked my label $((Get-Date).ToString('G'))"})
-
-# This silently ceases to work 
-$f.Add_Load({
-  param ([Object] $sender, [System.EventArgs] $eventArgs )
-    $timer1.Interval = 1000 
-    $timer1.Start()
-    $timer1.Enabled = $true
-
-}) 
-
-$timer1.Add_Elapsed({
-     $label1.Text = [System.DateTime]::Now.ToString()
-})
-
-# This loudly ceases to start the timer "theTimer"
-$global:timer = New-Object System.Timers.Timer
-$global:timer.Interval = 1000
-Register-ObjectEvent -InputObject $global:timer -EventName Elapsed -SourceIdentifier theTimer -Action {AddToLog('') }
-$global:timer.Start()
-$global:timer.Enabled = $true
+  $f.SuspendLayout()
+  $components = New-Object System.ComponentModel.Container
+  $label1.Font = New-Object System.Drawing.Font ("Microsoft Sans Serif",14.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
+  $label1.ForeColor = [System.Drawing.SystemColors]::Highlight
+  $label1.Location = New-Object System.Drawing.Point (24,8)
+  $label1.Name = "label1"
+  $label1.Size = New-Object System.Drawing.Size (224,48)
+  $label1.TabIndex = 0
+  $label1.Text = [System.DateTime]::Now.ToString()
+  $label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 
 
-function AddToLog()
-{
-param ([string] $text )
+  $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
+  $f.ClientSize = New-Object System.Drawing.Size (292,69)
+  $f.Controls.AddRange(@( $label1))
+  $f.Name = 'MyClockForm';
+  $f.Text = 'My Clock';
 
-     $label1.Text = [System.DateTime]::Now.ToString()
-}
+  # This was added - it does not belong to the original Form
+  $eventMethod = $label1.add_click
+  $eventMethod.Invoke({ $f.Text = "You clicked my label $((Get-Date).ToString('G'))" })
 
-$f.ResumeLayout($false)
-$f.Topmost = $True
+  # This silently ceases to work 
+  $f.add_Load({
+      param([object]$sender,[System.EventArgs]$eventArgs)
+      $timer1.Interval = 1000
+      $timer1.Start()
+      $timer1.Enabled = $true
 
-$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+    })
 
-$f.Add_Shown( { $f.Activate() } )
+  $timer1.Add_Elapsed({
+      $label1.Text = [System.DateTime]::Now.ToString()
+    })
 
-[void] $f.ShowDialog([Win32Window ] ($caller) )
+  # This loudly ceases to start the timer "theTimer"
+  $global:timer = New-Object System.Timers.Timer
+  $global:timer.Interval = 1000
+  Register-ObjectEvent -InputObject $global:timer -EventName Elapsed -SourceIdentifier theTimer -Action { AddToLog ('') }
+  $global:timer.Start()
+  $global:timer.Enabled = $true
+
+
+  function AddToLog ()
+  {
+    param([string]$text)
+
+    $label1.Text = [System.DateTime]::Now.ToString()
+  }
+
+  $f.ResumeLayout($false)
+  $f.Topmost = $True
+
+  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
 
 
 }

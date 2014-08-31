@@ -2,7 +2,7 @@
 # origin: http://stackoverflow.com/questions/5863209/compile-wpf-xaml-using-add-type-of-powershell-without-using-powerboots
 #requires -version 2
 Add-Type -AssemblyName PresentationFramework
-[xml]$xaml = 
+[xml]$xaml =
 @"
 <Window
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -34,9 +34,9 @@ http://social.msdn.microsoft.com/Forums/vstudio/en-US/753be353-a2f9-4b29-ba75-cd
 "@
 
 Clear-Host
-$reader=(New-Object System.Xml.XmlNodeReader $xaml)
-$target=[Windows.Markup.XamlReader]::Load($reader)
-$control=$target.FindName("button1")
-$eventMethod=$control.add_click
-$eventMethod.Invoke({$target.Title="Hello $((Get-Date).ToString('G'))"})
-$target.ShowDialog() | out-null 
+$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$target = [Windows.Markup.XamlReader]::Load($reader)
+$control = $target.FindName("button1")
+$eventMethod = $control.add_click
+$eventMethod.Invoke({ $target.Title = "Hello $((Get-Date).ToString('G'))" })
+$target.ShowDialog() | Out-Null

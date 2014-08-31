@@ -16,7 +16,7 @@ namespace SeleniumTests
         private StringBuilder verificationErrors;
         private string baseURL;
         private bool acceptNextAlert = true;
-        
+
         [SetUp]
         public void SetupTest()
         {
@@ -24,7 +24,7 @@ namespace SeleniumTests
             baseURL = "http://www.wikipedia.org/";
             verificationErrors = new StringBuilder();
         }
-        
+
         [TearDown]
         public void TeardownTest()
         {
@@ -38,7 +38,7 @@ namespace SeleniumTests
             }
             Assert.AreEqual("", verificationErrors.ToString());
         }
-        
+
         [Test]
         public void TheExampleTest()
         {
@@ -68,7 +68,7 @@ namespace SeleniumTests
                 return false;
             }
         }
-        
+
         private bool IsAlertPresent()
         {
             try
@@ -81,18 +81,25 @@ namespace SeleniumTests
                 return false;
             }
         }
-        
-        private string CloseAlertAndGetItsText() {
-            try {
+
+        private string CloseAlertAndGetItsText()
+        {
+            try
+            {
                 IAlert alert = driver.SwitchTo().Alert();
                 string alertText = alert.Text;
-                if (acceptNextAlert) {
+                if (acceptNextAlert)
+                {
                     alert.Accept();
-                } else {
+                }
+                else
+                {
                     alert.Dismiss();
                 }
                 return alertText;
-            } finally {
+            }
+            finally
+            {
                 acceptNextAlert = true;
             }
         }

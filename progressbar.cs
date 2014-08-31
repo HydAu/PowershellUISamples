@@ -43,16 +43,16 @@ namespace ProgressBarHost
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if (components != null) 
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Windows Form Designer generated code
@@ -121,7 +121,7 @@ this.cmdStep,
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() 
+        static void Main()
         {
             Application.Run(new ProgressBarHost());
         }
@@ -165,24 +165,22 @@ this.cmdStep,
         {
             // This call is required by the Windows.Forms Form Designer.
             InitializeComponent();
-
             // TODO: Add any initialization after the InitForm call
-
         }
 
         /// <summary> 
         /// Clean up any resources being used.
         /// </summary>
-        protected override void Dispose( bool disposing )
+        protected override void Dispose(bool disposing)
         {
-            if( disposing )
+            if (disposing)
             {
-                if(components != null)
+                if (components != null)
                 {
                     components.Dispose();
                 }
             }
-            base.Dispose( disposing );
+            base.Dispose(disposing);
         }
 
         #region Component Designer generated code
@@ -198,7 +196,7 @@ this.cmdStep,
             // 
             // lblProgress
             // 
-            this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right);
             this.lblProgress.Location = new System.Drawing.Point(5, 46);
             this.lblProgress.Name = "lblProgress";
@@ -209,7 +207,7 @@ this.cmdStep,
             // 
             // Bar
             // 
-            this.Bar.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.Bar.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right);
             this.Bar.Location = new System.Drawing.Point(5, 6);
             this.Bar.Name = "Bar";
@@ -227,8 +225,8 @@ this.cmdStep,
 
         }
         #endregion
-        
-        [Description("The current value (between 0 and Maximum) which sets the position of the progress bar"), 
+
+        [Description("The current value (between 0 and Maximum) which sets the position of the progress bar"),
         Category("Behavior"), DefaultValue(0)]
         public int Value
         {
@@ -280,8 +278,4 @@ this.cmdStep,
             lblProgress.Text += "% Done";
         }
     }
-
-
-
 }
-

@@ -1,7 +1,7 @@
 # origin: http://mark-dot-net.blogspot.com/2007/07/creating-custom-wpf-button-template-in.html
 #requires -version 2
 Add-Type -AssemblyName PresentationFramework
-[xml]$xaml = 
+[xml]$xaml =
 @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
 xmlns:sys="clr-namespace:System;assembly=mscorlib" 
@@ -118,9 +118,9 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 "@
 
 Clear-Host
-$reader=(New-Object System.Xml.XmlNodeReader $xaml)
-$target=[Windows.Markup.XamlReader]::Load($reader)
-$control=$target.FindName("button1")
-$eventMethod=$control.add_click
-$eventMethod.Invoke({$target.Title="Hello $((Get-Date).ToString('G'))"})
-$target.ShowDialog() | out-null 
+$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$target = [Windows.Markup.XamlReader]::Load($reader)
+$control = $target.FindName("button1")
+$eventMethod = $control.add_click
+$eventMethod.Invoke({ $target.Title = "Hello $((Get-Date).ToString('G'))" })
+$target.ShowDialog() | Out-Null

@@ -1,26 +1,52 @@
 $DebugPreference = 'Continue'
-
-$target_service_name = 'MsDepSvc'
-$domain = $env:USERDOMAIN
-if ($domain -like 'UAT') {
-  $user = '_uatmsdeploy'
-}
-elseif ($domain -like 'PROD') {
-  $user = '_msdeploy'
+
+
+target_service_name  = MsDepSvc'
+
+omain = = nv:USERDOMAIN
+
+if (omain - -like AT') ) {
+
+  er =  = atmsdeploy'
+
+
 }
-else { 
-  $user = $env:USERNAME
+
+elseif (in -lik -like ') {) {
+
+  = '_m = ploy'
+}
+
+
+}
+else {
+   $env = ERNAME
 
 }
+
+
+}
+
+
+
+count = "${doma = \${user}"
 
-$target_account = "${domain}\${user}"
-
-$credential = Get-Credential -username $target_account -message 'Please authenticate'
-if ($credential -ne $null) { 
-  $target_account  = $credential.Username
-  $target_password  = $credential.GetNetworkCredential().Password
-  write-Debug $target_password
+$cred
+
+
+ = Get-Cred = Get-Credential -UserName ount -message ' -Message henticate'
+if ($cre
+
+if (-ne $null)  -ne  $tar) {
+  unt  = $credent = Username
+.Username
+
+  ord  = $credenti = etNetworkCr.GetNetworkCredential().Password
+
+  Write-Debug rd
 } else { 
+
+} else {
 
 }
 return

@@ -164,7 +164,7 @@ namespace MyClock
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 Add-Type -TypeDefinition @"
 using System;
@@ -201,7 +201,7 @@ public class Win32Window : IWin32Window
 $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 $clock = New-Object MyClock.MyClockForm
-$clock.ShowDialog($process_window) | out-null
+$clock.ShowDialog($process_window) | Out-Null
 
 
-write-output $process_window.GetHashCode()
+Write-Output $process_window.GetHashCode()

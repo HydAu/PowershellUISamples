@@ -39,7 +39,6 @@ public class Form1Helper : Form
 
 }
 
-
 public class Form1 : Form
 {
     private System.Windows.Forms.WebBrowser webBrowser1;
@@ -81,8 +80,8 @@ public class Form1 : Form
         // e.g. arrive at Environment page which route is
         // '/app#/environments'
         // then capture the global cookies
-        string globalcookies =  Form1Helper.GetGlobalCookies(webBrowser1.Url.ToString());          
-        Console.WriteLine(String.Format("{0}->{1}", webBrowser1.Url.ToString(),globalcookies.ToString()));
+        string globalcookies = Form1Helper.GetGlobalCookies(webBrowser1.Url.ToString());
+        Console.WriteLine(String.Format("{0}->{1}", webBrowser1.Url.ToString(), globalcookies.ToString()));
     }
 
     [STAThread]
@@ -91,5 +90,4 @@ public class Form1 : Form
         Application.EnableVisualStyles();
         Application.Run(new Form1());
     }
-
 }

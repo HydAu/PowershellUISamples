@@ -3,13 +3,13 @@
 #requires -version 2
 
 $items = @(
-   'Apple' ,
-   'Banana' ,
-   'Orange' ,
-   'Pineapple' ,
-   'Plum'
-   ) 
-$selected = @{ }
+  'Apple',
+  'Banana',
+  'Orange',
+  'Pineapple',
+  'Plum'
+)
+$selected = @{}
 $context = @'
 <Window
   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -19,7 +19,7 @@ $context = @'
     <ComboBox Name="comboBox" IsEditable="False" Margin="5">
 '@
 $cnt = 1
-$items | foreach-object {  $name = "Item_${cnt}" ; $cnt ++ ; $context +="<ComboBoxItem Name='${name}' Content='$_'/>" } 
+$items | ForEach-Object { $name = "Item_${cnt}"; $cnt++; $context += "<ComboBoxItem Name='${name}' Content='$_'/>" }
 $context += @'
         </ComboBox>
     </StackPanel>
@@ -27,27 +27,27 @@ $context += @'
 '@
 
 
-Add-Type -AssemblyName PresentationFramework 
-[xml]$xaml = $context 
+Add-Type -AssemblyName PresentationFramework
+[xml]$xaml = $context
 
 Clear-Host
-$reader=(New-Object System.Xml.XmlNodeReader $xaml)
-$target=[Windows.Markup.XamlReader]::Load($reader)
+$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$target = [Windows.Markup.XamlReader]::Load($reader)
 $handler = {
-      param ([object] $sender,  # System.Windows.Controls.ComboboxItem
-                                # http://msdn.microsoft.com/en-us/library/system.windows.controls.comboboxitem_properties%28v=vs.110%29.aspx
-             [System.Windows.RoutedEventArgs] $eventargs )
-      $sender.Background = [ System.Windows.Media.Brushes]::Red
-      $target.Title = ( 'Added {0} ' -f $sender.Content ) 
-      $selected[ $sender.Content  ]  = $true
+  param([object]$sender,# System.Windows.Controls.ComboboxItem
+    # http://msdn.microsoft.com/en-us/library/system.windows.controls.comboboxitem_properties%28v=vs.110%29.aspx
+    [System.Windows.RoutedEventArgs]$eventargs)
+  $sender.Background = [ System.Windows.Media.Brushes]::Red
+  $target.Title = ('Added {0} ' -f $sender.Content)
+  $selected[$sender.Content] = $true
 
-  }
+}
 
-foreach ($item in ("Item_1", "Item_5", "Item_2","Item_3","Item_4") ){
+foreach ($item in ("Item_1","Item_5","Item_2","Item_3","Item_4")) {
   $combobox_item_control = $target.FindName($item)
   $eventargsventMethod2 = $combobox_item_control.add_Selected
-  $eventargsventMethod2.Invoke( $handler )
-  $combobox_item_control = $null 
+  $eventargsventMethod2.Invoke($handler)
+  $combobox_item_control = $null
 }
 
 <#
@@ -67,6 +67,6 @@ $combobox_handler.Invoke({
 #>
 
 
-$target.ShowDialog() | out-null 
-write-output 'Selected items:'
-$items | where-object {$selected.ContainsKey( $_ ) }
+$target.ShowDialog() | Out-Null
+Write-Output 'Selected items:'
+$items | Where-Object { $selected.containskey($_) }

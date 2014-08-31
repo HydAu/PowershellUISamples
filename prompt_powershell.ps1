@@ -24,75 +24,75 @@ $RESULT_POSITIVE = 0
 $RESULT_NEGATIVE = 1
 $RESULT_CANCEL = 2
 
-$Readable = @{ 
-	$RESULT_NEGATIVE = 'NO!'; 
-	$RESULT_POSITIVE = 'YES!' ; 
-	$RESULT_CANCEL = 'MAYBE...'
-	} 
+$Readable = @{
+  $RESULT_NEGATIVE = 'NO!';
+  $RESULT_POSITIVE = 'YES!';
+  $RESULT_CANCEL = 'MAYBE...'
+}
 
-function PromptAuto(
-	[String] $title, 
-	[String] $message,
-        [Object] $caller
-	){
+function PromptAuto (
+  [string]$title,
+  [string]$message,
+  [object]$caller
+) {
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
-
-
-$f = New-Object System.Windows.Forms.Form 
-$f.Text = $title
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
 
-$f.Size = New-Object System.Drawing.Size(650,120) 
-$f.StartPosition = 'CenterScreen'
-
-$f.KeyPreview = $True
-$f.Add_KeyDown({
-
-	if     ($_.KeyCode -eq 'M')       { $caller.Data = $RESULT_POSITIVE }
-	elseif ($_.KeyCode -eq 'A')       { $caller.Data = $RESULT_NEGATIVE }
-	elseif ($_.KeyCode -eq 'Escape')  { $caller.Data = $RESULT_CANCEL }
-	else                              { return }  
-	$f.Close()
-
-})
-
-$b1 = New-Object System.Windows.Forms.Button
-$b1.Location = New-Object System.Drawing.Size(50,40)
-$b1.Size = New-Object System.Drawing.Size(75,23)
-$b1.Text = 'Yes!'
-$b1.Add_Click({ $caller.Data = $RESULT_POSITIVE; $f.Close(); })
-$f.Controls.Add($b1)
-
-$b2 = New-Object System.Windows.Forms.Button
-$b2.Location = New-Object System.Drawing.Size(125,40)
-$b2.Size = New-Object System.Drawing.Size(75,23)
-$b2.Text = 'No!'
-$b2.Add_Click({ $caller.Data = $RESULT_NEGATIVE; $f.Close(); })
-$f.Controls.Add($b2)
-
-$b3 = New-Object System.Windows.Forms.Button
-$b3.Location = New-Object System.Drawing.Size(200,40)
-$b3.Size = New-Object System.Drawing.Size(75,23)
-$b3.Text = 'Maybe'
-$b3.Add_Click({$caller.Data =  $RESULT_CANCEL ; $f.Close()})
-$f.Controls.Add($b3)
-
-$l = New-Object System.Windows.Forms.Label
-$l.Location = New-Object System.Drawing.Size(10,20) 
-$l.Size = New-Object System.Drawing.Size(280,20) 
-$l.Text = $message 
-$f.Controls.Add($l) 
-$f.Topmost = $True
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
 
 
-$caller.Data = $RESULT_CANCEL;
-$f.Add_Shown( { $f.Activate() } )
+  $f.Size = New-Object System.Drawing.Size (650,120)
+  $f.StartPosition = 'CenterScreen'
 
-[Void] $f.ShowDialog([Win32Window ] ($caller) )
+  $f.KeyPreview = $True
+  $f.Add_KeyDown({
 
-$f.Dispose() 
+      if ($_.KeyCode -eq 'M') { $caller.Data = $RESULT_POSITIVE }
+      elseif ($_.KeyCode -eq 'A') { $caller.Data = $RESULT_NEGATIVE }
+      elseif ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_CANCEL }
+      else { return }
+      $f.Close()
+
+    })
+
+  $b1 = New-Object System.Windows.Forms.Button
+  $b1.Location = New-Object System.Drawing.Size (50,40)
+  $b1.Size = New-Object System.Drawing.Size (75,23)
+  $b1.Text = 'Yes!'
+  $b1.add_click({ $caller.Data = $RESULT_POSITIVE; $f.Close(); })
+  $f.Controls.Add($b1)
+
+  $b2 = New-Object System.Windows.Forms.Button
+  $b2.Location = New-Object System.Drawing.Size (125,40)
+  $b2.Size = New-Object System.Drawing.Size (75,23)
+  $b2.Text = 'No!'
+  $b2.add_click({ $caller.Data = $RESULT_NEGATIVE; $f.Close(); })
+  $f.Controls.Add($b2)
+
+  $b3 = New-Object System.Windows.Forms.Button
+  $b3.Location = New-Object System.Drawing.Size (200,40)
+  $b3.Size = New-Object System.Drawing.Size (75,23)
+  $b3.Text = 'Maybe'
+  $b3.add_click({ $caller.Data = $RESULT_CANCEL; $f.Close() })
+  $f.Controls.Add($b3)
+
+  $l = New-Object System.Windows.Forms.Label
+  $l.Location = New-Object System.Drawing.Size (10,20)
+  $l.Size = New-Object System.Drawing.Size (280,20)
+  $l.Text = $message
+  $f.Controls.Add($l)
+  $f.Topmost = $True
+
+
+  $caller.Data = $RESULT_CANCEL;
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
+
+  $f.Dispose()
 }
 
 Add-Type -TypeDefinition @" 
@@ -125,10 +125,10 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
-$title = 'Question' 
-$message =  "Continue to Next step?"
+$title = 'Question'
+$message = "Continue to Next step?"
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptAuto -title $title -message $message -caller $caller
-$result = $caller.Data 
-write-debug ("Result is : {0} ({1})" -f $Readable.Item($result) , $result )
+PromptAuto -Title $title -Message $message -caller $caller
+$result = $caller.Data
+Write-Debug ("Result is : {0} ({1})" -f $Readable.Item($result),$result)
