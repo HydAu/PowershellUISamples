@@ -19,7 +19,7 @@
 #THE SOFTWARE.
 
 param(
-  [switch]$browser
+  [string]$browser
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -56,7 +56,7 @@ symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
 $verificationErrors = New-Object System.Text.StringBuilder
 $baseURL = "http://www.wikipedia.org"
 $phantomjs_executable_folder = "C:\tools\phantomjs"
-if ($PSBoundParameters["browser"]) {
+if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
     $connection.Connect("127.0.0.1",4444)
@@ -66,11 +66,23 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  Write-Host "Running on ${browser}"
+  if ($browser -match 'firefox') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  }
+  elseif ($browser -match 'chrome') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  }
+  elseif ($browser -match 'safari') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
+  }
+  else {
+    throw "unknown browser choice:${browser}"
+  }
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
+  Write-Host 'Running on phantomjs'
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $selenium.Capabilities.SetCapability("ssl-protocol","any")
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
@@ -82,15 +94,29 @@ if ($PSBoundParameters["browser"]) {
 
 
 
-$selenium.Navigate().GoToUrl($baseURL )
+
+$selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
+
+
+[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
+
+[int]$timeout = 4000
+# change $timeout to see if the WevDriver is waiting on page  sctript to execute
+[string]$script = "window.setTimeout(function(){document.getElementById('searchInput').value = 'test'}, ${timeout});"
+
 $start = (Get-Date -UFormat "%s")
-# The following call has no effect.
-$selenium.manage().timeouts().implicitlyWait([System.TimeSpan]::FromSeconds(100))
+
+# still have to ignore the timeout exceptions
+try {
+  [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeAsyncScript($script);
+
+} catch [OpenQA.Selenium.WebDriverTimeoutException]{
+}
 $end = (Get-Date -UFormat "%s")
-$elapsed = New-TimeSpan -Seconds  ( $end - $start )
-Write-Output  ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds ,  ( $end - $start ))
-start-sleep 3
+$elapsed = New-TimeSpan -Seconds ($end - $start)
+Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
+Start-Sleep 3
 
 try {
   $selenium.Quit()
