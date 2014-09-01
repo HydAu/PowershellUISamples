@@ -98,7 +98,7 @@ if ($browser -ne $null -and $browser -ne '') {
 $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
 
-
+# http://roadtoautomation.blogspot.com/2013/10/webdriver-implicit-and-explicit-wait.html
 [void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
 
 [int]$timeout = 4000
