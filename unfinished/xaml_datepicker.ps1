@@ -17,7 +17,7 @@ Add-Type -AssemblyName PresentationFramework
       <RowDefinition/>
     </Grid.RowDefinitions>
     <Label Content="Pick Date" Grid.Column="0" Grid.Row="0" Margin="1"/>
-    <DatePicker x:Name="datePicker1" Grid.Column="1" Grid.Row="0" Margin="2" Background="#FFC000"/>
+    <DatePicker x:Name="datePicker" Grid.Column="1" Grid.Row="0" Margin="2" Background="#FFC000"/>
   </Grid>
 </Window>
 "@
@@ -26,14 +26,22 @@ Add-Type -AssemblyName PresentationFramework
 Clear-Host
 $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
-$control = $target.FindName("datePicker1")
+$control = $target.FindName('datePicker')
 $eventMethod = $control.Add_SelectedDateChanged 
-# SelectionChangedEventArgs
-$eventMethod.Invoke({ write-host "Hello "})
+
+$handler = {
+  param(
+    [object]$sender,
+    [System.Windows.Controls.SelectionChangedEventArgs]$e)
+    write-host $sender.SelectedDate.ToString()
+}
+$eventMethod.Invoke($handler )
 $result = $target.ShowDialog() 
 write-output $result
 
 <#
-Exception calling "ShowDialog" with "0" argument(s): "Not enough quota is available to process this command"
-
+NOTE: 
+occasional
+  Exception calling "ShowDialog" with "0" argument(s):
+ "Not enough quota is available to process this command"
 #>
