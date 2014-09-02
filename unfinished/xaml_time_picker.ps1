@@ -47,13 +47,18 @@ Exception calling "Load" with "1" argument(s): "Failed to create a 'KeyDown' fro
       <TextBlock x:Name="yyTxt" TextWrapping="Wrap" Text="{Binding Path=Seconds, ElementName=UserControl, Mode=Default}" TextAlignment="Center" VerticalAlignment="Center" FontFamily="Goudy Stout" FontSize="14"/>
     </Grid>
   </Grid>
+<!--
+<Button x:Name="upBtn" Width="24.5" Margin="0,8,0,0"/>
+<Button x:Name="downBtn" Width="36" Margin="0,8,0,0" />
+
+-->
 </UserControl>
  </Grid>
 </Window>
 "@
 # http://msdn.microsoft.com/en-us/library/windows/apps/xaml/dn308514.aspx
 # 
-[xml]$xaml =@"
+[xml]$xaml2 =@"
 <?xml version="1.0"?>
 <Window
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
