@@ -85,7 +85,6 @@ if ($PSBoundParameters["browser"]) {
 }
 
 
-
 $selenium.Navigate().GoToUrl($baseURL )
 $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Maximize()
@@ -97,11 +96,6 @@ function test_drag_drop {
 
 
 $elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('.ui-draggable'))
-<#
-for ($cnt = 0 ; $cnt -ne $elements.Count ;$cnt ++) {
-write-output ('elements[{0}] = "{1}"' -f $cnt , $elements[$cnt].Text )
-}
-#>
 
 $elements | foreach-object { 
   if  ($_.Text -match $name ) {
@@ -117,23 +111,20 @@ Start-Sleep 1
 [OpenQA.Selenium.Interactions.Actions]$builder = New-Object OpenQA.Selenium.Interactions.Actions($selenium);
 [void]$builder.Build();
 [void]$builder.dragAndDrop($element,$elements[0])
-# [void]$builder.release()
 [void]$builder.Perform()
 Start-Sleep 1
 }
 
-$names = @(
+@(
   'Pumpkin',
   'Apple',
   'Berries',
   'Granny Smith'
   'Blueberry',
   'Cucumber'
-  )
+  ) | foreach-object { test_drag_drop -name $_ } 
+Start-Sleep 3
 
-$names | foreach-object { test_drag_drop -name $_ } 
-
-start-sleep 3
 
 try {
   $selenium.Quit()
