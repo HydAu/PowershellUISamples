@@ -109,6 +109,8 @@ $elements | foreach-object {
 Start-Sleep 1
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
 [OpenQA.Selenium.Interactions.Actions]$builder = New-Object OpenQA.Selenium.Interactions.Actions($selenium);
+# not chaining the actions, hence [void]
+# see http://stackoverflow.com/questions/14210051/how-to-automate-drag-drop-functionality-using-selenium-web-driver
 [void]$builder.Build();
 [void]$builder.dragAndDrop($element,$elements[0])
 [void]$builder.Perform()

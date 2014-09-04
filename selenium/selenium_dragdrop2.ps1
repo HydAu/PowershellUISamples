@@ -119,6 +119,8 @@ Start-Sleep 1
 [OpenQA.Selenium.Interactions.Actions]$builder = New-Object OpenQA.Selenium.Interactions.Actions($selenium);
 
 
+# not chaining the actions, hence [void]
+# see http://stackoverflow.com/questions/14210051/how-to-automate-drag-drop-functionality-using-selenium-web-driver
 [void]$builder.Build();
 
 [void]$builder.clickAndHold($element)
