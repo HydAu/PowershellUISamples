@@ -18,3 +18,4 @@ REM https://code.google.com/p/selenium/wiki/InternetExplorerDriver
 rem http://seleniumonlinetrainingexpert.wordpress.com/2012/12/11/how-do-i-start-the-internet-explorer-webdriver-for-selenium/
 goto :EOF 
 
+REM NOTE: http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
