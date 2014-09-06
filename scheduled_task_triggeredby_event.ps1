@@ -9,10 +9,9 @@
 
 # Collects all named paramters (all others end up in $Args)
 param(
-[string] $event_record_id,
-[string] $event_channel
+[string] $event_record_id = '17954',
+[string] $event_channel  = 'Application'
 )
-
 
 $event = get-winevent -LogName $event_channel -FilterXPath ( "<QueryList><Query Id='0' Path='{0}'><Select Path='{0}'>*[System[(EventRecordID={1})]]</Select></Query></QueryList>" -f $event_channel, $event_record_id  )
 
@@ -26,14 +25,16 @@ if ($eventParams.Params.TimeStamp) {
     $popupObject.popup("RecordID: " + $event_record_id + ", Channel: " + $event_channel + ", Event Timestamp: " + $eventTimestamp + ", File: " + $eventFile)
 }
 
-invoke-expression -command $command
+<#
+$date_str = '{0:yyyy-MM-ddTHH:mm:ssZ}' -f (Get-Date)
 [string]$command = @"
-eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>2011-08-29T21:24:03Z</Timestamp><InputFile>C:\temp\Some Test File.txt</InputFile><Result>Success</Result></Params>"
+eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>${date_str}</Timestamp><InputFile>C:\developer\sergueik\powershell_ui_samples\dummy.txt</InputFile><Result>Success</Result></Params>"
 "@
 $result = (invoke-expression -command $command)
-<#
-eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>2011-08-29T21:24:03Z</Timestamp><InputFile>C:\temp\Some Test File.txt</InputFile><Result>Success</Result></Params>"
+# $result = 
+# SUCCESS: An event of type 'INFORMATION' was created in the 'APPLICATION' log with 'SomeApplication' as the source.
 #>
+
 <#
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Events>
