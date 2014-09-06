@@ -1,22 +1,80 @@
-# http://blogs.technet.com/b/wincat/archive/2011/08/25/trigger-a-powershell-script-from-a-windows-event.aspx
-
-#>
-# Script Name: eventlog_scheduled.ps1
-# Usage Example (use a valid ID found via Event Viewer XML view of an event): powershell .\TriggerScript.ps1 -event_record_id 1 -event_channel Application
+#Copyright (c) 2014 Serguei Kouzmine
 #
-# Create a fake event or testing with the following command (from an elevated command prompt):
-#   eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>2011-08-29T21:24:03Z</Timestamp><InputFile>C:\temp\Some Test File.txt</InputFile><Result>Success</Result></Params>"
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
 
-# Collects all named paramters (all others end up in $Args)
-param(
+param( # Collects all named paramters - the rest end up in $Args
 [string] $event_record_id = '17954',
-[string] $event_channel  = 'Application'
+[string] $event_channel  = 'Application',
+[switch] $create_event
+
 )
 
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
+}
+
+
+if ($PSBoundParameters["create_event"]) {
+
+$date_str = '{0:yyyy-MM-ddTHH:mm:ssZ}' -f (Get-Date)
+[string]$command = @"
+eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>${date_str}</Timestamp><InputFile>C:\developer\sergueik\powershell_ui_samples\dummy.txt</InputFile><Result>Success</Result></Params>"
+"@
+$result = (invoke-expression -command $command)
+# $result = 
+# SUCCESS: An event of type 'INFORMATION' was created in the 'APPLICATION' log with 'SomeApplication' as the source.
+} else { 
+
+
+# http://blogs.technet.com/b/wincat/archive/2011/08/25/trigger-a-powershell-script-from-a-windows-event.aspx
+
+
+# alternative ways to compose XPath query:
+# direct:
+$event = get-winevent -LogName $event_channel -FilterXPath "*[System[(EventRecordID=$event_record_id)]]"
+# indirect:
 $event = get-winevent -LogName $event_channel -FilterXPath ( "<QueryList><Query Id='0' Path='{0}'><Select Path='{0}'>*[System[(EventRecordID={1})]]</Select></Query></QueryList>" -f $event_channel, $event_record_id  )
 
+# alternative ways to extract event fields:
 
-[xml]$eventParams = $event.Message
+# XML
+$event_obj = ([xml]$event.ToXml()) 
+if ($eventParams.Event.System.TimeCreated.SystemTime)
+{
+[xml]$event_obj.event.eventdata.data |Select-Object -Property @{Label='InputFile';Expression="Name"}, @{Label='EventData';Expression="#text"} |ConvertTo-Csv -NoTypeInformation |Out-File ('{0}\{1}' -f (Get-ScriptDirectory), 'appusage.csv' ) -Append
+}
+# VB-style
+[xml]$eventParams = $event_obj.Event.EventData.Data
 if ($eventParams.Params.TimeStamp) {
     [datetime]$eventTimestamp = $eventParams.Params.TimeStamp
     $eventFile = $eventParams.Params.InputFile
@@ -25,15 +83,7 @@ if ($eventParams.Params.TimeStamp) {
     $popupObject.popup("RecordID: " + $event_record_id + ", Channel: " + $event_channel + ", Event Timestamp: " + $eventTimestamp + ", File: " + $eventFile)
 }
 
-<#
-$date_str = '{0:yyyy-MM-ddTHH:mm:ssZ}' -f (Get-Date)
-[string]$command = @"
-eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>${date_str}</Timestamp><InputFile>C:\developer\sergueik\powershell_ui_samples\dummy.txt</InputFile><Result>Success</Result></Params>"
-"@
-$result = (invoke-expression -command $command)
-# $result = 
-# SUCCESS: An event of type 'INFORMATION' was created in the 'APPLICATION' log with 'SomeApplication' as the source.
-#>
+}
 
 <#
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
