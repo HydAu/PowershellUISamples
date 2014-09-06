@@ -1,3 +1,9 @@
+# https://github.com/signumsoftware/framework/blob/master/Signum.Windows/Controls/AutoCompleteTextBox.xaml.cs
+
+# https://github.com/samueldjack/SilverlightToolkit/tree/master/Controls.Input.Toolkit
+# https://github.com/samueldjack/SilverlightToolkit/tree/master/Controls.Input.Toolkit
+# https://github.com/samueldjack/SilverlightToolkit/tree/master/Controls.Input.Toolkit
+
 Add-Type -AssemblyName PresentationFramework
 # WPF 4.0 doesn't provide a DateTimePicker out of the box. 
 # Add-Type -AssemblyName System.Windows.Controls.Toolkit
