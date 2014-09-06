@@ -3,6 +3,7 @@
 # http://www.c-sharpcorner.com/UploadFile/mahesh/wpf-datepicker/
 # http://www.codeproject.com/Tips/399140/WPF-DatePicker-Background-Fix
 # http://www.codeproject.com/Articles/237011/CREATING-A-CUSTOM-TIMEPICKER-CONTROL-IN-WPF
+# http://www.codeproject.com/Articles/132992/A-WPF-DateTimePicker-That-Works-Like-the-One-in-Wi
 # WPF 4.0 doesn't provide a DateTimePicker out of the box.
 # http://jobijoy.blogspot.com/2007/10/time-picker-user-control.html
 

@@ -99,7 +99,7 @@
     chartElement : 'body',
     depth      : -1,
     chartClass : "jOrgChart",
-    dragAndDrop: false
+    dragAndDrop: true
   };
 	
   var nodeCount = 0;
