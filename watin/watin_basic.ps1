@@ -46,8 +46,8 @@ $so = [hashtable]::Synchronized(@{
     'Window' = [System.Windows.Window]$null;
     'Control' = [System.Windows.Controls.ToolTip]$null;
     'Contents' = [System.Windows.Controls.TextBox]$null;
-    'NeedData' = [bool]$false;
-    'HaveData' = [bool]$false;
+    'Started' = [bool]$false;
+    'Finished' = [bool]$false;
 
   })
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -74,21 +74,38 @@ $run_script = [powershell]::Create().AddScript({
     pushd $shared_assemblies_path
     $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
     popd
-
+$so.Started = $true 
 $browser = New-Object WatiN.Core.IE("http://www.google.com")
+
+
+$browser.TextField([WatiN.Core.Find]::ByName("q")).TypeText("WatiN")
+[WatiN.Core.Button]$button = $browser.Button([WatiN.Core.Find]::ByName("btnG"))
+$so.Result +=  $button.Text
+$so.Result += $button.OuterHtml
+$button.Focus()
+$button.Click()
+
+[NUnit.Framework.Assert]::IsTrue($browser.ContainsText("WatiN"))
+
+[WatiN.Core.Div] $div = ie.Div([WatiN.Core.Find]::ById("ssb"))
+        [WatiN.Core.Para.Para] $p = $div.Paras[0]
+        [string] $result = $p.Text
+write-host $result
+$so.Result += $result
+
+start-sleep 10
+$browser.Close()
+<#
+$browser = New-Object WatiN.Core.Firefox("http://www.google.com")
 
 $browser.TextField([WatiN.Core.Find]::ByName("q")).TypeText("WatiN");
 $browser.Button([WatiN.Core.Find]::ByName("btnG")).Click();
 [NUnit.Framework.Assert]::IsTrue($browser.ContainsText("WatiN"));
+start-sleep 10
+$browser.Close()
 
-
-    <#
-var browser = new IE("http://www.google.com"))
-{
-browser.TextField(Find.ByName("q")).TypeText("WatiN");
-browser.Button(Find.ByName("btnG")).Click();
-Assert.IsTrue(browser.ContainsText("WatiN"));
 #>
+$so.Finished = $true 
   })
 
 function send_text {
@@ -96,22 +113,8 @@ function send_text {
     $content,
     [switch]$append
   )
-
+  # reserved for future use
   return
-  # NOTE - host-specific method signature:
-  $so.Indicator.Dispatcher.Invoke([System.Action]{
-      $so.Indicator.Visibility = 'Collapsed'
-    },'Normal')
-  $so.Contents.Dispatcher.Invoke([System.Action]{
-
-      if ($PSBoundParameters['append_content']) {
-        $so.Contents.AppendText($content)
-      } else {
-        $so.Contents.Text = $content
-      }
-      $so.Result = $so.Contents.Text
-    },'Normal')
-
 }
 
 
@@ -121,13 +124,15 @@ Clear-Host
 $handle = $run_script.BeginInvoke()
 while (-not $handle.IsCompleted) {
   Start-Sleep -Milliseconds 100
-  if ($so.NeedData -and -not $so.HaveData) {
-    Write-Output ('Need to provide data')
-    Start-Sleep -Milliseconds 10
-    send_text -Content (Date)
-    Write-Output ('Sent {0}' -f $so.Result)
-    $so.HaveData = $true
+  if ($so.Started -and -not $so.Finished) {
+    # Write-Output ('Waiting for test to complete')
+    Start-Sleep -Milliseconds 1000
+    send_text -Content ($null)
+    # reserved for futute use
+    # $so.HaveData = $true
   }
 }
+
+write-output $so.Result
 $run_script.EndInvoke($handle)
 $rs.Close()
