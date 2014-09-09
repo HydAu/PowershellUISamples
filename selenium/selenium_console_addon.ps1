@@ -92,9 +92,12 @@ if ($PSBoundParameters["browser"]) {
 
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  [int] $version_major = [int][math]::Round([double]$selenium.Capabilities.Version ) 
+  #  http://stackoverflow.com/questions/25646639/firefox-webdriver-doesnt-work-with-firefox-32
+  [NUnit.Framework.Assert]::IsTrue($version_major -lt 32)
 } else {
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
-  $selenium.Capabilities.SetCapability("ssl-protocol","any")
+  $selenium.Capabilities.SetCapability('ssl-protocol','any')
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
   $selenium.Capabilities.SetCapability("takesScreenshot",$true)
   $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
@@ -102,9 +105,8 @@ if ($PSBoundParameters["browser"]) {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-# $selenium.Navigate().GoToUrl("file:///C:/developer/sergueik/powershell_ui_samples/selenium/popup.html" )
 $baseURL = 'file:///C:/developer/sergueik/powershell_ui_samples/external/grid-console.html'
-# $baseURL = "http://localhost/selenium-grid/console.html"
+# $baseURL = 'http://localhost/selenium-grid/console.html'
 $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Maximize()
@@ -120,9 +122,9 @@ return
 `$("p[class='proxyid']").innerHTML
 "@
 
-write-output $script
+# write-output $script
 [string]$result = ([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script)
-write-host $result
+# write-host $result
 #>
 
 # http://www.w3schools.com/xpath/xpath_examples.asp
@@ -153,6 +155,8 @@ result.appendChild(p);
 start-sleep 4
 [OpenQA.Selenium.Remote.RemoteWebElement]$proxy_id = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("p[class='proxyid']"))
 write-host $proxy_id.Text
+[NUnit.Framework.Assert]::IsTrue($proxy_id.Text -match 'Data from Powershell' )
+
 start-sleep 6
 
 <#
