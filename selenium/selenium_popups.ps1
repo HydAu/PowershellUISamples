@@ -1,4 +1,3 @@
-
 #Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -69,7 +68,6 @@ $shared_assemblies | ForEach-Object {
  }
  write-output $_
  Add-Type -Path $_ 
-start-sleep 10
  }
 popd
 
@@ -93,9 +91,9 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node_ie.cmd"
     Start-Sleep -Seconds 10
   }
-#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
 #  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
 
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
@@ -126,7 +124,7 @@ $alert = $selenium.switchTo().alert()
 write-output $alert.Text
 $alert.accept()
 
-# Works on FF, Chrome, IE 8 - 11
+# This works on FF, Chrome, IE 8 - 11
 # http://seleniumeasy.com/selenium-tutorials/how-to-handle-javascript-alerts-confirmation-prompts
 # e.g. need to be able to copy a url from a dialog box pop up and paste it into a new browser window
 
@@ -138,7 +136,3 @@ try {
 } catch [exception]{
   # Ignore errors if unable to close the browser
 }
-
-
-
-
