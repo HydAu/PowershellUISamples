@@ -115,7 +115,8 @@ $selenium.Manage().Window.Maximize()
 $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Maximize()
 [OpenQA.Selenium.Remote.RemoteWebElement]$proxy_id = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("p[class='proxyid']"))
-write-host $proxy_id.Text
+write-host ( "<<<" + $proxy_id.Text )
+
 <# jquery works in FireBug but not Selenium
 [string]$script = @"
 return
@@ -154,7 +155,7 @@ result.appendChild(p);
 
 start-sleep 4
 [OpenQA.Selenium.Remote.RemoteWebElement]$proxy_id = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("p[class='proxyid']"))
-write-host $proxy_id.Text
+write-host ( ">>>" + $proxy_id.Text )
 [NUnit.Framework.Assert]::IsTrue($proxy_id.Text -match 'Data from Powershell' )
 
 start-sleep 6
