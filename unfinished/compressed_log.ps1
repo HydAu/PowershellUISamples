@@ -31,22 +31,29 @@ Param(
 # The following will not work ?"
 #      $lines =  $string_buffer -split '`l'
 #     write-output "`n---`n${string_buffer}`n---`n" 
-      write-output ('Read {0} lines ' -f $lines.count )
+      write-debug ('Read {0} lines ' -f $lines.count )
       # need to chomp ?
-      $unfinished_lines[0] =  ( '>>{0}<<|>>{1}<<' -f  $unfinished_lines[1] , $lines[0] )
+      $unfinished_lines[0] =  ( '{0}{1}' -f  $unfinished_lines[1] , $lines[0] )
 
       # this will add a newline?
       # $unfinished_lines[0] =  ( $unfinished_lines[1] + $lines[0] )
       $unfinished_lines[1] = $lines[$lines.count - 1 ]
-      write-output 'Fixed the corner lines'
+      write-debug 'Fixed the corner lines'
 if  ($unfinished_lines[2] ){
-      write-output $unfinished_lines[0]
+     $lines[0] = $unfinished_lines[0]
+     $lines[$lines.count - 1 ] = $null 
+#      write-output $unfinished_lines[0]
 }
 $unfinished_lines[2] = $true
-     start-sleep 1;
+
+     $lines | foreach-object {write-output $_}
+#     start-sleep 1;
+
+
+
  
-     [Int32]$read  =$ref_read.Value
-	$output.Write($buffer, 0, $read)	
+#     [Int32]$read  =$ref_read.Value
+#	$output.Write($buffer, 0, $read)	
 }
 
 [Object[]] $unfinished_lines = ('','', $false )
