@@ -80,3 +80,42 @@ public class Win32Window : IWin32Window
 
 $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $owner.Data = 42;
+<#
+http://blogs.technet.com/b/heyscriptingguy/archive/2011/06/16/use-asynchronous-event-handling-in-powershell.aspx
+http://www.nivot.org/blog/post/2008/05/23/BackgroundTimerPowerShellWPFWidget
+http://jrich523.wordpress.com/2011/06/13/creating-a-timer-event-in-powershell/
+
+$timer = new-object timers.timer
+
+$action1 = {write-host "Timer Elapse Event: $(get-date -Format ‘HH:mm:ss’)"} 
+$complete = 0
+$action2 = {
+write-host "complete: $complete"
+if($complete -eq 1)
+   {
+     write-host "completed"
+     $timer.stop()
+     Unregister-Event thetimer
+   }
+}
+Register-ObjectEvent -InputObject $timer -EventName elapsed `
+–SourceIdentifier  thetimer -Action $action1
+
+$timer.Interval = 3000 #3 seconds 
+
+Register-ObjectEvent -InputObject $timer -EventName elapsed `
+–SourceIdentifier  thetimer -Action $action
+
+$timer.start()
+
+#to stop run
+$timer.stop()
+#cleanup
+Unregister-Event thetimer
+
+
+$timer.start()
+
+#to stop
+$complete = 1
+#>
