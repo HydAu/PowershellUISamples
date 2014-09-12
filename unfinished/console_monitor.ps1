@@ -48,7 +48,7 @@ public class Win32Window : IWin32Window
         get { return _count; }
         set { _count = value; }
     }
-    public String Screenshot()
+    public String TakeScreenshot()
     {
         Bitmap bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
         Graphics gr = Graphics.FromImage(bmp);
@@ -71,18 +71,26 @@ http://www.nivot.org/blog/post/2008/05/23/BackgroundTimerPowerShellWPFWidget
 http://jrich523.wordpress.com/2011/06/13/creating-a-timer-event-in-powershell/
 #>
 
+$owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
 $timer = New-Object System.Timers.Timer
 
 [int32]$max_iterations = 20
 [int32]$iteration = 0
 
 $action = {
-
+  param(
+   [System.Management.Automation.PSReference] $ref_screen_grabber 
+)
+  [Win32Window]$screen_grabber = $ref_screen_grabber.Value
   Write-Host "Iteration # ${iteration}"
   Write-Host "Timer Elapse Event: $(get-date -Format 'HH:mm:ss')"
-  $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  $owner.count = $iteration
-  $owner.Screenshot()
+
+ $screen_grabber  = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
+  $screen_grabber.count = $iteration
+  $screen_grabber.TakeScreenshot()
+  $screen_grabber = $null
   $iteration++
   if ($iteration -ge $max_iterations)
   {
@@ -92,7 +100,9 @@ $action = {
   }
 }
 
-Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action
+# http://www.ravichaganti.com/blog/passing-variables-or-arguments-to-an-event-action-in-powershell/
+
+Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action -MessageData  ([ref]$owner ) 
 <#
 TODO : catch and unregister
 Register-ObjectEvent : Cannot subscribe to event. A subscriber with sourceidentifier 'thetimer' already exists.
