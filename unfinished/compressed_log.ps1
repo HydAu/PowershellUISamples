@@ -46,16 +46,16 @@ function process {
   [char[]]$newlines = @( 0xd,0xa)
   $lines = $string_buffer.split($newlines)
 
-    write-debug ( '<< ' + $unfinished_line  + '|' )
-    write-debug ( '<< ' + '|' + $lines[0]  )
-    write-debug ( '>> ' + $unfinished_line + $lines[0]  )
+  Write-Debug ('<< ' + $unfinished_line + '|')
+  Write-Debug ('<< ' + '|' + $lines[0])
+  Write-Debug ('>> ' + $unfinished_line + $lines[0])
 
-    $lines[0] = $unfinished_line + $lines[0]
-    $unfinished_line = $lines[$lines.count - 1] 
-    $ref_unfinished_line.Value  = $unfinished_line
+  $lines[0] = $unfinished_line + $lines[0]
+  $unfinished_line = $lines[$lines.count - 1]
+  $ref_unfinished_line.Value = $unfinished_line
 
-    $lines[$lines.count - 1] = $null
-    $lines | ForEach-Object { Write-Output $_ }
+  $lines[$lines.count - 1] = $null
+  $lines | ForEach-Object { Write-Output $_ }
 
 
   <#
@@ -65,16 +65,16 @@ function process {
 }
 
 $DebugPreference = 'Continue'
-[String]$unfinished_line = ''
-$input = New-Object System.IO.FileStream ('{0}\{1}' -f (Get-ScriptDirectory), $inFile),([IO.FileMode]::Open),([IO.FileAccess]::Read),([IO.FileShare]::Read)
-$output = New-Object System.IO.FileStream ('{0}\{1}' -f (Get-ScriptDirectory), $outFile),([IO.FileMode]::Create),([IO.FileAccess]::Write),([IO.FileShare]::None)
+[string]$unfinished_line = ''
+$input = New-Object System.IO.FileStream ('{0}\{1}' -f (Get-ScriptDirectory),$inFile),([IO.FileMode]::Open),([IO.FileAccess]::Read),([IO.FileShare]::Read)
+$output = New-Object System.IO.FileStream ('{0}\{1}' -f (Get-ScriptDirectory),$outFile),([IO.FileMode]::Create),([IO.FileAccess]::Write),([IO.FileShare]::None)
 $gzipStream = New-Object System.IO.Compression.GzipStream $input,([IO.Compression.CompressionMode]::Decompress)
 [int]$BUF_SIZE = 8192
 $buffer = New-Object byte[] ($BUF_SIZE)
 while ($true) {
-   $read = $gzipstream.Read($buffer,0,$BUF_SIZE)
-   if ($read -le 0) { break }
-   process ([ref]$output) ([ref]$buffer) ([ref]$read) ([ref]$unfinished_line) 
+  $read = $gzipstream.Read($buffer,0,$BUF_SIZE)
+  if ($read -le 0) { break }
+  process ([ref]$output) ([ref]$buffer) ([ref]$read) ([ref]$unfinished_line)
 }
 
 $gzipStream.Close()
