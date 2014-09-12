@@ -55,6 +55,8 @@ public class Win32Window : IWin32Window
         gr.CopyFromScreen(0, 0, 0, 0, bmp.Size);
         string str = string.Format(@"C:\temp\Snap[{0}].jpeg", _count);
         bmp.Save(str, ImageFormat.Jpeg);
+        bmp.Dispose();
+        gr.Dispose();
         return str;
     }
     public Win32Window(IntPtr handle)
@@ -75,18 +77,14 @@ $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::Get
 
 $timer = New-Object System.Timers.Timer
 
-[int32]$max_iterations = 20
+[int32]$max_iterations = 10
 [int32]$iteration = 0
 
 $action = {
-  param(
-   [System.Management.Automation.PSReference] $ref_screen_grabber 
-)
-  [Win32Window]$screen_grabber = $ref_screen_grabber.Value
   Write-Host "Iteration # ${iteration}"
   Write-Host "Timer Elapse Event: $(get-date -Format 'HH:mm:ss')"
-
- $screen_grabber  = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+  # now displosing
+  $screen_grabber  = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
   $screen_grabber.count = $iteration
   $screen_grabber.TakeScreenshot()
@@ -94,21 +92,21 @@ $action = {
   $iteration++
   if ($iteration -ge $max_iterations)
   {
-    Write-Host 'Completed'
+    Write-Host 'Stopping'
     $timer.stop()
-    Unregister-Event thetimer
+    Unregister-Event thetimer -Force 
+    Write-Host 'Completed'    
   }
 }
 
 # http://www.ravichaganti.com/blog/passing-variables-or-arguments-to-an-event-action-in-powershell/
-
-Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action -MessageData  ([ref]$owner ) 
+Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action
 <#
 TODO : catch and unregister
 Register-ObjectEvent : Cannot subscribe to event. A subscriber with sourceidentifier 'thetimer' already exists.
 
 #>
-$timer.Interval = 10 # milliseconds
+$timer.Interval = 1000 # milliseconds
 
 Write-Output 'Starting'
 $timer.start()
