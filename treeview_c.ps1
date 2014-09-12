@@ -123,6 +123,8 @@ function PromptTreeView
  $f.Name = "TreeViewExample"
  $f.Text = "TreeView Example" 
  $f_Load = $f.add_Load
+
+ # for loading AD data see http://www.codeproject.com/Tips/295882/Use-PowerShell-to-Query-and-Display-Data-II-Active
  $f_Load.Invoke({
    param(
     [Object] $sender, 
