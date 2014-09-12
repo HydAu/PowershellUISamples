@@ -1,4 +1,4 @@
-﻿#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@ public class Win32Window : IWin32Window
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
 <#
 http://blogs.technet.com/b/heyscriptingguy/archive/2011/06/16/use-asynchronous-event-handling-in-powershell.aspx
@@ -73,7 +73,7 @@ http://jrich523.wordpress.com/2011/06/13/creating-a-timer-event-in-powershell/
 
 $timer = New-Object System.Timers.Timer
 
-[int32]$max_iterations = 4
+[int32]$max_iterations = 20
 [int32]$iteration = 0
 
 $action = {
@@ -84,7 +84,7 @@ $action = {
   $owner.count = $iteration
   $owner.Screenshot()
   $iteration++
-  if ($iteration -eq $max_iterations)
+  if ($iteration -ge $max_iterations)
   {
     Write-Host 'Completed'
     $timer.stop()
@@ -93,8 +93,12 @@ $action = {
 }
 
 Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action
+<#
+TODO : catch and unregister
+Register-ObjectEvent : Cannot subscribe to event. A subscriber with sourceidentifier 'thetimer' already exists.
 
-$timer.Interval = 3000 # milliseconds
+#>
+$timer.Interval = 10 # milliseconds
 
 Write-Output 'Starting'
 $timer.start()
