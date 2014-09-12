@@ -115,3 +115,6 @@ Mode                LastWriteTime     Length Name
   $owner.count = $iteration
   $owner.Screenshot()
  
+# PowerShell Invoke-Command -FilePath example
+# Invoke-Command -ComputerName 'cclprdwebops1.carnival.com'  -FilePath "C:\Users\tso-sergueik\console_snapshot_local.ps1"
+# The handle is invalid
