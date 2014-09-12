@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+﻿#Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -18,104 +18,86 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-param (
-  [string] $servers_file = '',
-  [string] $use_servers_file = ''
-) 
-
+param(
+  [string]$servers_file = '',
+  [string]$use_servers_file = ''
+)
 
 
 # http://www.codeproject.com/Tips/816113/Console-Monitor
 Add-Type -TypeDefinition @"
 
 // "
+// intend to call from a Form or from a timer 
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
-
-
-
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-
-    private  String _data;
-
-    public String Data
-    {
-        get { return _data; }
-        set { _data = value; }
-
-    }
-
-    public Win32Window(IntPtr handle)
-    {   int c = 0;
-        _hWnd = handle;
-                Bitmap bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-                Graphics gr = Graphics.FromImage(bmp);
-                gr.CopyFromScreen(0, 0, 0, 0, bmp.Size);
-
-                string str = string.Format(@"C:\temp\Snap[{0}].jpeg", c);
-
-                bmp.Save(str, ImageFormat.Jpeg);
-
-    }
-
     public IntPtr Handle
     {
         get { return _hWnd; }
     }
+    private int _count = 0;
+    public int Count
+    {
+        get { return _count; }
+        set { _count = value; }
+    }
+    public String Screenshot()
+    {
+        Bitmap bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        Graphics gr = Graphics.FromImage(bmp);
+        gr.CopyFromScreen(0, 0, 0, 0, bmp.Size);
+        string str = string.Format(@"C:\temp\Snap[{0}].jpeg", _count);
+        bmp.Save(str, ImageFormat.Jpeg);
+        return str;
+    }
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.ComponentModel.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
-
-$owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$owner.Data = 42;
 <#
 http://blogs.technet.com/b/heyscriptingguy/archive/2011/06/16/use-asynchronous-event-handling-in-powershell.aspx
 http://www.nivot.org/blog/post/2008/05/23/BackgroundTimerPowerShellWPFWidget
 http://jrich523.wordpress.com/2011/06/13/creating-a-timer-event-in-powershell/
-
-$timer = new-object timers.timer
-
-$action1 = {write-host "Timer Elapse Event: $(get-date -Format ‘HH:mm:ss’)"} 
-$complete = 0
-$action2 = {
-write-host "complete: $complete"
-if($complete -eq 1)
-   {
-     write-host "completed"
-     $timer.stop()
-     Unregister-Event thetimer
-   }
-}
-Register-ObjectEvent -InputObject $timer -EventName elapsed `
-–SourceIdentifier  thetimer -Action $action1
-
-$timer.Interval = 3000 #3 seconds 
-
-Register-ObjectEvent -InputObject $timer -EventName elapsed `
-–SourceIdentifier  thetimer -Action $action
-
-$timer.start()
-
-#to stop run
-$timer.stop()
-#cleanup
-Unregister-Event thetimer
-
-
-$timer.start()
-
-#to stop
-$complete = 1
 #>
+
+$timer = New-Object System.Timers.Timer
+
+[int32]$max_iterations = 4
+[int32]$iteration = 0
+
+$action = {
+
+  Write-Host "Iteration # ${iteration}"
+  Write-Host "Timer Elapse Event: $(get-date -Format 'HH:mm:ss')"
+  $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+  $owner.count = $iteration
+  $owner.Screenshot()
+  $iteration++
+  if ($iteration -eq $max_iterations)
+  {
+    Write-Host 'Completed'
+    $timer.stop()
+    Unregister-Event thetimer
+  }
+}
+
+Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action
+
+$timer.Interval = 3000 # milliseconds
+
+Write-Output 'Starting'
+$timer.start()
+
+# http://amazingcarousel.com/examples/jquery-image-carousel-with-text-id7/
+# http://www.codeproject.com/Articles/808930/Animated-Image-Slide-Show
