@@ -8,41 +8,50 @@ public static extern IntPtr GetConsoleWindow();
 public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
 "@
 
-# http://pinvoke.net/default.aspx/Enums/ShowWindowCommand.html
-$SW_HIDE = 0
-$SW_SHOWNORMAL = 1
-$SW_NORMAL = 1
-$SW_SHOWMINIMIZED = 2
-$SW_SHOWMAXIMIZED = 3
-$SW_MAXIMIZE = 3
-$SW_SHOWNOACTIVATE = 4
-$SW_SHOW = 5
-$SW_MINIMIZE = 6
-$SW_SHOWMINNOACTIVE = 7
-$SW_SHOWNA = 8
-$SW_RESTORE = 9
-$SW_SHOWDEFAULT = 10
-$SW_FORCEMINIMIZE = 11
-$SW_MAX = 11
-
 [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 
 $f = New-Object System.Windows.Forms.Form
 $f.SuspendLayout()
 $f.Size = New-Object System.Drawing.Size (132,105)
+# $f.Location = New-Object System.Drawing.Point(0 , 0)
 $s = New-Object System.Windows.Forms.Button
 $s.Text = 'ShowConsole'
-$s.Location = New-Object System.Drawing.Point (10,10)
+function toggle_console_display {
+  param([int]$ShowWindowCommand
+  )
+  # http://pinvoke.net/default.aspx/Enums/ShowWindowCommand.html
+  $SW_HIDE = 0
+  $SW_SHOWNORMAL = 1
+  $SW_NORMAL = 1
+  $SW_SHOWMINIMIZED = 2
+  $SW_SHOWMAXIMIZED = 3
+  $SW_MAXIMIZE = 3
+  $SW_SHOWNOACTIVATE = 4
+  $SW_SHOW = 5
+  $SW_MINIMIZE = 6
+  $SW_SHOWMINNOACTIVE = 7
+  $SW_SHOWNA = 8
+  $SW_RESTORE = 9
+  $SW_SHOWDEFAULT = 10
+  $SW_FORCEMINIMIZE = 11
+  $SW_MAX = 11
+
+
+  [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(),$ShowWindowCommand)
+
+}
+
+$s.Location = New-Object System.Drawing.Point (10,12)
 $s.Size = New-Object System.Drawing.Size (100,22)
 
-$s.add_Click({ [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(),$SW_SHOWNOACTIVATE) })
-
+$s.add_Click({ toggle_console_display ($SW_SHOWNOACTIVATE) })
+$f.add_Closing({ toggle_console_display ($SW_SHOW) })
 $h = New-Object System.Windows.Forms.Button
 $h.Text = 'HideConsole'
 $h.Size = $s.Size
 
 $h.Location = New-Object System.Drawing.Point (10,42)
-$h.add_Click({ [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(),$SW_HIDE) })
+$h.add_Click({ toggle_console_display ($SW_HIDE) })
 $f.Controls.AddRange(@( $s,$h))
 $f.ResumeLayout($false)
 [void]$f.ShowDialog()
