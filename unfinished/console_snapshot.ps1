@@ -18,11 +18,25 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-param(
+param([string] $master_server = '', 
   [string]$servers_file = '',
-  [string]$use_servers_file = ''
-)
+  [string]$use_servers_file = '', 
+  [bool] $bool_verbose  = $false 
+  )
 
+
+# Load the entries from remote 
+if ($master_server -eq '') {
+	$master_server = $env:MASTER_NODE
+}
+
+
+function make_screenshot  {
+param([string] $string_value = '', 
+  [bool] $bool_value  = $false 
+  )
+
+# embed everything 
 
 # http://www.codeproject.com/Tips/816113/Console-Monitor
 Add-Type -TypeDefinition @"
@@ -32,7 +46,7 @@ Add-Type -TypeDefinition @"
 
 using System;
 using System.Drawing;
-using System.Windows.Forms;
+using System.Windows.Forms; // for IWin32Window
 using System.IO;
 using System.Drawing.Imaging;
 public class Win32Window : IWin32Window
@@ -48,15 +62,13 @@ public class Win32Window : IWin32Window
         get { return _count; }
         set { _count = value; }
     }
-    public String TakeScreenshot()
+    public String Screenshot()
     {
         Bitmap bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
         Graphics gr = Graphics.FromImage(bmp);
         gr.CopyFromScreen(0, 0, 0, 0, bmp.Size);
         string str = string.Format(@"C:\temp\Snap[{0}].jpeg", _count);
         bmp.Save(str, ImageFormat.Jpeg);
-        bmp.Dispose();
-        gr.Dispose();
         return str;
     }
     public Win32Window(IntPtr handle)
@@ -67,49 +79,42 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
-<#
-http://blogs.technet.com/b/heyscriptingguy/archive/2011/06/16/use-asynchronous-event-handling-in-powershell.aspx
-http://www.nivot.org/blog/post/2008/05/23/BackgroundTimerPowerShellWPFWidget
-http://jrich523.wordpress.com/2011/06/13/creating-a-timer-event-in-powershell/
-#>
 
-$owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-$timer = New-Object System.Timers.Timer
-
-[int32]$max_iterations = 10
-[int32]$iteration = 0
-
-$action = {
-  Write-Host "Iteration # ${iteration}"
-  Write-Host "Timer Elapse Event: $(get-date -Format 'HH:mm:ss')"
-  # now displosing
-  $screen_grabber  = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-  $screen_grabber.count = $iteration
-  $screen_grabber.TakeScreenshot()
-  $screen_grabber = $null
-  $iteration++
-  if ($iteration -ge $max_iterations)
-  {
-    Write-Host 'Stopping'
-    $timer.stop()
-    Unregister-Event thetimer -Force 
-    Write-Host 'Completed'    
-  }
+write-output "Run on ${env:COMPUTERNAME} as ${env:CLIENTNAME}"
+# The screenshot will be taken and saved locally on the callers node
+#   $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 }
 
-# http://www.ravichaganti.com/blog/passing-variables-or-arguments-to-an-event-action-in-powershell/
-Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action
 <#
-TODO : catch and unregister
-Register-ObjectEvent : Cannot subscribe to event. A subscriber with sourceidentifier 'thetimer' already exists.
-
+$step_remote =  invoke-command -computer $master_server  -ScriptBlock ${function:make_screenshot} -Authentication Credssp -ArgumentList 'test', $true 
+invoke-command : The WinRM client cannot process the request. Requests must
+include user name and password when CredSSP authentication mechanism is used.
+Add the user name and password or change the authentication mechanism and try
+the request again.
 #>
-$timer.Interval = 1000 # milliseconds
+write-output "Run on ${master_server}"
+$step_remote =  invoke-command -computer $master_server  -ScriptBlock ${function:make_screenshot} -ArgumentList 'test', $true 
+write-output $step_remote
+<#  Metadata file 'System.ComponentModel.dll' may not be found on certain boxes
 
-Write-Output 'Starting'
-$timer.start()
+    Directory: C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.ComponentModel\v4.0_4.0.0.0__b03f5f7f11d50a3a
 
-# http://amazingcarousel.com/examples/jquery-image-carousel-with-text-id7/
-# http://www.codeproject.com/Articles/808930/Animated-Image-Slide-Show
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+-a---          7/9/2012  12:40 AM      21976 System.ComponentModel.dll
+
+    Directory: C:\Windows\Microsoft.NET\Framework\v4.0.30319
+
+
+Mode                LastWriteTime     Length Name
+----                -------------     ------ ----
+-a---          7/9/2012  12:40 AM      21976 System.ComponentModel.dll
+#>
+
+  $owner.count = $iteration
+  $owner.Screenshot()
+ 
+# PowerShell Invoke-Command -FilePath example
+# Invoke-Command -ComputerName 'cclprdwebops1.carnival.com'  -FilePath "C:\Users\tso-sergueik\console_snapshot_local.ps1"
+# The handle is invalid
