@@ -25,24 +25,24 @@ $SW_SHOWDEFAULT = 10
 $SW_FORCEMINIMIZE = 11
 $SW_MAX = 11
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+[void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 
 $f = New-Object System.Windows.Forms.Form
 $f.SuspendLayout()
-$f.Size = new-object System.Drawing.Size(132, 105)
+$f.Size = New-Object System.Drawing.Size (132,105)
 $s = New-Object System.Windows.Forms.Button
 $s.Text = 'ShowConsole'
-$s.Location = New-Object System.Drawing.Point(10, 10)
-$s.Size = new-object System.Drawing.Size(100, 22)
+$s.Location = New-Object System.Drawing.Point (10,10)
+$s.Size = New-Object System.Drawing.Size (100,22)
 
-$s.add_Click({[Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(), $SW_SHOWNOACTIVATE)})
- 
+$s.add_Click({ [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(),$SW_SHOWNOACTIVATE) })
+
 $h = New-Object System.Windows.Forms.Button
 $h.Text = 'HideConsole'
 $h.Size = $s.Size
 
-$h.Location = New-Object System.Drawing.Point(10, 42)
-$h.add_Click({ [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(), $SW_HIDE )})
-$f.Controls.AddRange(@( $s, $h))
+$h.Location = New-Object System.Drawing.Point (10,42)
+$h.add_Click({ [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(),$SW_HIDE) })
+$f.Controls.AddRange(@( $s,$h))
 $f.ResumeLayout($false)
 [void]$f.ShowDialog()
