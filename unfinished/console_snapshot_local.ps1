@@ -28,6 +28,7 @@ using System.Windows.Forms;
 using System.Drawing.Imaging;
 public class WindowHelper
 {
+    private Bitmap bmp;
     private int _count = 0;
     public int Count
     {
@@ -36,13 +37,33 @@ public class WindowHelper
     }
     public String Screenshot()
     {
-        Bitmap bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
         Graphics gr = Graphics.FromImage(bmp);
         gr.CopyFromScreen(0, 0, 0, 0, bmp.Size);
+        Label();
+
         string str = string.Format(@"C:\temp\Snap[{0}].jpeg", _count);
         bmp.Save(str, ImageFormat.Jpeg);
         return str;
     }
+
+    public void Label() { 
+
+string firstText = "Hello";
+string secondText = "World";
+
+PointF firstLocation = new PointF(10f, 10f);
+PointF secondLocation = new PointF(10f, 50f);
+
+using(Graphics graphics = Graphics.FromImage(bmp))
+{
+    using (Font arialFont =  new Font("Arial", 40))
+    {
+        graphics.DrawString(firstText, arialFont, Brushes.White, firstLocation);
+        graphics.DrawString(secondText, arialFont, Brushes.Red, secondLocation);
+    }
+}
+}
     public WindowHelper()
     {
     }
