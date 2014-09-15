@@ -3,10 +3,10 @@
 # imagine that we want to get rid of Desktop Experience for the sake of performance increase:
 Remove-WindowsFeature Desktop-Experience -Restart
 # takes from Desktop Experience to Server with a GUI.
-# NOTE: need to uninstall Visual Studio and other apps. Otherwise Desktop Experienced remains present.
+# NOTE: need to uninstall Visual Studio and other apps.
 Uninstall-WindowsFeature Server-Gui-Shell -Restart
 # takes from Server with a GUI to Minimal Server Interface
-# Most Powershell UI form examples continue to work: WPF OK, Windows Forms OK,win32 P/Invoke with some issues: toggle_console.ps1 is able to hide but not show the Powershell console window.
+# Powershell UI form examples work, except toggle_display.ps1 which manages to show the form, and hide console, but never shows console back.
 Remove-WindowsFeature User-Interfaces-Infra -Restart
 # takes from Server with a GUI to Server Core
 #>
