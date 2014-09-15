@@ -69,7 +69,21 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-
+<#
+pushd 'HKLM:'
+cd '/SOFTWARE/Microsoft/Internet Explorer'
+$version = get-itemproperty -name 'Version' -path 'HKLM:/SOFTWARE/Microsoft/Internet Explorer'
+popd
+write-output  $version.Version
+# 8.0.6001.18702 
+# through 
+# 10.???
+# are OK
+# IE 11 - need do find version in some other registry key - the above returns
+# 9.11.9600.17280
+# The svcVersion = 11.0.12 
+# IE 11  fails to execute javascript code in the browser.
+#>
   # The script works fine with Chrome or Firefox 31, but not IE 11.
   # the exception specifically when attempting to mess with cookies
   # Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
