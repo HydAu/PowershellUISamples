@@ -66,11 +66,21 @@ if ($PSBoundParameters["browser"]) {
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node_ie.cmd"
     Start-Sleep -Seconds 10
   }
-#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+
+  # The script works fine with Chrome or Firefox 31, but not IE 11.
+  # the exception specifically when attempting to mess with cookies
+  # Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
+  # is known since Nov 2013 
+  # https://code.google.com/p/selenium/issues/detail?id=6511  
+  # The bad news is that cookie manipulation is broken. Badly. If you attempt to set or retrieve cookies, there's a chance that you'll end up with the "Unable to get browser" error encountered before. At the moment, there is no workaround for that. Matt, looking at the log you posted earlier, it looks like you were doing some cookie manipulation before you got into the bad state."
+  # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+
+  $capability.setCapability([OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer]::ENSURING_CLEAN_SESSION, $true)  
+
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
@@ -85,29 +95,22 @@ if ($PSBoundParameters["browser"]) {
 
 
 
-$selenium.Navigate().GoToUrl($baseURL )
+$selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
 
-[string]$title = ([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("return document.title")
-# Write-Output $title
-
-[int]$timeout  = 10000
-# change $timeout to see if the WevDriver is waiting on page  sctript to execute
-[String] $script =  "window.setTimeout(function(){document.getElementById('searchInput').value = 'test'}, ${timeout});"
-
-$start = (Get-Date -UFormat "%s")
 
 <#
 
 # http://www.milincorporated.com/a2_cookies.html
  pushd "${env:USERPROFILE}\AppData\Roaming\Microsoft\Windows\Cookies"
  pushd "${env:USERPROFILE}\AppData\Roaming\Microsoft\Windows\Cookies\Low\"
+NOTE: Recent Files in the latter directory  are present even before the browser is open first time after the cold boot.
 # Session cookies ?
  pushd "${env:USERPROFILE}\Local Settings\Temporary Internet Files\Content.IE5"
 #>
 # http://stackoverflow.com/questions/7413966/delete-cookies-in-webdriver 
 <#
-$target_server = 'hqvdix64ded0055.carnival.com'
+$target_server = '...'
 function clear_cookies{
 
 $command = 'C:\Windows\System32\rundll32.exe InetCpl.cpl,ClearMyTracksByProcess 2'
@@ -163,26 +166,11 @@ function eraseCookie(name) {
 // finally invoke 
 
 var cookies = document.cookie.split(";");
-for (var i = 0; i < cookies.length; i++)
+for (var i = 0; i < cookies.length; i++) {
   eraseCookie(cookies[i].split("=")[0]);
-"@
-
-try {
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeAsyncScript($script);
-
-} catch [OpenQA.Selenium.WebDriverTimeoutException]{
-
-  # Ignore
-  # Timed out waiting for async script result  (Firefox)
-  # asynchronous script timeout: result was not received (Chrome)
-  [NUnit.Framework.Assert]::IsTrue(  $_.Exception.Message -match '(?:Timed out waiting for async script result|asynchronous script timeout)')
 }
-$end = (Get-Date -UFormat "%s")
-
-$elapsed = New-TimeSpan -Seconds  ( $end - $start )
-Write-Output  ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds ,  ( $end - $start ))
-start-sleep 3
-
+"@
+[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeScript($script);
 
 try {
   $selenium.Quit()
