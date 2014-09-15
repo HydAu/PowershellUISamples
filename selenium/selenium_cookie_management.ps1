@@ -69,7 +69,21 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-
+<#
+pushd 'HKLM:'
+cd '/SOFTWARE/Microsoft/Internet Explorer'
+$version = get-itemproperty -name 'Version' -path 'HKLM:/SOFTWARE/Microsoft/Internet Explorer'
+popd
+write-output  $version.Version
+# 8.0.6001.18702 
+# through 
+# 10.???
+# are OK
+# IE 11 - need do find version in some other registry key - the above returns
+# 9.11.9600.17280
+# The svcVersion = 11.0.12 
+# IE 11  fails to execute javascript code in the browser.
+#>
   # The script works fine with Chrome or Firefox 31, but not IE 11.
   # the exception specifically when attempting to mess with cookies
   # Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
@@ -129,7 +143,14 @@ $command = 'C:\Windows\System32\rundll32.exe InetCpl.cpl,ClearMyTracksByProcess 
 [void](invoke-expression -command $command  )
 } 
 
-$remote_run_step = invoke-command -computer $target_server -ScriptBlock ${function:clear_cookies} 
+$remote_run_step = invoke-command -computer $target_server -ScriptBlock ${function:clear_cookies}
+# note one may try to do the same using java runtime:
+http://girixh.blogspot.com/2013/10/how-to-clear-cookies-from-internet.html
+try {
+  Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 2");
+ } catch (IOException e) {
+  // TODO Auto-generated catch block
+  e.printStackTrace();
 #>
 <#
 
@@ -189,3 +210,15 @@ try {
 } catch [exception]{
   # Ignore errors if unable to close the browser
 }
+
+
+<#
+# The following registry key describes the state of the 'Delete Browsing history on exit' checkbox 
+
+pushd 'HKCU:'
+cd '/Software/Microsoft/Internet Explorer/Privacy'
+get-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy'
+set-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy' -value '1'
+popd
+
+#>
