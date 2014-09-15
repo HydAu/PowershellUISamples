@@ -129,7 +129,14 @@ $command = 'C:\Windows\System32\rundll32.exe InetCpl.cpl,ClearMyTracksByProcess 
 [void](invoke-expression -command $command  )
 } 
 
-$remote_run_step = invoke-command -computer $target_server -ScriptBlock ${function:clear_cookies} 
+$remote_run_step = invoke-command -computer $target_server -ScriptBlock ${function:clear_cookies}
+# note one may try to do the same using java runtime:
+http://girixh.blogspot.com/2013/10/how-to-clear-cookies-from-internet.html
+try {
+  Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 2");
+ } catch (IOException e) {
+  // TODO Auto-generated catch block
+  e.printStackTrace();
 #>
 <#
 
@@ -189,3 +196,15 @@ try {
 } catch [exception]{
   # Ignore errors if unable to close the browser
 }
+
+
+<#
+# The following registry key describes the state of the 'Delete Browsing history on exit' checkbox 
+
+pushd 'HKCU:'
+cd '/Software/Microsoft/Internet Explorer/Privacy'
+get-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy'
+set-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy' -value '1'
+popd
+
+#>
