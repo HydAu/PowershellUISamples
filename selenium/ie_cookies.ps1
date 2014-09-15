@@ -184,3 +184,15 @@ try {
 } catch [exception]{
   # Ignore errors if unable to close the browser
 }
+
+
+<#
+# The following registry key describes the state of the 'Delete Browsing history on exit' checkbox 
+
+pushd 'HKCU:'
+cd '/Software/Microsoft/Internet Explorer/Privacy'
+get-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy'
+set-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy' -value '1'
+popd
+
+#>
