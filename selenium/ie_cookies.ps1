@@ -66,7 +66,7 @@ if ($PSBoundParameters["browser"]) {
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node_ie.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
 
@@ -78,11 +78,23 @@ if ($PSBoundParameters["browser"]) {
   # The bad news is that cookie manipulation is broken. Badly. If you attempt to set or retrieve cookies, there's a chance that you'll end up with the "Unable to get browser" error encountered before. At the moment, there is no workaround for that. Matt, looking at the log you posted earlier, it looks like you were doing some cookie manipulation before you got into the bad state."
   # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
-
-  $capability.setCapability([OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer]::ENSURING_CLEAN_SESSION, $true)  
+  try { 
+    $capability.setCapability([OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer]::ENSURING_CLEAN_SESSION, $true)  
+  } catch [Exception] {
+    # OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer possibly not available for C# port
+  } 
 
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
+ try {
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+}  catch [Exception]{
+throw
+}
+<#
+New-Object : Exception calling ".ctor" with "2" argument(s): "Error forwarding
+the new session Empty pool of VM for setup Capabilities 
+[{platform=ANY,javascriptEnabled=true, browserName=chrome, version=}]"
+#>
 } else {
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $selenium.Capabilities.SetCapability("ssl-protocol","any")

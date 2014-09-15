@@ -86,8 +86,8 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
 #  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
 
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")

@@ -69,9 +69,13 @@ if ($browser -ne $null -and $browser -ne '') {
   Write-Host "Running on ${browser}"
   if ($browser -match 'firefox') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+
   }
   elseif ($browser -match 'chrome') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  }
+  elseif ($browser -match 'ie' ) {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
   }
   elseif ($browser -match 'safari') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
@@ -116,6 +120,11 @@ try {
 $end = (Get-Date -UFormat "%s")
 $elapsed = New-TimeSpan -Seconds ($end - $start)
 Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
+<#
+Exception calling "ExecuteAsyncScript" with "1" argument(s): "Unable to get
+browser (WARNING: The server did not provide any stacktrace information)
+
+#>
 Start-Sleep 3
 
 try {
