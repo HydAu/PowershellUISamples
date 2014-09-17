@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Linq.Expressions;
 using System.Text;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using OpenQA.Selenium.IE;
 using System.Configuration;
 using System.Configuration.Install;
 
-// TODO : App.config 
+// TODO : App.config
 namespace SeleniumTests
 {
 
@@ -63,12 +63,23 @@ namespace SeleniumTests
         public void MyTestInitialize()
         {
             string url = ReadSetting("url");
-            DesiredCapabilities capability = DesiredCapabilities.Firefox();
-            //  driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), DesiredCapabilities.Firefox()) ;
-            String phantomjs_executable_folder = ReadSetting("phantomjs_executable_path");
-            driver = new OpenQA.Selenium.PhantomJS.PhantomJSDriver(phantomjs_executable_folder);
+            String browser_selection  = ReadSetting("browser");
+		DesiredCapabilities capability = null;
+            if (browser_selection.IndexOf("firefox") == 0 ){
+               capability = DesiredCapabilities.Firefox();
+            }
+            if (browser_selection.IndexOf("chrome") == 0 ){
+               capability = DesiredCapabilities.Chrome();
+            }
+            if (browser_selection.IndexOf("IE") == 0 ){
+               capability = DesiredCapabilities.InternetExplorer();
+            }
 
-            driver.Url = "http://localhost:8011/";
+            driver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), capability ) ;
+            // String phantomjs_executable_folder = ReadSetting("phantomjs_executable_path");
+            // driver = new OpenQA.Selenium.PhantomJS.PhantomJSDriver(phantomjs_executable_folder);
+
+            driver.Url = "http://www.google.com/";
             driver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(10));
             verificationErrors = new StringBuilder();
 
@@ -81,77 +92,59 @@ namespace SeleniumTests
         }
 
         [TestMethod]
-        [TestCategory("US")]
-        public void Test_1()
+        [TestCategory("Category")]
+        public void Test()
         {
 
             // Arrange
             // Act
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP1"));
+            driver.Navigate().GoToUrl(ReadSetting("baseURL"));
+IJavaScriptExecutor js = driver as IJavaScriptExecutor;
+
+String script = @"
+
+
+function createCookie(name,value,days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = ; expires=+date.toGMTString();
+    }
+    else var expires = '';
+    document.cookie = name+'='+value+expires+'; path=/';
+}
+
+function readCookie(name) {
+    var nameEQ = name + '=';
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name,'',-1);
+}
+
+// finally invoke 
+
+var cookies = document.cookie.split(';');
+for (var i = 0; i < cookies.length; i++) {
+  eraseCookie(cookies[i].split(=)[0]);
+}
+";
+
+// script = "return document.title" ;
+string title = (string)js.ExecuteScript(script);
+   
             // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
-            Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Lines") > -1, driver.Title);
+            Assert.IsTrue(driver.Title.IndexOf(ReadSetting("title")) > -1, driver.Title);
         }
-
-        [TestMethod]
-        [TestCategory("UK")]
-        public void Test_2()
-        {
-
-            // Arrange
-            // Act
-
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP1"));
-            //Find the Log In link and create an object so we can use it
-            IWebElement queryBox = driver.FindElements(By.ClassName("header"))[0];
-            queryBox.Click();
-            // 
-            driver.FindElement(By.PartialLinkText("To join the fun"));
-            // Assert.IsTrue(), driver.Title);
-        }
-
-
-        [TestMethod]
-        [TestCategory("US")]
-        public void Test_3()
-        {
-
-            // Arrange
-            // Act
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP2"));
-            // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
-            Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Lines") > -1, driver.Title);
-        }
-
-        [TestMethod]
-        [TestCategory("UK")]
-        public void Test_4()
-        {
-
-            // Arrange
-            // Act
-
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP1"));
-            //Find the Log In link and create an object so we can use it
-            IWebElement queryBox = driver.FindElement(By.ClassName("login-link"));
-            queryBox.Click();
-
-            // 
-            driver.FindElement(By.PartialLinkText("To join the fun"));
-            // Assert.IsTrue(), driver.Title);
-        }
-
-        [TestMethod]
-        [TestCategory("US")]
-        public void Test_5()
-        {
-
-            // Arrange
-            // Act
-            driver.Navigate().GoToUrl(ReadSetting("baseURL_GROUP2"));
-            // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
-            Assert.IsTrue(driver.Title.IndexOf("Carnival Cruise Deals") > -1, driver.Title);
-        }
-
 
     }
 }
+
+
