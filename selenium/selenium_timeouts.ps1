@@ -117,6 +117,11 @@ try {
 
 } catch [OpenQA.Selenium.WebDriverTimeoutException]{
 }
+catch [OpenQA.Selenium.NoSuchWindowException] { 
+write-host $_.Exception.Message # Unable to get browser
+ $_.Exception | get-member
+
+}
 $end = (Get-Date -UFormat "%s")
 $elapsed = New-TimeSpan -Seconds ($end - $start)
 Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
