@@ -11,6 +11,8 @@ rem Need to keep 1.7 and 1.6 both installed
 set GROOVY_HOME=c:\java\groovy-2.3.2
 PATH=%JAVA_HOME%\bin;%PATH%;%GROOVY_HOME%\bin
 PATH=%PATH%;c:\Program Files\Mozilla Firefox
+REM support for local installs for  specificuser 
+PATH=%PATH%;%USERPROFILE%\AppData\Local\Mozilla Firefox\
 REM This setting may need adjustment.
 REM set LAUNCHER_OPTS=-XX:PermSize=512M -XX:MaxPermSize=1028M -Xmn128M -Xms512M -Xmx1024M
 set LAUNCHER_OPTS=-XX:MaxPermSize=1028M -Xmn128M
