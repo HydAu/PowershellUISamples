@@ -1,4 +1,4 @@
-﻿ using System;
+ using System;
 using System.Linq.Expressions;
 using System.Text;
 using System.Collections.Generic;
@@ -137,7 +137,7 @@ for (var i = 0; i < cookies.length; i++) {
 }
 ";
 
-// script = "return document.title" ;
+script = "return document.title" ;
 string title = (string)js.ExecuteScript(script);
    
             // WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10)) ;
