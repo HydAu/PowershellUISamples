@@ -1,23 +1,3 @@
-#Copyright (c) 2014 Serguei Kouzmine
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-
 param(
   [string]$debug = ''
 )
@@ -137,7 +117,24 @@ Error: "The 'p' start tag on line 1 position 749 does not match the end tag of '
 foreach ($node in $nodes)
 {
   Write-Output $node.InnerText
-  [HtmlAgilityPack.HtmlNodeCollection]$browsers = $node.ParentNode.SelectNodes("//div[@type='browsers']//img")
+
+  try {
+    [HtmlAgilityPack.HtmlNodeNavigator]$navigator = $node.CreateNavigator()
+    [void]$navigator.MoveToNext()
+    [void]$navigator.MoveToNext()
+    $navigator.SelectNodes("//div[@type='browsers']//img")
+    <# TODO - switch back to node collection
+Method invocation failed because ...#>
+    Write-Output 'in navigator'
+    $navigator = $null
+  } catch [exception]{
+    # write-output $_.Exception.Message
+    # NOOP 
+  }
+  $browsers_div = $node.NextSibling.NextSibling
+  # write-output $browsers_div
+  [HtmlAgilityPack.HtmlNodeCollection]$browsers = $browsers_div.SelectNodes("div[@type='browsers']//img")
+
 
   # [HtmlAgilityPack.HtmlNode] $node = $null
   foreach ($image in $browsers)
