@@ -1,46 +1,36 @@
 {
-  "capabilities":
-      [
-        {
-          "browserName": "*firefox",
-          "maxInstances": 5,
-          "seleniumProtocol": "Selenium"
-        },
-        {
-          "browserName": "*googlechrome",
-          "maxInstances": 5,
-          "seleniumProtocol": "Selenium"
-        },
-        {
-          "browserName": "*iexplore",
-          "maxInstances": 1,
-          "seleniumProtocol": "Selenium"
-        },
-        {
-          "browserName": "firefox",
-          "maxInstances": 5,
-          "seleniumProtocol": "WebDriver"
-        },
-        {
-          "browserName": "chrome",
-          "maxInstances": 5,
-          "seleniumProtocol": "WebDriver"
-        },
-        {
-          "browserName": "internet explorer",
-          "maxInstances": 1,
-          "seleniumProtocol": "WebDriver"
-        }
-      ],
-  "configuration":
-  {
-    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
-    "maxSession": 5,
-    "port": 5555,
-    "host": ip,
+  "capabilities": [
+    {
+      "browserName": "chrome",
+      "version": "",
+      "platform": "WINDOWS",
+      "maxInstances": 1
+    },
+    {
+      "browserName": "internet explorer",
+      "version": "",
+      "platform": "WINDOWS",
+      "maxInstances": 1
+    },
+    {
+      "browserName": "firefox",
+      "version": "",
+      "platform": "WINDOWS",
+      "maxInstances": 1
+    }
+  ],
+  "configuration": {
+    "host": "HOSTNAME_OF_THE_NODE",
+    "role": "node",
+    "maxSession": 1,
+    "port": 5557,
+    "nodeTimeout": 120,
+    "nodePolling": 2000,
+    "registerCycle": 10000,
+    "cleanUpCycle": 2000,
+    "timeout": 30000,
     "register": true,
-    "registerCycle": 5000,
     "hubPort": 4444,
-    "hubHost": "192.168.0.7"
+    "hubHost": "IP_ADDRESS_OH_THE_HUB"	
   }
 }
