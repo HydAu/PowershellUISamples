@@ -19,21 +19,27 @@
 #THE SOFTWARE.
 
 param(
-  [switch]$browser
+  [string] $debug = '' 
 )
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory {
-  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
-  if ($Invocation.PSScriptRoot) {
-    $Invocation.PSScriptRoot
-  }
-  elseif ($Invocation.MyCommand.Path) {
-    Split-Path $Invocation.MyCommand.Path
-  } else {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
-  }
+function Get-ScriptDirectory
+{
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
 }
+
 
 $shared_assemblies = @(
   "HtmlAgilityPack.dll",
@@ -47,96 +53,104 @@ $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; 
 popd
 
 
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') 
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic') 
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Collections') 
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') 
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Text') 
-  [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Data') 
+$url =  'http://localhost:4444/grid/console#' 
 
-# TODO : real html, with problems
-$source = get-content -Path "C:\developer\sergueik\powershell_ui_samples\external\grid-console.html"
-$source =  [System.Net.WebUtility]::HtmlDecode($source) 
-$source
-# http://stackoverflow.com/questions/691657/c-htmldocument-object-has-no-constructor
-# [System.Windows.Forms.HtmlDocument] $resultat  = [System.Windows.Forms.HtmlDocument]::LoadHtml($source)
+$sleep_interval = 30 
+$max_retries  = 1
+$build_log = 'test.properties'
+$expected_http_status  = 200 
+
+$proxyAddr = (get-itemproperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').ProxyServer
+if ($proxyAddr -eq $null ){
+  $proxyAddr = (get-itemproperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').AutoConfigURL
+}
+
+if ($proxyAddr -eq $null){
+  $proxyAddr = 'http://proxy.carnival.com:8080/array.dll?Get.Routing.Script'
+}
+
+$proxy = new-object System.Net.WebProxy
+$proxy.Address = $proxyAddr
+write-debug ('Probing {0}' -f $proxy.Address )
+$proxy.useDefaultCredentials = $true
+
+$req = [system.Net.WebRequest]::Create($url)
+$req.proxy = $proxy
+$req.useDefaultCredentials = $true
+
+$req.PreAuthenticate = $true
+$req.Headers.Add('UserAgent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/22.0.1229.94 Safari/535.2')
+
+$req.Credentials = new-object system.net.networkcredential($build_user, $build_password )
+# $response = $webrequest.GetResponse()
+[Io.StreamReader] $sr  =  $null
+[int]$int = 0
+for ($i = 0 ; $i -ne $max_retries  ; $i ++ ) {
+
+
+try {
+    $res = $req.GetResponse()
+    $sr = [Io.StreamReader]($res.GetResponseStream()) 
+# may fail!
+# [xml]$xmlout = $sr.ReadToEnd()
+
+} catch [System.Net.WebException] {
+    $res = $_.Exception.Response
+}
+$int = [int]$res.StatusCode
+$time_stamp =  ( Get-Date -format 'yyyy/MM/dd hh:mm' ) 
+$status = $res.StatusCode
+write-output "$time_stamp`t$url`t$int`t$status" 
+if (($int -ne $expected_http_status ) -or ( $sr -eq $null )) {
+start-sleep -seconds $sleep_interval
+}
+}
+$time_stamp =  $null 
+if ($int -ne $expected_http_status ) {
+# write error status to a log file and exit
+# 
+    write-output 'Unexpected http status detected. Error reported.'
+    log_message  'STEP_STATUS=ERROR' $build_status 
+	exit 1 
+
+}
+[string]$source =$sr.ReadToEnd()
+try{
+# may fail!
+[xml]$xmlout = $source 
+
+} 
+catch [Exception]  {
+write-output 'ignoring the exception' 
+# write-output $_.Exception.Message
+<# Cannot convert value "<html><... </a></div></body></html>" to type "System.Xml.XmlDocument". 
+Error: "The 'p' start tag on line 1 position 749 does not match the end tag of 'div'. Line 4, position 833." 
+#>
+}
+
+[System.Net.WebUtility]::HtmlDecode($source) 
+write-debug $source
 [HtmlAgilityPack.HtmlDocument]$resultat  = new-Object HtmlAgilityPack.HtmlDocument
 $resultat.LoadHtml($source) 
-# too messy to do in Powershell
-# $resultat.DocumentNode.Descendants() |  foreach-object {write-output $_.Name; write-output $_.InnerText;  }
-[HtmlAgilityPack.HtmlNodeCollection] $col = $resultat.DocumentNode.SelectNodes("//p/img")
- [HtmlAgilityPack.HtmlNode] $node = $null
-foreach ( $node in $col)
-{
-     $actuald=$node.Attributes["title"].Value
-     write-output $node
-}
 # http://www.codeproject.com/Tips/804660/How-to-Parse-Html-using-csharp
 # http://htmlagilitypack.codeplex.com/downloads/get/437941
-<#
-try {
-Add-Type -TypeDefinition @"
 
-// "
-using System;
-using System.Net;
-using HtmlAgilityPack;
-using System.Data;
-using System.Data.Linq;
-using System.Xml.Linq;
-using System.Xml;
-using System.Text;
-using System.Net.Http;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-public class Win32Window 
+[HtmlAgilityPack.HtmlNodeCollection] $nodes = $resultat.DocumentNode.SelectNodes("//p[@class='proxyid']")
+foreach ( $node in $nodes)
+{
+     write-output $node.InnerText   
+     [HtmlAgilityPack.HtmlNodeCollection] $browsers = $node.ParentNode.SelectNodes("//div[@type='browsers']//img")
+
+# [HtmlAgilityPack.HtmlNode] $node = $null
+foreach ( $image in $browsers)
 {
 
-private async void Parsing(string website) 
-        { 
-            try 
-            { 
-
-                HttpClient http = new HttpClient(); 
-                var response = await http.GetByteArrayAsync(website); 
-                String source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1); 
-                source = WebUtility.HtmlDecode(source); 
-                HtmlDocument resultat = new HtmlDocument(); 
-                resultat.LoadHtml(source); 
- 
-                List<HtmlNode> toftitle = resultat.DocumentNode.Descendants().Where 
-                (x => (x.Name == "div" && x.Attributes["class"] != null && x.Attributes["class"].Value.Contains("block_content"))).ToList(); 
- 
-                var li = toftitle[6].Descendants("li").ToList(); 
-                foreach (var item in li) 
-                { 
-                    var link = item.Descendants("a").ToList()[0].GetAttributeValue("href", null); 
-                    var img = item.Descendants("img").ToList()[0].GetAttributeValue("src", null); 
-                    var title = item.Descendants("h5").ToList()[0].InnerText; 
- 
-                    listproduct.Add(new Product() 
-                    { 
-                        Img = img, 
-                        Title = title, 
-                        Link = link 
-                    }); 
-                } 
- 
-            } 
-            catch (Exception) 
-            { 
- 
-                Console.WriteLine("Network Problem!"); 
-            } 
- 
-        }
+     write-output $image.Attributes["title"].Value
+     write-output $image.Attributes["class"].Value
 
 }
-"@ -ReferencedAssemblies 'System.Data.Linq.dll','System.Net.dll','System.Xml.Linq.dll','System.Xml.dll','System.Text.Encoding.dll', 'System.Net.Http.dll','System.Collections.dll', 'C:\developer\sergueik\csharp\SharedAssemblies\HtmlAgilityPack.dll'
-} catch  [Exception] { 
-write-debug $_.Exception.Message
+
 }
 
-#>
+return
+
