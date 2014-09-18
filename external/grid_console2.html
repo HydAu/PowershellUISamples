@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<html>
+  <head>
+    <!--
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="/grid/resources/org/openqa/grid/images/console-beta.js"></script>
+    <link href="/grid/resources/org/openqa/grid/images/console-beta.css" rel="stylesheet" type="text/css"/>
+    <link href="/grid/resources/org/openqa/grid/images/favicon.ico" rel="icon" type="image/x-icon"/>
+
+-->
+    <title>Grid Console</title>
+    <style>.busy { opacity : 0.4;filter: alpha(opacity=40);}</style>
+  </head>
+  <body>
+    <div id="main_content">
+      <div id="header">
+        <h1>
+          <a href="/grid/console">Selenium</a>
+        </h1>
+        <h2>Grid Console v.2.43.1</h2>
+        <div>
+          <a id="helplink" target="_blank" href="http://code.google.com/p/selenium/wiki/Grid2">Help</a>
+        </div>
+      </div>
+      <div id="leftColumn">
+        <div class="proxy">
+          <p class="proxyname">DefaultRemoteProxy (version : 2.43.1)
+<p class="proxyid">id : http://CCLPRDKEYNOTE1:5557, OS : WINDOWS</p>
+</p>
+          <div class="tabs">
+            <ul>
+              <li class="tab" type="browsers">
+                <a title="test slots" href="#">Browsers</a>
+              </li>
+              <li class="tab" type="config">
+                <a title="node configuration" href="#">Configuration</a>
+              </li>
+            </ul>
+          </div>
+          <div class="content">
+            <div type="browsers" class="content_detail">
+              <p class="protocol">WebDriver</p>
+              <p>v:<img src="/grid/resources/org/openqa/grid/images/chrome.png" width="16" height="16" title="{platform=WINDOWS, seleniumProtocol=WebDriver, browserName=chrome, maxInstances=1, version=}"/>
+</p>
+              <p>v:<img src="/grid/resources/org/openqa/grid/images/firefox.png" width="16" height="16" class="busy" title="POST - /session/8eb05f0f-950a-4f73-b1cb-d706a1ef43a3/url executed."/>
+</p>
+              <p>v:<img src="/grid/resources/org/openqa/grid/images/internet_explorer.png" width="16" height="16" title="{platform=WINDOWS, seleniumProtocol=WebDriver, browserName=internet explorer, maxInstances=1, version=}"/>
+
+</p>
+            </div>
+            <div type="config" class="content_detail">
+              <p>port:5557</p>
+              <p>nodeConfig:node2.json</p>
+              <p>registerCycle:10000</p>
+              <p>newSessionWaitTimeout:-1</p>
+              <p>prioritizer:null</p>
+              <p>remoteHost:http://CCLPRDKEYNOTE1:5557</p>
+              <p>throwOnCapabilityNotPresent:true</p>
+              <p>proxy:org.openqa.grid.selenium.proxy.DefaultRemoteProxy</p>
+              <p>maxSession:1</p>
+              <p>role:node</p>
+              <p>host:CCLPRDKEYNOTE1</p>
+              <p>servlets:[]</p>
+              <p>cleanUpCycle:2000</p>
+              <p>browserTimeout:120</p>
+              <p>hubHost:172.25.177.112</p>
+              <p>capabilityMatcher:org.openqa.grid.internal.utils.DefaultCapabilityMatcher</p>
+              <p>url:http://CCLPRDKEYNOTE1:5557</p>
+              <p>register:true</p>
+              <p>nodePolling:2000</p>
+              <p>Dwebdriver.chrome.driver=chromedriver.exe:</p>
+              <p>jettyMaxThreads:-1</p>
+              <p>nodeTimeout:120</p>
+              <p>Dwebdriver.ie.driver=IEDriverServer.exe:</p>
+              <p>hubPort:4444</p>
+              <p>timeout:120</p>
+            </div>
+            <div id="rightColumn">
+              <div class="proxy">
+                <p class="proxyname">DefaultRemoteProxy unknown version,FOO</p>
+                <p class="proxyid">id : http://FOO:5560, OS : WINDOWS</p>
+                <div class="tabs">
+                  <ul>
+                    <li class="tab" type="browsers">
+                      <a title="test slots" href="#">Browsers</a>
+                    </li>
+                    <li class="tab" type="config">
+                      <a title="node configuration" href="#">Configuration</a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="content">
+                  <div type="browsers" class="content_detail">
+                    <p class="protocol">WebDriver</p>
+                    <p>v:<img src="/grid/resources/org/openqa/grid/images/chrome.png" width="16" height="16" class="busy" title="POST - /session executed."/>
+</p>
+                    <p>v:<img src="/grid/resources/org/openqa/grid/images/firefox.png" width="16" height="16" title="{platform=WINDOWS, seleniumProtocol=WebDriver, browserName=firefox, maxInstances=1, version=}"/>
+</p>
+                    <p>v:<img src="/grid/resources/org/openqa/grid/images/internet_explorer.png" width="16" height="16" title="{platform=WINDOWS, seleniumProtocol=WebDriver, browserName=internet explorer, maxInstances=1, version=}"/>
+</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div type="config" class="content_detail">
+              <p>port:5560</p>
+              <p>nodeConfig:node2.json</p>
+              <p>registerCycle:10000</p>
+              <p>newSessionWaitTimeout:-1</p>
+              <p>hub:http://127.0.0.1:4444/hub/register</p>
+              <p>prioritizer:null</p>
+              <p>remoteHost:http://FOO:5560</p>
+              <p>throwOnCapabilityNotPresent:true</p>
+              <p>proxy:org.openqa.grid.selenium.proxy.DefaultRemoteProxy</p>
+              <p>maxSession:1</p>
+              <p>role:node</p>
+              <p>host:FOO</p>
+              <p>servlets:[]</p>
+              <p>cleanUpCycle:2000</p>
+              <p>browserTimeout:120</p>
+              <p>hubHost:127.0.0.1</p>
+              <p>capabilityMatcher:org.openqa.grid.internal.utils.DefaultCapabilityMatcher</p>
+              <p>url:http://FOO:5560</p>
+              <p>register:true</p>
+              <p>nodePolling:2000</p>
+              <p>Dwebdriver.chrome.driver=chromedriver.exe:</p>
+              <p>jettyMaxThreads:-1</p>
+              <p>nodeTimeout:120</p>
+              <p>Dwebdriver.ie.driver=IEDriverServer.exe:</p>
+              <p>hubPort:4444</p>
+              <p>timeout:120</p>
+            </div>
+            <div class="clearfix">
+</div>
+            <div>
+              <ul/>
+            </div>
+            <a href="?config=true&amp;configDebug=true">view config</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
