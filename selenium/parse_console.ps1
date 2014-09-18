@@ -1,5 +1,27 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 param(
-  [string]$debug = ''
+  [string]$export,
+  [switch]$debug
 )
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -108,8 +130,12 @@ Error: "The 'p' start tag on line 1 position 749 does not match the end tag of '
 #>
 }
 
-[System.Net.WebUtility]::HtmlDecode($source)
-
+[void][System.Net.WebUtility]::HtmlDecode($source)
+if ($PSBoundParameters['debug']) {
+   write-debug $source
+}
+[HtmlAgilityPack.HtmlDocument]$resultat = New-Object HtmlAgilityPack.HtmlDocument
+$resultat.LoadHtml($source)
 
 # http://www.codeproject.com/Tips/804660/How-to-Parse-Html-using-csharp
 # http://htmlagilitypack.codeplex.com/downloads/get/437941
@@ -117,40 +143,56 @@ Error: "The 'p' start tag on line 1 position 749 does not match the end tag of '
 foreach ($node in $nodes)
 {
   Write-Output $node.InnerText
-
+  <#
   try {
     [HtmlAgilityPack.HtmlNodeNavigator]$navigator = $node.CreateNavigator()
     [void]$navigator.MoveToNext()
     [void]$navigator.MoveToNext()
     $navigator.SelectNodes("//div[@type='browsers']//img")
-    <# TODO - switch back to node collection
-Method invocation failed because ...#>
+    TODO - switch back to node collection
     Write-Output 'in navigator'
     $navigator = $null
   } catch [exception]{
     # write-output $_.Exception.Message
     # NOOP 
   }
+#>
   $browsers_div = $node.NextSibling.NextSibling
-  # write-output $browsers_div
   [HtmlAgilityPack.HtmlNodeCollection]$browsers = $browsers_div.SelectNodes("div[@type='browsers']//img")
-
-
-  # [HtmlAgilityPack.HtmlNode] $node = $null
+  $node_browsers = @()
   foreach ($image in $browsers)
   {
+    # Parse JSON-like format 
+    $browser = $image.Attributes['title'].Value
+    $browser_info = @{}
+    if ($browser -match '{(.+)}') {
+      $data = $matches[1]
+      # $data -split ', ' | foreach-object { $entry =  $_ ; $entry  -split '=' | foreach-object { write-output $_  } } 
+      $data -split ', ' | ForEach-Object { $entry = $_;
+        if ($entry -match '^(.+)\s*=(.*)$') {
+          $k = $matches[1]
+          $v = $matches[2]
+          # Write-Output ( $k + ' = ' + ('"{0}"' -f $v))
+          $browser_info[$k] = $v
+        } }
 
-    Write-Output $image.Attributes["title"].Value
-    Write-Output $image.Attributes["class"].Value
 
+      # write-output $data
+    }
+    # Write-Output $image.Attributes["title"].Value
+    # Write-Output $image.Attributes['class'].Value
+    $browser_info['class'] = $image.Attributes['class'].Value
+    $node_browsers += $browser_info
   }
-
+  $node_browsers | Format-Table -AutoSize
 }
 
-[HtmlAgilityPack.HtmlWeb]$web = New-Object HtmlAgilityPack.HtmlWeb
-[System.Xml.XmlTextWriter]$wr = New-Object XML.XmlTextWriter ('{0}\{1}' -f (Get-ScriptDirectory),'test12.xml'),([Text.Encoding]::Unicode)
-[void]$web.LoadHtmlAsXml($url,$wr)
+if ($PSBoundParameters['export']) {
 
-$wr.Close()
+  [HtmlAgilityPack.HtmlWeb]$web = New-Object HtmlAgilityPack.HtmlWeb
+  [System.Xml.XmlTextWriter]$writer = New-Object XML.XmlTextWriter ('{0}\{1}' -f (Get-ScriptDirectory),'test12.xml'),([Text.Encoding]::Unicode)
+  [void]$web.LoadHtmlAsXml($url,$writer)
 
+  $writer.Close()
+}
 return
