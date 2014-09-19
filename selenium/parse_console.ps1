@@ -21,6 +21,7 @@
 
 param(
   [string]$export,
+  [switch]$override_proxy,
   [switch]$debug
 )
 
@@ -54,30 +55,43 @@ pushd $shared_assemblies_path
 $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; Write-Debug ("Loaded {0} " -f $_) }
 popd
 
-
-$url = 'http://localhost:4444/grid/console#'
-
+# TODO -  read node.json configuration hubHost and hubPort
+$url = 'http://127.0.0.1:4444/grid/console#'
+# $url = 'http://10.240.140.85:4444/grid/console#'
 $sleep_interval = 30
 $max_retries = 1
 $build_log = 'test.properties'
 $expected_http_status = 200
 
-$proxyAddr = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').ProxyServer
-if ($proxyAddr -eq $null) {
-  $proxyAddr = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').AutoConfigURL
+$proxy_url = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').ProxyServer
+if ($proxy_url -eq $null) {
+  $proxy_url = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').AutoConfigURL
 }
 
-if ($proxyAddr -eq $null) {
-  $proxyAddr = 'http://proxy.carnival.com:8080/array.dll?Get.Routing.Script'
+if ($proxy_url -eq $null -or $PSBoundParameters['override_proxy']) {
+
+  $proxy_url = 'http://proxy.carnival.com:8080/array.dll?Get.Routing.Script'
 }
+
+
 
 $proxy = New-Object System.Net.WebProxy
-$proxy.Address = $proxyAddr
+$proxy.Address = $proxy_url
 Write-Debug ('Probing {0}' -f $proxy.Address)
 $proxy.useDefaultCredentials = $true
 
 $req = [system.Net.WebRequest]::Create($url)
-$req.proxy = $proxy
+try {
+$req.proxy = $proxy}
+catch [exception]{
+  # Write-Output 'ignoring the exception'
+  write-output $_.Exception.Message
+<#
+Exception setting "proxy": 
+The ServicePointManager does not support proxies with the proxy.carnival.com scheme.
+#>
+ #  exit 1
+}
 $req.useDefaultCredentials = $true
 
 $req.PreAuthenticate = $true
@@ -97,8 +111,19 @@ for ($i = 0; $i -ne $max_retries; $i++) {
     # [xml]$xmlout = $sr.ReadToEnd()
 
   } catch [System.Net.WebException]{
+
     $res = $_.Exception.Response
   }
+  catch [Exception] {
+
+<#
+Exception calling "GetResponse" with "0" argument(s): "The ServicePointManager
+does not support proxies with the proxy.carnival.com scheme." 
+#>
+  write-output $_.Exception
+
+ }
+
   $int = [int]$res.StatusCode
   $time_stamp = (Get-Date -Format 'yyyy/MM/dd hh:mm')
   $status = $res.StatusCode
@@ -109,14 +134,14 @@ for ($i = 0; $i -ne $max_retries; $i++) {
 }
 $time_stamp = $null
 if ($int -ne $expected_http_status) {
-  # write error status to a log file and exit
-  # 
   Write-Output 'Unexpected http status detected. Error reported.'
-  log_message 'STEP_STATUS=ERROR' $build_status
   exit 1
-
 }
+
 [string]$source = $sr.ReadToEnd()
+# TODO detect failure to  handle proxy :
+# <title>Access to this site is blocked</title>
+
 try {
   # will fail to load. 
   [xml]$xmlout = $source
@@ -132,8 +157,9 @@ Error: "The 'p' start tag on line 1 position 749 does not match the end tag of '
 
 [void][System.Net.WebUtility]::HtmlDecode($source)
 if ($PSBoundParameters['debug']) {
-   write-debug $source
+   write-output $source
 }
+
 [HtmlAgilityPack.HtmlDocument]$resultat = New-Object HtmlAgilityPack.HtmlDocument
 $resultat.LoadHtml($source)
 
