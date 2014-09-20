@@ -1,5 +1,4 @@
 ﻿
-
 Add-Type -Language 'VisualBasic' -TypeDefinition @"
 
 ' origin: 
@@ -17,10 +16,10 @@ Public Class BarChart
 
     Inherits System.Windows.Forms.Form
 
-    Shared Sub Main()
-        Dim f As BarChart = New BarChart()
-        Application.Run(f)
-    End Sub
+   ''Shared Sub Main()
+   ''    Dim f As BarChart = New BarChart()
+   ''    Application.Run(f)
+   ''End Sub
 
     Public Sub New()
         MyBase.New()
@@ -39,10 +38,6 @@ Public Class BarChart
     Private components As System.ComponentModel.IContainer
 
     <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
-        '
-        'BarChart
-        '
-        '' TODO: http://www.java2s.com/Code/VB/GUI/SetuptheTooltip.htm
         '' http://www.java2s.com/Code/VB/GUI/Screensnapshot.htm
         '' http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
         Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
@@ -75,12 +70,14 @@ Public Class BarChart
             intMaxWidth = CType(Me.Width - (Me.Width / 4), Integer)
             intXaxis = CType(Me.Width / 12, Integer)
             intYaxis = CType(Me.Height / 4, Integer)
+            objHashTableG1 = New Hashtable(10)
             objHashTableG1.Add("Product1", 5)
             objHashTableG1.Add("Product2", 15)
             objHashTableG1.Add("Product3", 25)
             drawBarChart(objHashTableG1.GetEnumerator, objHashTableG1.Count, "Graph 1", intXaxis, intYaxis, intMaxWidth, intMaxHeight, True, False)
             intMaxHeight = CType((Me.Height * 0.67) - (Me.Height / 12), Integer)
             intYaxis = CType(Me.Height - (Me.Height / 12), Integer)
+            objHashTableG2 = New Hashtable(100)
             objHashTableG2.Add("Item1", 50)
             objHashTableG2.Add("Item2", 150)
             objHashTableG2.Add("Item3", 250)
@@ -153,14 +150,15 @@ Public Class BarChart
                     'Fill Rectangle
                     Dim Rec as Rectangle 
                     Rec =  New System.Drawing.Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight)
-                    Dim RecLabel as Label
-                    RecLabel = New System.Windows.Forms.Label
-                    RecLabel.Location = new System.Drawing.Point(intGraphXaxis, intGraphYaxis)
-                    RecLabel.Size = New System.Drawing.Size(10,10 ) ' calculate
+                    'Dim RecLabel as Label
+                    'RecLabel = New System.Windows.Forms.Label
+                    'RecLabel.Location = new System.Drawing.Point(intGraphXaxis, intGraphYaxis)
+                    'RecLabel.Size = New System.Drawing.Size(10,10 ) ' calculate
                     grfx.FillRectangle(objColorArray(intCounter), Rec )
-                    RecLabel.Text ="Xxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    'RecLabel.Text ="Xxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    'http://stackoverflow.com/questions/19124474/c-sharp-chart-annotation-tooltip?rq=1
                     'http://stackoverflow.com/questions/12025536/how-do-i-change-and-display-a-tooltip-on-a-chart-in-c-sharp-when-the-mouse-hover
-                     Me.ttHint.SetToolTip(RecLabel , "this is a tooltip.")
+                    ' Me.ttHint.SetToolTip(RecLabel , "this is a tooltip.")
                     'Display Text and value
                     strText = "(" & objEnum.Key & "," & objEnum.Value & ")"
                     grfx.DrawString(strText, New Font("VERDANA", 8.0, FontStyle.Regular, GraphicsUnit.Point), Brushes.Black, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis)
@@ -321,13 +319,53 @@ Public Class BarChart
         End If
     End Sub
     Friend WithEvents ttHint As System.Windows.Forms.ToolTip
-    Friend WithEvents RecLabel As System.Windows.Forms.Label
+    ' Friend WithEvents RecLabel As System.Windows.Forms.Label
     '' need to draw System.Windows.Forms.Control
 End Class
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
+
+Add-Type -TypeDefinition @"
+
+// "
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
+    private string _message;
+
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+    public string Message
+    {
+        get { return _message; }
+        set { _message = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$caller | get-member
 $object = New-Object -TypeName 'BarChart'
-$object.Show()
-start-sleep -seconds 10
+
+[void]$object.ShowDialog([Win32Window ] ($caller) )
+# $object.Show()
+start-sleep -seconds 4
 $object.Close()
 $object.Dispose()
 
