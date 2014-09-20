@@ -1,11 +1,11 @@
-﻿# origin: 
-# http://www.codeproject.com/Articles/7456/Drawing-a-Bar-Chart
+﻿
 
-# http://get-powershell.com/post/2008/12/31/Inline-F-in-PowerShell.aspx
-# http://powershell.com/cs/blogs/ebookv2/archive/2012/03/27/chapter-20-loading-net-libraries-and-compiling-code.aspx
-# Microsoft.VisualBasic.VBCodeProvide is in System.dll
+Add-Type -Language 'VisualBasic' -TypeDefinition @"
 
-$code = @'
+' origin: 
+' http://www.codeproject.com/Articles/7456/Drawing-a-Bar-Chart
+
+
 Imports Microsoft.VisualBasic
 Imports System
 Imports System.Drawing
@@ -22,20 +22,11 @@ Public Class BarChart
         Application.Run(f)
     End Sub
 
-#Region " Windows Form Designer generated code "
-
-
     Public Sub New()
         MyBase.New()
-
-        'This call is required by the Windows Form Designer.
         InitializeComponent()
-
-        'Add any initialization after the InitializeComponent() call
-
     End Sub
 
-    'Form overrides dispose to clean up the component list.
     Protected Overloads Overrides Sub Dispose(ByVal disposing As Boolean)
         If disposing Then
             If Not (components Is Nothing) Then
@@ -45,12 +36,8 @@ Public Class BarChart
         MyBase.Dispose(disposing)
     End Sub
 
-    'Required by the Windows Form Designer
     Private components As System.ComponentModel.IContainer
 
-    'NOTE: The following procedure is required by the Windows Form Designer
-    'It can be modified using the Windows Form Designer.  
-    'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
         '
         'BarChart
@@ -63,10 +50,10 @@ Public Class BarChart
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable
         Me.Name = "BarChart"
         Me.Text = "BarChart"
-
+        Me.components = New System.ComponentModel.Container
+        Me.ttHint = New System.Windows.Forms.ToolTip(Me.components)
     End Sub
 
-#End Region
     Dim blnFormLoaded As Boolean = False
     Dim objHashTableG1 As New Hashtable(10)
     Dim objHashTableG2 As New Hashtable(100)
@@ -151,7 +138,6 @@ Public Class BarChart
             intBarWidthMax = CInt(intWidthMax / intMaxValue)
 
             ' Obtain the Graphics object exposed by the Form.
-
             If Not objEnum Is Nothing Then
                 intCounter = 1
                 objEnum.Reset()
@@ -165,7 +151,16 @@ Public Class BarChart
                     'Draw Rectangle
                     grfx.DrawRectangle(Pens.Black, New Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight))
                     'Fill Rectangle
-                    grfx.FillRectangle(objColorArray(intCounter), New Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight))
+                    Dim Rec as Rectangle 
+                    Rec =  New System.Drawing.Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight)
+                    Dim RecLabel as Label
+                    RecLabel = New System.Windows.Forms.Label
+                    RecLabel.Location = new System.Drawing.Point(intGraphXaxis, intGraphYaxis)
+                    RecLabel.Size = New System.Drawing.Size(10,10 ) ' calculate
+                    grfx.FillRectangle(objColorArray(intCounter), Rec )
+                    RecLabel.Text ="Xxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    'http://stackoverflow.com/questions/12025536/how-do-i-change-and-display-a-tooltip-on-a-chart-in-c-sharp-when-the-mouse-hover
+                     Me.ttHint.SetToolTip(RecLabel , "this is a tooltip.")
                     'Display Text and value
                     strText = "(" & objEnum.Key & "," & objEnum.Value & ")"
                     grfx.DrawString(strText, New Font("VERDANA", 8.0, FontStyle.Regular, GraphicsUnit.Point), Brushes.Black, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis)
@@ -325,14 +320,14 @@ Public Class BarChart
             BarChart_Paint(Me, New System.Windows.Forms.PaintEventArgs(CreateGraphics(), New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height)))
         End If
     End Sub
+    Friend WithEvents ttHint As System.Windows.Forms.ToolTip
+    Friend WithEvents RecLabel As System.Windows.Forms.Label
+    '' need to draw System.Windows.Forms.Control
 End Class
-'@
-
-$type = Add-Type -TypeDefinition $code -Language 'VisualBasic' -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
-$object = New-Object -TypeNam 'BarChart'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
+$object = New-Object -TypeName 'BarChart'
 $object.Show()
 start-sleep -seconds 10
 $object.Close()
 $object.Dispose()
-
 
