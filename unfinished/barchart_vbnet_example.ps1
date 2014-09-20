@@ -55,9 +55,12 @@ Public Class BarChart
         '
         'BarChart
         '
+        '' TODO: http://www.java2s.com/Code/VB/GUI/SetuptheTooltip.htm
+        '' http://www.java2s.com/Code/VB/GUI/Screensnapshot.htm
+        '' http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
         Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
-        Me.ClientSize = New System.Drawing.Size(744, 502)
-        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
+        Me.ClientSize = New System.Drawing.Size(344, 302)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable
         Me.Name = "BarChart"
         Me.Text = "BarChart"
 
@@ -79,6 +82,7 @@ Public Class BarChart
             Dim intMaxHeight As Integer
             Dim intXaxis As Integer
             Dim intYaxis As Integer
+            Me.SuspendLayout()
             LoadColorArray()
             intMaxHeight = CType((Me.Height / 4) - (Me.Height / 12), Integer)
             intMaxWidth = CType(Me.Width - (Me.Width / 4), Integer)
@@ -101,6 +105,7 @@ Public Class BarChart
             objHashTableG2.Add("Item9", 267)
             drawBarChart(objHashTableG2.GetEnumerator, objHashTableG2.Count, "Graph 2", intXaxis, intYaxis, intMaxWidth, intMaxHeight, False)
             blnFormLoaded = True
+            Me.ResumeLayout(False)
         Catch ex As Exception
             Throw ex
         End Try
