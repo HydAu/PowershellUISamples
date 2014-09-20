@@ -1,4 +1,4 @@
-# origin: 
+﻿# origin: 
 # http://www.codeproject.com/Articles/7456/Drawing-a-Bar-Chart
 
 # http://get-powershell.com/post/2008/12/31/Inline-F-in-PowerShell.aspx
@@ -13,13 +13,13 @@ Imports System.Drawing.Drawing2D
 Imports System.Collections
 Imports System.Windows.Forms
 
-Public Class Form1
+Public Class BarChart
 
     Inherits System.Windows.Forms.Form
 
     Shared Sub Main()
-        Dim myF As Form1 = New Form1()
-        Application.Run(myF)
+        Dim f As BarChart = New BarChart()
+        Application.Run(f)
     End Sub
 
 #Region " Windows Form Designer generated code "
@@ -53,13 +53,13 @@ Public Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
         '
-        'Form1
+        'BarChart
         '
         Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
         Me.ClientSize = New System.Drawing.Size(744, 502)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
-        Me.Name = "Form1"
-        Me.Text = "Form1"
+        Me.Name = "BarChart"
+        Me.Text = "BarChart"
 
     End Sub
 
@@ -69,11 +69,11 @@ Public Class Form1
     Dim objHashTableG2 As New Hashtable(100)
 
     Dim objColorArray(150) As Brush
-    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+    Private Sub BarChart_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
     End Sub
 
-    Private Sub Form1_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles MyBase.Paint
+    Private Sub BarChart_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles MyBase.Paint
         Try
             Dim intMaxWidth As Integer
             Dim intMaxHeight As Integer
@@ -315,15 +315,19 @@ Public Class Form1
         objColorArray(131) = Brushes.Yellow
         objColorArray(132) = Brushes.YellowGreen
     End Sub
-    Private Sub Form1_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles MyBase.Resize
+    Private Sub BarChart_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles MyBase.Resize
         If blnFormLoaded = True Then
-            Form1_Paint(Me, New System.Windows.Forms.PaintEventArgs(CreateGraphics(), New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height)))
+            BarChart_Paint(Me, New System.Windows.Forms.PaintEventArgs(CreateGraphics(), New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height)))
         End If
     End Sub
 End Class
 '@
 
 $type = Add-Type -TypeDefinition $code -Language 'VisualBasic' -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
-$object = New-Object -TypeNam 'Form1'
-# $object.CopyToClipboard(“Hi Everyone!”)
+$object = New-Object -TypeNam 'BarChart'
 $object.Show()
+start-sleep -seconds 10
+$object.Close()
+$object.Dispose()
+
+
