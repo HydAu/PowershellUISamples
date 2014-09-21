@@ -154,23 +154,51 @@ Public Class BarChart
                 While objEnum.MoveNext = True
                     'Get new Y axis
                     intGraphYaxis = intGraphYaxis - intBarHeight
+
+                    Dim objRec as Rectangle
+                    objRec = New System.Drawing.Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight)
                     'Draw Rectangle
-                    grfx.DrawRectangle(Pens.Black, New Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight))
+                    grfx.DrawRectangle(Pens.Black, objRec)
                     'Fill Rectangle
-                    Dim Rec as Rectangle 
-                    Rec =  New System.Drawing.Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight)
-                    'Dim RecLabel as Label
-                    'RecLabel = New System.Windows.Forms.Label
-                    'RecLabel.Location = new System.Drawing.Point(intGraphXaxis, intGraphYaxis)
-                    'RecLabel.Size = New System.Drawing.Size(10,10 ) ' calculate
-                    grfx.FillRectangle(objColorArray(intCounter), Rec )
-                    'RecLabel.Text ="Xxxxxxxxxxxxxxxxxxxxxxxxxx"
-                    'http://stackoverflow.com/questions/19124474/c-sharp-chart-annotation-tooltip?rq=1
-                    'http://stackoverflow.com/questions/12025536/how-do-i-change-and-display-a-tooltip-on-a-chart-in-c-sharp-when-the-mouse-hover
-                    ' Me.ttHint.SetToolTip(RecLabel , "this is a tooltip.")
+                    grfx.FillRectangle(objColorArray(intCounter), objRec )
                     'Display Text and value
+                    ' http://www.java2s.com/Tutorial/VB/0300__2D-Graphics/Measurestringanddrawstring.htm
                     strText = "(" & objEnum.Key & "," & objEnum.Value & ")"
-                    grfx.DrawString(strText, New Font("VERDANA", 8.0, FontStyle.Regular, GraphicsUnit.Point), Brushes.Black, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis)
+                    Dim objLabelFont as Font
+                    objLabelFont = New Font("Verdana", 8.0, FontStyle.Regular, GraphicsUnit.Point) 
+                    Dim textLabelArea As SizeF
+                    textLabelArea = grfx.MeasureString(strText, objLabelFont)
+                    grfx.DrawString(strText, objLabelFont, Brushes.Black, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis)
+
+                    Dim linePen As Pen  
+                    linePen = New Pen(Color.Gray, 1)
+                    linePen.DashStyle = Drawing2D.DashStyle.Dash
+
+                    Dim fontRatio As Single 
+                    fontRatio = objLabelFont.Height / objLabelFont.FontFamily.GetLineSpacing(FontStyle.Regular)
+ 
+                    Dim ascentSize As Single
+                    ascentSize = objLabelFont.FontFamily.GetCellAscent(FontStyle.Regular) * fontRatio
+                    Dim descentSize As Single
+                    descentSize = objLabelFont.FontFamily.GetCellDescent(FontStyle.Regular) * fontRatio
+                    Dim emSize As Single
+                    emSize = objLabelFont.FontFamily.GetEmHeight(FontStyle.Regular) * fontRatio
+                    Dim cellHeight As Single
+                    cellHeight = ascentSize + descentSize
+                    Dim internalLeading As Single
+                    internalLeading = cellHeight - emSize
+                    Dim externalLeading As Single
+                    externalLeading = (objLabelFont.FontFamily.GetLineSpacing(FontStyle.Regular) * fontRatio) - cellHeight
+                    Dim labelLeft As Single : labelLeft = intGraphXaxis + (intBarWidthMax * objEnum.Value)
+                    Dim labelBottom As Single:  labelBottom =  intGraphYaxis
+                    Dim labelRight As Single : labelRight = labelLeft + textLabelArea.Width
+                    Dim labelTop As Single : labelTop = textLabelArea.Height + labelBottom
+                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis, textLabelArea.Width + intGraphXaxis + (intBarWidthMax * objEnum.Value) , intGraphYaxis)
+                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value),  intGraphYaxis + textLabelArea.Height, intGraphXaxis + (intBarWidthMax * objEnum.Value) + textLabelArea.Width, textLabelArea.Height + intGraphYaxis)
+
+                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis + ascentSize, intGraphXaxis + (intBarWidthMax * objEnum.Value) + textLabelArea.Width, intGraphYaxis + ascentSize)
+                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis + ascentSize + descentSize, intGraphXaxis + (intBarWidthMax * objEnum.Value) + textLabelArea.Width, intGraphYaxis + ascentSize + descentSize)
+
                     intCounter += 1
                     If SpaceRequired = True Then
                         intGraphYaxis = intGraphYaxis - intSpaceHeight
@@ -332,7 +360,7 @@ Public Class BarChart
     '' need to draw System.Windows.Forms.Control
 End Class
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
-
+# http://www.outlookcode.com/codedetail.aspx?id=1428
 Add-Type -Language 'VisualBasic' -TypeDefinition  @"
 
 ' http://msdn.microsoft.com/en-us/library/system.windows.forms.iwin32window%28v=vs.110%29.aspx
@@ -385,5 +413,4 @@ $object.LoadData([System.Collections.Hashtable] $data1, [System.Collections.Hash
 
 $object.Close()
 $object.Dispose()
-
 
