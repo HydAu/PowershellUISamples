@@ -33,11 +33,6 @@ Public Class BarChart
 
     Inherits System.Windows.Forms.Form
 
-   ''Shared Sub Main()
-   ''    Dim f As BarChart = New BarChart()
-   ''    Application.Run(f)
-   ''End Sub
-
     Public Sub New()
         MyBase.New()
         InitializeComponent()
@@ -80,6 +75,14 @@ Public Class BarChart
        objHashTableG2 =  objCallerHashTable2.Clone()
     End Sub
 
+
+    Public Sub RenderData '' temporary short of sending the specifi event
+                          '' http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
+       Me.BarChart_Paint(Nothing, New System.Windows.Forms.PaintEventArgs( _
+        CreateGraphics(), _
+	New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height))) 
+    End Sub
+
     Private Sub BarChart_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles MyBase.Paint
         Try
             Dim intMaxWidth As Integer
@@ -87,7 +90,6 @@ Public Class BarChart
             Dim intXaxis As Integer
             Dim intYaxis As Integer
             Me.SuspendLayout()
-            'Me.LoadData()
             Me.LoadColorArray()
             intMaxHeight = CType((Me.Height / 4) - (Me.Height / 12), Integer)
             intMaxWidth = CType(Me.Width - (Me.Width / 4), Integer)
@@ -419,7 +421,13 @@ $data2.Add("Item9", 267)
 
 $object.LoadData([System.Collections.Hashtable] $data1, [System.Collections.Hashtable] $data2)
 
-[void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
+# [void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
+[void]$object.Show()
+start-sleep -seconds 5
+$object.LoadData([System.Collections.Hashtable] $data2, [System.Collections.Hashtable] $data1)
+
+$object.RenderData()
+start-sleep -seconds 5
 
 $object.Close()
 $object.Dispose()
