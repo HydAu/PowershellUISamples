@@ -123,7 +123,7 @@ Public Class BarChart
                 grfx.Clear(BackColor)
             End If
 
-            grfx.DrawString(strGraphTitle, New Font("VERDANA", 12.0, FontStyle.Bold, GraphicsUnit.Point), Brushes.DeepPink, intGraphXaxis + (intWidthMax / 4), (intGraphYaxis - intHeightMax) - 40)
+            grfx.DrawString(strGraphTitle, New Font("Verdana", 12.0, FontStyle.Bold, GraphicsUnit.Point), Brushes.DeepPink, intGraphXaxis + (intWidthMax / 4), (intGraphYaxis - intHeightMax) - 40)
 
             'Get the Height of the Bar        
             intBarHeight = CInt(intHeightMax / intItemCount)
@@ -163,12 +163,11 @@ Public Class BarChart
                     grfx.FillRectangle(objColorArray(intCounter), objRec )
                     'Display Text and value
                     ' http://www.java2s.com/Tutorial/VB/0300__2D-Graphics/Measurestringanddrawstring.htm
-                    strText = "(" & objEnum.Key & "," & objEnum.Value & ")"
+                    strText =  objEnum.Key & "=" & objEnum.Value 
                     Dim objLabelFont as Font
-                    objLabelFont = New Font("Verdana", 8.0, FontStyle.Regular, GraphicsUnit.Point) 
+                    objLabelFont = New Font("Verdana", 7.0, FontStyle.Regular, GraphicsUnit.Point) 
                     Dim textLabelArea As SizeF
                     textLabelArea = grfx.MeasureString(strText, objLabelFont)
-                    grfx.DrawString(strText, objLabelFont, Brushes.Black, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis)
 
                     Dim linePen As Pen  
                     linePen = New Pen(Color.Gray, 1)
@@ -189,15 +188,26 @@ Public Class BarChart
                     internalLeading = cellHeight - emSize
                     Dim externalLeading As Single
                     externalLeading = (objLabelFont.FontFamily.GetLineSpacing(FontStyle.Regular) * fontRatio) - cellHeight
+
+
                     Dim labelLeft As Single : labelLeft = intGraphXaxis + (intBarWidthMax * objEnum.Value)
+                    labelLeft = intGraphXaxis
                     Dim labelBottom As Single:  labelBottom =  intGraphYaxis
                     Dim labelRight As Single : labelRight = labelLeft + textLabelArea.Width
                     Dim labelTop As Single : labelTop = textLabelArea.Height + labelBottom
-                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis, textLabelArea.Width + intGraphXaxis + (intBarWidthMax * objEnum.Value) , intGraphYaxis)
-                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value),  intGraphYaxis + textLabelArea.Height, intGraphXaxis + (intBarWidthMax * objEnum.Value) + textLabelArea.Width, textLabelArea.Height + intGraphYaxis)
 
-                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis + ascentSize, intGraphXaxis + (intBarWidthMax * objEnum.Value) + textLabelArea.Width, intGraphYaxis + ascentSize)
-                    grfx.DrawLine(linePen, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis + ascentSize + descentSize, intGraphXaxis + (intBarWidthMax * objEnum.Value) + textLabelArea.Width, intGraphYaxis + ascentSize + descentSize)
+                    Dim objLabelRec as Rectangle
+                    objLabelRec = New System.Drawing.Rectangle(labelLeft, labelBottom, textLabelArea.Width , textLabelArea.Height )
+                 
+                    grfx.DrawRectangle(Pens.Black, objLabelRec)
+                    'Fill Rectangle
+                    grfx.FillRectangle(Brushes.White, objLabelRec )
+
+                    grfx.DrawLine(linePen, labelLeft, labelTop, labelLeft , labelBottom)
+                    grfx.DrawLine(linePen, labelRight, labelTop, labelRight , labelBottom)
+                    grfx.DrawLine(linePen, labelLeft, labelTop, labelRight , labelTop)
+                    grfx.DrawLine(linePen, labelLeft, labelBottom, labelRight , labelBottom)
+                    grfx.DrawString(strText, objLabelFont, Brushes.Black, labelLeft, labelBottom)
 
                     intCounter += 1
                     If SpaceRequired = True Then
@@ -392,9 +402,9 @@ $object = New-Object -TypeName 'BarChart'
 # TODO  $obj_data = New-Object PSObject 
 # conversion
 $data1 = New-Object System.Collections.Hashtable(10)
-$data1.Add("Product1", 5)
+$data1.Add("Product1", 25)
 $data1.Add("Product2", 15)
-$data1.Add("Product3", 25)
+$data1.Add("Product3", 35)
 
 $data2 =  New-Object System.Collections.Hashtable(100)
 $data2.Add("Item1", 50)
