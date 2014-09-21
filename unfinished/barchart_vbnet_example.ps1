@@ -33,11 +33,6 @@ Public Class BarChart
 
     Inherits System.Windows.Forms.Form
 
-   ''Shared Sub Main()
-   ''    Dim f As BarChart = New BarChart()
-   ''    Application.Run(f)
-   ''End Sub
-
     Public Sub New()
         MyBase.New()
         InitializeComponent()
@@ -80,6 +75,14 @@ Public Class BarChart
        objHashTableG2 =  objCallerHashTable2.Clone()
     End Sub
 
+
+    Public Sub RenderData '' temporary short of sending the specifi event
+                          '' http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
+       Me.BarChart_Paint(Nothing, New System.Windows.Forms.PaintEventArgs( _
+        CreateGraphics(), _
+	New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height))) 
+    End Sub
+
     Private Sub BarChart_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles MyBase.Paint
         Try
             Dim intMaxWidth As Integer
@@ -87,7 +90,6 @@ Public Class BarChart
             Dim intXaxis As Integer
             Dim intYaxis As Integer
             Me.SuspendLayout()
-            'Me.LoadData()
             Me.LoadColorArray()
             intMaxHeight = CType((Me.Height / 4) - (Me.Height / 12), Integer)
             intMaxWidth = CType(Me.Width - (Me.Width / 4), Integer)
@@ -123,7 +125,7 @@ Public Class BarChart
                 grfx.Clear(BackColor)
             End If
 
-            grfx.DrawString(strGraphTitle, New Font("VERDANA", 12.0, FontStyle.Bold, GraphicsUnit.Point), Brushes.DeepPink, intGraphXaxis + (intWidthMax / 4), (intGraphYaxis - intHeightMax) - 40)
+            grfx.DrawString(strGraphTitle, New Font("Verdana", 12.0, FontStyle.Bold, GraphicsUnit.Point), Brushes.DeepPink, intGraphXaxis + (intWidthMax / 4), (intGraphYaxis - intHeightMax) - 40)
 
             'Get the Height of the Bar        
             intBarHeight = CInt(intHeightMax / intItemCount)
@@ -154,23 +156,61 @@ Public Class BarChart
                 While objEnum.MoveNext = True
                     'Get new Y axis
                     intGraphYaxis = intGraphYaxis - intBarHeight
+
+                    Dim objRec as Rectangle
+                    objRec = New System.Drawing.Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight)
                     'Draw Rectangle
-                    grfx.DrawRectangle(Pens.Black, New Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight))
+                    grfx.DrawRectangle(Pens.Black, objRec)
                     'Fill Rectangle
-                    Dim Rec as Rectangle 
-                    Rec =  New System.Drawing.Rectangle(intGraphXaxis, intGraphYaxis, intBarWidthMax * objEnum.Value, intBarHeight)
-                    'Dim RecLabel as Label
-                    'RecLabel = New System.Windows.Forms.Label
-                    'RecLabel.Location = new System.Drawing.Point(intGraphXaxis, intGraphYaxis)
-                    'RecLabel.Size = New System.Drawing.Size(10,10 ) ' calculate
-                    grfx.FillRectangle(objColorArray(intCounter), Rec )
-                    'RecLabel.Text ="Xxxxxxxxxxxxxxxxxxxxxxxxxx"
-                    'http://stackoverflow.com/questions/19124474/c-sharp-chart-annotation-tooltip?rq=1
-                    'http://stackoverflow.com/questions/12025536/how-do-i-change-and-display-a-tooltip-on-a-chart-in-c-sharp-when-the-mouse-hover
-                    ' Me.ttHint.SetToolTip(RecLabel , "this is a tooltip.")
+                    grfx.FillRectangle(objColorArray(intCounter), objRec )
                     'Display Text and value
-                    strText = "(" & objEnum.Key & "," & objEnum.Value & ")"
-                    grfx.DrawString(strText, New Font("VERDANA", 8.0, FontStyle.Regular, GraphicsUnit.Point), Brushes.Black, intGraphXaxis + (intBarWidthMax * objEnum.Value), intGraphYaxis)
+                    ' http://www.java2s.com/Tutorial/VB/0300__2D-Graphics/Measurestringanddrawstring.htm
+                    strText =  objEnum.Key & "=" & objEnum.Value 
+                    Dim objLabelFont as Font
+                    objLabelFont = New Font("Verdana", 7.0, FontStyle.Regular, GraphicsUnit.Point) 
+                    Dim textLabelArea As SizeF
+                    textLabelArea = grfx.MeasureString(strText, objLabelFont)
+
+                    Dim linePen As Pen  
+                    linePen = New Pen(Color.Gray, 1)
+                    linePen.DashStyle = Drawing2D.DashStyle.Dash
+
+                    Dim fontRatio As Single 
+                    fontRatio = objLabelFont.Height / objLabelFont.FontFamily.GetLineSpacing(FontStyle.Regular)
+ 
+                    Dim ascentSize As Single
+                    ascentSize = objLabelFont.FontFamily.GetCellAscent(FontStyle.Regular) * fontRatio
+                    Dim descentSize As Single
+                    descentSize = objLabelFont.FontFamily.GetCellDescent(FontStyle.Regular) * fontRatio
+                    Dim emSize As Single
+                    emSize = objLabelFont.FontFamily.GetEmHeight(FontStyle.Regular) * fontRatio
+                    Dim cellHeight As Single
+                    cellHeight = ascentSize + descentSize
+                    Dim internalLeading As Single
+                    internalLeading = cellHeight - emSize
+                    Dim externalLeading As Single
+                    externalLeading = (objLabelFont.FontFamily.GetLineSpacing(FontStyle.Regular) * fontRatio) - cellHeight
+
+
+                    Dim labelLeft As Single : labelLeft = intGraphXaxis + (intBarWidthMax * objEnum.Value)
+                    labelLeft = intGraphXaxis
+                    Dim labelBottom As Single:  labelBottom =  intGraphYaxis
+                    Dim labelRight As Single : labelRight = labelLeft + textLabelArea.Width
+                    Dim labelTop As Single : labelTop = textLabelArea.Height + labelBottom
+
+                    Dim objLabelRec as Rectangle
+                    objLabelRec = New System.Drawing.Rectangle(labelLeft, labelBottom, textLabelArea.Width , textLabelArea.Height )
+                 
+                    grfx.DrawRectangle(Pens.Black, objLabelRec)
+                    'Fill Rectangle
+                    grfx.FillRectangle(Brushes.White, objLabelRec )
+
+                    grfx.DrawLine(linePen, labelLeft, labelTop, labelLeft , labelBottom)
+                    grfx.DrawLine(linePen, labelRight, labelTop, labelRight , labelBottom)
+                    grfx.DrawLine(linePen, labelLeft, labelTop, labelRight , labelTop)
+                    grfx.DrawLine(linePen, labelLeft, labelBottom, labelRight , labelBottom)
+                    grfx.DrawString(strText, objLabelFont, Brushes.Black, labelLeft, labelBottom)
+
                     intCounter += 1
                     If SpaceRequired = True Then
                         intGraphYaxis = intGraphYaxis - intSpaceHeight
@@ -332,7 +372,7 @@ Public Class BarChart
     '' need to draw System.Windows.Forms.Control
 End Class
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
-
+# http://www.outlookcode.com/codedetail.aspx?id=1428
 Add-Type -Language 'VisualBasic' -TypeDefinition  @"
 
 ' http://msdn.microsoft.com/en-us/library/system.windows.forms.iwin32window%28v=vs.110%29.aspx
@@ -364,9 +404,9 @@ $object = New-Object -TypeName 'BarChart'
 # TODO  $obj_data = New-Object PSObject 
 # conversion
 $data1 = New-Object System.Collections.Hashtable(10)
-$data1.Add("Product1", 5)
+$data1.Add("Product1", 25)
 $data1.Add("Product2", 15)
-$data1.Add("Product3", 25)
+$data1.Add("Product3", 35)
 
 $data2 =  New-Object System.Collections.Hashtable(100)
 $data2.Add("Item1", 50)
@@ -381,9 +421,14 @@ $data2.Add("Item9", 267)
 
 $object.LoadData([System.Collections.Hashtable] $data1, [System.Collections.Hashtable] $data2)
 
-[void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
+# [void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
+[void]$object.Show()
+start-sleep -seconds 5
+$object.LoadData([System.Collections.Hashtable] $data2, [System.Collections.Hashtable] $data1)
+
+$object.RenderData()
+start-sleep -seconds 5
 
 $object.Close()
 $object.Dispose()
-
 
