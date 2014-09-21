@@ -58,6 +58,11 @@ Public Class BarChart
 
     End Sub
 
+    Public Sub LoadData(ByVal objCallerHashTable1 As Hashtable, ByVal objCallerHashTable2 As Hashtable )
+       objHashTableG1 =  objCallerHashTable1.Clone()
+       objHashTableG2 =  objCallerHashTable2.Clone()
+    End Sub
+
     Private Sub BarChart_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles MyBase.Paint
         Try
             Dim intMaxWidth As Integer
@@ -65,28 +70,15 @@ Public Class BarChart
             Dim intXaxis As Integer
             Dim intYaxis As Integer
             Me.SuspendLayout()
-            LoadColorArray()
+            'Me.LoadData()
+            Me.LoadColorArray()
             intMaxHeight = CType((Me.Height / 4) - (Me.Height / 12), Integer)
             intMaxWidth = CType(Me.Width - (Me.Width / 4), Integer)
             intXaxis = CType(Me.Width / 12, Integer)
             intYaxis = CType(Me.Height / 4, Integer)
-            objHashTableG1 = New Hashtable(10)
-            objHashTableG1.Add("Product1", 5)
-            objHashTableG1.Add("Product2", 15)
-            objHashTableG1.Add("Product3", 25)
             drawBarChart(objHashTableG1.GetEnumerator, objHashTableG1.Count, "Graph 1", intXaxis, intYaxis, intMaxWidth, intMaxHeight, True, False)
             intMaxHeight = CType((Me.Height * 0.67) - (Me.Height / 12), Integer)
             intYaxis = CType(Me.Height - (Me.Height / 12), Integer)
-            objHashTableG2 = New Hashtable(100)
-            objHashTableG2.Add("Item1", 50)
-            objHashTableG2.Add("Item2", 150)
-            objHashTableG2.Add("Item3", 250)
-            objHashTableG2.Add("Item4", 20)
-            objHashTableG2.Add("Item5", 100)
-            objHashTableG2.Add("Item6", 125)
-            objHashTableG2.Add("Item7", 148)
-            objHashTableG2.Add("Item8", 199)
-            objHashTableG2.Add("Item9", 267)
             drawBarChart(objHashTableG2.GetEnumerator, objHashTableG2.Count, "Graph 2", intXaxis, intYaxis, intMaxWidth, intMaxHeight, False)
             blnFormLoaded = True
             Me.ResumeLayout(False)
@@ -360,12 +352,28 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$caller | get-member
 $object = New-Object -TypeName 'BarChart'
 
+$data1 = New-Object System.Collections.Hashtable(10)
+$data1.Add("Product1", 5)
+$data1.Add("Product2", 15)
+$data1.Add("Product3", 25)
+
+$data2 =  New-Object System.Collections.Hashtable(100)
+$data2.Add("Item1", 50)
+$data2.Add("Item2", 150)
+$data2.Add("Item3", 250)
+$data2.Add("Item4", 20)
+$data2.Add("Item5", 100)
+$data2.Add("Item6", 125)
+$data2.Add("Item7", 148)
+$data2.Add("Item8", 199)
+$data2.Add("Item9", 267)
+
+$object.LoadData([System.Collections.Hashtable] $data1, [System.Collections.Hashtable] $data2)
+
 [void]$object.ShowDialog([Win32Window ] ($caller) )
-# $object.Show()
-start-sleep -seconds 4
+# start-sleep -seconds 4
 $object.Close()
 $object.Dispose()
 
