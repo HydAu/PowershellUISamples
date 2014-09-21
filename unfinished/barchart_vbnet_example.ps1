@@ -1,5 +1,4 @@
-﻿
-Add-Type -Language 'VisualBasic' -TypeDefinition @"
+﻿Add-Type -Language 'VisualBasic' -TypeDefinition @"
 
 ' origin: 
 ' http://www.codeproject.com/Articles/7456/Drawing-a-Bar-Chart
@@ -316,44 +315,36 @@ Public Class BarChart
 End Class
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
 
-Add-Type -TypeDefinition @"
+Add-Type -Language 'VisualBasic' -TypeDefinition  @"
 
-// "
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private int _data;
-    private string _message;
+' http://msdn.microsoft.com/en-us/library/system.windows.forms.iwin32window%28v=vs.110%29.aspx
 
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-    public string Message
-    {
-        get { return _message; }
-        set { _message = value; }
-    }
+Public Class MyWin32Window 
+Implements System.Windows.Forms.IWin32Window
 
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
+    Dim _hWnd As System.IntPtr
 
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
-}
+    Public Sub New(ByVal handle As System.IntPtr)
+
+       _hWnd = handle
+
+    End Sub
+
+    Public ReadOnly Property Handle() As System.IntPtr Implements System.Windows.Forms.IWin32Window.Handle
+        Get
+            Handle = _hWnd
+        End Get
+    End Property
+ 
+End Class
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$caller = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $object = New-Object -TypeName 'BarChart'
 
+# TODO  $obj_data = New-Object PSObject 
+# conversion
 $data1 = New-Object System.Collections.Hashtable(10)
 $data1.Add("Product1", 5)
 $data1.Add("Product2", 15)
@@ -372,8 +363,9 @@ $data2.Add("Item9", 267)
 
 $object.LoadData([System.Collections.Hashtable] $data1, [System.Collections.Hashtable] $data2)
 
-[void]$object.ShowDialog([Win32Window ] ($caller) )
+[void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
 # start-sleep -seconds 4
 $object.Close()
 $object.Dispose()
+
 
