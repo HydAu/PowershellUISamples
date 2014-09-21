@@ -50,8 +50,6 @@ Public Class BarChart
     Private components As System.ComponentModel.IContainer
 
     <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
-        '' http://www.java2s.com/Code/VB/GUI/Screensnapshot.htm
-        '' http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
         Me.AutoScaleBaseSize = New System.Drawing.Size(5, 13)
         Me.ClientSize = New System.Drawing.Size(344, 302)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable
@@ -62,28 +60,28 @@ Public Class BarChart
     End Sub
 
     Dim blnFormLoaded As Boolean = False
-    Dim objHashTableG1 As New Hashtable(10)
-    Dim objHashTableG2 As New Hashtable(100)
+    Dim objHashTableG As New Hashtable(100)
 
     Dim objColorArray(150) As Brush
     Private Sub BarChart_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
     End Sub
 
-    Public Sub LoadData(ByVal objCallerHashTable1 As Hashtable, ByVal objCallerHashTable2 As Hashtable )
-       objHashTableG1 =  objCallerHashTable1.Clone()
-       objHashTableG2 =  objCallerHashTable2.Clone()
+    Public Sub LoadData(ByVal objCallerHashTable As Hashtable )
+       objHashTableG =  objCallerHashTable.Clone()
     End Sub
 
 
-    Public Sub RenderData '' temporary short of sending the specifi event
-                          '' http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
-       Me.BarChart_Paint(Nothing, New System.Windows.Forms.PaintEventArgs( _
+    Public Sub RenderData '' see also http://www.java2s.com/Code/VB/GUI/GetOtherFormPaintevent.htm
+        Me.BarChart_Paint(Nothing, New System.Windows.Forms.PaintEventArgs( _
         CreateGraphics(), _
-	New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height))) 
+	New System.Drawing.Rectangle(0, 0, Me.Width, Me.Height) _
+        )) 
     End Sub
 
-    Private Sub BarChart_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles MyBase.Paint
+    Private Sub BarChart_Paint(ByVal sender As Object, _
+                               ByVal e As System.Windows.Forms.PaintEventArgs _
+                               ) Handles MyBase.Paint
         Try
             Dim intMaxWidth As Integer
             Dim intMaxHeight As Integer
@@ -91,14 +89,19 @@ Public Class BarChart
             Dim intYaxis As Integer
             Me.SuspendLayout()
             Me.LoadColorArray()
-            intMaxHeight = CType((Me.Height / 4) - (Me.Height / 12), Integer)
+            intMaxHeight = CType((Me.Height / 2) - (Me.Height / 12), Integer)
             intMaxWidth = CType(Me.Width - (Me.Width / 4), Integer)
             intXaxis = CType(Me.Width / 12, Integer)
-            intYaxis = CType(Me.Height / 4, Integer)
-            drawBarChart(objHashTableG1.GetEnumerator, objHashTableG1.Count, "Graph 1", intXaxis, intYaxis, intMaxWidth, intMaxHeight, True, False)
-            intMaxHeight = CType((Me.Height * 0.67) - (Me.Height / 12), Integer)
-            intYaxis = CType(Me.Height - (Me.Height / 12), Integer)
-            drawBarChart(objHashTableG2.GetEnumerator, objHashTableG2.Count, "Graph 2", intXaxis, intYaxis, intMaxWidth, intMaxHeight, False)
+            intYaxis = CType(Me.Height / 2, Integer)
+            drawBarChart(objHashTableG.GetEnumerator , _
+                         objHashTableG.Count, _
+                         "Graph 1", _
+                         intXaxis, _
+                         intYaxis, _
+                         intMaxWidth, _
+                         intMaxHeight, _
+                         True, _
+                         False)
             blnFormLoaded = True
             Me.ResumeLayout(False)
         Catch ex As Exception
@@ -107,7 +110,15 @@ Public Class BarChart
         
     End Sub
 
-    Public Sub drawBarChart(ByVal objEnum As IDictionaryEnumerator, ByVal intItemCount As Integer, ByVal strGraphTitle As String, ByVal Xaxis As Integer, ByVal Yaxis As Integer, ByVal MaxWidth As Int16, ByVal MaxHt As Int16, ByVal clearForm As Boolean, Optional ByVal SpaceRequired As Boolean = False)
+    Public Sub drawBarChart(ByVal objEnum As IDictionaryEnumerator, _
+                            ByVal intItemCount As Integer, _
+                            ByVal strGraphTitle As String, _
+                            ByVal Xaxis As Integer, _
+                            ByVal Yaxis As Integer, _
+                            ByVal MaxWidth As Int16, _
+                            ByVal MaxHt As Int16, _
+                            ByVal clearForm As Boolean, _
+                            Optional ByVal SpaceRequired As Boolean = False)
 
         Dim intGraphXaxis As Integer = Xaxis
         Dim intGraphYaxis As Integer = Yaxis
@@ -167,7 +178,7 @@ Public Class BarChart
                     ' http://www.java2s.com/Tutorial/VB/0300__2D-Graphics/Measurestringanddrawstring.htm
                     strText =  objEnum.Key & "=" & objEnum.Value 
                     Dim objLabelFont as Font
-                    objLabelFont = New Font("Verdana", 7.0, FontStyle.Regular, GraphicsUnit.Point) 
+                    objLabelFont = New Font("Verdana", 7.2, FontStyle.Regular, GraphicsUnit.Point) 
                     Dim textLabelArea As SizeF
                     textLabelArea = grfx.MeasureString(strText, objLabelFont)
 
@@ -407,6 +418,12 @@ $data1 = New-Object System.Collections.Hashtable(10)
 $data1.Add("Product1", 25)
 $data1.Add("Product2", 15)
 $data1.Add("Product3", 35)
+$object.LoadData([System.Collections.Hashtable] $data1)
+
+# not necessary for the example at hand but may be necessary 
+# [void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
+[void]$object.Show()
+start-sleep -seconds 5
 
 $data2 =  New-Object System.Collections.Hashtable(100)
 $data2.Add("Item1", 50)
@@ -419,12 +436,7 @@ $data2.Add("Item7", 148)
 $data2.Add("Item8", 199)
 $data2.Add("Item9", 267)
 
-$object.LoadData([System.Collections.Hashtable] $data1, [System.Collections.Hashtable] $data2)
-
-# [void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
-[void]$object.Show()
-start-sleep -seconds 5
-$object.LoadData([System.Collections.Hashtable] $data2, [System.Collections.Hashtable] $data1)
+$object.LoadData([System.Collections.Hashtable] $data2)
 
 $object.RenderData()
 start-sleep -seconds 5
