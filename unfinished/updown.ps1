@@ -96,7 +96,7 @@ class TimePicker : System.Windows.Forms.DomainUpDown
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
 Add-Type -TypeDefinition @"
 using System;
@@ -143,5 +143,5 @@ $DebugPreference = 'Continue'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 
-$test = new-Object -TypeName 'NumericUpDowns'
+$test = New-Object -TypeName 'NumericUpDowns'
 [void]$test.ShowDialog([win32window ]($caller))
