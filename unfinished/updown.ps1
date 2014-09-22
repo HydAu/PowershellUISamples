@@ -25,13 +25,13 @@ using System.Windows.Forms;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _count;
+    private int _numeric;
     private string _timestr;
 
-    public int Count
+    public int Numeric
     {
-        get { return _count; }
-        set { _count = value; }
+        get { return _numeric; }
+        set { _numeric = value; }
     }
 
     public string TimeStr
@@ -113,11 +113,11 @@ function UpDownsPrompt
   # $numeric_updown.ValueChanged += new EventHandler(numeric_updown_OnValueChanged);
 
 
-$handler = {
-  param(
-    [object]$sender,
-    [System.EventArgs] $eventargs )
-	$caller.Count  =  $numeric_updown.Value
+  $handler = {
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs)
+    $caller.Numeric = $numeric_updown.Value
   }
 
   $eventMethod = $numeric_updown.add_ValueChanged
@@ -132,6 +132,15 @@ $handler = {
   $time_updown.ReadOnly = $true
   # $time_updown.TextChanged += new EventHandler(time_updown_OnTextChanged);
 
+  $handler = {
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs)
+    $caller.TimeStr = $time_updown.SelectedItem.ToString()
+  }
+
+  $eventMethod = $time_updown.add_TextChanged
+  $eventMethod.Invoke($handler)
 
   $time_updown.SuspendLayout()
 
@@ -165,14 +174,10 @@ $handler = {
 
 $DebugPreference = 'Continue'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
 UpDownsPrompt -caller $caller
 
-$result = $caller.TimeStr
-Write-Debug ('Selection is : {0}' -f,$result)
-$result = $caller.Count
-
-Write-Debug ('Numeric Value is : {0}' -f,$result)
+Write-Debug ('Time Selection is : {0}' -f $caller.TimeStr)
+Write-Debug ('Numeric Value is : {0}' -f $caller.Numeric)
 $caller = $null
 
 
