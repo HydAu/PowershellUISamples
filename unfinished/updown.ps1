@@ -19,65 +19,46 @@
 #THE SOFTWARE.
 
 
-# http://www.java2s.com/Tutorial/CSharp/0460__GUI-Windows-Forms/DomainUpDownselecteditemchangedevent.htmhttp://www.java2s.com/Tutorial/CSharp/0460__GUI-Windows-Forms/DomainUpDownselecteditemchangedevent.htm
 Add-Type -TypeDefinition @"
-
-//  "
-
 using System;
-using System.Drawing;
 using System.Windows.Forms;
-
-public class NumericUpDowns : Form
+public class Win32Window : IWin32Window
 {
-  NumericUpDown nupdwnH;
-  TimePicker nupdwnM;
-  public NumericUpDowns()
-  {
-    Size = new Size(480,580);
-    nupdwnH = new NumericUpDown();
-    nupdwnH.Parent = this;
-    nupdwnH.Location = new Point(90, 50);
-    nupdwnH.Size = new Size(50,20);
-    nupdwnH.Value = 1;
-    nupdwnH.Minimum = 0;
-    nupdwnH.Maximum = 1000;
-    nupdwnH.Increment = 1;    //  decimal
-    nupdwnH.DecimalPlaces = 0;
-    nupdwnH.ReadOnly = false;
-    nupdwnH.TextAlign = HorizontalAlignment.Right;
-    nupdwnH.ValueChanged += new EventHandler(nupdwnH_OnValueChanged);
+    private IntPtr _hWnd;
+    private int _count;
+    private string _timestr;
 
-    nupdwnM = new TimePicker();
-    nupdwnM.Parent = this;
-    nupdwnM.Location = new Point(30, 50);
-    nupdwnM.Size = new Size(70,20);
-    nupdwnM.TextAlign = HorizontalAlignment.Right;
-    nupdwnM.ReadOnly = true;
-    nupdwnM.TextChanged += new EventHandler(nupdwnM_OnTextChanged);
-    nupdwnM.LostFocus += new EventHandler(nupdwnM_OnTextChanged);
+    public int Count
+    {
+        get { return _count; }
+        set { _count = value; }
+    }
 
-  }  
+    public string TimeStr
+    {
+        get { return _timestr; }
+        set { _timestr = value; }
+    }
 
-  private void nupdwnH_OnValueChanged(object sender, EventArgs e)
-  {
-    Console.WriteLine(nupdwnH.Value);
-  }
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
 
-  private void nupdwnM_OnTextChanged(object sender, EventArgs e)
-  {
-    Console.WriteLine(nupdwnM.SelectedItem.ToString());
-  }
- 
- public static void Main() 
-  {
-    Application.Run(new NumericUpDowns());
-  }
-
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
 }
 
-//  http://stackoverflow.com/questions/16789399/looking-for-time-picker-control-with-half-hourly-up-down
-class TimePicker : System.Windows.Forms.DomainUpDown
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+
+# http://stackoverflow.com/questions/16789399/looking-for-time-picker-control-with-half-hourly-up-down
+Add-Type -TypeDefinition @"
+
+
+public class TimePicker : System.Windows.Forms.DomainUpDown
 {
     public TimePicker()
     {         
@@ -98,50 +79,101 @@ class TimePicker : System.Windows.Forms.DomainUpDown
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
-Add-Type -TypeDefinition @"
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
+
+function UpDownsPrompt
 {
-    private IntPtr _hWnd;
-    private int _data;
-    private string _txtUser;
-    private string _txtPassword;
+  param(
+    [object]$caller
+  )
 
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Text')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
+
+  $f = New-Object System.Windows.Forms.Form
+
+  $f.Size = New-Object System.Drawing.Size (180,120)
+  $numeric_updown = New-Object System.Windows.Forms.NumericUpDown
+  $numeric_updown.SuspendLayout()
+
+  $numeric_updown.Parent = $this
+  $numeric_updown.Location = New-Object System.Drawing.Point (30,80)
+  $numeric_updown.Size = New-Object System.Drawing.Size (50,20)
+  $numeric_updown.Value = 1
+  $numeric_updown.Minimum = 0
+  $numeric_updown.Maximum = 1000
+  $numeric_updown.Increment = 1
+  $numeric_updown.DecimalPlaces = 0
+  $numeric_updown.ReadOnly = $false
+  $numeric_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
+  # $numeric_updown.ValueChanged += new EventHandler(numeric_updown_OnValueChanged);
 
 
-    public string TxtUser
-    {
-        get { return _txtUser; }
-        set { _txtUser = value; }
-    }
-    public string TxtPassword
-    {
-        get { return _txtPassword; }
-        set { _txtPassword = value; }
-    }
+$handler = {
+  param(
+    [object]$sender,
+    [System.EventArgs] $eventargs )
+	$caller.Count  =  $numeric_updown.Value
+  }
 
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
+  $eventMethod = $numeric_updown.add_ValueChanged
+  $eventMethod.Invoke($handler)
 
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
+
+  $time_updown = New-Object TimePicker
+  $time_updown.Parent = $f
+  $time_updown.Location = New-Object System.Drawing.Point (30,50)
+  $time_updown.Size = New-Object System.Drawing.Size (70,20)
+  $time_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
+  $time_updown.ReadOnly = $true
+  # $time_updown.TextChanged += new EventHandler(time_updown_OnTextChanged);
+
+
+  $time_updown.SuspendLayout()
+
+  $time_updown.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
+  $time_updown.ReadOnly = $true
+
+  $time_updown.TabIndex = 0
+  $time_updown.TabStop = $false
+  $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
+  $f.ClientSize = New-Object System.Drawing.Size (180,120)
+  $components = New-Object System.ComponentModel.Container
+
+  $f.Controls.AddRange(@( $time_updown,$numeric_updown))
+
+  $f.Name = 'Form1'
+  $f.Text = 'UpDown Sample'
+  $time_updown.ResumeLayout($false)
+  $numeric_updown.ResumeLayout($false)
+  $f.ResumeLayout($false)
+
+  $f.StartPosition = 'CenterScreen'
+
+  $f.KeyPreview = $True
+
+  $f.Topmost = $True
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
+  $f.Dispose()
 }
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
+UpDownsPrompt -caller $caller
 
-$test = New-Object -TypeName 'NumericUpDowns'
-[void]$test.ShowDialog([win32window ]($caller))
+$result = $caller.TimeStr
+Write-Debug ('Selection is : {0}' -f,$result)
+$result = $caller.Count
+
+Write-Debug ('Numeric Value is : {0}' -f,$result)
+$caller = $null
+
+
+
