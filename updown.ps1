@@ -85,92 +85,96 @@ function UpDownsPrompt
   param(
     [object]$caller
   )
+  $r = @( 'System.Drawing',
+    'System.Collections.Generic',
+    'System.Collections',
+    'System.ComponentModel',
+    'System.Windows.Forms',
+    'System.Text',
+    'System.Data'
+  )
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Text')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
+  $r | ForEach-Object { $assembly = $_; [void][System.Reflection.Assembly]::LoadWithPartialName($assembly) }
 
   $f = New-Object System.Windows.Forms.Form
 
   $f.Size = New-Object System.Drawing.Size (180,120)
-  $numeric_updown = New-Object System.Windows.Forms.NumericUpDown
-  $numeric_updown.SuspendLayout()
+  $n = New-Object System.Windows.Forms.NumericUpDown
+  $n.SuspendLayout()
 
-  $numeric_updown.Parent = $this
-  $numeric_updown.Location = New-Object System.Drawing.Point (30,80)
-  $numeric_updown.Size = New-Object System.Drawing.Size (50,20)
-  $numeric_updown.Value = 1
-  $numeric_updown.Minimum = 0
-  $numeric_updown.Maximum = 1000
-  $numeric_updown.Increment = 1
-  $numeric_updown.DecimalPlaces = 0
-  $numeric_updown.ReadOnly = $false
-  $numeric_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
-
-
+  $n.Parent = $this
+  $n.Location = New-Object System.Drawing.Point (30,80)
+  $n.Size = New-Object System.Drawing.Size (50,20)
+  $n.Value = 1
+  $n.Minimum = 0
+  $n.Maximum = 1000
+  $n.Increment = 1
+  $n.DecimalPlaces = 0
+  $n.ReadOnly = $false
+  $n.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
 
   $handler = {
     param(
       [object]$sender,
       [System.EventArgs]$eventargs)
-    $caller.Numeric = $numeric_updown.Value
+    $caller.Numeric = $n.Value
   }
 
-  $eventMethod = $numeric_updown.add_ValueChanged
+  $eventMethod = $n.add_ValueChanged
   $eventMethod.Invoke($handler)
 
-
-  $custom_time_updown = New-Object CustomTimePicker
-  $custom_time_updown.Parent = $f
-  $custom_time_updown.Location = New-Object System.Drawing.Point (30,50)
-  $custom_time_updown.Size = New-Object System.Drawing.Size (70,20)
-  $custom_time_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Left
-  $custom_time_updown.ReadOnly = $true
-
+  $c = New-Object CustomTimePicker
+  $c.Parent = $f
+  $c.Location = New-Object System.Drawing.Point (30,50)
+  $c.Size = New-Object System.Drawing.Size (70,20)
+  $c.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Left
+  $c.ReadOnly = $true
 
   $handler = {
     param(
       [object]$sender,
       [System.EventArgs]$eventargs)
-    $caller.TimeStr = $custom_time_updown.SelectedItem.ToString()
+    $caller.TimeStr = $c.SelectedItem.ToString()
   }
 
-  $eventMethod = $custom_time_updown.add_TextChanged
+  $eventMethod = $c.add_TextChanged
   $eventMethod.Invoke($handler)
 
-  $custom_time_updown.SuspendLayout()
+  $c.SuspendLayout()
 
-  $custom_time_updown.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
-  $custom_time_updown.ReadOnly = $true
+  $c.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+  $c.ReadOnly = $true
 
-  $custom_time_updown.TabIndex = 0
-  $custom_time_updown.TabStop = $false
+  $c.TabIndex = 0
+  $c.TabStop = $false
 
-  $standard_datepicker_updown = New-Object System.Windows.Forms.DateTimePicker
-  $standard_datepicker_updown.Parent = $f
-  $standard_datepicker_updown.Location = New-Object System.Drawing.Point (30,20)
-  $standard_datepicker_updown.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
-  $standard_datepicker_updown.Size = New-Object System.Drawing.Size (70,20)
-  $standard_datepicker_updown.Format =  [System.Windows.Forms.DateTimePickerFormat]::Custom 
-  $standard_datepicker_updown.CustomFormat ='hh:mm'
-  $standard_datepicker_updown.ShowUpDown = $true
-  $standard_datepicker_updown.Checked = $false
-  # $custom_time_updown.TextChanged += new EventHandler(time_updown_OnTextChanged);
+  $s = New-Object System.Windows.Forms.DateTimePicker
+  $s.Parent = $f
+  $s.Location = New-Object System.Drawing.Point (30,20)
+  $s.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+  $s.Size = New-Object System.Drawing.Size (70,20)
+  $s.Format = [System.Windows.Forms.DateTimePickerFormat]::Custom
+  $s.CustomFormat = 'hh:mm'
+  $s.ShowUpDown = $true
+  $s.Checked = $false
+  $s.Add_VisibleChanged({ #  += new-object System.EventHandler
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs)
+      $caller.TimeStr = $s.Value
+
+    })
 
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
   $f.ClientSize = New-Object System.Drawing.Size (180,120)
   $components = New-Object System.ComponentModel.Container
 
-  $f.Controls.AddRange(@( $custom_time_updown,$numeric_updown, $standard_datepicker_updown))
+  $f.Controls.AddRange(@( $c,$n,$s))
 
   $f.Name = 'Form1'
   $f.Text = 'UpDown Sample'
-  $custom_time_updown.ResumeLayout($false)
-  $numeric_updown.ResumeLayout($false)
+  $c.ResumeLayout($false)
+  $n.ResumeLayout($false)
   $f.ResumeLayout($false)
 
   $f.StartPosition = 'CenterScreen'
