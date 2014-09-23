@@ -58,9 +58,9 @@ public class Win32Window : IWin32Window
 Add-Type -TypeDefinition @"
 
 
-public class TimePicker : System.Windows.Forms.DomainUpDown
+public class CustomTimePicker : System.Windows.Forms.DomainUpDown
 {
-    public TimePicker()
+    public CustomTimePicker()
     {         
         // build the list of times, in reverse order because the up/down buttons go the other way
         for (double time = 23.5; time >= 0; time -= 0.5)
@@ -110,7 +110,7 @@ function UpDownsPrompt
   $numeric_updown.DecimalPlaces = 0
   $numeric_updown.ReadOnly = $false
   $numeric_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
-  # $numeric_updown.ValueChanged += new EventHandler(numeric_updown_OnValueChanged);
+
 
 
   $handler = {
@@ -124,40 +124,52 @@ function UpDownsPrompt
   $eventMethod.Invoke($handler)
 
 
-  $time_updown = New-Object TimePicker
-  $time_updown.Parent = $f
-  $time_updown.Location = New-Object System.Drawing.Point (30,50)
-  $time_updown.Size = New-Object System.Drawing.Size (70,20)
-  $time_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
-  $time_updown.ReadOnly = $true
-  # $time_updown.TextChanged += new EventHandler(time_updown_OnTextChanged);
+  $custom_time_updown = New-Object CustomTimePicker
+  $custom_time_updown.Parent = $f
+  $custom_time_updown.Location = New-Object System.Drawing.Point (30,50)
+  $custom_time_updown.Size = New-Object System.Drawing.Size (70,20)
+  $custom_time_updown.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Left
+  $custom_time_updown.ReadOnly = $true
+
 
   $handler = {
     param(
       [object]$sender,
       [System.EventArgs]$eventargs)
-    $caller.TimeStr = $time_updown.SelectedItem.ToString()
+    $caller.TimeStr = $custom_time_updown.SelectedItem.ToString()
   }
 
-  $eventMethod = $time_updown.add_TextChanged
+  $eventMethod = $custom_time_updown.add_TextChanged
   $eventMethod.Invoke($handler)
 
-  $time_updown.SuspendLayout()
+  $custom_time_updown.SuspendLayout()
 
-  $time_updown.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
-  $time_updown.ReadOnly = $true
+  $custom_time_updown.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
+  $custom_time_updown.ReadOnly = $true
 
-  $time_updown.TabIndex = 0
-  $time_updown.TabStop = $false
+  $custom_time_updown.TabIndex = 0
+  $custom_time_updown.TabStop = $false
+
+  $standard_datepicker_updown = New-Object System.Windows.Forms.DateTimePicker
+  $standard_datepicker_updown.Parent = $f
+  $standard_datepicker_updown.Location = New-Object System.Drawing.Point (30,20)
+  $standard_datepicker_updown.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
+  $standard_datepicker_updown.Size = New-Object System.Drawing.Size (70,20)
+  $standard_datepicker_updown.Format =  [System.Windows.Forms.DateTimePickerFormat]::Custom 
+  $standard_datepicker_updown.CustomFormat ='hh:mm'
+  $standard_datepicker_updown.ShowUpDown = $true
+  $standard_datepicker_updown.Checked = $false
+  # $custom_time_updown.TextChanged += new EventHandler(time_updown_OnTextChanged);
+
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
   $f.ClientSize = New-Object System.Drawing.Size (180,120)
   $components = New-Object System.ComponentModel.Container
 
-  $f.Controls.AddRange(@( $time_updown,$numeric_updown))
+  $f.Controls.AddRange(@( $custom_time_updown,$numeric_updown, $standard_datepicker_updown))
 
   $f.Name = 'Form1'
   $f.Text = 'UpDown Sample'
-  $time_updown.ResumeLayout($false)
+  $custom_time_updown.ResumeLayout($false)
   $numeric_updown.ResumeLayout($false)
   $f.ResumeLayout($false)
 
@@ -179,6 +191,5 @@ UpDownsPrompt -caller $caller
 Write-Debug ('Time Selection is : {0}' -f $caller.TimeStr)
 Write-Debug ('Numeric Value is : {0}' -f $caller.Numeric)
 $caller = $null
-
 
 
