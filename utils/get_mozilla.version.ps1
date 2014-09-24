@@ -1,16 +1,28 @@
-pushd 'HKLM:'
-cd  '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
-$app_record  = get-childitem . | where-object {$_.Name -match 'Mozilla'}   | select-object -first 1
-$app_record_fields  = $app_record.GetValueNames()
+Write-Host -ForegroundColor 'green' @"
+This call shows Mozila Version
+"@
 
-if ( -not ($app_record_fields.GetType().BaseType.Name -match  'Array' ) ) {
-  write-output 'Unexpected result type'
+pushd 'HKLM:'
+cd '\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+$app_record = Get-ChildItem . | Where-Object { $_.Name -match 'Mozilla' } | Select-Object -First 1
+$app_record_fields = $app_record.GetValueNames()
+
+if (-not ($app_record_fields.GetType().BaseType.Name -match 'Array')) {
+  Write-Output 'Unexpected result type'
 }
 # not good for mixed types 
-$results = $app_record_fields | foreach-object { @{'name' = $_; 'expression' = &{$app_record.GetValue($_)}}}; 
+$results = $app_record_fields | ForEach-Object { @{ 'name' = $_; 'expression' = & { $app_record.GetValue($_) } } };
 
-$results_lookup =  @{} 
-$results | foreach-object {$results_lookup[$_.name] = $_.expression } 
-popd 
-$results_lookup
+$results_lookup = @{}
+$results | ForEach-Object { $results_lookup[$_.Name] = $_.expression }
+popd
+$fields = @()
+$fields += $results_lookup.Keys
+$fields | ForEach-Object { $key = $_;
+  if (-not (($key -match 'DisplayVersion') -or ($key -match 'DisplayName'))) {
+    $results_lookup.Remove($key)
+  }
+}
 
+
+$results_lookup | Format-Table -AutoSize
