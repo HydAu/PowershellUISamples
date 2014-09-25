@@ -85,17 +85,18 @@ catch {
   Start-Sleep 10
 }
 
-$capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+$capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
 $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
 $driver = New-Object CustomeRemoteDriver ($uri,$capability)
-
+$sessionid = $driver.GetSessionId()
 [void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
+[string]$baseURL = $driver.Url = 'http://www.google.com';
 $driver.Navigate().GoToUrl($baseURL)
 $sessionid = $driver.GetSessionId()
 [NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)
 
 # https://github.com/davglass/selenium-grid-status/blob/master/lib/index.js
+# call TestSessionStatusServlet.java
 $sessionURL = ("http://127.0.0.1:4444/grid/api/testsession?session={0}" -f $sessionid)
 $req = [System.Net.WebRequest]::Create($sessionURL)
 $resp = $req.GetResponse()
@@ -106,6 +107,7 @@ $result = $sr.ReadToEnd()
 # Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
 [NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
 $json_object = ConvertFrom-Json -InputObject $result
+$json_object 
 <#
 internalKey    : 908cbce8-31cd-4ee9-a154-271c4ff4c22c
 session        : 6f689139-39a2-473a-be2d-34312e37b6d4
@@ -113,11 +115,39 @@ inactivityTime : 1
 proxyId        : http://192.168.0.7:5555
 msg            : slot found !
 success        : True
-#>
+
 $proxyId = $json_object.proxyId
 $proxyUri = New-Object System.Uri ($proxyId)
 $proxyUri.Port
 $proxyUri.Host
+#>
+
+# calls ProxyStatusServlet.java
+$proxyinfoURL = ("http://127.0.0.1:4444/grid/api/proxy?id={0}" -f $proxyId )
+
+$req = [System.Net.WebRequest]::Create($proxyinfoURL)
+$resp = $req.GetResponse()
+$reqstream = $resp.GetResponseStream()
+$sr = New-Object System.IO.StreamReader $reqstream
+$result = $sr.ReadToEnd()
+
+# Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
+[NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
+$json_object = ConvertFrom-Json -InputObject $result
+$json_object 
+# start-sleep 1200
+# $window_handle =  $driver.CurrentWindowHandle
+# $window_handle
+$driver_capabilities = $driver.Capabilities
+$driver_capabilities
+<# 
+
+BrowserName         : firefox
+Platform            : OpenQA.Selenium.Platform
+Version             : 30.0
+IsJavaScriptEnabled : True
+
+#<
 try {
   $driver.Quit()
 } catch [exception]{
