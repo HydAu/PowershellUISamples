@@ -75,3 +75,15 @@ foreach ($item in ('Polygon1','Polygon2','Polygon3')) {
 }
 $eventMethod.Invoke($handler)
 $target.ShowDialog() | Out-Null
+
+<#
+NOTE:
+on w2k3 
+need to explicitly pass arguments when sourcing the script:
+ powershell.exe -sta .\xaml_polygon_events.ps1
+otherwise
+Exception calling "Load" with "1" argument(s): "Cannot create instance of 'Window' 
+defined in assembly 
+'PresentationFramework, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'. 
+The calling thread must be STA, because many UI components require this.  "
+#>
