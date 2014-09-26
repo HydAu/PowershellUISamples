@@ -20,8 +20,6 @@
 
 Add-Type -TypeDefinition @" 
 
-
- // http://msdn.microsoft.com/en-us/library/ms172532%28v=vs.90%29.aspx
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -74,18 +72,9 @@ using System.Windows.Forms;
          this.timer1 = new System.Timers.Timer();
          ((System.ComponentModel.ISupportInitialize)(this.timer1)).BeginInit();
          this.SuspendLayout();
-// 
-//         this.Load += new System.EventHandler(this.TimerPanel_Load );
+            this.timer1.Interval = 1000 ;
+            this.timer1.Start();
 
-            timer1.Interval = 1000 ;
-            // Start the Timer
-            timer1.Start();
-            // Enable the timer. The timer starts now
-            timer1.Enabled = true ; 
-
-         // 
-         // timer1
-         // 
          this.timer1.Enabled = true;
          this.timer1.SynchronizingObject = this;
          this.timer1.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimerElapsed);
@@ -97,23 +86,20 @@ using System.Windows.Forms;
 
         private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-	Console.WriteLine(".");
-//         throw new Exception(); 
+	// Console.WriteLine(".");
         }
 
     }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-
-
-$RESULT_POSITIVE = 0
-$RESULT_NEGATIVE = 1
-$RESULT_CANCEL = 2
+$RESULT_OK = 0
+$RESULT_CANCEL = 1
+$RESULT_TIMEOUT = 2
 
 $Readable = @{
-  $RESULT_NEGATIVE = 'NO!';
-  $RESULT_POSITIVE = 'YES!';
-  $RESULT_CANCEL = 'MAYBE...'
+  $RESULT_CANCEL = 'CANCEL';
+  $RESULT_OK = 'OK';
+  $RESULT_TIMEOUT = 'TIMEOUT';
 }
 
 function PromptAuto (
@@ -130,15 +116,16 @@ function PromptAuto (
   $f.Text = $title
 
 
-  $f.Size = New-Object System.Drawing.Size (650,120)
+  $f.Size = New-Object System.Drawing.Size (240,110)
+
   $f.StartPosition = 'CenterScreen'
 
   $f.KeyPreview = $True
   $f.Add_KeyDown({
 
-      if ($_.KeyCode -eq 'M') { $caller.Data = $RESULT_POSITIVE }
-      elseif ($_.KeyCode -eq 'A') { $caller.Data = $RESULT_NEGATIVE }
-      elseif ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_CANCEL }
+      if ($_.KeyCode -eq 'O') { $caller.Data = $RESULT_OK }
+      elseif ($_.KeyCode -eq 'C') { $caller.Data = $RESULT_CANCEL }
+      elseif ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_TIMEOUT }
       else { return }
       $f.Close()
 
@@ -147,43 +134,39 @@ function PromptAuto (
   $b1 = New-Object System.Windows.Forms.Button
   $b1.Location = New-Object System.Drawing.Size (50,40)
   $b1.Size = New-Object System.Drawing.Size (75,23)
-  $b1.Text = 'Yes!'
-  $b1.add_click({ $caller.Data = $RESULT_POSITIVE; $f.Close(); })
+  $b1.Text = 'OK'
+  $b1.add_click({ $caller.Data = $RESULT_OK; $f.Close(); })
   $p = New-Object TimerPanel
+  $p.Size = $f.Size
+
   $p.Controls.Add($b1)
 
   $b2 = New-Object System.Windows.Forms.Button
-  $b2.Location = New-Object System.Drawing.Size (125,40)
+  $b2.Location = New-Object System.Drawing.Size (130,40)
   $b2.Size = New-Object System.Drawing.Size (75,23)
-  $b2.Text = 'No!'
-  $b2.add_click({ $caller.Data = $RESULT_NEGATIVE; $f.Close(); })
+  $b2.Text = 'Cancel'
+  $b2.add_click({ $caller.Data = $RESULT_CANCEL; $f.Close(); })
   $p.Controls.Add($b2)
-
-  $b3 = New-Object System.Windows.Forms.Button
-  $b3.Location = New-Object System.Drawing.Size (200,40)
-  $b3.Size = New-Object System.Drawing.Size (75,23)
-  $b3.Text = 'Maybe'
-  $b3.add_click({ $caller.Data = $RESULT_CANCEL; $f.Close() })
-  $p.Controls.Add($b3)
 
   $l = New-Object System.Windows.Forms.Label
   $l.Location = New-Object System.Drawing.Size (10,20)
   $l.Size = New-Object System.Drawing.Size (280,20)
   $l.Text = $message
   $p.Controls.Add($l)
+
+  $p.Timer.Stop()
+  $p.Timer.Interval = 10000 ;
+  $p.Timer.Start()
   $p.Timer.add_Elapsed({
- $caller.Data = $RESULT_CANCEL; $f.Close() 
-}) 
+     $caller.Data = $RESULT_TIMEOUT; $f.Close()  }) 
   $f.Controls.Add($p)
 
   $f.Topmost = $True
 
-
-  $caller.Data = $RESULT_CANCEL;
+  $caller.Data = $RESULT_TIMEOUT;
   $f.Add_Shown({ $f.Activate() })
 
   [void]$f.ShowDialog([win32window ]($caller))
- # $p | get-member
   $f.Dispose()
 }
 
@@ -217,8 +200,8 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $DebugPreference = 'Continue'
-$title = 'Question'
-$message = "Continue to Next step?"
+$title = 'Prompt w/timeout'
+$message = "Continue ?"
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 PromptAuto -Title $title -Message $message -caller $caller
