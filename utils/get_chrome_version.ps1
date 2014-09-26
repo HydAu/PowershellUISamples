@@ -1,9 +1,16 @@
 Write-Host -ForegroundColor 'green' @"
 This call shows Chrome Version
 "@
-[string]$name = $null
+
+
+if (-not [environment]::Is64BitProcess) {
+  $path = '/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall/Google Chrome'
+} else {
+  $path = '/SOFTWARE/Wow6432Node/Microsoft/Windows/CurrentVersion/Uninstall/Google Chrome'
+}
+
 $hive = 'HKLM:'
-$path = '/SOFTWARE/Wow6432Node/Microsoft/Windows/CurrentVersion/Uninstall/Google Chrome'
+[string]$name = $null
 pushd $hive
 cd $path
 $fields = @( 'DisplayName','Version','UninstallString')
@@ -35,6 +42,5 @@ $fields | ForEach-Object {
 
 }
 popd
-
 
 
