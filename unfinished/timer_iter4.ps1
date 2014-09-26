@@ -35,23 +35,13 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
   }
 }
-  $r = @( 'System.Drawing',
-    'System.Collections.Generic',
-    'System.Collections',
-    'System.ComponentModel',
-    'System.Windows.Forms',
-    'System.Text',
-    'System.Data'
-  )
 
-  $r | ForEach-Object { $assembly = $_; [void][System.Reflection.Assembly]::LoadWithPartialName($assembly) }
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
 $so = [hashtable]::Synchronized(@{
     'Form' = [System.Windows.Forms.Form]$null;
     'Result' = [string]'';
-    'NeedData' = [bool]$false;
-    'HaveData' = [bool]$false;
-     'IsCompleted' = [bool]$false;
     'ScriptDirectory' = [string]'';
   })
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -64,7 +54,7 @@ $rs.ThreadOptions = 'ReuseThread'
 $rs.Open()
 $rs.SessionStateProxy.SetVariable('so',$so)
 $run_script = [powershell]::Create().AddScript({
-Add-Type -TypeDefinition @"
+    Add-Type -TypeDefinition @"
 
 
 /*
@@ -213,7 +203,7 @@ namespace MyClock
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
-Add-Type -TypeDefinition @"
+    Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
 public class Win32Window : IWin32Window
@@ -246,95 +236,76 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-  $r = @( 'System.Drawing',
-    'System.Collections.Generic',
-    'System.Collections',
-    'System.ComponentModel',
-    'System.Windows.Forms',
-    'System.Text',
-    'System.Data'
-  )
+    [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+    [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
-  $r | ForEach-Object { $assembly = $_; [void][System.Reflection.Assembly]::LoadWithPartialName($assembly) }
+    $f = New-Object System.Windows.Forms.Form
+    $f.Text = $title
 
+    $timer1 = New-Object System.Timers.Timer
 
-  $f = New-Object System.Windows.Forms.Form
-  $f.Text = $title
+    $label1 = New-Object System.Windows.Forms.Label
 
-  $timer1 = New-Object System.Timers.Timer
+    $f.SuspendLayout()
+    $components = New-Object System.ComponentModel.Container
 
+    $label1.Font = New-Object System.Drawing.Font ("Microsoft Sans Serif",14.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
+    $label1.ForeColor = [System.Drawing.SystemColors]::Highlight
+    $label1.Location = New-Object System.Drawing.Point (24,8)
+    $label1.Name = "label1"
+    $label1.Size = New-Object System.Drawing.Size (224,48)
+    $label1.TabIndex = 0
+    $label1.Text = [System.DateTime]::Now.ToString()
+    $label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 
-  $label1 = New-Object System.Windows.Forms.Label
+    $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
+    $f.ClientSize = New-Object System.Drawing.Size (292,69)
+    $f.Controls.AddRange(@( $label1))
+    $f.Name = 'MyClockForm';
+    $f.Text = 'My Clock';
 
-  $f.SuspendLayout()
-  $components = New-Object System.ComponentModel.Container
+    # This was added - it does not belong to the original Form
+    $eventMethod = $label1.add_click
+    $eventMethod.Invoke({ $f.Text = "You clicked my label $((Get-Date).ToString('G'))" })
 
+    $f.add_Load({
+        param([object]$sender,[System.EventArgs]$eventArgs)
+        $timer1.Interval = 1000
+        $timer1.Start()
+        $timer1.Enabled = $true
 
-  $label1.Font = New-Object System.Drawing.Font ("Microsoft Sans Serif",14.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
-  $label1.ForeColor = [System.Drawing.SystemColors]::Highlight
-  $label1.Location = New-Object System.Drawing.Point (24,8)
-  $label1.Name = "label1"
-  $label1.Size = New-Object System.Drawing.Size (224,48)
-  $label1.TabIndex = 0
-  $label1.Text = [System.DateTime]::Now.ToString()
-  $label1.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+      })
+    $timer1.Add_Elapsed({
+        $label1.Text = [System.DateTime]::Now.ToString()
+      })
 
+    $f.ResumeLayout($false)
+    $f.Topmost = $True
 
-  $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
-  $f.ClientSize = New-Object System.Drawing.Size (292,69)
-  $f.Controls.AddRange(@( $label1))
-  $f.Name = 'MyClockForm';
-  $f.Text = 'My Clock';
+    # $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+    $so.Form = $f
+    $so.IsCompleted = $false
+    $f.Add_Shown({ $f.Activate() })
 
-  # This was added - it does not belong to the original Form
-  $eventMethod = $label1.add_click
-  $eventMethod.Invoke({ $f.Text = "You clicked my label $((Get-Date).ToString('G'))" })
-
-  $f.add_Load({
-      param([object]$sender,[System.EventArgs]$eventArgs)
-      $timer1.Interval = 1000
-      $timer1.Start()
-      $timer1.Enabled = $true
-
-    })
-  $timer1.Add_Elapsed({
-      $label1.Text = [System.DateTime]::Now.ToString()
-    })
-
+    # [void]$f.ShowDialog([win32window ]($caller))
+    [void]$f.Show()
 
 
-  $f.ResumeLayout($false)
-  $f.Topmost = $True
-
-  # $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  $so.Form = $f
-
-  $f.Add_Shown({ $f.Activate() })
-
-  # [void]$f.ShowDialog([win32window ]($caller))
-[void]$f.Show()
-  
-
-})
+  })
 $run_script.Runspace = $rs
-# promptForContinueAuto
 
 $timer = New-Object System.Timers.Timer
 
-[int32]$global:complete2 = 0
-[int32]$complete = 0
+[int32]$global:complete = 0
 $action = {
-  
-  Write-Host "Invocation # ${complete}"
-  Write-Host "Timer Elapse Event: $(get-date -Format 'HH:mm:ss')"
-  Write-Host "Invocation # ${complete}"
 
-  $complete++
-  if ($complete -eq 4)
+  Write-Debug "Timer Elapse Event: $(get-date -Format 'HH:mm:ss')"
+
+  $global:complete++
+  if ($global:complete -eq 4)
   {
     Write-Host 'Completed'
     $timer.stop()
-    [int32]$global:complete2  = 222
     $run_script.EndInvoke($handle)
     $rs.Close()
     Unregister-Event thetimer
@@ -343,53 +314,23 @@ $action = {
 }
 
 
-Register-ObjectEvent -InputObject $timer -EventName elapsed –SourceIdentifier thetimer -Action $action
+Register-ObjectEvent -InputObject $timer -EventName elapsed -SourceIdentifier thetimer -Action $action
 $timer.Interval = 3000 # milliseconds
 
 Write-Output 'Starting'
-$timer.start()
-
-<#
-  $global:timer = New-Object System.Timers.Timer
-  $global:timer.Interval = 1000
-  Register-ObjectEvent -InputObject $global:timer -EventName Elapsed -SourceIdentifier theTimer -Action { AddToLog ('') }
-  $global:timer.Start()
-  $global:timer.Enabled = $true
-#>
-
-  function AddToLog ()
-  {
-    param([string]$text)
-
-    $label1.Text = [System.DateTime]::Now.ToString()
-  }
-
+$timer.Start()
 
 $handle = $run_script.BeginInvoke()
-start-sleep -Milliseconds 1000
-$z  = $so.Form
-$z |   get-member
-while ((-not $handle.IsCompleted) -and ($complete -ne 4)) {
-
-  write-output ('complete2 = {0}' -f  $global:complete2)
-
+while ($global:complete -ne 4) {
   Start-Sleep -Milliseconds 1000
-  if ($so.NeedData -and -not $so.HaveData) {
-    # Write-Output ('Need to provide data')
-    Start-Sleep -Milliseconds 10
-    # send_text -Content (Date)
-    # Write-Output ('Sent {0}' -f $so.Result)
-    $so.HaveData = $true
-  }
+  Write-Debug "Invocation # ${global:complete}"
 }
 
-  write-output ('complete2 = {0}' -f  $global:complete2)
-
-  if ($complete -eq 4)
-  {
-write-output 'xxxx'
-
-$so.Form.Close()
-$run_script.EndInvoke($handle)
-$rs.Close()
+if ($global:complete -eq 4)
+{
+  Write-Output 'Closing'
+  Start-Sleep -Milliseconds 1000
+  $so.Form.Close()
+  $run_script.EndInvoke($handle)
+  $rs.Close()
 }
