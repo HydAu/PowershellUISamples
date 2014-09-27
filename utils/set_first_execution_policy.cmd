@@ -18,3 +18,14 @@ call C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy 
 
 
 goto :EOF 
+REM 
+REM Set-WSManQuickConfig : 
+REM <f:WSManFault xmlns:f="http://schemas.microsoft.com/wbem/wsman/1/wsmanfault" Code="2150859113" Machine="localhost">
+REM <f:Message>
+REM <f:ProviderFault Code="2150859113" Machine="sergueik42">
+REM <f:Message>
+REM WinRM firewall exception will not work since 
+REM one of the network connection types on this machine is set to Public. 
+REM Change the network connection type to either Domain or Private and try again.
+REM </f:Message></f:WSManFault></f:ProviderFault></f:Message></f:WSManFault>
+REM http://www.minasi.com/newsletters/nws1304.htm
