@@ -24,72 +24,59 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-    public class TimerPanel : System.Windows.Forms.Panel
+public class TimerPanel : System.Windows.Forms.Panel
+{
+    private System.Timers.Timer _timer;
+    private System.ComponentModel.Container components = null;
+    public System.Timers.Timer Timer
     {
-        private string _message;
-
-        private System.Timers.Timer timer1;
-        private System.ComponentModel.Container components = null;
-
-        public System.Timers.Timer Timer
+        get
         {
-            get { 
-                return timer1; 
-           }
-           set { timer1 = value; }
+            return _timer;
         }
+        set { _timer = value; }
+    }
 
 
-        public TimerPanel()
+    public TimerPanel()
+    {
+        InitializeComponent();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-            InitializeComponent();
-
-        }
-
-        public string Message
-        {
-            get { 
-                return _message; 
-           }
-           set { _message = value; }
-        }
-        protected override void Dispose( bool disposing )
-        {
-            if( disposing )
+            if (components != null)
             {
-                if (components != null) 
-                {
-                    components.Dispose();
-                }
+                components.Dispose();
             }
-            timer1.Stop();
-
-            base.Dispose( disposing );
         }
+        _timer.Stop();
+        base.Dispose(disposing);
+    }
 
-        private void InitializeComponent()
-        {
-         this.timer1 = new System.Timers.Timer();
-         ((System.ComponentModel.ISupportInitialize)(this.timer1)).BeginInit();
-         this.SuspendLayout();
-            this.timer1.Interval = 1000 ;
-            this.timer1.Start();
-
-         this.timer1.Enabled = true;
-         this.timer1.SynchronizingObject = this;
-         this.timer1.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimerElapsed);
-
-         ((System.ComponentModel.ISupportInitialize)(this.timer1)).EndInit();
-         this.ResumeLayout(false);
-
-      }
-
-        private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-	// Console.WriteLine(".");
-        }
+    private void InitializeComponent()
+    {
+        this._timer = new System.Timers.Timer();
+        ((System.ComponentModel.ISupportInitialize)(this._timer)).BeginInit();
+        this.SuspendLayout();
+        this._timer.Interval = 1000;
+        this._timer.Start();
+        this._timer.Enabled = true;
+        this._timer.SynchronizingObject = this;
+        this._timer.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimerElapsed);
+        ((System.ComponentModel.ISupportInitialize)(this._timer)).EndInit();
+        this.ResumeLayout(false);
 
     }
+
+    private void OnTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+    {
+        // Console.WriteLine(".");
+    }
+
+}
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $RESULT_OK = 0
@@ -97,24 +84,24 @@ $RESULT_CANCEL = 1
 $RESULT_TIMEOUT = 2
 
 $Readable = @{
-  $RESULT_CANCEL = 'CANCEL';
   $RESULT_OK = 'OK';
+  $RESULT_CANCEL = 'CANCEL';
   $RESULT_TIMEOUT = 'TIMEOUT';
 }
 
-function PromptAuto (
+function PromptAuto  {
+
+param(
   [string]$title,
   [string]$message,
   [object]$caller
-) {
+)
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
-
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
-
 
   $f.Size = New-Object System.Drawing.Size (240,110)
 
@@ -124,8 +111,7 @@ function PromptAuto (
   $f.Add_KeyDown({
 
       if ($_.KeyCode -eq 'O') { $caller.Data = $RESULT_OK }
-      elseif ($_.KeyCode -eq 'C') { $caller.Data = $RESULT_CANCEL }
-      elseif ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_TIMEOUT }
+      elseif ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_CANCEL }
       else { return }
       $f.Close()
 
@@ -140,12 +126,16 @@ function PromptAuto (
   $p.Size = $f.Size
 
   $p.Controls.Add($b1)
-
+  $end = (Get-Date -UFormat "%s")
+  $end = ([int]$end + 60)
   $b2 = New-Object System.Windows.Forms.Button
   $b2.Location = New-Object System.Drawing.Size (130,40)
   $b2.Size = New-Object System.Drawing.Size (75,23)
   $b2.Text = 'Cancel'
-  $b2.add_click({ $caller.Data = $RESULT_CANCEL; $f.Close(); })
+  $b2.add_click({
+      $caller.Data = $RESULT_CANCEL;
+      $f.Close();
+    })
   $p.Controls.Add($b2)
 
   $l = New-Object System.Windows.Forms.Label
@@ -155,12 +145,21 @@ function PromptAuto (
   $p.Controls.Add($l)
 
   $p.Timer.Stop()
-  $p.Timer.Interval = 10000 ;
+  $p.Timer.Interval = 5000;
   $p.Timer.Start()
   $p.Timer.add_Elapsed({
-     $caller.Data = $RESULT_TIMEOUT; $f.Close()  }) 
-  $f.Controls.Add($p)
+      $start = (Get-Date -UFormat "%s")
 
+      $elapsed = New-TimeSpan -Seconds ($start - $end)
+      $l.Text = ('Remaining time {0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
+
+      if ($end - $start -lt 0) {
+        $caller.Data = $RESULT_TIMEOUT;
+        $f.Close()
+      }
+
+    })
+  $f.Controls.Add($p)
   $f.Topmost = $True
 
   $caller.Data = $RESULT_TIMEOUT;
