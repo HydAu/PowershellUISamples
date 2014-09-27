@@ -126,8 +126,6 @@ if ($browser -ne $null -and $browser -ne '') {
   }
   $driver = New-Object CustomeRemoteDriver ($uri,$capability)
 } else {
-  # this example 
-  # will not work with phantomjs 
   $phantomjs_executable_folder = "c:\tools\phantomjs"
   Write-Host 'Running on phantomjs'
   $driver = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
@@ -140,53 +138,35 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 
-try {
-  $sessionid = $driver.GetSessionId()
-
-} catch [exception]{
-  # Method invocation failed because [OpenQA.Selenium.PhantomJS.PhantomJSDriver] doesn't contain a method named 'GetSessionId'.
-  $driver.Quit()
-  return
-
-}
-
 [void]$driver.manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
 [string]$baseURL = $driver.Url = 'http://www.google.com';
 $driver.Navigate().GoToUrl($baseURL)
 
-[NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)
+# Unable to find type [OpenQA.Selenium.Remote.RemoteCookieJar].
 
-# https://github.com/davglass/selenium-grid-status/blob/master/lib/index.js
-# call TestSessionStatusServlet.java
-$sessionURL = ("http://{0}:{1}/grid/api/testsession?session={2}" -f $hub_host,$hub_port,$sessionid)
-$req = [System.Net.WebRequest]::Create($sessionURL)
-$resp = $req.GetResponse()
-$reqstream = $resp.GetResponseStream()
-$sr = New-Object System.IO.StreamReader $reqstream
-$result = $sr.ReadToEnd()
-$session_json_object = ConvertFrom-Json -InputObject $result
-$session_json_object | Format-List
+$cookies = $driver.manage().Cookies.AllCookies
 
-$proxyId = $session_json_object.proxyId
+$cookies.Name -split '`n' | ForEach-Object {
+  $cookie_name = $_
+  Write-Output ('->{0}' -f $cookie_name)
 
-# calls ProxyStatusServlet.java
-$proxyinfoURL = ('http://{0}:{1}/grid/api/proxy?id={2}' -f $hub_host,$hub_port,$proxyId)
+  try {
 
-$req = [System.Net.WebRequest]::Create($proxyinfoURL)
-$resp = $req.GetResponse()
-$reqstream = $resp.GetResponseStream()
-$sr = New-Object System.IO.StreamReader $reqstream
-$result = $sr.ReadToEnd()
+    $cookie = $driver.manage().Cookies.GetCookieNamed($cookie_name)
+    Write-Output '---'
+    Write-Output ('domain = "{0}"' -f $cookie.Domain)
+    Write-Output ('Name = "{0}"' -f $cookie.Name)
+    Write-Output ('Value = "{0}"' -f $cookie.Value)
+    Write-Output '---'
 
-$proxyinfo_json_object = ConvertFrom-Json -InputObject $result
-$proxyinfo_json_object | Format-List
+    [void]$driver.manage().Cookies.DeleteCookieNamed($cookie.Name)
+    [void]$driver.manage().Cookies.AddCookie($cookie)
+  } catch [exception]{
+    Write-Output (( $_.Exception.Message ) -split "`n" )[0]
+    # Ignore errors if unable to close the browser
+  }
 
-$window_handle = $driver.CurrentWindowHandle
-
-Write-Output ("CurrentWindowHandle = {0}`n" -f $window_handle)
-
-$driver_capabilities = $driver.Capabilities
-$driver_capabilities | Format-List
+}
 
 try {
   # IE 11 does not quit
