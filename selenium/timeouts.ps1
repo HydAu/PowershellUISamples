@@ -47,15 +47,8 @@ pushd $shared_assemblies_path
 $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
-<# 
-pushd C:\tools 
-mklink /D phantomjs C:\phantomjs-1.9.7-windows
-symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
-#>
-
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = "http://www.wikipedia.org"
-$phantomjs_executable_folder = "C:\tools\phantomjs"
+$baseURL = 'http://www.wikipedia.org'
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
@@ -87,6 +80,7 @@ if ($browser -ne $null -and $browser -ne '') {
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
   Write-Host 'Running on phantomjs'
+  $phantomjs_executable_folder = "C:\tools\phantomjs"
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $selenium.Capabilities.SetCapability("ssl-protocol","any")
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)

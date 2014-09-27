@@ -21,9 +21,9 @@
 param(
   [switch]$browser
 )
-
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory {
+function Get-ScriptDirectory
+{
   $Invocation = (Get-Variable MyInvocation -Scope 1).Value
   if ($Invocation.PSScriptRoot) {
     $Invocation.PSScriptRoot
@@ -34,20 +34,24 @@ function Get-ScriptDirectory {
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
-
 $shared_assemblies = @(
-  "WebDriver.dll",
-  "WebDriver.Support.dll",
-  "Selenium.WebDriverBackedSelenium.dll",
-  "nunit.framework.dll"
+  'WebDriver.dll',
+  'WebDriver.Support.dll',
+  'Selenium.WebDriverBackedSelenium.dll',
+  'nunit.framework.dll'
+
 )
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
+
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; Write-Debug ("Loaded {0} " -f $_) }
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
+$verificationErrors = New-Object System.Text.StringBuilder
+$baseURL = 'http://www.wikipedia.org/'
+$phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
@@ -58,10 +62,10 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ([System.Uri]("http://127.0.0.1:4444/wd/hub"),$capability)
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
-  $phantomjs_executable_folder = "C:\tools\phantomjs"
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $selenium.Capabilities.SetCapability("ssl-protocol","any")
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
@@ -71,15 +75,34 @@ if ($PSBoundParameters["browser"]) {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = 'http://www.google.com'
 $selenium.Navigate().GoToUrl($baseURL)
+$selenium.Navigate().Refresh()
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 100
-[OpenQA.Selenium.Remote.RemoteWebElement]$element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Id("hplogo")))
+[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
+
+# http://learnseleniumtesting.com/how-to-use-dropdown-or-selecttag/
+[OpenQA.Selenium.IWebElement]$web_element = $selenium.FindElement([OpenQA.Selenium.By]::Name('language'))
+[OpenQA.Selenium.Support.UI.SelectElement]$select_element = New-Object OpenQA.Selenium.Support.UI.SelectElement ($web_element)
+
+$availableOptions = $select_element.Options
+$index = 0
+
+foreach ($item in $availableOptions)
+{
+  $select_element.SelectByValue($item.GetAttribute('value'))
+  $result = $select_element.SelectedOption
+  [NUnit.Framework.Assert]::AreEqual($result.Text,$item.Text)
+  Write-Output $result.Text
+  $select_element.SelectByText($item.Text)
+  $select_element.SelectByIndex($index)
+  Start-Sleep -Milliseconds 10
+  $index++
+}
+
+
+
 try {
   $selenium.Quit()
 } catch [exception]{
+  # Ignore errors if unable to close the browser
 }
-[NUnit.Framework.Assert]::AreEqual($verificationErrors.Length,0)

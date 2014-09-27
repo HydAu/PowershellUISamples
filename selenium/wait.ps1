@@ -19,11 +19,11 @@
 #THE SOFTWARE.
 
 param(
-  [switch]$browser
+  [string]$browser
 )
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory
-{
+function Get-ScriptDirectory {
   $Invocation = (Get-Variable MyInvocation -Scope 1).Value
   if ($Invocation.PSScriptRoot) {
     $Invocation.PSScriptRoot
@@ -34,70 +34,51 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
+
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
-  # "Selenium.WebDriverBackedSelenium.dll",
-  # TODO - resolve dependencies
-  'nunit.core.dll',
-  'nunit.framework.dll'
-
+  "Selenium.WebDriverBackedSelenium.dll",
+  "nunit.framework.dll"
 )
-<#
-
-Add-Type : Could not load file or assembly 
-'file:///C:\developer\sergueik\csharp\SharedAssemblies\WebDriver.dll' 
-or one of its dependencies. This assembly is built by a runtime newer than the currently loaded runtime and cannot be loaded.
-
-Add-Type : Could not load file or assembly 
-'file:///C:\developer\sergueik\csharp\SharedAssemblies\nunit.framework.dll' or one of its dependencies. 
-Operation is not supported. (Exception from HRESULT: 0x80131515) 
-
-use fixw2k3.ps1
-
-Add-Type : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
-#>
 
 $env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
-
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { 
- if ($host.Version.Major -gt 2){
-   Unblock-File -Path $_;
- }
- write-output $_
- Add-Type -Path $_ 
- }
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; Write-Debug ("Loaded {0} " -f $_) }
 popd
-
-<# 
-pushd C:\tools 
-mklink /D phantomjs C:\phantomjs-1.9.7-windows
-symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
-#>
-
-$verificationErrors = New-Object System.Text.StringBuilder
-# use Default Web Site to host the page. Enable Directory Browsing.
-$baseURL = "http://localhost/jOrgChart-master2/example.html"
-$phantomjs_executable_folder = "C:\tools\phantomjs"
-if ($PSBoundParameters["browser"]) {
+if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect("127.0.0.1",4444)
+    $connection.Connect('127.0.0.1',4444)
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node_ie.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-#  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+  Write-Host "Running on ${browser}"
+  if ($browser -match 'firefox') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
 
+  }
+  elseif ($browser -match 'chrome') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  }
+  elseif ($browser -match 'ie') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+  }
+  elseif ($browser -match 'safari') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
+  }
+  else {
+    throw "unknown browser choice:${browser}"
+  }
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
+  Write-Host 'Running on phantomjs'
+  $phantomjs_executable_folder = 'C:\tools\phantomjs'
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $selenium.Capabilities.SetCapability("ssl-protocol","any")
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
@@ -107,32 +88,15 @@ if ($PSBoundParameters["browser"]) {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$selenium.Navigate().GoToUrl("file:///C:/developer/sergueik/powershell_ui_samples/selenium/popup.html" )
-$selenium.Navigate().Refresh()
-$selenium.Manage().Window.Maximize()
+$verificationErrors = New-Object System.Text.StringBuilder
+$baseURL = 'http://www.google.com'
+$selenium.Navigate().GoToUrl($baseURL)
 
-start-sleep 3
-
-[OpenQA.Selenium.Remote.RemoteWebElement]$button = $selenium.findElement([OpenQA.Selenium.By]::xpath("//input[@type='button']"))
-
-$button.click()
-# http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.Alert
-# NOTE: do not explicitly declare the type here
-# [OpenQA.Selenium.Remote.RemoteAlert]
-$alert = $selenium.switchTo().alert()
-
-write-output $alert.Text
-$alert.accept()
-
-# This works on FF, Chrome, IE 8 - 11
-# http://seleniumeasy.com/selenium-tutorials/how-to-handle-javascript-alerts-confirmation-prompts
-# e.g. need to be able to copy a url from a dialog box pop up and paste it into a new browser window
-
-Start-Sleep 3
-
-
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+$wait.PollingInterval = 100
+[OpenQA.Selenium.Remote.RemoteWebElement]$element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Id("hplogo")))
 try {
   $selenium.Quit()
 } catch [exception]{
-  # Ignore errors if unable to close the browser
 }
+[NUnit.Framework.Assert]::AreEqual($verificationErrors.Length,0)
