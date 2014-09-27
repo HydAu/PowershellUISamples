@@ -51,7 +51,8 @@ $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = "http://www.wikipedia.org"
+$baseURL = 'http://www.wikipedia.org'
+$uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
@@ -78,7 +79,7 @@ if ($browser -ne $null -and $browser -ne '') {
   else {
     throw ( 'Unknown browser choice: ' + $browser )
   }
-  $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
+  
   try {
     # TODO:
     # OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer possibly not available for C# port
@@ -104,52 +105,30 @@ if ($browser -ne $null -and $browser -ne '') {
 
 $selenium.Navigate().GoToUrl($baseURL)
 try { 
-  ([OpenQA.Selenium.Remote.ICommandExecutor]$selenium).Execute([OpenQA.Selenium.Remote.DriverCommand]::DeleteAllCookies)
+
+  [OpenQA.Selenium.Remote.HttpCommandExecutor]$executor = new-object OpenQA.Selenium.Remote.HttpCommandExecutor($uri, [System.TimeSpan]::FromSeconds(10))
+   $executor.Execute([OpenQA.Selenium.Remote.DriverCommand]::DeleteAllCookies)
+   write-host -ForegroundColor 'Green' "Deleted cookies"
 } catch [Exception]{
 <#
-Cannot convert value of type
+ Cannot convert value of type
 "OpenQA.Selenium.Remote.RemoteWebDriver" to type
 "OpenQA.Selenium.Remote.ICommandExecutor".
+
+ new-object : Cannot find type [OpenQA.Selenium.Remote.HttpCommandExecutor]:
+ verify that the assembly containing this type is loaded.
 #>
+# commenting the exception leads to the "Unable to get browser" error in the following code 
+# throw
 }
+# write-host -ForegroundColor 'Green' "Continue with the browser"
 
 $selenium.Navigate().Refresh()
 
-<#
-
-# http://www.milincorporated.com/a2_cookies.html
- pushd "${env:USERPROFILE}\AppData\Roaming\Microsoft\Windows\Cookies"
- pushd "${env:USERPROFILE}\AppData\Roaming\Microsoft\Windows\Cookies\Low\"
-NOTE: Recent Files in the latter directory  are present even before the browser is open first time after the cold boot.
-# Session cookies ?
- pushd "${env:USERPROFILE}\Local Settings\Temporary Internet Files\Content.IE5"
-#>
 # http://stackoverflow.com/questions/7413966/delete-cookies-in-webdriver 
-<#
-$target_server = '...'
-function clear_cookies{
 
-$command = 'C:\Windows\System32\rundll32.exe InetCpl.cpl,ClearMyTracksByProcess 2'
-[void](invoke-expression -command $command  )
-} 
-
-$remote_run_step = invoke-command -computer $target_server -ScriptBlock ${function:clear_cookies}
-# note one may try to do the same using java runtime:
-http://girixh.blogspot.com/2013/10/how-to-clear-cookies-from-internet.html
-try {
-  Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 2");
- } catch (IOException e) {
-  // TODO Auto-generated catch block
-  e.printStackTrace();
-#>
-
-
-<#
-# note this is a very very old post:
 # http://stackoverflow.com/questions/595228/how-can-i-delete-all-cookies-with-javascript
 # http://stackoverflow.com/questions/2144386/javascript-delete-cookie
-#>
-
 
 $script = @"
 
