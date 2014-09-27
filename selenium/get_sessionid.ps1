@@ -37,6 +37,10 @@ pushd $shared_assemblies_path
 $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
+# Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
+[NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
+
+
 # http://stackoverflow.com/questions/15767066/get-session-id-for-a-selenium-remotewebdriver-in-c-sharp
 Add-Type -TypeDefinition @"
 using System;
@@ -88,12 +92,15 @@ catch {
 }
 
 
+$hub_host = '127.0.0.1'
+$hub_port = '4444'
+
+$uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host, $hub_port))
 
 if ($browser -ne $null -and $browser -ne '') {
-  $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect("127.0.0.1",4444)
+    $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
@@ -117,13 +124,11 @@ if ($browser -ne $null -and $browser -ne '') {
   else {
     throw "unknown browser choice:${browser}"
   }
-  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
-  # $driver = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
   $driver = New-Object CustomeRemoteDriver ($uri,$capability)
 } else {
   # this example 
   # will not work with phantomjs 
-  $phantomjs_executable_folder = "D:\tools\phantomjs"
+  $phantomjs_executable_folder = "c:\tools\phantomjs"
   Write-Host 'Running on phantomjs'
   $driver = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $driver.Capabilities.SetCapability("ssl-protocol","any")
@@ -160,33 +165,19 @@ $driver.Navigate().GoToUrl($baseURL)
 
 # https://github.com/davglass/selenium-grid-status/blob/master/lib/index.js
 # call TestSessionStatusServlet.java
-$sessionURL = ("http://127.0.0.1:4444/grid/api/testsession?session={0}" -f $sessionid)
+$sessionURL = ("http://{0}:{1}/grid/api/testsession?session={2}" -f $hub_host, $hub_port, $sessionid)
 $req = [System.Net.WebRequest]::Create($sessionURL)
 $resp = $req.GetResponse()
 $reqstream = $resp.GetResponseStream()
 $sr = New-Object System.IO.StreamReader $reqstream
 $result = $sr.ReadToEnd()
+$session_json_object = ConvertFrom-Json -InputObject $result
+$session_json_object | format-list
 
-# Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
-[NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
-$json_object = ConvertFrom-Json -InputObject $result
-$json_object
-<#
-internalKey    : 908cbce8-31cd-4ee9-a154-271c4ff4c22c
-session        : 6f689139-39a2-473a-be2d-34312e37b6d4
-inactivityTime : 1
-proxyId        : http://192.168.0.7:5555
-msg            : slot found !
-success        : True
-
-$proxyId = $json_object.proxyId
-$proxyUri = New-Object System.Uri ($proxyId)
-$proxyUri.Port
-$proxyUri.Host
-#>
+$proxyId = $session_json_object.proxyId
 
 # calls ProxyStatusServlet.java
-$proxyinfoURL = ("http://127.0.0.1:4444/grid/api/proxy?id={0}" -f $proxyId)
+$proxyinfoURL = ('http://{0}:{1}/grid/api/proxy?id={2}' -f $hub_host, $hub_port, $proxyId)
 
 $req = [System.Net.WebRequest]::Create($proxyinfoURL)
 $resp = $req.GetResponse()
@@ -194,26 +185,20 @@ $reqstream = $resp.GetResponseStream()
 $sr = New-Object System.IO.StreamReader $reqstream
 $result = $sr.ReadToEnd()
 
-# Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
-[NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
-$json_object = ConvertFrom-Json -InputObject $result
-$json_object
-# start-sleep 1200
-# $window_handle =  $driver.CurrentWindowHandle
-# $window_handle
+$proxyinfo_json_object = ConvertFrom-Json -InputObject $result
+$proxyinfo_json_object  | format-list
+
+$window_handle =  $driver.CurrentWindowHandle
+
+write-output ("CurrentWindowHandle = {0}`n" -f $window_handle )
 $driver_capabilities = $driver.Capabilities
-$driver_capabilities
-<# 
+$driver_capabilities | format-list
 
-BrowserName         : firefox
-Platform            : OpenQA.Selenium.Platform
-Version             : 30.0
-IsJavaScriptEnabled : True
-
-#>
 try {
+  # IE 11 does not quit
   $driver.Quit()
 } catch [exception]{
+  write-ourput $_.Exception.Message
   # Ignore errors if unable to close the browser
 }
 return
