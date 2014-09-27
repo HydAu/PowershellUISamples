@@ -80,7 +80,21 @@ $selenium.Navigate().Refresh()
 
 [void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
 
-# http://learnseleniumtesting.com/how-to-use-dropdown-or-selecttag/
+[OpenQA.Selenium.IWebElement]$web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchLanguage'))
+[System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$webList = $web_element.findElements([OpenQA.Selenium.By]::TagName('option')) 
+$webList  | foreach-object {
+  write-output $_.Text
+ $value =  $_.GetAttribute('value')
+ $css_selector = ('option[value="{0}"]' -f $value)
+   write-output $css_selector
+ try {
+   [void]$web_element.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+ } catch [Exception] {
+ Write-Output ("Exception : {0} ...`n" -f (( $_.Exception.Message ) -split "`n" )[0])
+ }
+
+}
+
 [OpenQA.Selenium.IWebElement]$web_element = $selenium.FindElement([OpenQA.Selenium.By]::Name('language'))
 [OpenQA.Selenium.Support.UI.SelectElement]$select_element = New-Object OpenQA.Selenium.Support.UI.SelectElement ($web_element)
 
@@ -98,8 +112,6 @@ foreach ($item in $availableOptions)
   Start-Sleep -Milliseconds 10
   $index++
 }
-
-
 
 try {
   $selenium.Quit()
