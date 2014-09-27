@@ -19,7 +19,7 @@
 #THE SOFTWARE.
 
 param(
-  [switch]$browser
+  [string]$browser
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -34,13 +34,13 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
+
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
   "Selenium.WebDriverBackedSelenium.dll",
   'nunit.core.dll',
   'nunit.framework.dll'
-
 )
 
 $env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
@@ -50,16 +50,9 @@ pushd $shared_assemblies_path
 $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
-<# 
-pushd C:\tools 
-mklink /D phantomjs C:\phantomjs-1.9.7-windows
-symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
-#>
-
 $verificationErrors = New-Object System.Text.StringBuilder
 $baseURL = "http://www.wikipedia.org"
-$phantomjs_executable_folder = "C:\tools\phantomjs"
-if ($PSBoundParameters["browser"]) {
+if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
     $connection.Connect("127.0.0.1",4444)
@@ -69,61 +62,58 @@ if ($PSBoundParameters["browser"]) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-<#
-pushd 'HKLM:'
-cd '/SOFTWARE/Microsoft/Internet Explorer'
-$version = get-itemproperty -name 'Version' -path 'HKLM:/SOFTWARE/Microsoft/Internet Explorer'
-popd
-write-output  $version.Version
-# 8.0.6001.18702 
-# through 
-# 10.???
-# are OK
-# IE 11 - need do find version in some other registry key - the above returns
-# 9.11.9600.17280
-# The svcVersion = 11.0.12 
-# IE 11  fails to execute javascript code in the browser.
-#>
-  # The script works fine with Chrome or Firefox 31, but not IE 11.
-  # the exception specifically when attempting to mess with cookies
-  # Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
-  # is known since Nov 2013 
-  # https://code.google.com/p/selenium/issues/detail?id=6511  
-  # The bad news is that cookie manipulation is broken. Badly. If you attempt to set or retrieve cookies, there's a chance that you'll end up with the "Unable to get browser" error encountered before. At the moment, there is no workaround for that. Matt, looking at the log you posted earlier, it looks like you were doing some cookie manipulation before you got into the bad state."
-  # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
-  try { 
-    $capability.setCapability([OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer]::ENSURING_CLEAN_SESSION, $true)  
-  } catch [Exception] {
+  Write-Host "Running on ${browser}"
+  if ($browser -match 'firefox') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  }
+  elseif ($browser -match 'chrome') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  }
+  elseif ($browser -match 'ie') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+  }
+  elseif ($browser -match 'safari') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
+  }
+  else {
+    throw ( 'Unknown browser choice: ' + $browser )
+  }
+  $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
+  try {
+    # TODO:
     # OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer possibly not available for C# port
-  } 
+    $capability.setCapability([OpenQA.Selenium.Remote.CapabilityType.ForSeleniumServer]::ENSURING_CLEAN_SESSION,$true)
+  } catch [exception]{
+  }
 
-  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
- try {
-  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
-}  catch [Exception]{
-throw
-}
-<#
-New-Object : Exception calling ".ctor" with "2" argument(s): "Error forwarding
-the new session Empty pool of VM for setup Capabilities 
-[{platform=ANY,javascriptEnabled=true, browserName=chrome, version=}]"
-#>
+  try {
+    $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  } catch [exception]{
+    throw
+  }
 } else {
+  $phantomjs_executable_folder = 'C:\tools\phantomjs'
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
-  $selenium.Capabilities.SetCapability("ssl-protocol","any")
-  $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
-  $selenium.Capabilities.SetCapability("takesScreenshot",$true)
-  $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $selenium.Capabilities.setCapability('ssl-protocol','any')
+  $selenium.Capabilities.setCapability('ignore-ssl-errors',$true)
+  $selenium.Capabilities.setCapability('takesScreenshot',$true)
+  $selenium.Capabilities.setCapability('userAgent','Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34')
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
-  $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
+  $options.AddAdditionalCapability('phantomjs.executable.path',$phantomjs_executable_folder)
 }
-
-
 
 $selenium.Navigate().GoToUrl($baseURL)
-$selenium.Navigate().Refresh()
+try { 
+  ([OpenQA.Selenium.Remote.ICommandExecutor]$selenium).Execute([OpenQA.Selenium.Remote.DriverCommand]::DeleteAllCookies)
+} catch [Exception]{
+<#
+Cannot convert value of type
+"OpenQA.Selenium.Remote.RemoteWebDriver" to type
+"OpenQA.Selenium.Remote.ICommandExecutor".
+#>
+}
 
+$selenium.Navigate().Refresh()
 
 <#
 
@@ -152,17 +142,9 @@ try {
   // TODO Auto-generated catch block
   e.printStackTrace();
 #>
+
+
 <#
-
-DesiredCapabilities caps = DesiredCapabilities.internetExplorer(); 
-caps.setCapability(CapabilityType.ForSeleniumServer.ENSURING_CLEAN_SESSION, true); 
-WebDriver driver = new InternetExplorerDriver(caps);
-
-Once initialized, you can use:
-
-driver.manage().deleteAllCookies()
-
-
 # note this is a very very old post:
 # http://stackoverflow.com/questions/595228/how-can-i-delete-all-cookies-with-javascript
 # http://stackoverflow.com/questions/2144386/javascript-delete-cookie
@@ -196,13 +178,16 @@ function eraseCookie(name) {
     createCookie(name,"",-1);
 }
 
-// finally invoke 
-
 var cookies = document.cookie.split(";");
 for (var i = 0; i < cookies.length; i++) {
   eraseCookie(cookies[i].split("=")[0]);
 }
 "@
+
+# executeScript works fine with Chrome or Firefox 31, ie 10, but not IE 11.
+# Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
+# https://code.google.com/p/selenium/issues/detail?id=6511  
+
 [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeScript($script);
 
 try {
@@ -211,14 +196,3 @@ try {
   # Ignore errors if unable to close the browser
 }
 
-
-<#
-# The following registry key describes the state of the 'Delete Browsing history on exit' checkbox 
-
-pushd 'HKCU:'
-cd '/Software/Microsoft/Internet Explorer/Privacy'
-get-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy'
-set-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy' -value '1'
-popd
-
-#>
