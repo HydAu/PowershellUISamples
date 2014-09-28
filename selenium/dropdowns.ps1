@@ -83,10 +83,10 @@ $selenium.Navigate().Refresh()
 [OpenQA.Selenium.IWebElement]$web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchLanguage'))
 [System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$webList = $web_element.findElements([OpenQA.Selenium.By]::TagName('option')) 
 $webList  | foreach-object {
-  write-output $_.Text
+ write-output $_.Text
  $value =  $_.GetAttribute('value')
  $css_selector = ('option[value="{0}"]' -f $value)
-   write-output $css_selector
+ write-output $css_selector
  try {
    [void]$web_element.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
  } catch [Exception] {
