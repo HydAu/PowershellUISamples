@@ -41,6 +41,7 @@ $shared_assemblies = @(
   'nunit.framework.dll'
 )
 
+$max_count = 5
 $env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
@@ -65,7 +66,7 @@ if ($PSBoundParameters["browser"]) {
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
-  $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
+  [void]($selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder))
   $selenium.Capabilities.SetCapability("ssl-protocol","any")
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
   $selenium.Capabilities.SetCapability("takesScreenshot",$true)
@@ -77,31 +78,62 @@ if ($PSBoundParameters["browser"]) {
 $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
 
-[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
-
-[OpenQA.Selenium.IWebElement]$web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchLanguage'))
-[System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$web_element_list = $web_element.findElements([OpenQA.Selenium.By]::TagName('option')) 
-
-$web_element_enumerator =  $web_element_list.GetEnumerator()
-
-
-while ($web_element_enumerator.MoveNext()) { 
- $current  = $web_element_enumerator.Current
- [string]$xPath = ('/html/body//select[@id="searchLanguage"]/option[@value="{0}"]' -f $current.GetAttribute('value'))
- $result = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xPath))
- [NUnit.Framework.Assert]::AreEqual($result.Text,$current.Text)
-
+[void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchLanguage'))
+} catch [exception]{
 }
-$web_element_list  | foreach-object {
- write-output $_.Text
- $value =  $_.GetAttribute('value')
- $css_selector = ('option[value="{0}"]' -f $value)
- write-output $css_selector
- try {
-   [void]$web_element.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
- } catch [Exception] {
- Write-Output ("Exception : {0} ...`n" -f (( $_.Exception.Message ) -split "`n" )[0])
- }
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select#searchLanguage'))
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select[id=searchLanguage]'))
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select[id$=Language]'))
+  [System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$web_element_list = $web_element.findElements([OpenQA.Selenium.By]::TagName('option'))
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+
+$web_element_enumerator = $web_element_list.GetEnumerator()
+
+$cnt = 0
+while ($web_element_enumerator.MoveNext()) {
+  if ($cnt++ -gt $max_count) {
+    continue
+  }
+
+  $current = $web_element_enumerator.Current
+  [string]$xPath = ('/html/body//select[@id="searchLanguage"]/option[@value="{0}"]' -f $current.GetAttribute('value'))
+  $result = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xPath))
+  [NUnit.Framework.Assert]::AreEqual($result.Text,$current.Text)
+  Write-Output $current.Text
+}
+$cnt = 0
+$web_element_list | ForEach-Object {
+  if ($cnt++ -gt $max_count) {
+    return
+  }
+
+  Write-Output $_.Text
+  $value = $_.GetAttribute('value')
+  $css_selector = ('option[value="{0}"]' -f $value)
+  Write-Output $css_selector
+  try {
+    [void]$web_element.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  }
 
 }
 
@@ -113,6 +145,10 @@ $index = 0
 
 foreach ($item in $availableOptions)
 {
+  if ($index -gt $max_count) {
+    continue
+  }
+
   $select_element.SelectByValue($item.GetAttribute('value'))
   $result = $select_element.SelectedOption
   [NUnit.Framework.Assert]::AreEqual($result.Text,$item.Text)
