@@ -39,7 +39,6 @@ $shared_assemblies = @(
   'WebDriver.Support.dll',
   'Selenium.WebDriverBackedSelenium.dll',
   'nunit.framework.dll'
-
 )
 
 $env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
@@ -81,8 +80,19 @@ $selenium.Navigate().Refresh()
 [void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
 
 [OpenQA.Selenium.IWebElement]$web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchLanguage'))
-[System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$webList = $web_element.findElements([OpenQA.Selenium.By]::TagName('option')) 
-$webList  | foreach-object {
+[System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$web_element_list = $web_element.findElements([OpenQA.Selenium.By]::TagName('option')) 
+
+$web_element_enumerator =  $web_element_list.GetEnumerator()
+
+
+while ($web_element_enumerator.MoveNext()) { 
+ $current  = $web_element_enumerator.Current
+ [string]$xPath = ('/html/body//select[@id="searchLanguage"]/option[@value="{0}"]' -f $current.GetAttribute('value'))
+ $result = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xPath))
+ [NUnit.Framework.Assert]::AreEqual($result.Text,$current.Text)
+
+}
+$web_element_list  | foreach-object {
  write-output $_.Text
  $value =  $_.GetAttribute('value')
  $css_selector = ('option[value="{0}"]' -f $value)
