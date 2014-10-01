@@ -48,7 +48,7 @@ if ($browser -ne $null -and $browser -ne '') {
   elseif ($browser -match 'chrome') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
   }
-  elseif ($browser -match 'ie' ) {
+  elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
   }
   elseif ($browser -match 'safari') {
@@ -75,7 +75,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 $baseURL = "http://www.carnival.com"
 
-            $selenium.Navigate().GoToUrl($baseURL + "/")
+$selenium.Navigate().GoToUrl($baseURL + "/")
+$selenium.Manage().Window.Maximize()
 <#
             $selenium.FindElement([OpenQA.Selenium.By]::Id("ccl_header_expand-login-link")).Click()
             $selenium.FindElement([OpenQA.Selenium.By]::Id("username")).Clear()
@@ -86,96 +87,89 @@ $baseURL = "http://www.carnival.com"
             $selenium.FindElement([OpenQA.Selenium.By]::Id("login")).Click()
 
 #>
-#            $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("div.cruise-search-widget >div > div.container >ul >li >a[data-param=dest] > span")).Click()
-            
-  $value ='dest'
-  $css_selector = ('a[data-param={0}]' -f $value)
-  Write-Output $css_selector
-  try {
-    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-    Write-Output $_.Exception.Message
-  }
 
-  try {
-    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-  }
-    $element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-[NUnit.Framework.Assert]::IsTrue(($element.Text -match 'Select a destination'))
-$element.Click()
-start-sleep -seconds 3
+$value1 = 'dest'
+$css_selector1 = ('a[data-param={0}]' -f $value1)
+Write-Output $css_selector1
+try {
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 
-# TODO carribbean
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  Write-Output $_.Exception.Message
+}
 
-  $value ='C'
-  $css_selector = ('a[data-id={0}]' -f $value)
-  Write-Output $css_selector
-  try {
-    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-    Write-Output $_.Exception.Message
-  }
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Select a destination'))
 
-  try {
-    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-  }
-    $element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+Write-Output ('Clicking on ' + $element1.Text)
+$element1.Click()
+$value2 = 'C'
+$css_selector2 = ('a[data-id={0}]' -f $value2)
+Write-Output $css_selector2
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait2 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait2.PollingInterval = 100
 
-    [NUnit.Framework.Assert]::IsTrue(($element.Text -match 'Caribbean'))
-$element.Click()
+  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait2.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
 
-start-sleep -seconds 3
-<#
-Exception calling "Click" with "0" argument(s): "unknown error: Element is not clickable at point (250, 525). Other element would receive the click: <div
-#>
-  $value ='dat'
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  Write-Output $_.Exception.Message
+}
+$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+Write-Output ('Clicking on ' + $element2.Text)
+[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+$actions2.Click().Build().Perform()
+Start-Sleep 3
 
-  try {
-    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-  }
-    $element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  [NUnit.Framework.Assert]::IsTrue(($element.Text -match 'Select a date'))
-  $element.Click()
-start-sleep -seconds 3
+$value3 = 'dat'
+$css_selector3 = ('a[data-param={0}]' -f $value3)
+Write-Output $css_selector3
+try {
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector3))
 
-  $value ='numGuests'
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  Write-Output $_.Exception.Message
+}
 
-  try {
-    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-  }
-    $element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  [NUnit.Framework.Assert]::IsTrue(($element.Text -match 'How many travelers'))
-  $element.Click()
-start-sleep -seconds 3
+$element3 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector3))
+[NUnit.Framework.Assert]::IsTrue(($element3.Text -match 'Select a date'))
 
-# perform ??
-<#
-            $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("a[data-param=dest]")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::LinkText("Caribbean")).Click()
-#            $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("div.cruise-search-widget >div > div.container >ul >li >a[data-param=dat] > span")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("a[data-param=dat]")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::LinkText("February 2015")).Click()
-#            $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("div.cruise-search-widget >div > div.container >ul >li >a[data-param=numGuests] > span")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("a[data-param=numGuests]")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::LinkText("2 travelers")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::LinkText("Search")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::LinkText("Ocean View")).Click()
-            $selenium.FindElement([OpenQA.Selenium.By]::Id("cboxClose")).Click()
-#            $selenium.FindElement([OpenQA.Selenium.By]::Id("ccl_header_expand-login-link")).Click()
-#>
+Write-Output ('Clicking on ' + $element3.Text)
+$element3.Click()
+Start-Sleep 1
+
+$value4 =  '"022015"'
+$css_selector4 = ('a[data-id={0}]' -f $value4)
+Write-Output $css_selector4
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait4 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait4.PollingInterval = 100
+
+  [OpenQA.Selenium.Remote.RemoteWebElement]$element4 = $wait4.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector4)))
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector4))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  Write-Output $_.Exception.Message
+}
+$element4 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector4))
+Write-Output ('Clicking on ' + $element4.Text)
+[OpenQA.Selenium.Interactions.Actions]$actions4 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions4.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
+$actions4.Click().Build().Perform()
+Start-Sleep 3
+
+
+
+
 # Cleanup
 try {
-$selenium.Quit()
-} catch [Exception] {
-# Ignore errors if unable to close the browser
+  $selenium.Quit()
+} catch [exception]{
+  # Ignore errors if unable to close the browser
 }
