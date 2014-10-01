@@ -5,19 +5,19 @@ param(
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
-        $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
-        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
-    }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot;
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+  }
 }
 
 # http://www.codeproject.com/Tips/816113/Console-Monitor
@@ -106,69 +106,56 @@ public class WindowHelper
             }
 
         }
-        //  bmp.Save(_imagePath, ImageFormat.Jpeg);
-        string str = _dstImagePath;
-        bmp.Save(str, ImageFormat.Jpeg);
+        bmp.Save(_dstImagePath, ImageFormat.Jpeg);
     }
     public WindowHelper()
     {
     }
 
-
     private Bitmap createFromFile()
     {
         Bitmap bmp;
+        try {
         bmp = new Bitmap(_imagePath);
+        } catch (Exception e){
+           throw e;
+        }
+        if (bmp == null ){
+           throw new Exception("failed to load image");
+        }
         return bmp;
     }
 }
 
-
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
 
- $guid = [guid]::NewGuid()
-   $image_name = ($guid.ToString())
-   $image_name = 'bd6afdc3-af3e-4e4d-907b-5f6d2e182539'
-   $image_name = 'd2f5aaf9-066d-4b50-b9ae-0c9f45d2a97f'
-[string]$image_path = ('{0}\{1}.{2}' -f (Get-ScriptDirectory),  $image_name , '.png'  )
-[string]$src_image_path = ('{0}\{1}.{2}' -f (Get-ScriptDirectory),  $image_name , '.jpg'  )
-[string]$dest_image_path = ('{0}\{1}-new.{2}' -f (Get-ScriptDirectory),  $image_name , '.jpg'  )
-# $screenshot.SaveAsFile($image_path), [System.Drawing.Imaging.ImageFormat]::Png)
-   $iteration = '123' 
-   $browser = 'chrome'
+$guid = [guid]::NewGuid()
+$image_name = ($guid.ToString())
+$image_name = '4f654c89-5efd-43ef-9173-0cfe125ca9az'
+
+[string]$src_image_path = ('{0}\{1}.{2}' -f (Get-ScriptDirectory),$image_name,'jpg')
+[string]$dest_image_path = ('{0}\{1}-new.{2}' -f (Get-ScriptDirectory),$image_name,'jpg')
+$iteration = '123'
+$browser = 'chrome'
 
 $owner = New-Object WindowHelper
-  $owner.count = $iteration
-  $owner.Browser = $browser
-  $owner.ImagePath = $src_image_path
-  $owner.TimeStamp = Get-Date
-  $owner.DstImagePath  = $dest_image_path
-  $owner| get-member 
-  try {  
-  $owner.StampScreenshot()
- } catch [Exception]  {
-   write-output $_.Exception.Message
- }
-
-<#
-$owner = New-Object WindowHelper
-  $owner.count = $iteration
-  $owner.Browser = $browser
-  $owner.ImagePath = $image_path
+$owner.count = $iteration
+$owner.Browser = $browser
+$owner.ImagePath = $src_image_path
 $owner.TimeStamp = Get-Date
-
-  $owner| get-member 
-  try {  
-  $owner.StampScreenshot()
- } catch [Exception]  {
-   write-output $_.Exception.Message
- }
+$owner.DstImagePath = $dest_image_path
+<#
+try {
+  $owner.Screenshot()
+} catch [exception]{
+  Write-Output $_.Exception.Message
+}
 #>
 
-# Cleanup
 try {
-  $driver.Quit()
-} catch [Exception] {
-  # Ignore errors if unable to close the browser
+  $owner.StampScreenshot()
+} catch [exception]{
+  Write-Output $_.Exception.Message
 }
+
