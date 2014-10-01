@@ -27,14 +27,15 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
-public class WindowHelper
+public class WindowHelper : IDisposable
 {
-    private Bitmap bmp;
+    private Bitmap _bmp;
+    private Graphics _graphics;
     private int _count = 0;
+    private Font _font;
 
     private string _timeStamp;
     private string _browser;
-    private string _imagePath;
     private string _srcImagePath;
 
     private string _dstImagePath;
@@ -50,13 +51,6 @@ public class WindowHelper
         get { return _timeStamp; }
         set { _timeStamp = value; }
     }
-
-    public string ImagePath
-    {
-        get { return _imagePath; }
-        set { _imagePath = value; }
-    }
-
 
     public string SrcImagePath
     {
@@ -76,13 +70,11 @@ public class WindowHelper
     }
     public void Screenshot()
     {
-        bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
-        Graphics gr = Graphics.FromImage(bmp);
-        gr.CopyFromScreen(0, 0, 0, 0, bmp.Size);
+        _bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        _graphics = Graphics.FromImage(_bmp);
+        _graphics.CopyFromScreen(0, 0, 0, 0, _bmp.Size);
         StampScreenshot();
-
-        string str = _dstImagePath;
-        bmp.Save(str, ImageFormat.Jpeg);        
+        _bmp.Save(_dstImagePath, ImageFormat.Jpeg);        
     }
 
     public void StampScreenshot()
@@ -92,38 +84,43 @@ public class WindowHelper
 
         PointF firstLocation = new PointF(10f, 10f);
         PointF secondLocation = new PointF(10f, 55f);
-        if (bmp == null)
+        if (_bmp == null)
         {
-            bmp = createFromFile();
+            createFromFile();
         }
-
-        using (Graphics graphics = Graphics.FromImage(bmp))
-        {
-            using (Font arialFont = new Font("Arial", 40))
-            {
-                graphics.DrawString(firstText, arialFont, Brushes.White, firstLocation);
-                graphics.DrawString(secondText, arialFont, Brushes.Aqua, secondLocation);
-            }
-
-        }
-        bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+        _graphics = Graphics.FromImage(_bmp);
+        _font = new Font("Arial", 40);
+        _graphics.DrawString(firstText, _font, Brushes.White, firstLocation);
+        _graphics.DrawString(secondText, _font, Brushes.Aqua, secondLocation);
+        _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
     }
     public WindowHelper()
     {
     }
 
-    private Bitmap createFromFile()
+~WindowHelper()
     {
-        Bitmap bmp;
+        Console.WriteLine("destructor");
+    }
+   
+    public void Dispose()
+    {
+        Console.WriteLine("implementation of IDisposable.Dispose()");
+        _font.Dispose();
+        _bmp.Dispose();
+        _graphics.Dispose();
+
+    }
+    private void createFromFile()
+    {
         try {
-        bmp = new Bitmap(_imagePath);
+        _bmp = new Bitmap(_srcImagePath);
         } catch (Exception e){
            throw e;
         }
-        if (bmp == null ){
+        if (_bmp == null ){
            throw new Exception("failed to load image");
         }
-        return bmp;
     }
 }
 
@@ -142,7 +139,7 @@ $browser = 'chrome'
 $owner = New-Object WindowHelper
 $owner.count = $iteration
 $owner.Browser = $browser
-$owner.ImagePath = $src_image_path
+$owner.SrcImagePath = $src_image_path
 $owner.TimeStamp = Get-Date
 $owner.DstImagePath = $dest_image_path
 <#
