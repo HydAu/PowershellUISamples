@@ -1,5 +1,8 @@
 param(
-  [string]$image_path
+  [string]$image_path,
+  [switch]$take,
+  [switch]$stamp
+
 )
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -27,7 +30,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
-public class WindowHelper : IDisposable
+public class WindowHelper
 {
     private Bitmap _bmp;
     private Graphics _graphics;
@@ -68,13 +71,20 @@ public class WindowHelper : IDisposable
         get { return _count; }
         set { _count = value; }
     }
-    public void Screenshot()
+    public void Screenshot(bool Stamp = false)
     {
         _bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
         _graphics = Graphics.FromImage(_bmp);
         _graphics.CopyFromScreen(0, 0, 0, 0, _bmp.Size);
-        StampScreenshot();
-        _bmp.Save(_dstImagePath, ImageFormat.Jpeg);        
+        if (Stamp)
+        {
+            StampScreenshot();
+        }
+        else
+        {
+            _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+        }
+        Dispose();
     }
 
     public void StampScreenshot()
@@ -93,33 +103,34 @@ public class WindowHelper : IDisposable
         _graphics.DrawString(firstText, _font, Brushes.White, firstLocation);
         _graphics.DrawString(secondText, _font, Brushes.Aqua, secondLocation);
         _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+        Dispose();
+
     }
     public WindowHelper()
     {
     }
 
-~WindowHelper()
-    {
-        Console.WriteLine("destructor");
-    }
-   
     public void Dispose()
     {
-        Console.WriteLine("implementation of IDisposable.Dispose()");
         _font.Dispose();
         _bmp.Dispose();
         _graphics.Dispose();
 
     }
+
     private void createFromFile()
     {
-        try {
-        _bmp = new Bitmap(_srcImagePath);
-        } catch (Exception e){
-           throw e;
+        try
+        {
+            _bmp = new Bitmap(_srcImagePath);
         }
-        if (_bmp == null ){
-           throw new Exception("failed to load image");
+        catch (Exception e)
+        {
+            throw e;
+        }
+        if (_bmp == null)
+        {
+            throw new Exception("failed to load image");
         }
     }
 }
@@ -129,7 +140,10 @@ public class WindowHelper : IDisposable
 
 $guid = [guid]::NewGuid()
 $image_name = ($guid.ToString())
+
+<# 
 $image_name = '4f654c89-5efd-43ef-9173-0cfe125ca9az'
+#>
 
 [string]$src_image_path = ('{0}\{1}.{2}' -f (Get-ScriptDirectory),$image_name,'jpg')
 [string]$dest_image_path = ('{0}\{1}-new.{2}' -f (Get-ScriptDirectory),$image_name,'jpg')
@@ -142,17 +156,31 @@ $owner.Browser = $browser
 $owner.SrcImagePath = $src_image_path
 $owner.TimeStamp = Get-Date
 $owner.DstImagePath = $dest_image_path
-<#
-try {
-  $owner.Screenshot()
-} catch [exception]{
-  Write-Output $_.Exception.Message
-}
-#>
-
-try {
-  $owner.StampScreenshot()
-} catch [exception]{
-  Write-Output $_.Exception.Message
+[boolean]$stamp = $false
+if ($PSBoundParameters['stamp']) {
+  $stamp = $true
+} else {
+  $stamp = $false
 }
 
+if ($PSBoundParameters['take']) {
+
+  try {
+    $owner.Screenshot([boolean]$stamp)
+  } catch [exception]{
+    # TODO: 
+    # . .\from_file.ps1 -take
+    # Ignoring exception:  
+    # Object reference not set to an instance of an object.
+    # Write-Output ("Ignoring exception:`n{0}" -f $_.Exception.Message)
+  }
+}
+else {
+
+  try {
+    $owner.StampScreenshot()
+  } catch [exception]{
+    # Write-Output $_.Exception.Message
+  }
+
+}
