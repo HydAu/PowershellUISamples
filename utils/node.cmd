@@ -12,13 +12,14 @@ set HUB_HTTP_PORT=4444
 
 set HTTPS_PORT=-1
 set APP_VERSION=2.43.1
-set JAVA_VERSION=1.7.0_55
+set JAVA_VERSION=1.6.0_45
 set JAVA_HOME=c:\progra~1\java\jdk%JAVA_VERSION%
+set JAVA_HOME=c:\java\jdk%JAVA_VERSION%
 rem Need to keep 1.7 and 1.6 both installed
 set GROOVY_HOME=c:\java\groovy-2.3.2
 set HUB_URL=http://127.0.0.1:4444/grid/register
 REM cannot use paths
-set NODE_CONFIG=NODE_config_local.json
+set NODE_CONFIG=NODE.json
 PATH=%JAVA_HOME%\bin;%PATH%;%GROOVY_HOME%\bin
 
 REM Browsers are installed in WOW6432
@@ -46,7 +47,7 @@ java %LAUNCHER_OPTS% ^
 -Dwebdriver.ie.driver=IEDriverServer.exe ^
 -Dwebdriver.chrome.driver=chromedriver.exe ^
 -nodeConfig %NODE_CONFIG%  ^
--browserTimeout 120 -timeout 120 ^
+-browserTimeout 12000 -timeout 12000 ^
 
 REM Blank line
 goto :EOF
