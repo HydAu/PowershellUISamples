@@ -1,0 +1,3427 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<script xmlns="http://www.keynote.com/namespaces/txnp/script" type="TransactionPerspective" version="12.0.15.296" guid="E7256C6D-27F5-4178-B557-B699FA9B34E6" recorder="12.1.172.439" sav="253">
+  <name><![CDATA[Cruise Deals]]></name>
+  <description><![CDATA[]]></description>
+  <settings>
+    <timeout>300</timeout>
+    <ignore_frame_errors>1</ignore_frame_errors>
+    <http_decoding_option>0</http_decoding_option>
+    <err_if_no_nw_activity>0</err_if_no_nw_activity>
+    <non_dom>0</non_dom>
+    <dialog auto-close="1"/>
+    <remap>
+      <err start="-99101" end="-99101" new="70020"/>
+    </remap>
+    <iemode>9999</iemode>
+    <usermark mark=""/>
+  </settings>
+  <actions>
+    <action type="Browser">
+      <name><![CDATA[Home Page]]></name>
+      <description><![CDATA[Direct navigation to http://www.carnival.com/]]></description>
+      <step type="Navigate">
+        <context window="0" frame="0"/>
+        <parameter name="URL">
+          <variable type="Static"><![CDATA[http://www.carnival.com]]></variable>
+        </parameter>
+      </step>
+      <completion>
+        <window index="0" type="ReadyState" count="1">
+          <event type="Timer" timeout="30"/>
+        </window>
+      </completion>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Login]]></name>
+      <description><![CDATA[LogOn]]></description>
+      <step type="Click" DelayMSec="100" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">26</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[/BookedGuest/guestmanagement/mycarnival/logon?returnUrl=http%3A%2F%2Fwww2.uatcarnival.com%2F]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Log In]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[/BookedGuest/guestmanagement/mycarnival/logon?returnUrl=http%3A%2F%2Fwww2.uatcarnival.com%2F]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Log In]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl_header_expand-login-link]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl-refresh-header]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl-refresh-header]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl_homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <completion>
+        <window index="0" type="ReadyState" count="1">
+          <event type="Timer" timeout="3"/>
+        </window>
+      </completion>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Return Home]]></name>
+      <description><![CDATA[LogOn]]></description>
+      <step type="Click" DelayMSec="100" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="INPUT">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[UserNameOrLoyaltyNum]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[name]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[UserNameOrLoyaltyNum]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[text]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[text]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[text]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[lnUserName]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[action]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[/BookedGuest/guestmanagement/mycarnival/logon?returnUrl=http%3A%2F%2Fwww2.uatcarnival.com%2F]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">31</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[logon]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Text" DelayMSec="100">
+        <context window="0" frame="0"/>
+        <parameter name="Text">
+          <variable type="Static"><![CDATA[xxxxx]]></variable>
+        </parameter>
+        <element type="Signature">
+          <tag type="INPUT">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[UserNameOrLoyaltyNum]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[name]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[UserNameOrLoyaltyNum]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[text]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[text]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[text]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[value]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[xxxxx]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[lnUserName]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[action]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[/BookedGuest/guestmanagement/mycarnival/logon?returnUrl=http%3A%2F%2Fwww2.uatcarnival.com%2F]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">31</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[logon]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Text" DelayMSec="100" Password="1">
+        <context window="0" frame="0"/>
+        <parameter name="Text">
+          <variable type="Static"><![CDATA[xxxxx]]></variable>
+        </parameter>
+        <element type="Signature">
+          <tag type="INPUT">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Password]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[name]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Password]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[password]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[password]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[type]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[password]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[value]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[xxxxx]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[action]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[/BookedGuest/guestmanagement/mycarnival/logon?returnUrl=http%3A%2F%2Fwww2.uatcarnival.com%2F]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">31</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[logon]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+        <enter/>
+      </step>
+      <completion>
+        <window index="0" type="ReadyState" count="1">
+          <event type="Timer" timeout="10"/>
+        </window>
+      </completion>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Search Results]]></name>
+      <description><![CDATA[Cruise Deals, Discount Cruises, and Cruise Vacations ??? Carnival Cruise Lines]]></description>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="3000"/>
+        </window>
+      </completion>
+      <step type="Click" DelayMSec="1500" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="SPAN">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+          </tag>
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">6</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select a destination ]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">3</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select a destination ]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl-refresh-homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">2</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl_homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Click" DelayMSec="1500" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">3</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Caribbean]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">3</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Caribbean]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[cboxLoadedContent]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">6</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[cboxContent]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[cboxWrapper]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">107</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[colorbox]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Click" DelayMSec="1500" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="SPAN">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+          </tag>
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">7</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select a date ]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">4</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select a date ]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl-refresh-homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">2</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl_homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Script" DelayMSec="1500">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">function knFromToOptions() {
+	var optionElements = document.getElementsByClassName('option');
+	for (var elementIdx = 0; elementIdx &lt; optionElements.length; elementIdx++) {
+		if (optionElements[elementIdx].getAttribute('data-alias') == "datFrom datTo") {
+			return optionElements[elementIdx];
+		}
+	}
+}
+
+function knGetDateString() {
+	var theDate = new Date();
+
+	// Add one year to current year
+	var theYear = (theDate.getFullYear() + 1).toString();
+	// Date.getMonth() returns 0-11; this converts the result to 1-12.
+	var theMonth = (theDate.getMonth() + 1).toString();
+	if (theMonth.length &lt; 2) {
+		theMonth = "0" + theMonth;
+	}
+
+	return theMonth + theYear; 
+}
+
+function knFindOptionForDate(theDateString) {
+	var theOptions = knFromToOptions().getElementsByTagName('a');
+	for (var optionIdx = 0; optionIdx &lt; theOptions.length; optionIdx++) {
+		if (theOptions[optionIdx].getAttribute('data-id') == theDateString) {
+			return theOptions[optionIdx];
+		}
+	}
+	return null;
+}
+
+var knDateOption = knFindOptionForDate( knGetDateString() );
+if (knDateOption) { knDateOption.click(); }
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <step type="Click" DelayMSec="1500" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="SPAN">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+          </tag>
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[How many travelers ]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">5</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[How many travelers ]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl-refresh-homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">2</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl_homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Click" DelayMSec="1500" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[2 travelers]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">1</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/#]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[2 travelers]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[cboxLoadedContent]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">6</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[cboxContent]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[cboxWrapper]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">113</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[colorbox]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <step type="Click" DelayMSec="100" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">11</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/bookingEngine/cruise-search/]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Search]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www2.uatcarnival.com/bookingEngine/cruise-search/]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Search]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl-refresh-homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="FORM">
+            <parameter name="Index">
+              <variable type="Static">2</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[method]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[post]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[form2]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[ccl_homepage]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="BODY">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[MainBody]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[View Cruise Details]]></name>
+      <description><![CDATA[Click on the first 'Details' link on the page]]></description>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="8000"/>
+        </window>
+      </completion>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">var check, cruiseBtns;
+var cruises = document.getElementsByClassName("search-result");
+for (i=0;i&lt;cruises.length;i++) {
+                check = cruises[i].innerHTML;
+                if (check.indexOf("Carnival Destiny") == -1) {
+                                cruiseBtns = cruises[i].getElementsByClassName("btn");
+                                if(cruiseBtns[0].innerHTML == "Learn More") {
+                                                cruiseBtns[0].click();
+                                                break;
+                                }
+                }
+}
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <validation/>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Select Stateroom Class]]></name>
+      <description><![CDATA[Click on the first 'Book Now' link on the page]]></description>
+      <completion>
+        <window index="0" type="ReadyState" count="1">
+          <event type="Timer" timeout="10"/>
+        </window>
+      </completion>
+      <validation>
+        <validate type="RequiredText" RegEx="0">
+          <parameter name="Text">
+            <variable type="Static"><![CDATA[Ocean View]]></variable>
+          </parameter>
+        </validate>
+      </validation>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">var check, cruiseBtns;
+var cruises = document.getElementsByClassName("sailings");
+for (i=0;i&lt;cruises.length;i++) {
+  check = cruises[i].innerHTML;
+  cruiseBtns = cruises[i].getElementsByClassName("btn");
+  if(cruiseBtns[0].innerHTML == "Book Now") {
+     cruiseBtns[0].click();
+     break;
+  }
+}
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Confirm Travelers]]></name>
+      <description><![CDATA[Click on 'Select' under 'Ocean View']]></description>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="5000"/>
+        </window>
+      </completion>
+      <step type="Click" DelayMSec="100" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">1</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www.carnival.com/BookingEngine/StateRoom/stateroom2?embkCode=MIA&itinCode=BA6&durDays=2&shipCode=GL&subRegionCode=BH&sailDate=11012013&sailingID=63460&numGuests=2&showDbl=False&isOver55=N&isPastGuest=N&stateCode=&isMilitary=N&pCompare=PFA#]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">1</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www.carnival.com/BookingEngine/StateRoom/stateroom2?embkCode=MIA&itinCode=BA6&durDays=2&shipCode=GL&subRegionCode=BH&sailDate=11012013&sailingID=63460&numGuests=2&showDbl=False&isOver55=N&isPastGuest=N&stateCode=&isMilitary=N&pCompare=PFA#]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">1</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[uk-air]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[nav-6]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">17</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[accordion-stateroom]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[BookingProcessContainer]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[main-content]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">8</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[container]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">3</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[main]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <validation/>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Select Rate]]></name>
+      <description><![CDATA[Do not make any changes to default of 2 travelers, click on 'Go']]></description>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="3000"/>
+        </window>
+      </completion>
+      <validation/>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">function autoClickPowerUser()
+{
+    if ($('div [data-mcbFlowOption="3"]').is(':visible'))
+    {
+            $('div [data-mcbFlowOption="3"]').click();
+            $('#nav-7 .continue-btn').click();
+    }
+    else
+        setTimeout(autoClickPowerUser, 1000);
+}
+
+setTimeout(autoClickPowerUser, 1000);
+
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">//$(".step.flowOptions").show();
+//$('div [data-mcbFlowOption="3"]').click();
+$('#nav-7 .continue-btn').click();
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Select Stateroom]]></name>
+      <description><![CDATA[Click on 'Fun Saver' radio; Click on 'Continue']]></description>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="3000"/>
+        </window>
+      </completion>
+      <validation>
+        <validate type="ErrorText" RegEx="0">
+          <parameter name="Text">
+            <variable type="Static"><![CDATA[No rates available]]></variable>
+          </parameter>
+        </validate>
+      </validation>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <step type="Click" DelayMSec="100" MouseClick="0">
+        <context window="0" frame="0"/>
+        <element type="Signature">
+          <tag type="A">
+            <parameter name="Index">
+              <variable type="Static">1</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www.carnival.com/BookingEngine/StateRoom/stateroom2/?embkCode=MIA&itinCode=KC3&durDays=4&shipCode=EC&subRegionCode=CW&sailDate=12012014&sailingID=65044&numGuests=2&showDbl=False&isOver55=N&isPastGuest=Y&stateCode=FL&isMilitary=N&evsel=#upgradelightbox]]></variable>
+                </parameter>
+              </attribute>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[href]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[http://www.carnival.com/BookingEngine/StateRoom/stateroom2/?embkCode=MIA&itinCode=KC3&durDays=4&shipCode=EC&subRegionCode=CW&sailDate=12012014&sailingID=65044&numGuests=2&showDbl=False&isOver55=N&isPastGuest=Y&stateCode=FL&isMilitary=N&evsel=#upgradelightbox]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[innerText]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[Select]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">60</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[nav-1]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">19</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[accordion-stateroom]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[BookingProcessContainer]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">0</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[main-content]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">5</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[container]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+          <tag type="DIV">
+            <parameter name="Index">
+              <variable type="Static">4</variable>
+            </parameter>
+            <attributes>
+              <parameter name="Index">
+                <variable type="Static">0</variable>
+              </parameter>
+              <attribute>
+                <parameter name="Name">
+                  <variable type="Static"><![CDATA[id]]></variable>
+                </parameter>
+                <parameter name="Value">
+                  <variable type="Static"><![CDATA[main]]></variable>
+                </parameter>
+              </attribute>
+            </attributes>
+          </tag>
+        </element>
+      </step>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Select Location]]></name>
+      <description><![CDATA[]]></description>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">document.getElementById("stateroomTypeContinue").click();
+
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <completion>
+        <window index="0" type="Timer">
+          <event type="Timer" timeout="10"/>
+        </window>
+      </completion>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Select Deck]]></name>
+      <description><![CDATA[]]></description>
+      <step type="Script" name="DOM Script - Randomize Deck" DelayMSec="1000">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">//in &lt;div id="nav-3"
+//&lt;a href="#" class="btn-stateroom-continue" onclick="OmnitureActionYourLocation()" style="display: block; "&gt;&lt;/a&gt;
+
+var check;
+var block = document.getElementById("nav-3");
+
+var radios = block.getElementsByTagName("INPUT");
+radios[Math.floor(Math.random()*radios.length)].click();
+
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <step type="Script" name="DOM Script - Click Continue">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">//in &lt;div id="nav-3"
+//&lt;a href="#" class="btn-stateroom-continue" onclick="OmnitureActionYourLocation()" style="display: block; "&gt;&lt;/a&gt;
+
+var check;
+var block = document.getElementById("nav-3");
+var button = getElementsByClassName("btn-stateroom-continue",block,"A");
+button[0].click();
+
+function getElementsByClassName(className,node,tag) {
+	var classList = new Array();
+	var tagList = node.getElementsByTagName(tag);
+	var tagLength = tagList.length;
+	var pattern = new RegExp("(^|\\s)"+className+"(\\s|$)");
+	for (i = 0, j = 0; i &lt; tagLength; i++) {
+		if (pattern.test(tagList[i].className)) {
+			classList[j] = tagList[i];
+			j++;
+		}
+	}
+	return classList;
+}
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="3000"/>
+        </window>
+      </completion>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Select Room]]></name>
+      <description><![CDATA[]]></description>
+      <step type="Script" name="DOM Script - Randomize Room" DelayMSec="1000">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">//in &lt;div id="nav-3"
+//&lt;a href="#" class="btn-stateroom-continue" onclick="OmnitureActionYourLocation()" style="display: block; "&gt;&lt;/a&gt;
+
+var check;
+var block = document.getElementById("nav-4");
+
+var radios = block.getElementsByTagName("INPUT");
+radios[Math.floor(Math.random()*radios.length)].click();
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <step type="Script" name="DOM Script - Click Continue">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">document.getElementById("deckContinueBttn").click();
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="3000"/>
+        </window>
+      </completion>
+      <validation>
+        <validate type="ErrorText" RegEx="0">
+          <parameter name="Text">
+            <variable type="Static"><![CDATA[please retry selecting]]></variable>
+          </parameter>
+        </validate>
+      </validation>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Guest Information]]></name>
+      <description><![CDATA[Click on 'Continue']]></description>
+      <completion>
+        <window index="0" type="Network">
+          <event type="Inactivity" duration="3000"/>
+        </window>
+      </completion>
+      <validation>
+        <validate type="ErrorText" RegEx="0">
+          <parameter name="Text">
+            <variable type="Static"><![CDATA[selected cabin is no longer available]]></variable>
+          </parameter>
+        </validate>
+        <validate type="RequiredText" RegEx="0">
+          <parameter name="Text">
+            <variable type="Static"><![CDATA[First Name]]></variable>
+          </parameter>
+        </validate>
+      </validation>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">if(document.getElementById("yourRoomContinue")) {
+	document.getElementById("yourRoomContinue").click();
+} else {
+	document.getElementsByClassName("btn-stateroom-yourRoom-continue")[0].click();
+}
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+      </options>
+    </action>
+    <action type="Browser">
+      <name><![CDATA[Release Itinerary]]></name>
+      <description><![CDATA[Click on 'Exit Booking (All selections will be lost)']]></description>
+      <step type="Script">
+        <context window="0" frame="0"/>
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">if(document.getElementById("showExitMitigation")) {
+	document.getElementById("showExitMitigation").value = "";
+}
+
+document.getElementById("lnkReturnToCruiseDetails").click();
+
+</variable>
+          </parameter>
+        </code>
+      </step>
+      <completion>
+        <window index="0" type="ReadyState" count="1">
+          <event type="Timer" timeout="10"/>
+        </window>
+      </completion>
+      <post type="AdvScript">
+        <code language="JavaScript">
+          <parameter name="Code">
+            <variable type="Static">try {
+	var intServer='0';
+	var dom = System.GetHTMLDOM(0);
+	System.Log("Debug Information\r\n-=-=-=-=-=-=-=-=-\r\n");
+	intServer=dom.getElementById("hst").value;
+	System.Log("X-Media server number: " + intServer + "\r\n");
+	System.SetInfoDetails("Server Name", intServer, "", "");
+} catch(err) {
+	System.SetErrorDetails(-99100,true,'No hst value',err.message,'');
+}
+</variable>
+          </parameter>
+        </code>
+      </post>
+      <options PageResToTrans="1" logic="and">
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*match\.adsrvr\.org.*" domain=".*match\.adsrvr\.org.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ad\.yieldmanager\.com.*" domain="cm\.g\.doubleclick\.net"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*cm\.g\.doubleclick\.net.*" domain="ad\.yieldmanager\.com"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*ib\.adnxs\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*pixel\.mathtag\.com.*"/>
+        <filter name="url" whole="1" regex="1" case="0" invert="1" url=".*sync\.mathtag\.com.*"/>
+      </options>
+    </action>
+  </actions>
+  <report><![CDATA[<?xml version="1.0"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Script View</title>
+    <link rel="stylesheet" type="text/css" title="" href="../kite/Report.css"/>
+  </head>
+  <body>
+    <ul class="scriptviewer">
+      <ul>
+        <li class="script_i2">
+          <span class="script_i2_s">Cruise Deals</span>
+        </li>
+        <ul>
+          <li class="settings_i22">
+            <span class="settings_i22_s">Settings</span>
+          </li>
+          <ul>
+            <li class="">
+              <span class="_s">Timeout: 300 sec</span>
+            </li>
+            <li class="">
+              <span class="_s">IE Browser Mode: IE 9</span>
+            </li>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">1.Home Page</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Direct navigation to http://www.carnival.com/ </span>
+            </li>
+            <li class="step_i11">
+              <span class="step_i11_s">Navigate to</span>
+            </li>
+            <ul>
+              <li class="parameter">
+                <span class="parameter_s">URL: http://www.carnival.com</span>
+              </li>
+            </ul>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window_i21">
+                <span class="window_i21_s">Download Cycles: 1</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Timer - 30 sec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">2.Login</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">LogOn </span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Follow link 'Log In'</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window_i21">
+                <span class="window_i21_s">Download Cycles: 1</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Timer - 3 sec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">3.Return Home</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">LogOn </span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Click on field 'UserNameOrLoyaltyNum'</span>
+            </li>
+            <li class="step_i13">
+              <span class="step_i13_s">Enter text in field 'UserNameOrLoyaltyNum'</span>
+            </li>
+            <ul>
+              <li class="parameter">
+                <span class="parameter_s">Text: xxxxx</span>
+              </li>
+            </ul>
+            <li class="step_i13">
+              <span class="step_i13_s">Enter password</span>
+            </li>
+            <ul>
+              <li class="parameter">
+                <span class="parameter_s">Text: ********</span>
+              </li>
+            </ul>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window_i21">
+                <span class="window_i21_s">Download Cycles: 1</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Timer - 10 sec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">4.Search Results</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Cruise Deals, Discount Cruises, and Cruise Vacations ??? Carnival Cruise Lines </span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Click on SPAN ''</span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Follow link 'Caribbean'</span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Click on SPAN ''</span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Click on SPAN ''</span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Follow link '2 travelers'</span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Follow link 'Search'</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 3000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">5.View Cruise Details</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Click on the first 'Details' link on the page </span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 8000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">6.Select Stateroom Class</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Click on the first 'Book Now' link on the page </span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <ul>
+              <li class="validate_i30">
+                <span class="validate_i30_s">Type:RequiredText;  Text:Ocean View</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window_i21">
+                <span class="window_i21_s">Download Cycles: 1</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Timer - 10 sec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">7.Confirm Travelers</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Click on 'Select' under 'Ocean View' </span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Follow link 'Select'</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 5000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">8.Select Rate</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Do not make any changes to default of 2 travelers, click on 'Go' </span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 3000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">9.Select Stateroom</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Click on 'Fun Saver' radio; Click on 'Continue' </span>
+            </li>
+            <li class="step_i12">
+              <span class="step_i12_s">Follow link 'Select'</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <ul>
+              <li class="validate_i31">
+                <span class="validate_i31_s">Type:ErrorText;  Text:No rates available</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 3000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">10.Select Location</span>
+          </li>
+          <ul>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">Timer</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Timer - 10 sec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">11.Select Deck</span>
+          </li>
+          <ul>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script - Randomize Deck</span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script - Click Continue</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 3000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">12.Select Room</span>
+          </li>
+          <ul>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script - Randomize Room</span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script - Click Continue</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <ul>
+              <li class="validate_i31">
+                <span class="validate_i31_s">Type:ErrorText;  Text:please retry selecting</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 3000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">13.Guest Information</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Click on 'Continue' </span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="validation_i9">
+              <span class="validation_i9_s">Validation</span>
+            </li>
+            <ul>
+              <li class="validate_i31">
+                <span class="validate_i31_s">Type:ErrorText;  Text:selected cabin is no longer available</span>
+              </li>
+              <li class="validate_i30">
+                <span class="validate_i30_s">Type:RequiredText;  Text:First Name</span>
+              </li>
+            </ul>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window">
+                <span class="window_s">HTTP Messages</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Inactivity - 3000 msec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li class="empty-line">
+          <div/>
+        </li>
+        <ul class="actionblock">
+          <li class="action_i6">
+            <span class="action_i6_s">14.Release Itinerary</span>
+          </li>
+          <ul>
+            <li class="description">
+              <span class="description_s">Click on 'Exit Booking (All selections will be lost)' </span>
+            </li>
+            <li class="step_i15">
+              <span class="step_i15_s">DOM Script</span>
+            </li>
+            <li class="options">
+              <span class="options_s">Match Page Elements</span>
+            </li>
+            <ul>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*match\.adsrvr\.org.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ad\.yieldmanager\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*cm\.g\.doubleclick\.net.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*ib\.adnxs\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*pixel\.mathtag\.com.*</span>
+              </li>
+              <li class="filter">
+                <span class="filter_s">URL NOT Match: .*sync\.mathtag\.com.*</span>
+              </li>
+            </ul>
+            <li class="post_i14">
+              <span class="post_i14_s">Script After Action</span>
+            </li>
+            <li class="completion_i8">
+              <span class="completion_i8_s">Completion</span>
+            </li>
+            <ul>
+              <li class="window_i21">
+                <span class="window_i21_s">Download Cycles: 1</span>
+              </li>
+              <ul>
+                <li class="event">
+                  <span class="event_s">Event: Timer - 10 sec</span>
+                </li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+  </body>
+</html>
+]]></report>
+  <info OS="6.1.7601 Service Pack 1" IE="9.0.8112.16421" MSHTML="9.0.8112.16555" WinInet="9.0.8112.16555" WinHttp="6.1.7601.17514" MSXML6="6.30.7601.18431">
+    <ps e="0" d="0" s="0" el="0"/>
+  </info>
+  <hosts>
+    <host name="ad.yieldmanager.com" ipaddress="0.0.0.0">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+    <host name="cm.g.doubleclick.net" ipaddress="0.0.0.0">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+    <host name="match.adsrvr.org" ipaddress="0.0.0.0">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+    <host name="ib.adnxs.com" ipaddress="0.0.0.0">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+    <host name="pixel.mathtag.com" ipaddress="0.0.0.0" RegEx="0">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+    <host name="sync.mathtag.com" ipaddress="0.0.0.0">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+    <host>
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[]]></variable>
+      </parameter>
+    </host>
+    <host RegEx="1" name=".*beacon\.sojern\.com.*">
+      <parameter name="ipaddress">
+        <variable type="Static"><![CDATA[0.0.0.0]]></variable>
+      </parameter>
+    </host>
+  </hosts>
+  <exclude_hosts>
+    <host name=".*beacon\.sojern\.com.*" RegEx="1"/>
+  </exclude_hosts>
+</script>
