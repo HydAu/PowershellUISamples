@@ -1,7 +1,8 @@
 param(
   [string]$target_host = '',
-  [switch]$debug,
-  [switch]$test
+  [switch]$test,
+  [switch]$append,
+  [switch]$debug
 )
 
 if ($target_host -eq '') {
@@ -38,16 +39,8 @@ function Get-ScriptDirectory
 function fix_hosts_file {
   param(
     # cannot pass  switch param
-    [string]$test
-  )
-  $domains = @(
-    'static.ak.facebook.com',
-    's-static.ak.facebook.com',
-    'ad.doubleclick.net',
-    'ad.yieldmanager.com',
-    'pc1.yumenetworks.com',
-    'fbstatic-a.akamaihd.net',
-    'ad.amgdgt.com'
+    [string]$test,
+    [string]$append
   )
   Write-Output $env:COMPUTERNAME
   $local_hosts_file = 'c:\windows\system32\drivers\etc\hosts'
@@ -65,18 +58,44 @@ function fix_hosts_file {
   Write-Host -ForegroundColor 'green' @"
 This script updates  ${fixed_hosts_file}
 "@
-  $current_content = Get-Content -Path $local_hosts_file -Encoding ascii
-  return
-  $domains | ForEach-Object { $domain = $_
 
+
+
+  if ($PSBoundParameters['append']) {
+    Write-Output 'Will append.'
+    $current_content = Get-Content -Path $local_hosts_file -Encoding ascii
+  } else {
+    Write-Output 'Will overwrite.'
+
+    $dummy_hosts_file = @"
+# localhost name resolution is handled within DNS itself.
+#	127.0.0.1       localhost
+#	::1             localhost
+"@
+    $current_content = $dummy_hosts_file -split "`n"
+  }
+
+  $domains = @(
+    'static.ak.facebook.com',
+    's-static.ak.facebook.com',
+    'ad.doubleclick.net',
+    'ad.yieldmanager.com',
+    'pc1.yumenetworks.com',
+    'fbstatic-a.akamaihd.net',
+    'ad.amgdgt.com'
+  )
+
+  $domains | ForEach-Object { $domain = $_
+    Write-Host -ForegroundColor 'green' @" 
+      Adding entry for $_
+"@
     $domain_defined_check = $current_content -match $domain
-    if ($domain_defined_check -eq $null -or $domain_defined_check.count -eq 0) {
+    if ($domain_defined_check -eq $null -or $domain_defined_check -eq $false -or $domain_defined_check.count -eq 0) {
+
       $current_content += ('127.0.0.1 {0}' -f $domain)
     }
   }
-
   Set-Content -Path $fixed_hosts_file -Value $current_content
-
 }
 
 if ($PSBoundParameters['test']) {
@@ -87,16 +106,20 @@ if ($PSBoundParameters['test']) {
   $test_argument = $null
 }
 
-$remote_run_step1 = Invoke-Command -computer $target_host -ScriptBlock ${function:fix_hosts_file} -ArgumentList $test_argument
+if ($PSBoundParameters['append']) {
+  Write-Output 'Will append.'
+  $append_argument = 'append'
+} else {
+  Write-Output 'Will overwrite.'
+  $append_argument = $null
+}
+
+$remote_run_step1 = Invoke-Command -computer $target_host -ScriptBlock ${function:fix_hosts_file} -ArgumentList $test_argument,$append_argument
 Write-Output $remote_run_step1
-#
-#$remote_run_step2 = invoke-command -computer $target_host -ScriptBlock ${function:flush_dns} 
 
-Write-Output $remote_run_step2
+if (-not ($PSBoundParameters['test'])) {
+  $remote_run_step2 = Invoke-Command -computer $target_host -ScriptBlock ${function:flush_dns}
+  Write-Output $remote_run_step2
+}
 
 
-$dummy_hosts_file = @"
-# localhost name resolution is handled within DNS itself.
-#	127.0.0.1       localhost
-#	::1             localhost
-"@
