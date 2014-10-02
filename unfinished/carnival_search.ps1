@@ -1,5 +1,6 @@
 param(
-  [string]$browser
+  [string]$browser,
+  [int]$version
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -20,7 +21,7 @@ $shared_assemblies = @(
   'Selenium.WebDriverBackedSelenium.dll',
   'nunit.framework.dll'
 )
-# NOTE  a call to fix_w2k3.ps1 may be needed
+
 $env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
@@ -56,7 +57,12 @@ if ($browser -ne $null -and $browser -ne '') {
   }
   elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+    if ($version -ne $null -and $version -ne 0) {
+      $capability.SetCapability("version", $version.ToString());
+    }
+    # http://www.browserstack.com/automate/c-sharp   
   }
+
   elseif ($browser -match 'safari') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
   }
@@ -80,6 +86,7 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 $baseURL = "http://www.carnival.com"
+$baseURL = 'http://www4.uatcarnival.com/';
 
 $selenium.Navigate().GoToUrl($baseURL + "/")
 $selenium.Manage().Window.Maximize()
@@ -225,12 +232,39 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 Write-Output ('Clicking on ' + $element1.Text)
 $element1.Click()
 
-Start-Sleep 30
+Start-Sleep 10
 
+try {
+  [OpenQA.Selenium.Screenshot]$screenshot =  $selenium.GetScreenshot()
+  $guid = [guid]::NewGuid()
+  $image_name = ($guid.ToString())
+  [string]$image_path = ('{0}\{1}\{2}.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
+  $screenshot.SaveAsFile($image_path,[System.Drawing.Imaging.ImageFormat]::Jpeg)
 
+} catch [exception]{
+  Write-Output $_.Exception.Message
+}
 # Cleanup
 try {
   $selenium.Quit()
 } catch [exception]{
   # Ignore errors if unable to close the browser
 }
+
+<#
+https://www.youtube.com/watch?v=76qeLNMHgF4
+
+Powershell from salt stack on w2k12 R2  - slow 
+https://www.youtube.com/watch?v=miK25mDV9ik
+
+There is plenty of organizations who are still locked to running full Windows images hosting 
+legacy GUI applications for which do not have remote management options
+C:\java\selenium\selenium-server-standalone-2.43.1.jar\core\scripts\selenium-api.js
+http://www.gazeta.ru/culture/2014/09/26/a_6236173.shtml
+http://blogs.technet.com/b/heyscriptingguy/archive/2010/08/12/august-12-2010.aspx
+#>
+
+# https://code.google.com/p/selenium/wiki/WebDriverJs
+# http://grokbase.com/t/gg/selenium-users/12b2hq0t2p/use-task-scheduler-to-run-ie-node-without-user-logged-in
+# http://sqa.stackexchange.com/questions/5212/selenium-tests-run-in-the-background-when-teamcity-ci-is-run-as-a-windows-servic
+# http://selenium.10932.n7.nabble.com/node-start-on-windows-7-startup-td23699.html
