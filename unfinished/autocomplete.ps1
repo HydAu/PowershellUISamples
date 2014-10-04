@@ -1,3 +1,69 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+Add-Type -TypeDefinition @"
+
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
+    private string _txtUser;
+    private string _txtPassword;
+
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+
+
+    public string TxtUser
+    {
+        get { return _txtUser; }
+        set { _txtUser = value; }
+    }
+    public string TxtPassword
+    {
+        get { return _txtPassword; }
+        set { _txtPassword = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+
+
+Add-Type -TypeDefinition @"
+
 // http://www.java2s.com/Code/CSharp/Components/UseanAutocompleteComboBox.htm
 // shows first match instantly, need to rub to get to the next
 using System;
@@ -67,3 +133,9 @@ public class AutoCompleteComboBox : ComboBox {
         }
     }
 }
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+
+
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$test = New-Object -type 'AutoCompleteComboBoxTest'
+[void]$test.ShowDialog([win32window]($caller))

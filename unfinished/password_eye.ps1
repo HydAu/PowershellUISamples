@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+﻿#Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -17,6 +17,49 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
+
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Windows.Forms;
+using System.ComponentModel;
+using System.Drawing;
+
+    public class PasswordEyePropertiesChangedEventArgs
+        {
+        public Color   backcolor;
+        public Button  button;
+        public Control control;
+        public Color   forecolor;
+        public int     maximum_width;
+        public Panel   panel;
+        public TextBox textbox;
+
+        // ********************* PasswordEyePropertiesChangedEventArgs
+
+        public PasswordEyePropertiesChangedEventArgs ( 
+                                                Color   backcolor,
+                                                Button  button,
+                                                Control control,
+                                                Color   forecolor,
+                                                int     maximum_width,
+                                                Panel   panel,
+                                                TextBox textbox )
+            {
+
+            this.backcolor = backcolor;
+            this.button = button;
+            this.control = control;
+            this.forecolor = forecolor;
+            this.maximum_width = maximum_width;
+            this.panel = panel;
+            this.textbox = textbox;
+            }
+
+        } // class PasswordEyePropertiesChangedEventArgs
+        
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+
 
 Add-Type -TypeDefinition @"
 using System;
