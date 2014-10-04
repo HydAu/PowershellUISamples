@@ -33,8 +33,8 @@ function PromptPassword (
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
   $f = New-Object System.Windows.Forms.Form
-  $f.MaximizeBox = $false;
-  $f.MinimizeBox = $false;
+  $f.MaximizeBox = $false
+  $f.MinimizeBox = $false
   $f.Text = $title
 
   $l1 = New-Object System.Windows.Forms.Label
@@ -43,14 +43,14 @@ function PromptPassword (
   $l1.Text = 'Username'
   $f.Controls.Add($l1)
 
-  $f.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
+  $f.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
 
   $t1 = New-Object System.Windows.Forms.TextBox
   $t1.Location = New-Object System.Drawing.Point (120,20)
   $t1.Size = New-Object System.Drawing.Size (140,20)
-  $t1.Text = $user;
-  $t1.Name = 'txtUser';
-  $f.Controls.Add($t1);
+  $t1.Text = $user
+  $t1.Name = 'txtUser'
+  $f.Controls.Add($t1)
 
   $l2 = New-Object System.Windows.Forms.Label
   $l2.Location = New-Object System.Drawing.Size (10,50)
@@ -70,17 +70,17 @@ function PromptPassword (
   $x2 = 20
   $y1 = ($t1.Location.Y + $t1.Size.Height + + $btnOK.Size.Height + 20)
   $btnOK.Location = New-Object System.Drawing.Point ($x2,$y1)
-  $btnOK.Text = "OK";
-  $btnOK.Name = "btnOK";
-  $f.Controls.Add($btnOK);
-
+  $btnOK.Text = 'OK'
+  $btnOK.Name = "btnOK"
+  $f.Controls.Add($btnOK)
   $btnCancel = New-Object System.Windows.Forms.Button
   $x1 = (($f.Size.Width - $btnCancel.Size.Width) - 20)
 
-  $btnCancel.Location = New-Object System.Drawing.Point ($x1,$y1);
-  $btnCancel.Text = 'Cancel';
-  $btnCancel.Name = 'btnCancel';
-  $f.Controls.Add($btnCancel);
+  $btnCancel.Location = New-Object System.Drawing.Point($x1,$y1)
+  $btnCancel.Text = 'Cancel'
+  $btnCancel.Name = 'btnCancel'
+  $f.Controls.Add($btnCancel)
+
   $s1 = ($f.Size.Width - $btnCancel.Size.Width) - 20
   $y2 = ($t1.Location.Y + $t1.Size.Height + $btnOK.Size.Height)
 
@@ -94,7 +94,7 @@ function PromptPassword (
   $f.Topmost = $true
 
 
-  $caller.Data = $RESULT_CANCEL;
+  $caller.Data = $RESULT_CANCEL
   $f.Add_Shown({ $f.Activate() })
   $f.KeyPreview = $True
   $f.Add_KeyDown({
