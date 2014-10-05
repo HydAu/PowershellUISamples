@@ -88,56 +88,78 @@ if ($browser -ne $null -and $browser -ne '') {
 
 [void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
-[string]$baseURL = 'http://www.naukri.com/'
+$selenium.url = $baseURL = 'http://translation2.paralink.com/'
+# $selenium.url = $baseURL = 'http://www.freetranslation.com/'
+
 $selenium.Navigate().GoToUrl($baseURL)
+$selenium.Manage().Window.Maximize()
 
-$initial_window_handle = $selenium.CurrentWindowHandle
+[string]$xpath = "//frame[@id='topfr']"
+$top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
+$frame_driver = $selenium.SwitchTo().Frame($top_frame)
 
-Write-Output ("CurrentWindowHandle = {0}`n" -f $initial_window_handle)
+$actions = New-Object OpenQA.Selenium.Interactions.Actions ($frame_driver)
 
-$handles = @()
-try {
-  $handles = $selenium.WindowHandles
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-if ($handles.Count -gt 1) {
-  $handles | ForEach-Object {
-    $switch_to_window_handle = $_
-    if ($switch_to_window_handle -eq $initial_window_handle)
-    {
-      [void]$selenium.switchTo().defaultContent()
-    } else {
+$source_text = $frame_driver.FindElementByXPath("//textarea[@class='textus']")
+$source_text = $frame_driver.findElement([OpenQA.Selenium.By]::Xpath("//textarea[@class='textus']"))
+[NUnit.Framework.Assert]::IsTrue($source_text.Displayed)
 
+# Input some text
+$source_text.Clear()
 
-      [void]$selenium.switchTo().window($switch_to_window_handle)
-      Start-Sleep -Seconds 10
-      $window_handle = $selenium.CurrentWindowHandle
-      Write-Output ('WindowHandle : {0}' -f $window_handle)
+Start-Sleep -Seconds 1
+$source_text.SendKeys('good morning')
+
+# does not work
+# $actions.SendKeys($source_text,'good morning') | out-null
 
 
-      Write-Output ('Title: {0}' -f $selenium.Title)
-      # write-output ([OpenQA.Selenium.Remote.RemoteTargetLocator]::DefaultContent)
+Start-Sleep -Seconds 1
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 
-      $window_size = $selenium.Manage().window.Size
-      $window_position = $selenium.Manage().window.Position
-      $selenium.Manage().window.Size = New-Object System.Drawing.Size (600,400)
-      $selenium.Manage().window.Position = New-Object System.Drawing.Point (0,0)
-      Start-Sleep -Seconds 10
-      $selenium.Manage().window.Size = $window_size
-      $selenium.Manage().window.Position = $window_position
-      Start-Sleep -Seconds 10
-      [void]$selenium.switchTo().window($initial_window_handle)
-    }
-  }
-  [void]$selenium.switchTo().window($initial_window_handle)
-  [void]$selenium.switchTo().defaultContent()
+[void]$actions.SendKeys($source_text,[System.Windows.Forms.SendKeys]::SendWait("^a"))
 
-}
+# Copy text
+[void]$actions.SendKeys($source_text,[System.Windows.Forms.SendKeys]::SendWait("^x"))
+Start-Sleep -Seconds 1
+# Paste text
+[void]$actions.SendKeys($source_text,[System.Windows.Forms.SendKeys]::SendWait("^v"))
+
+[void]$actions.SendKeys($source_text,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
+# Paste text second time 
+[void]$actions.SendKeys($source_text,[System.Windows.Forms.SendKeys]::SendWait("^v"))
+
+$button_image = $selenium.FindElementByXPath("//img[@alt='Translate']")
+$button_image.Click()
+Start-Sleep -Seconds 3
+[void]$selenium.SwitchTo().DefaultContent()
+
+$xpath = "//frame[@id='botfr']"
+$bot_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
+$frame_driver = $selenium.SwitchTo().Frame($bot_frame)
+
+$actions = New-Object OpenQA.Selenium.Interactions.Actions ($frame_driver)
+
+$target_text = $frame_driver.FindElementByXPath("//textarea[@name='target']")
+$target_text = $frame_driver.findElement([OpenQA.Selenium.By]::Xpath("//textarea[@class='textus']"))
+[NUnit.Framework.Assert]::IsTrue($target_text.Displayed)
+Write-Output ('Translation: ' + $target_text.Text)
+<#
+# TODO : copy between frames
+[void]$actions.SendKeys($target_text,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
+# Paste text second time 
+[void]$actions.SendKeys($target_text,[System.Windows.Forms.SendKeys]::SendWait("^v"))
+#>
+Start-Sleep 1
+
+<#
+$dirs_image = $selenium.FindElementByXPath("//div[@class='dirs']")
+$dirs_image.Click()
+$button_image.Click()
+#>
 try {
   $selenium.Quit()
 } catch [exception]{
-  # Write-Output $_.Exception.Message
-  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
 }
-return
+

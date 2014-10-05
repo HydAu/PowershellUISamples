@@ -88,45 +88,42 @@ if ($browser -ne $null -and $browser -ne '') {
 
 [void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
-
-[string]$baseURL = 'file:///C:/developer/sergueik/powershell_ui_samples/external/two_iframes_example.html'
 $selenium.url = $baseURL = 'http://translation2.paralink.com/'
 $selenium.Navigate().GoToUrl($baseURL)
 [string]$xpath = "//frame[@id='topfr']"
 $top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
-$frame_driver = $selenium.SwitchTo().Frame($top_frame)   
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newtop.asp',  $frame_driver.url)
-write-debug '1'
+$frame_driver = $selenium.SwitchTo().Frame($top_frame)
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newtop.asp',$frame_driver.url)
+Write-Debug '1'
 
 [void]$selenium.SwitchTo().DefaultContent()
 
 $xpath = "//frame[@id='botfr']"
 $bot_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
-$frame_driver = $selenium.SwitchTo().Frame($bot_frame)   
+$frame_driver = $selenium.SwitchTo().Frame($bot_frame)
 
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newbot.asp',  $frame_driver.url)
-write-debug '2'
-
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newbot.asp',$frame_driver.url)
+Write-Debug '2'
+# write-output $frame_driver.PageSource
 [void]$selenium.SwitchTo().DefaultContent()
 
-$driver = $selenium.SwitchTo().Frame(1)   
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newbot.asp',  $frame_driver.url)
+$driver = $selenium.SwitchTo().Frame(1)
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newbot.asp',$frame_driver.url)
 
 [void]$selenium.SwitchTo().DefaultContent()
-write-debug '3'
-$driver = $selenium.SwitchTo().Frame(0)   
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newtop.asp',  $frame_driver.url)
+Write-Debug '3'
+$driver = $selenium.SwitchTo().Frame(0)
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newtop.asp',$frame_driver.url)
 
 [void]$selenium.SwitchTo().DefaultContent()
-write-debug '4'
+Write-Debug '4'
 
-# [OpenQA.Selenium.IWebElement]$element = $driver.FindElement([OpenQA.Selenium.By]::ClassName('central-featured-logo'))
+# TODO:
 # [void]$selenium.SwitchOutOfIFrame()
 
 try {
   $selenium.Quit()
 } catch [exception]{
-  # Write-Output $_.Exception.Message
-  # Ignore errors if unable to close the browser
+  Write-Output (( $_.Exception.Message ) -split "`n" )[0]
 }
-return
+

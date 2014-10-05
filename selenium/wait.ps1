@@ -95,6 +95,13 @@ $selenium.Navigate().GoToUrl($baseURL)
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 100
 [OpenQA.Selenium.Remote.RemoteWebElement]$element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Id("hplogo")))
+
+<#
+TitleIs()
+TitleContains()
+ElementExists()
+ElementIsVisible()
+#>
 try {
   $selenium.Quit()
 } catch [exception]{

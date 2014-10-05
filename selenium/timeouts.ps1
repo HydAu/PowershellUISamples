@@ -105,11 +105,14 @@ $selenium.Navigate().Refresh()
 
 $start = (Get-Date -UFormat "%s")
 
-# still have to ignore the timeout exceptions
 try {
   [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeAsyncScript($script);
 
 } catch [OpenQA.Selenium.WebDriverTimeoutException]{
+  # Ignore
+  # Timed out waiting for async script result  (Firefox)
+  # asynchronous script timeout: result was not received (Chrome)
+  [NUnit.Framework.Assert]::IsTrue(  $_.Exception.Message -match '(?:Timed out waiting for async script result|asynchronous script timeout)')
 }
 catch [OpenQA.Selenium.NoSuchWindowException] { 
 write-host $_.Exception.Message # Unable to get browser
@@ -120,8 +123,8 @@ $end = (Get-Date -UFormat "%s")
 $elapsed = New-TimeSpan -Seconds ($end - $start)
 Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
 <#
-Exception calling "ExecuteAsyncScript" with "1" argument(s): "Unable to get
-browser (WARNING: The server did not provide any stacktrace information)
+Exception calling "ExecuteAsyncScript" with "1" argument(s): 
+"Unable to get browser (WARNING: The server did not provide any stacktrace information)
 
 #>
 Start-Sleep 3
