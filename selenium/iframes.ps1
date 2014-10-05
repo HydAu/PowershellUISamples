@@ -90,17 +90,38 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 [string]$baseURL = 'file:///C:/developer/sergueik/powershell_ui_samples/external/two_iframes_example.html'
+$selenium.url = $baseURL = 'http://translation2.paralink.com/'
 $selenium.Navigate().GoToUrl($baseURL)
-$frame = $selenium.FindElementByTagName('iframe')
-$driver = $selenium.SwitchTo().Frame($frame)   
-[OpenQA.Selenium.IWebElement]$element = $driver.FindElement([OpenQA.Selenium.By]::ClassName('central-featured-logo'))
-# [void]$selenium.SwitchOutOfIFrame()
-[void]$selenium.SwitchTo().DefaultContent()
-$driver = $selenium.SwitchTo().Frame(1)   
+[string]$xpath = "//frame[@id='topfr']"
+$top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
+$frame_driver = $selenium.SwitchTo().Frame($top_frame)   
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newtop.asp',  $frame_driver.url)
+write-debug '1'
+
 [void]$selenium.SwitchTo().DefaultContent()
 
-$driver = $selenium.SwitchTo().Frame(0)   
+$xpath = "//frame[@id='botfr']"
+$bot_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
+$frame_driver = $selenium.SwitchTo().Frame($bot_frame)   
+
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newbot.asp',  $frame_driver.url)
+write-debug '2'
+
 [void]$selenium.SwitchTo().DefaultContent()
+
+$driver = $selenium.SwitchTo().Frame(1)   
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newbot.asp',  $frame_driver.url)
+
+[void]$selenium.SwitchTo().DefaultContent()
+write-debug '3'
+$driver = $selenium.SwitchTo().Frame(0)   
+[NUnit.Framework.Assert]::AreEqual($frame_driver.url, 'http://translation2.paralink.com/newtop.asp',  $frame_driver.url)
+
+[void]$selenium.SwitchTo().DefaultContent()
+write-debug '4'
+
+# [OpenQA.Selenium.IWebElement]$element = $driver.FindElement([OpenQA.Selenium.By]::ClassName('central-featured-logo'))
+# [void]$selenium.SwitchOutOfIFrame()
 
 try {
   $selenium.Quit()
