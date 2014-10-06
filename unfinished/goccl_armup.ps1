@@ -111,7 +111,8 @@ try {
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
 [NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('type') -match 'text'))
 $element1.SendKeys($username)
 
@@ -160,7 +161,11 @@ try {
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+
 [NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('href') -match "/BookingEngine/BookingSearch/QuickSell.aspx"))
 $element1.Click()
 
@@ -178,7 +183,11 @@ try {
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+
 [NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('href') -match "/BookingEngine/Groups/SailingSearch.aspx"), $element1.GetAttribute('href') )
 
 $element1.Click()
@@ -198,7 +207,11 @@ try {
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
 
 $element1.Click()
 
