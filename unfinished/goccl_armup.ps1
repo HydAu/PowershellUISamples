@@ -1,7 +1,7 @@
 param(
   [string]$browser,
   [int]$version,
-  [string]$baseURL = 'http://www.goccl.com/', 
+  [string]$baseURL = 'http://www.goccl.com/',
   [string]$username,
   [string]$password
 )
@@ -25,26 +25,44 @@ $shared_assemblies = @(
   'nunit.framework.dll'
 )
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
+
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
 
+[NUnit.Framework.Assert]::IsTrue($host.Version.Major -ge 2)
+
 $verificationErrors = New-Object System.Text.StringBuilder
+
+
+$hub_host = '127.0.0.1'
+$hub_port = '4444'
+
+$uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect("127.0.0.1",4444)
+    $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-  Write-Host "Running on ${browser}"
+  Write-Debug "Running on ${browser}"
   if ($browser -match 'firefox') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
 
@@ -65,101 +83,85 @@ if ($browser -ne $null -and $browser -ne '') {
   else {
     throw "unknown browser choice:${browser}"
   }
-  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
-  Write-Host 'Running on phantomjs'
-  $phantomjs_executable_folder = "C:\tools\phantomjs"
+  Write-Debug 'Running on phantomjs'
+  $phantomjs_executable_folder = 'C:\tools\phantomjs'
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
-  $selenium.Capabilities.SetCapability("ssl-protocol","any")
-  $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
-  $selenium.Capabilities.SetCapability("takesScreenshot",$true)
-  $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $selenium.Capabilities.SetCapability('ssl-protocol','any')
+  $selenium.Capabilities.SetCapability('ignore-ssl-errors',$true)
+  $selenium.Capabilities.SetCapability('takesScreenshot',$true)
+  $selenium.Capabilities.SetCapability('userAgent','Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34')
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
-  $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
+  $options.AddAdditionalCapability('phantomjs.executable.path',$phantomjs_executable_folder)
 }
 
 
 $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Manage().Window.Maximize()
-# 
 
 $value1 = 'content_content_0_columnright_0_txtLogin'
 $css_selector1 = ('input#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait($selenium,[System.TimeSpan]::FromSeconds(3))
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-$element1
+[NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('type') -match 'text'))
 $element1.SendKeys($username)
-# [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'How many travelers'))
 
 
 $value1 = 'content_content_0_columnright_0_txtPass'
 $css_selector1 = ('input#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait($selenium,[System.TimeSpan]::FromSeconds(3))
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('type') -match 'password'))
 $element1.SendKeys($password)
-$element1
-# [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'How many travelers'))
-
-# Write-Output ('Clicking on ' + $element1.Text)
-# $element1.Click()
-Start-Sleep 1
 
 
 $value1 = 'content_content_0_columnright_0_lnkLogin'
 $css_selector1 = ('a#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait($selenium,[System.TimeSpan]::FromSeconds(3))
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-
 [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'LOGIN'))
-Write-Output ('Clicking on ' + $element1.Text)
+# Write-Output ('Clicking on ' + $element1.Text)
 $element1.Click()
 
 Start-Sleep 1
 
-# [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'How many travelers'))
-
 $link_text_value = 'Individual Stateroom'
-# a href="/BookingEngine/BookingSearch/QuickSell.aspx"
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait($selenium,[System.TimeSpan]::FromSeconds(3))
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::LinkText($link_text_value)))
-  ##
   [void]$selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
-
+[NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('href') -match "/BookingEngine/BookingSearch/QuickSell.aspx"))
 $element1.Click()
 
 Start-Sleep 3
@@ -167,18 +169,17 @@ $selenium.Navigate().Back()
 
 
 $link_text_value = 'Group Bookings'
-# a href="/BookingEngine/BookingSearch/QuickSell.aspx"
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait($selenium,[System.TimeSpan]::FromSeconds(3))
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::LinkText($link_text_value)))
-  ##
   [void]$selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+[NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('href') -match "/BookingEngine/Groups/SailingSearch.aspx"), $element1.GetAttribute('href') )
 
 $element1.Click()
 
@@ -189,10 +190,9 @@ Start-Sleep 3
 $value1 = 'Header2_NavZero1_lnkLogOut'
 $css_selector1 = ('a#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait( $selenium,[System.TimeSpan]::FromSeconds(3))
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
