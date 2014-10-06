@@ -1,6 +1,8 @@
 param(
   [string]$browser,
-  [int]$version
+  [int]$version,
+  [string]$user,
+  [string]$password
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -86,6 +88,46 @@ $selenium.Manage().Window.Maximize()
 # 
 
 $value1 = 'content_content_0_columnright_0_txtLogin'
+$css_selector1 = ('input#{0}' -f $value1)
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+##
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+$element1.SendKeys($username)
+# [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'How many travelers'))
+
+
+$value1 = 'content_content_0_columnright_0_txtPass'
+$css_selector1 = ('input#{0}' -f $value1)
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+##
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+$element1.SendKeys($password)
+# [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'How many travelers'))
+
+# Write-Output ('Clicking on ' + $element1.Text)
+# $element1.Click()
+Start-Sleep 1
+
+
+$value1 = 'content_content_0_columnright_0_lnkLogin'
 $css_selector1 = ('a#{0}' -f $value1)
 try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
@@ -99,14 +141,33 @@ try {
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 
+$element1.Click()
+Start-Sleep 3
 # [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'How many travelers'))
 
-Write-Output ('Clicking on ' + $element1.Text)
+$value1 = 'Header2_NavZero1_lnkLogOut'
+$css_selector1 = ('a#{0}' -f $value1)
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+##
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
 $element1.Click()
+
+
+# a href="/BookingEngine/BookingSearch/QuickSell.aspx"
+
+# Write-Output ('Clicking on ' + $element1.Text)
+# $element1.Click()
 Start-Sleep 1
 
-# content_content_0_columnright_0_txtPass
-start-sleep 3
 # Cleanup
 try {
   $selenium.Quit()
