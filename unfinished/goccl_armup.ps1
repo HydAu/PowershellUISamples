@@ -1,10 +1,38 @@
 param(
   [string]$browser,
   [int]$version,
-  [string]$baseURL = 'http://www.goccl.com/',
+  [string]$base_url = 'http://www.goccl.com/',
   [string]$username,
   [string]$password
 )
+
+if ($base_url -eq '') {
+  $base_url = $env:BASE_URL
+}
+
+if (($base_url -eq '') -or ($base_url -eq $null)) {
+  Write-Error 'The required parameter is missing : BASE_URL'
+  exit (1)
+}
+
+if ($username -eq '') {
+  $username = $env:USERNAME
+}
+
+if (($username -eq '') -or ($username -eq $null)) {
+  Write-Error 'The required parameter is missing : USERNAME'
+  exit (1)
+}
+
+if ($password -eq '') {
+  $password = $env:PASSWORD
+}
+
+if (($password -eq '') -or ($password -eq $null)) {
+  Write-Error 'The required parameter is missing : PASSWORD'
+  exit (1)
+}
+
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -97,7 +125,7 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 
-$selenium.Navigate().GoToUrl($baseURL)
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Manage().Window.Maximize()
 
 $value1 = 'content_content_0_columnright_0_txtLogin'
