@@ -1,4 +1,139 @@
+<#
+		private void OnTextChange(object sender, System.EventArgs e)
+		{
+			int box_type = 0;
 
+			CultureInfo MyCultureInfo = new CultureInfo("en-GB");
+
+			double d;
+
+			if( sender.Equals( ip1 ) )
+				box_type = 1;
+			if( sender.Equals( ip2 ) )
+				box_type = 2;
+			if( sender.Equals( ip3 ) )
+				box_type = 3;
+			if( sender.Equals( ip4 ) )
+				box_type = 4;
+
+			switch( box_type )
+			{
+				case 1:
+
+					if( this.ip1.Text.Length > 0 && this.ip1.Text.ToCharArray()[this.ip1.Text.Length - 1] == '.' )
+					{
+						this.ip1.Text = this.ip1.Text.TrimEnd( '.' );
+						ip1.Text = (this.ip1.Text.Length > 0 ) ? int.Parse( this.ip1.Text ).ToString() : "0" ;
+						ip2.Focus();
+						return;
+					}
+
+					// integer validation
+					if( double.TryParse(
+						this.ip1.Text,
+						System.Globalization.NumberStyles.Integer,
+						MyCultureInfo,
+						out d ) == false
+						)
+					{
+						this.ip1.Text = this.ip1.Text.Remove( 0, this.ip1.Text.Length );
+						return;
+					}
+
+					// change focus to the next textbox if fully inserted
+					if( this.ip1.Text.Length == 3 )
+					{
+						if( int.Parse( this.ip1.Text ) >= 255 )
+							this.ip1.Text = "255";
+						else
+							ip1.Text = int.Parse( ip1.Text ).ToString();
+						ip2.Focus();
+					}
+					break;
+				case 2:
+					if( this.ip2.Text.Length > 0 && this.ip2.Text.ToCharArray()[this.ip2.Text.Length - 1] == '.' )
+					{
+						this.ip2.Text = this.ip2.Text.TrimEnd( '.' );
+						ip2.Text = (this.ip2.Text.Length > 0 ) ? int.Parse( this.ip2.Text ).ToString() : "0" ;
+						ip3.Focus();
+						return;
+					}
+
+					if( double.TryParse(
+						this.ip2.Text,
+						System.Globalization.NumberStyles.Integer,
+						MyCultureInfo,
+						out d ) == false
+						)
+					{
+						this.ip2.Text = this.ip2.Text.Remove( 0, this.ip2.Text.Length );
+						return;
+					}
+
+					if( this.ip2.Text.Length == 3 )
+					{
+						if( int.Parse( this.ip2.Text ) >= 255 )
+							this.ip2.Text = "255";
+						else
+							ip2.Text = int.Parse( ip2.Text ).ToString();
+						ip3.Focus();
+					}
+					break;
+				case 3:
+					if( this.ip3.Text.Length > 0 && this.ip3.Text.ToCharArray()[this.ip3.Text.Length - 1] == '.' )
+					{
+						this.ip3.Text = this.ip3.Text.TrimEnd( '.' );
+						ip3.Text = (this.ip3.Text.Length > 0 ) ? int.Parse( this.ip3.Text ).ToString() : "0" ;
+						ip4.Focus();
+						return;
+					}
+
+					if( double.TryParse(
+						this.ip3.Text,
+						System.Globalization.NumberStyles.Integer,
+						MyCultureInfo,
+						out d ) == false
+						)
+					{
+						this.ip3.Text = this.ip3.Text.Remove( 0, this.ip3.Text.Length );
+						return;
+					}
+
+					if( this.ip3.Text.Length == 3 )
+					{
+						if( int.Parse( this.ip3.Text ) >= 255 )
+							this.ip3.Text = "255";
+						else
+							ip3.Text = int.Parse( ip3.Text ).ToString();
+						ip4.Focus();
+					}
+					break;
+				case 4:
+
+					if( double.TryParse(
+						this.ip4.Text,
+						System.Globalization.NumberStyles.Integer,
+						MyCultureInfo,
+						out d ) == false
+						)
+					{
+						this.ip4.Text = this.ip4.Text.Remove( 0, this.ip4.Text.Length );
+						return;
+					}
+
+					if( this.ip4.Text.Length == 3 )
+					{
+						if( int.Parse( this.ip4.Text ) >= 255 )
+							this.ip4.Text = "255";
+						else
+							ip4.Text = int.Parse( ip4.Text ).ToString();
+					}
+					break;
+			}
+		}
+
+
+#>
 function dialogForContinueAuto($title, $message, $owner) {
 
 
