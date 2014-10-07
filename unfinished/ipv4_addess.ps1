@@ -3,7 +3,18 @@ function dialogForContinueAuto($title, $message, $owner) {
 
 
 [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+
 [void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+
+
+  function text_changed(){
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+     # NOOP
+   }
+
 
   $f = New-Object System.Windows.Forms.Form
 $f.Text = $title
@@ -32,7 +43,15 @@ $f.Topmost = $True
   $ip1.TabIndex = 0  
   $ip1.Text = "0"  
   $ip1.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Center  
-#  $ip1.TextChanged += new-object System.EventHandler($p.OnTextChange)  
+  $ip1_text_changed  = $ip1.add_TextChanged 
+  $ip1_text_changed.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+        text_changed($sender, $eventargs)
+      })
+
   # 
   # ip2
   # 
@@ -44,7 +63,14 @@ $f.Topmost = $True
   $ip2.TabIndex = 1  
   $ip2.Text = "0"  
   $ip2.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Center  
-#  $ip2.TextChanged += new-object System.EventHandler($p.OnTextChange)  
+  $ip2_text_changed  = $ip2.add_TextChanged 
+  $ip2_text_changed.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+        text_changed($sender, $eventargs)
+      })
   # 
   # ip3
   # 
@@ -56,7 +82,15 @@ $f.Topmost = $True
   $ip3.TabIndex = 2  
   $ip3.Text = "0"  
   $ip3.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Center  
-#  $ip3.TextChanged += new-object System.EventHandler($p.OnTextChange)  
+  $ip3_text_changed  = $ip3.add_TextChanged 
+  $ip3_text_changed.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+        text_changed($sender, $eventargs)
+      })
+
   # 
   # ip4
   # 
@@ -67,8 +101,16 @@ $f.Topmost = $True
   $ip4.Size = new-object System.Drawing.Size(20, 13)  
   $ip4.TabIndex = 3  
   $ip4.Text = "0"  
-  $ip4.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Center  
-#  $ip4.TextChanged += new-object System.EventHandler($p.OnTextChange)  
+  $ip4.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Center   
+  $ip4_text_changed  = $ip4.add_TextChanged 
+  $ip4_text_changed.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+        text_changed($sender, $eventargs)
+      })
+
   # 
   # dotLabel1
   # 
@@ -122,7 +164,7 @@ $f.Topmost = $True
 
 
 
-$f.Add_Shown({ $objForm.Activate() })
+$f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog()
 
 write-host $new_message
