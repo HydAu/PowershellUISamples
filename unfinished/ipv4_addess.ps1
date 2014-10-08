@@ -1,3 +1,37 @@
+
+# WARNING: fragile under DTW.PS.PrettyPrinterV1.psm1
+# home-grown ternary ?:
+# http://blogs.msdn.com/b/powershell/archive/2006/12/29/dyi-ternary-operator.aspx
+# http://scriptinghell.blogspot.com/2012/10/ternary-operator-support-in-powershell.html
+#
+
+function ipv4_address () {
+  param(
+    [object]$ip1,
+    [object]$ip2,
+    [object]$ip3,
+    [object]$ip4
+  )
+
+  $r = @()
+
+  @( $ip1,
+    $ip2,
+    $ip3,
+    $ip4) | ForEach-Object {
+    $q = $_
+    if ($q.Length -gt 0) { $u = $q } else { $u = '0' }
+    $d = [int]::Parse($u).ToString()
+    $r += $d
+  }
+
+$result = [System.Net.IPAddress]::Parse( ($r -join '.') )
+
+return $result.IPAddressToString
+}
+
+
+
 function dialogForContinueAuto ($title,$message,$owner) {
 
 
@@ -310,7 +344,23 @@ function dialogForContinueAuto ($title,$message,$owner) {
   $p.Size = New-Object System.Drawing.Size (112,25)
 
   $f.Controls.Add($p)
+
+  $b1 = New-Object System.Windows.Forms.Button
+  $b1.Location = New-Object System.Drawing.Size (50,40)
+  $b1.Size = New-Object System.Drawing.Size (75,23)
+  $b1.Text = 'Done!'
+  $b1.add_click({
+ 
+Write-Host (ipv4_address -ip1 $ip1.Text  -ip2 $ip2.Text  -ip3 $ip3.Text  -ip4 $ip4.Text )
+
+$f.Close(); })
+  $f.Controls.Add($b1)
+
+
+
   $p.Name = "IpBox"
+
+
   $p.Size = New-Object System.Drawing.Size (112,26)
   $p.ResumeLayout($false)
   $p.ResumeLayout($false)
@@ -321,8 +371,8 @@ function dialogForContinueAuto ($title,$message,$owner) {
   $f.Add_Shown({ $f.Activate() })
   [void]$f.ShowDialog()
 
-  Write-Host $new_message
 
+#  Write-Host $result
 }
 
 dialogForContinueAuto
