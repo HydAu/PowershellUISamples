@@ -27,8 +27,12 @@ set SERVLET_JARS=
 
 java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar ^
      %SERVLET_OPTS% ^
-     -role hub 
-
+     -role hub  ^
+     -ensureCleanSession true ^
+     -trustAllSSLCertificates true ^
+     -maxSession 20 ^
+     -newSessionWaitTimeout 600000^
+     
 
 
 REM Blank line
