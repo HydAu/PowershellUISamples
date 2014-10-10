@@ -239,75 +239,54 @@ try {
   # $element5
   [NUnit.Framework.Assert]::IsTrue(($element5.Text -match 'Analyze'))
 
-
+  [NUnit.Framework.Assert]::IsTrue(($element5.Displayed))
+# write-host ('->{0}' -f  $element5.Displayed )
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'color: blue; border: 4px solid blue;')
 Start-Sleep 1
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'')
 
 
+#   $element5| get-member
 
-  $element5.Click()   #  - this does not work
+  $element5.SendKeys([OpenQA.Selenium.Keys]::RETURN)
+start-sleep 10
+#  $element5.Click()   #  - this does not work
   # brute-force. We are sucessfully authenticated 
-$graph_url = 'https://my.keynote.com/newmykeynote/graph.aspx'
-$selenium.Navigate().GoToUrl($graph_url)
+# $graph_url = 'https://my.keynote.com/newmykeynote/graph.aspx'
+# $graph_url = 'https://my.keynote.com/newmykeynote/graph.aspx?hist=0&vp=N&yud=66442'
+# $selenium.Navigate().GoToUrl($graph_url)
   # select device 
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 start-sleep -seconds 3
 
-<# need to find 
-<select id="mlist" class="step1select text"
-...
-
-
-#>
-
 try {
   [OpenQA.Selenium.IWebElement]$web_element = $null
+# quotes ?
   $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('input[name=regexp]'))
-  $web_element = $selenium.FindElementsByCssSelector("input[name=regexp]")
-  # debug 
-  $web_element 
+#  $web_element = $selenium.FindElementsByCssSelector("input[name=regexp]")
 } catch [exception]{
 }
 [NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
 write-output  $web_element.TagName
 $web_element.SendKeys('CCL - Carnival.com')
-$web_element.SendKeys([org.openqa.selenium.Keys]::RETURN)
+$web_element.SendKeys([OpenQA.Selenium.Keys]::RETURN)
 start-sleep -seconds 3
 
-  $web_element  | get-member
-
-<# 
+$web_element  | get-member
+<#
 try {
   [OpenQA.Selenium.IWebElement]$web_element = $null
-  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('mlist'))
-} catch [exception]{
-}
-[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
-try {
-  [OpenQA.Selenium.IWebElement]$web_element = $null
-  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select.step1select'))
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('step4btn'))
 } catch [exception]{
 }
 [NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
 
-
+$web_element.Click()   #  - this does not work
 #>
 
-try {
-  [OpenQA.Selenium.IWebElement]$web_element = $null
-  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select#mlist'))
-  $web_element = $selenium.FindElementsByCssSelector("select#mlist")
-  # debug 
-  $web_element
-} catch [exception]{
-}
-[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
-
-#[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Charts'))
-
+start-sleep -seconds 3
 # Cleanup
 try {
   $selenium.Quit()
