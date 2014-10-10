@@ -1,4 +1,3 @@
-
 #Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -74,7 +73,7 @@ if ($browser -ne $null -and $browser -ne '') {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
-  Write-Host "Running on ${browser}"
+  Write-Debug "Running on ${browser}"
   if ($browser -match 'firefox') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
 
@@ -124,23 +123,24 @@ $baseURL = "http://www.urbandictionary.com"
 $selenium.Navigate().GoToUrl($baseURL + "/")
 $selenium.Manage().Window.Maximize()
 # $element = $selenium.FindElement([OpenQA.Selenium.By]::ClassName("main-photo"))
+start-sleep 1
 $element = $selenium.FindElement([OpenQA.Selenium.By]::Id("logo"))
 
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $context = $actions.ContextClick($element)
 Start-Sleep -Seconds 1
 
-$context.Build().Perform()
+[void]$context.Build().Perform()
 # 
-$context.MoveByOffset(100,0)
-$context.Build().Perform()
+
+# Save Link as...
+# $context.MoveByOffset(10,95)
+# Copy link location
+[void]$context.MoveByOffset(10,100)
+[void]$context.Build().Perform()
 Start-Sleep -Seconds 3
 
-$context.MoveByOffset(0,100)
-$context.Build().Perform()
-Start-Sleep -Seconds 3
-
-$context.Click()
+[void]$context.Click()
 [void]$context.Build().Perform()
 
 <#
