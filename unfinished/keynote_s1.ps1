@@ -86,8 +86,8 @@ if ($browser -ne $null -and $browser -ne '') {
     $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
   Write-Debug "Running on ${browser}"
@@ -124,7 +124,7 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability('phantomjs.executable.path',$phantomjs_executable_folder)
 }
 
-
+[void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(120))
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Manage().Window.Maximize()
 
@@ -235,16 +235,77 @@ try {
     }
     $cnt++
   }
-  $element5.Click()
+  # debug 
+  # $element5
+  [NUnit.Framework.Assert]::IsTrue(($element5.Text -match 'Analyze'))
+
+
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'color: blue; border: 4px solid blue;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'')
+
+
+
+  $element5.Click()   #  - this does not work
+  # brute-force. We are sucessfully authenticated 
+$graph_url = 'https://my.keynote.com/newmykeynote/graph.aspx'
+$selenium.Navigate().GoToUrl($graph_url)
   # select device 
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
+start-sleep -seconds 3
 
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-$element1.Click()
+<# need to find 
+<select id="mlist" class="step1select text"
+...
 
-#
+
+#>
+
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('input[name=regexp]'))
+  $web_element = $selenium.FindElementsByCssSelector("input[name=regexp]")
+  # debug 
+  $web_element 
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+write-output  $web_element.TagName
+$web_element.SendKeys('CCL - Carnival.com')
+$web_element.SendKeys([org.openqa.selenium.Keys]::RETURN)
+start-sleep -seconds 3
+
+  $web_element  | get-member
+
+<# 
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('mlist'))
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select.step1select'))
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+
+
+#>
+
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select#mlist'))
+  $web_element = $selenium.FindElementsByCssSelector("select#mlist")
+  # debug 
+  $web_element
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+
 #[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Charts'))
 
 # Cleanup
