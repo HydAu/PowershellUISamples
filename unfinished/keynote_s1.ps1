@@ -313,6 +313,8 @@ $element1.Click()
 Start-Sleep -Seconds 10
 
 $css_selector1 = 'path[fill="#f00"]'
+[OpenQA.Selenium.IWebElement]$element1 = $null
+
 try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 30
@@ -325,6 +327,47 @@ try {
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 $element1.Click()
 Start-Sleep -Seconds 10
+
+
+$css_selector1 = 'div.screenshotTitle'
+[OpenQA.Selenium.IWebElement]$element1 = $null
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(30))
+  $wait.PollingInterval = 150
+  $element1 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+  $element1
+  } catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+if ($element1 -ne $null) {
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 4
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+}
+# [NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('href') -match "measure"))
+
+<#
+# needs more work
+$link_text_value = 'View Headers'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::LinkText($link_text_value)))
+  [void]$selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText($link_text_value))
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+
+[NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('href') -match "measure"))
+$element1.Click()
+#>
+
+
 # Cleanup
 try {
   $selenium.Quit()
