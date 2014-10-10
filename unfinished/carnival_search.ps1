@@ -116,7 +116,6 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 $baseURL = "http://www.carnival.com"
-$baseURL = 'http://www4.uatcarnival.com/';
 
 $selenium.Navigate().GoToUrl($baseURL + "/")
 $selenium.Manage().Window.Maximize()
