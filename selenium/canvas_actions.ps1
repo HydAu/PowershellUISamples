@@ -83,15 +83,15 @@ if ($PSBoundParameters["browser"]) {
 
 $selenium.Navigate().GoToUrl($baseURL + "")
 # https://groups.google.com/forum/?fromgroups#!topic/selenium-users/V1eoFUMEPqI
-[OpenQA.Selenium.Interactions.Actions]$builder = New-Object OpenQA.Selenium.Interactions.Actions ($selenium);
+[OpenQA.Selenium.Interactions.Actions]$builder = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 # NOTE: failed in phantomjs
-[OpenQA.Selenium.IWebElement]$canvas = $selenium.FindElement([OpenQA.Selenium.By]::Id("tutorial"));
+[OpenQA.Selenium.IWebElement]$canvas = $selenium.FindElement([OpenQA.Selenium.By]::Id("tutorial"))
 $builder.Build();
 $builder.MoveToElement($canvas,100,100)
 $builder.clickAndHold()
 $builder.moveByOffset(40,60)
-$builder.release();
-$builder.Perform();
+$builder.release()
+$builder.Perform()
 
 Start-Sleep -Seconds 10
 
