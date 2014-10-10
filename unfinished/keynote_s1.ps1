@@ -5,7 +5,7 @@ param(
   [string]$username,
   [string]$password
 )
-
+[string]$device = 'CCL - Carnival.com'
 if ($base_url -eq '') {
   $base_url = $env:BASE_URL
 }
@@ -86,8 +86,8 @@ if ($browser -ne $null -and $browser -ne '') {
     $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\node.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
   Write-Debug "Running on ${browser}"
@@ -128,11 +128,12 @@ if ($browser -ne $null -and $browser -ne '') {
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Manage().Window.Maximize()
 
+# Enter credentials
 $value1 = 'un'
 $css_selector1 = ('input#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 30
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
@@ -148,8 +149,8 @@ $element1.SendKeys($username)
 $value1 = 'pw'
 $css_selector1 = ('input#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 30
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
@@ -174,17 +175,17 @@ try {
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 [NUnit.Framework.Assert]::IsTrue(($element1.GetAttribute('value') -match 'Sign In'))
+Write-Output ('Clicking on "{0}"' -f $element1.GetAttribute('value'))
 
-# Write-Output ('Clicking on ' + $element1.GetAttribute('value'))
 $element1.Click()
 
-Start-Sleep 5
+# Navigate the menu to select 'Analyze'
 
 $value1 = 'graphsNavTab'
 $css_selector1 = ('a#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 30
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
@@ -199,13 +200,11 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element1).Build().Perform();
 
 
-Start-Sleep 5
-
 $value1 = 'graphsNavTab'
 $css_selector1 = ('li#{0}' -f $value1)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 30
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
@@ -214,79 +213,73 @@ try {
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 
-$value2 = 'fa-bar-chart-o'
-$css_selector2 = ('i."{0}"' -f $value1)
+$css_selector2 = 'ul > li > a'
 try {
-  #  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  #  $wait.PollingInterval = 150
-  #  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  #  $element2 = $element1.FindElements([OpenQA.Selenium.By]::TagName("ul"))
-  #  $elements2 = $element1.FindElementByTagName("ul")
-  $elements3 = $element1.FindElementsByCssSelector("ul > li > a")
-  $element5 = $null
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 30
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
 
-  $cnt = 0
-
-  $elements3 | ForEach-Object { $element3 = $_
-    # https://my.keynote.com/newmykeynote/graph.aspx?hist=0&vp=N&yud=1066435
-
-    if (($element3.GetAttribute('href') -match 'graph.asp') -and ($element3.Text -match 'Analyze')) {
-      $element5 = $element3
-    }
-    $cnt++
-  }
-  # debug 
-  # $element5
-  [NUnit.Framework.Assert]::IsTrue(($element5.Text -match 'Analyze'))
-
-  [NUnit.Framework.Assert]::IsTrue(($element5.Displayed))
-# write-host ('->{0}' -f  $element5.Displayed )
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'color: blue; border: 4px solid blue;')
-Start-Sleep 1
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'')
-
-
-#   $element5| get-member
-
-  $element5.SendKeys([OpenQA.Selenium.Keys]::RETURN)
-start-sleep 10
-#  $element5.Click()   #  - this does not work
-  # brute-force. We are sucessfully authenticated 
-# $graph_url = 'https://my.keynote.com/newmykeynote/graph.aspx'
-# $graph_url = 'https://my.keynote.com/newmykeynote/graph.aspx?hist=0&vp=N&yud=66442'
-# $selenium.Navigate().GoToUrl($graph_url)
-  # select device 
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
-start-sleep -seconds 3
 
-try {
-  [OpenQA.Selenium.IWebElement]$web_element = $null
-# quotes ?
-  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('input[name=regexp]'))
-#  $web_element = $selenium.FindElementsByCssSelector("input[name=regexp]")
-} catch [exception]{
+$elements3 = $element1.FindElementsByCssSelector($css_selector2)
+$element5 = $null
+
+$cnt = 0
+
+$elements3 | ForEach-Object { $element3 = $_
+  if (($element3.GetAttribute('href') -match 'graph.asp') -and ($element3.Text -match 'Analyze')) {
+    $element5 = $element3
+  }
+  $cnt++
 }
-[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
-write-output  $web_element.TagName
-$web_element.SendKeys('CCL - Carnival.com')
-$web_element.SendKeys([OpenQA.Selenium.Keys]::RETURN)
-start-sleep -seconds 3
+[NUnit.Framework.Assert]::IsTrue(($element5.Text -match 'Analyze'))
+[NUnit.Framework.Assert]::IsTrue(($element5.Displayed))
 
-$web_element  | get-member
+
 <#
-try {
-  [OpenQA.Selenium.IWebElement]$web_element = $null
-  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('step4btn'))
-} catch [exception]{
-}
-[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
 
-$web_element.Click()   #  - this does not work
+# optional highlight
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'color: blue; border: 4px solid blue;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'')
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 #>
 
-start-sleep -seconds 3
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Build().Perform();
+
+$element5.SendKeys([OpenQA.Selenium.Keys]::RETURN)
+Start-Sleep 3
+
+# Select device by first filtering
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('input[name=regexp]'))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+$web_element.SendKeys($device)
+[NUnit.Framework.Assert]::IsTrue(($element5.Text -match '')) # Text will be still blank
+# NOTE: Do not send ENTER key
+# $web_element.SendKeys([OpenQA.Selenium.Keys]::RETURN)
+Start-Sleep -Seconds 3
+
+try {
+  [OpenQA.Selenium.IWebElement]$web_element = $null
+  $web_element = $selenium.FindElement([OpenQA.Selenium.By]::Id('mlist'))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
+[NUnit.Framework.Assert]::IsTrue(($web_element.Text -match $device))
+
+$web_element.Click()
+
+Start-Sleep -Seconds 10
+
+
 # Cleanup
 try {
   $selenium.Quit()
