@@ -206,7 +206,7 @@ try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 30
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+#   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
@@ -276,30 +276,55 @@ try {
 [NUnit.Framework.Assert]::IsTrue(($element1.Text -match $device))
 
 $element1.Click()
-Start-Sleep -Seconds 5
-$css_selector2 = 'span.scatter'
+
+[OpenQA.Selenium.IWebElement]$element1 = $null
+
+$css_selector1 = 'span.scatter'
 try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 30
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
 
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
-$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-$element2.Click()
-Start-Sleep -Seconds 5
-[OpenQA.Selenium.IWebElement]$element1 = $null
-try {
-  $element1 = $selenium.FindElement([OpenQA.Selenium.By]::Id('step4btn'))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 $element1.Click()
-Start-Sleep -Seconds 30
+# Start-Sleep -Seconds 5
 
+$id1 = 'step4btn'
+[OpenQA.Selenium.IWebElement]$element1 = $null
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 30
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector([OpenQA.Selenium.By]::Id($id1))))
+
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1, (($_.Exception.Message) -split "`n")[0])
+}
+  $element1 = $selenium.FindElement([OpenQA.Selenium.By]::Id($id1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Generate Graph'))
+$element1.Click()
+Start-Sleep -Seconds 10
+
+$css_selector1 = 'path[fill="#f00"]'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 30
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+$element1.Click()
+Start-Sleep -Seconds 10
 # Cleanup
 try {
   $selenium.Quit()
