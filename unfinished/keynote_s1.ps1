@@ -199,7 +199,7 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element1).Build().Perform();
 
 
-start-sleep 5
+Start-Sleep 5
 
 $value1 = 'graphsNavTab'
 $css_selector1 = ('li#{0}' -f $value1)
@@ -217,31 +217,26 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 $value2 = 'fa-bar-chart-o'
 $css_selector2 = ('i."{0}"' -f $value1)
 try {
-#  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-#  $wait.PollingInterval = 150
-#  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-#  $element2 = $element1.FindElements([OpenQA.Selenium.By]::TagName("ul"))
-
-  $elements2 = $element1.FindElementByTagName("ul")
-$cnt = 0 
-$elements2 | foreach-object { $element2 = $_
-  $cnt
-  $element2.Text
-  write-host ("->{0}" -f $element2.GetAttribute('class') )
-$cnt++
-}
+  #  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  #  $wait.PollingInterval = 150
+  #  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+  #  $element2 = $element1.FindElements([OpenQA.Selenium.By]::TagName("ul"))
+  #  $elements2 = $element1.FindElementByTagName("ul")
   $elements3 = $element1.FindElementsByCssSelector("ul > li > a")
+  $element5 = $null
 
-$elements3 | foreach-object { $element3 = $_
-  $cnt
-  $element3.Text
-  write-host ("->{0}" -f $element3.GetAttribute('class') )  
-  write-host ("->{0}" -f $element3.GetAttribute('href') )  
+  $cnt = 0
 
+  $elements3 | ForEach-Object { $element3 = $_
+    # https://my.keynote.com/newmykeynote/graph.aspx?hist=0&vp=N&yud=1066435
 
-$cnt++
-}
-
+    if (($element3.GetAttribute('href') -match 'graph.asp') -and ($element3.Text -match 'Analyze')) {
+      $element5 = $element3
+    }
+    $cnt++
+  }
+  $element5.Click()
+  # select device 
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
