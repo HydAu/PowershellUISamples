@@ -18,70 +18,70 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-param( # Collects all named paramters - the rest end up in $Args
-[string] $event_record_id = '17954',
-[string] $event_channel  = 'Application',
-[switch] $create_event
+param(# Collects all named paramters - the rest end up in $Args
+  [string]$event_record_id = '17954',
+  [string]$event_channel = 'Application',
+  [switch]$create_event
 
 )
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
-    if($Invocation.PSScriptRoot)
-    {
-        $Invocation.PSScriptRoot;
-    }
-    Elseif($Invocation.MyCommand.Path)
-    {
-        Split-Path $Invocation.MyCommand.Path
-    }
-    else
-    {
-        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
-    }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"))
+  }
 }
 
 
 if ($PSBoundParameters["create_event"]) {
 
-$date_str = '{0:yyyy-MM-ddTHH:mm:ssZ}' -f (Get-Date)
-[string]$command = @"
+  $date_str = '{0:yyyy-MM-ddTHH:mm:ssZ}' -f (Get-Date)
+  [string]$command = @"
 eventcreate /T INFORMATION /SO SomeApplication /ID 1000 /L APPLICATION /D "<Params><Timestamp>${date_str}</Timestamp><InputFile>C:\developer\sergueik\powershell_ui_samples\dummy.txt</InputFile><Result>Success</Result></Params>"
 "@
-$result = (invoke-expression -command $command)
-# $result = 
-# SUCCESS: An event of type 'INFORMATION' was created in the 'APPLICATION' log with 'SomeApplication' as the source.
-} else { 
+  $result = (Invoke-Expression -Command $command)
+  # $result = 
+  # SUCCESS: An event of type 'INFORMATION' was created in the 'APPLICATION' log with 'SomeApplication' as the source.
+} else {
 
 
-# http://blogs.technet.com/b/wincat/archive/2011/08/25/trigger-a-powershell-script-from-a-windows-event.aspx
+  # http://blogs.technet.com/b/wincat/archive/2011/08/25/trigger-a-powershell-script-from-a-windows-event.aspx
 
 
-# alternative ways to compose XPath query:
-# direct:
-$event = get-winevent -LogName $event_channel -FilterXPath "*[System[(EventRecordID=$event_record_id)]]"
-# indirect:
-$event = get-winevent -LogName $event_channel -FilterXPath ( "<QueryList><Query Id='0' Path='{0}'><Select Path='{0}'>*[System[(EventRecordID={1})]]</Select></Query></QueryList>" -f $event_channel, $event_record_id  )
+  # alternative ways to compose XPath query:
+  # direct:
+  $event = Get-WinEvent -LogName $event_channel -FilterXPath "*[System[(EventRecordID=$event_record_id)]]"
+  # indirect:
+  $event = Get-WinEvent -LogName $event_channel -FilterXPath ("<QueryList><Query Id='0' Path='{0}'><Select Path='{0}'>*[System[(EventRecordID={1})]]</Select></Query></QueryList>" -f $event_channel,$event_record_id)
 
-# alternative ways to extract event fields:
+  # alternative ways to extract event fields:
 
-# XML
-$event_obj = ([xml]$event.ToXml()) 
-if ($eventParams.Event.System.TimeCreated.SystemTime)
-{
-[xml]$event_obj.event.eventdata.data |Select-Object -Property @{Label='InputFile';Expression="Name"}, @{Label='EventData';Expression="#text"} |ConvertTo-Csv -NoTypeInformation |Out-File ('{0}\{1}' -f (Get-ScriptDirectory), 'appusage.csv' ) -Append
-}
-# VB-style
-[xml]$eventParams = $event_obj.Event.EventData.Data
-if ($eventParams.Params.TimeStamp) {
+  # XML
+  $event_obj = ([xml]$event.ToXml())
+  if ($eventParams.Event.System.TimeCreated.SystemTime)
+  {
+    [xml]$event_obj.Event.eventdata.data | Select-Object -Property @{ Label = 'InputFile'; Expression = "Name" },@{ Label = 'EventData'; Expression = "#text" } | ConvertTo-Csv -NoTypeInformation | Out-File ('{0}\{1}' -f (Get-ScriptDirectory),'appusage.csv') -Append
+  }
+  # VB-style
+  [xml]$eventParams = $event_obj.Event.eventdata.data
+  if ($eventParams.Params.TimeStamp) {
     [datetime]$eventTimestamp = $eventParams.Params.TimeStamp
     $eventFile = $eventParams.Params.InputFile
 
-    $popupObject = new-object -comobject wscript.shell
+    $popupObject = New-Object -ComObject wscript.shell
     $popupObject.popup("RecordID: " + $event_record_id + ", Channel: " + $event_channel + ", Event Timestamp: " + $eventTimestamp + ", File: " + $eventFile)
-}
+  }
 
 }
 
