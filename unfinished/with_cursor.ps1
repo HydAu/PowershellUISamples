@@ -19,14 +19,14 @@
 #THE SOFTWARE.
 
 param(
-  [string]$image_name='4f654c89-5efd-43ef-9173-0cfe125ca9az',
+  [string]$image_name = '4f654c89-5efd-43ef-9173-0cfe125ca9az',
   [switch]$cursor
 )
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
-  $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
   if ($Invocation.PSScriptRoot)
   {
     $Invocation.PSScriptRoot;
@@ -37,7 +37,7 @@ function Get-ScriptDirectory
   }
   else
   {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"))
   }
 }
 
@@ -56,9 +56,6 @@ namespace ScreenshotCaptureWithMouse.ScreenCapture
 {
     class Win32Stuff
     {
-
-        #region Class Variables
-        
         public const int SM_CXSCREEN = 0;
         public const int SM_CYSCREEN = 1;
 
@@ -67,11 +64,11 @@ namespace ScreenshotCaptureWithMouse.ScreenCapture
         [StructLayout(LayoutKind.Sequential)]
         public struct ICONINFO
         {
-            public bool fIcon;         // Specifies whether this structure defines an icon or a cursor. A value of TRUE specifies 
-            public Int32 xHotspot;     // Specifies the x-coordinate of a cursor's hot spot. If this structure defines an icon, the hot 
-            public Int32 yHotspot;     // Specifies the y-coordinate of the cursor's hot spot. If this structure defines an icon, the hot 
-            public IntPtr hbmMask;     // (HBITMAP) Specifies the icon bitmask bitmap. If this structure defines a black and white icon, 
-            public IntPtr hbmColor;    // (HBITMAP) Handle to the icon color bitmap. This member can be optional if this 
+            public bool fIcon;
+            public Int32 xHotspot;
+            public Int32 yHotspot;
+            public IntPtr hbmMask;
+            public IntPtr hbmColor;
         }
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT
@@ -83,16 +80,11 @@ namespace ScreenshotCaptureWithMouse.ScreenCapture
         [StructLayout(LayoutKind.Sequential)]
         public struct CURSORINFO
         {
-            public Int32 cbSize;        // Specifies the size, in bytes, of the structure. 
-            public Int32 flags;         // Specifies the cursor state. This parameter can be one of the following values:
-            public IntPtr hCursor;          // Handle to the cursor. 
-            public POINT ptScreenPos;       // A POINT structure that receives the screen coordinates of the cursor. 
+            public Int32 cbSize;
+            public Int32 flags;
+            public IntPtr hCursor;
+            public POINT ptScreenPos;
         }
-
-        #endregion
-
-
-        #region Class Functions
 
         [DllImport("user32.dll", EntryPoint = "GetDesktopWindow")]
         public static extern IntPtr GetDesktopWindow();
@@ -118,24 +110,179 @@ namespace ScreenshotCaptureWithMouse.ScreenCapture
 
         [DllImport("user32.dll", EntryPoint = "GetIconInfo")]
         public static extern bool GetIconInfo(IntPtr hIcon, out ICONINFO piconinfo);
-
-
-        #endregion
     }
 
-public class ScreenshotHelper
-{
+    class GDIStuff
+    {
+        public const int SRCCOPY = 13369376;
+
+        [DllImport("gdi32.dll", EntryPoint = "CreateDC")]
+        public static extern IntPtr CreateDC(IntPtr lpszDriver, string lpszDevice, IntPtr lpszOutput, IntPtr lpInitData);
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteDC")]
+        public static extern IntPtr DeleteDC(IntPtr hDc);
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        public static extern IntPtr DeleteObject(IntPtr hDc);
+
+        [DllImport("gdi32.dll", EntryPoint = "BitBlt")]
+        public static extern bool BitBlt(IntPtr hdcDest, int xDest,
+                                         int yDest, int wDest,
+                                         int hDest, IntPtr hdcSource,
+                                         int xSrc, int ySrc, int RasterOp);
+
+        [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleBitmap")]
+        public static extern IntPtr CreateCompatibleBitmap
+                                    (IntPtr hdc, int nWidth, int nHeight);
+
+        [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleDC")]
+        public static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
+        public static extern IntPtr SelectObject(IntPtr hdc, IntPtr bmp);
+    }
+
+    public class ScreenshotHelper
+    {
+
+
+        private Boolean _cursor;
+        public Boolean Cursor
+        {
+            get { return _cursor; }
+            set { _cursor = value; }
+        }
+        private string _imagePath;
+        public string ImagePath
+        {
+            get { return _imagePath; }
+            set { _imagePath = value; }
+        }
+
+        public struct SIZE
+        {
+            public int cx;
+            public int cy;
+        }
+
+        static Bitmap CaptureDesktop()
+        {
+            SIZE size;
+            IntPtr hBitmap;
+            IntPtr hDC = Win32Stuff.GetDC(Win32Stuff.GetDesktopWindow());
+            IntPtr hMemDC = GDIStuff.CreateCompatibleDC(hDC);
+
+            size.cx = Win32Stuff.GetSystemMetrics
+                      (Win32Stuff.SM_CXSCREEN);
+
+            size.cy = Win32Stuff.GetSystemMetrics
+                      (Win32Stuff.SM_CYSCREEN);
+
+            hBitmap = GDIStuff.CreateCompatibleBitmap(hDC, size.cx, size.cy);
+
+            if (hBitmap != IntPtr.Zero)
+            {
+                IntPtr hOld = (IntPtr)GDIStuff.SelectObject
+                                       (hMemDC, hBitmap);
+
+                GDIStuff.BitBlt(hMemDC, 0, 0, size.cx, size.cy, hDC,
+                                               0, 0, GDIStuff.SRCCOPY);
+
+                GDIStuff.SelectObject(hMemDC, hOld);
+                GDIStuff.DeleteDC(hMemDC);
+                Win32Stuff.ReleaseDC(Win32Stuff.GetDesktopWindow(), hDC);
+                Bitmap bmp = System.Drawing.Image.FromHbitmap(hBitmap);
+                GDIStuff.DeleteObject(hBitmap);
+                GC.Collect();
+                return bmp;
+            }
+            return null;
+
+        }
+
+
+        static Bitmap CaptureCursor(ref int x, ref int y)
+        {
+            Bitmap bmp;
+            IntPtr hicon;
+            Win32Stuff.CURSORINFO ci = new Win32Stuff.CURSORINFO();
+            Win32Stuff.ICONINFO icInfo;
+            ci.cbSize = Marshal.SizeOf(ci);
+            if (Win32Stuff.GetCursorInfo(out ci))
+            {
+                if (ci.flags == Win32Stuff.CURSOR_SHOWING)
+                {
+                    hicon = Win32Stuff.CopyIcon(ci.hCursor);
+                    if (Win32Stuff.GetIconInfo(hicon, out icInfo))
+                    {
+                        x = ci.ptScreenPos.x - ((int)icInfo.xHotspot);
+                        y = ci.ptScreenPos.y - ((int)icInfo.yHotspot);
+
+                        Icon ic = Icon.FromHandle(hicon);
+                        bmp = ic.ToBitmap();
+                        return bmp;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public static Bitmap CaptureDesktopWithCursor()
+        {
+            int cursorX = 0;
+            int cursorY = 0;
+            Bitmap desktopBMP;
+            Bitmap cursorBMP;
+            Graphics g;
+            Rectangle r;
+
+            desktopBMP = CaptureDesktop();
+            cursorBMP = CaptureCursor(ref cursorX, ref cursorY);
+            if (desktopBMP != null)
+            {
+                if (cursorBMP != null)
+                {
+                    r = new Rectangle(cursorX, cursorY, cursorBMP.Width, cursorBMP.Height);
+                    g = Graphics.FromImage(desktopBMP);
+                    g.DrawImage(cursorBMP, r);
+                    g.Flush();
+                }
+                else {
+                     throw( new Exception("!!!"));
+                }
+                return desktopBMP;
+            }
+
+            return null;
+
+        }
+
+        public void Screenshot()
+        {
+            Bitmap finalBMP;
+            Graphics graphics;
+
+            finalBMP = CaptureDesktopWithCursor();
+            graphics = Graphics.FromImage(finalBMP);
+            // graphics.CopyFromScreen(0, 0, 0, 0, finalBMP.Size);
+            finalBMP.Save(_imagePath, ImageFormat.Png);
+            finalBMP.Dispose();
+            graphics.Dispose();
+        }
+
+
+    }
 }
-}
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
 
 if ($image_name -eq '') {
   $image_name = $env:IMAGE_NAME
 }
 
 if (($image_name -eq '') -or ($image_name -eq $null)) {
-$guid = [guid]::NewGuid()
-$image_name = ($guid.ToString())
+  $guid = [guid]::NewGuid()
+  $image_name = ($guid.ToString())
 }
 [string]$image_path = ('{0}\{1}.{2}' -f (Get-ScriptDirectory),$image_name,'png')
 
@@ -148,8 +295,8 @@ if ($PSBoundParameters['cursor']) {
   $cursor = $false
 }
 $helper.Cursor = $cursor
-  try {
-    $helper.Screenshot($cursor)
-  } catch [exception]{
-    Write-Output ("Ignoring exception:`n{0}" -f $_.Exception.Message)
-  }
+try {
+  $helper.Screenshot()
+} catch [exception]{
+  Write-Output ("Ignoring exception:`n{0}" -f $_.Exception.Message)
+}
