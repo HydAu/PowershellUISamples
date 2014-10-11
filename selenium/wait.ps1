@@ -42,15 +42,31 @@ $shared_assemblies = @(
   "nunit.framework.dll"
 )
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
+
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
+
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; Write-Debug ("Loaded {0} " -f $_) }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
+
+$hub_host = '127.0.0.1'
+$hub_port = '4444'
+$uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
+
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect('127.0.0.1',4444)
+    $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
@@ -74,7 +90,6 @@ if ($browser -ne $null -and $browser -ne '') {
   else {
     throw "unknown browser choice:${browser}"
   }
-  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
   Write-Host 'Running on phantomjs'
@@ -105,5 +120,7 @@ ElementIsVisible()
 try {
   $selenium.Quit()
 } catch [exception]{
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
 }
 [NUnit.Framework.Assert]::AreEqual($verificationErrors.Length,0)

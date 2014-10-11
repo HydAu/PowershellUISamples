@@ -37,8 +37,6 @@ function Get-ScriptDirectory
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
-  # "Selenium.WebDriverBackedSelenium.dll",
-  # TODO - resolve dependencies
   'nunit.core.dll',
   'nunit.framework.dll'
 
@@ -58,26 +56,36 @@ use fixw2k3.ps1
 Add-Type : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
 #>
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
+
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { 
- if ($host.Version.Major -gt 2){
-   Unblock-File -Path $_;
- }
- write-output $_
- Add-Type -Path $_ 
- }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
 
 $verificationErrors = New-Object System.Text.StringBuilder
+
 # use Default Web Site to host the page. Enable Directory Browsing.
+
+$hub_host = '127.0.0.1'
+$hub_port = '4444'
+$uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
+
 $baseURL = 'http://localhost/jOrgChart-master2/example.html'
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect('127.0.0.1',4444)
+    $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
@@ -101,7 +109,6 @@ if ($browser -ne $null -and $browser -ne '') {
   else {
     throw "unknown browser choice:${browser}"
   }
-  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
   Write-Host 'Running on phantomjs'
@@ -143,4 +150,5 @@ try {
   $selenium.Quit()
 } catch [exception]{
   # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
 }
