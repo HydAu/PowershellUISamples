@@ -123,7 +123,7 @@ $baseURL = "http://www.urbandictionary.com"
 $selenium.Navigate().GoToUrl($baseURL + "/")
 $selenium.Manage().Window.Maximize()
 # $element = $selenium.FindElement([OpenQA.Selenium.By]::ClassName("main-photo"))
-start-sleep 1
+Start-Sleep 1
 $element = $selenium.FindElement([OpenQA.Selenium.By]::Id("logo"))
 
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)

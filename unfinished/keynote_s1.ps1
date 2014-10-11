@@ -326,8 +326,6 @@ try {
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 $element1.Click()
-Start-Sleep -Seconds 10
-
 
 $css_selector1 = 'div.screenshotTitle'
 [OpenQA.Selenium.IWebElement]$element1 = $null
