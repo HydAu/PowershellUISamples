@@ -123,13 +123,9 @@ public enum MSGRESPONSE
             frm.FormClosing += new FormClosingEventHandler(frm_FormClosing);
             frm.BackColor = System.Drawing.SystemColors.ButtonFace;
 
-         //messagebox icon
-         // TODO:
-         // 
-//http://www.iconarchive.com/search?q=ico+files&page=7
-            string p = @"C:\developer\sergueik\powershell_ui_samples\external\Icons8-Windows-8-Very-Basic-File.ico";
+            //http://www.iconarchive.com/search?q=ico+files&page=7
+            string p = @"C:\developer\sergueik\powershell_ui_samples\external\Martz90-Circle-Files.ico";
             frm.Icon = new System.Drawing.Icon( p );
-         //  frm.Icon = ((System.Drawing.Icon)(nameMSGBOX.Properties.Resources.P));
             if (btnDetails.Tag.ToString() == "exp")
             {
                 frm.Height = frm.Height - txtDescription.Height - 6;
@@ -418,7 +414,7 @@ public enum MSGRESPONSE
 
 
 $o = new-object -type 'nameMSGBOX.MSGBOX'
-$o.SetMessageText("test", "this is a test", $null)
+$o.SetMessageText("Test", "this is a Lorem Ipsum test", "This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
 $o.AddIconImage([nameMSGBOX.MSGICON]::Information)
 $o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
 $o.DrawBox()
