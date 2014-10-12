@@ -41,7 +41,8 @@ function Get-ScriptDirectory
   }
 }
 
-# http://www.codeproject.com/Tips/816113/Console-Monitor
+# http://www.codeproject.com/Articles/12850/Capturing-the-Desktop-Screen-with-the-Mouse-Cursor
+
 Add-Type -TypeDefinition @"
 using System;
 using System.Drawing;
