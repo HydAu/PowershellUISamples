@@ -22,8 +22,8 @@ param(
   [string]$browser = 'firefox',
   [int]$version,
   [string]$base_url = 'https://my.keynote.com/newmykeynote/logon.do',
-  [string]$username,
-  [string]$password
+  [string]$username = 'kouzmine_serguei@yahoo.com',
+  [string]$password = 'd1emW02m_@'
 )
 [string]$device = 'CCL - Carnival.com'
 if ($base_url -eq '') {
@@ -106,8 +106,8 @@ if ($browser -ne $null -and $browser -ne '') {
     $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\node.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
   Write-Debug "Running on ${browser}"
@@ -147,7 +147,8 @@ if ($browser -ne $null -and $browser -ne '') {
 [void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(120))
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Manage().Window.Maximize()
-
+$title = $selenium.Title
+[NUnit.Framework.Assert]::IsTrue(($title.IndexOf('Logon Page - MyKeynote') -gt -1),$title)
 # Enter credentials
 $value1 = 'un'
 $css_selector1 = ('input#{0}' -f $value1)
@@ -199,6 +200,10 @@ Write-Output ('Clicking on "{0}"' -f $element1.GetAttribute('value'))
 
 $element1.Click()
 
+$title = $selenium.Title
+[NUnit.Framework.Assert]::IsTrue(($title.IndexOf('Home - MyKeynote') -gt -1),$title)
+
+<#
 # Navigate the menu to select 'Analyze'
 
 $value1 = 'graphsNavTab'
@@ -264,6 +269,7 @@ Start-Sleep 1
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'')
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
+#>
 
 # Log off 
 
@@ -274,74 +280,67 @@ try {
   $wait.PollingInterval = 30
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+# optional highlight
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: blue; border: 4px solid blue;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+
 # TODO: find attributes to assert  
-#$element1
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match '') , $element1.Text)
+Write-Output $element1.ToString()
+$element1
+[NUnit.Framework.Assert]::IsTrue(($element1.Text -match ''),$element1.Text)
 
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element1).Build().Perform()
 
-$element1.Click()
-start-sleep 5 
-
-$value1 = 'settingsNavTab'
-$css_selector1 = ('a#{0}' -f $value1)
+$css_selector2 = ('li#{0} > ul > li > a' -f $value1)
+Write-Output ('Navigating to CSS SELECTOR {0}' -f $css_selector2)
 try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
-  $wait.PollingInterval = 30
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-# TODO: find attributes to assert  
-#$element1
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match '') , $element1.Text)
-
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element1).Build().Perform()
-start-sleep 10
-
-$css_selector2 = 'ul > li > a'
-try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 30
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(5))
+  $wait.PollingInterval = 100
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-
+  # [void]$selenium.FindElementsByCssSelector($css_selector2)
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  throw
 }
 
-$elements3 = $element1.FindElementsByCssSelector($css_selector2)
+# Relative does not work
+$css_selector_relative_2 = 'ul > li > a'
+$elements3 = $element1.FindElementsByCssSelector($css_selector_relative_2)
+# $elements3 
+$elements3 = $selenium.FindElementsByCssSelector($css_selector2)
+# $elements3
 $element5 = $null
-
+# $elements3 | get-member
 $cnt = 0
 
 $elements3 | ForEach-Object { $element3 = $_
-  $element3   
-# optional highlight
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: blue; border: 4px solid blue;')
-Start-Sleep 1
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  # optional highlight
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: blue; border: 4px solid blue;')
+  Start-Sleep -Milliseconds 200
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
-  if (($element3.GetAttribute('href') -match 'mylogout.aspx') -and ($element3.Text -match 'Sign out of MyKeynote')) {
+  if ($element3.GetAttribute('href') -match 'mylogout.aspx') {
     $element5 = $element3
   }
   $cnt++
 }
-[NUnit.Framework.Assert]::IsTrue(($element5.Text -match 'Sign out of MyKeynote'))
+[NUnit.Framework.Assert]::IsTrue(($element5.Text -match 'Sign out'))
 [NUnit.Framework.Assert]::IsTrue(($element5.Displayed))
-
+$element5.SendKeys([OpenQA.Selenium.Keys]::RETURN)
+Start-Sleep 4
+$title = $selenium.Title
+[NUnit.Framework.Assert]::IsTrue(($title.IndexOf('Logon Page - MyKeynote') -gt -1),$title)
 
 # Cleanup
 try {
@@ -349,3 +348,4 @@ try {
 } catch [exception]{
   # Ignore errors if unable to close the browser
 }
+# d1emW02m_@
