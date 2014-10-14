@@ -362,11 +362,111 @@ try {
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 [NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
 
+write-output ('Clicking on {0}' -f $element1.GetAttribute('target') )
 write-output ('Clicking on {0}' -f $element1.GetAttribute('fill') )
 
 $element1.Click()
 
 start-sleep 10
+
+$initial_window_handle = $selenium.CurrentWindowHandle
+
+Write-Output ("CurrentWindowHandle = {0}`n" -f $initial_window_handle)
+
+$handles = @()
+try {
+  $handles = $selenium.WindowHandles
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+if ($handles.Count -gt 1) {
+  $handles | ForEach-Object {
+    $switch_to_window_handle = $_
+    if ($switch_to_window_handle -eq $initial_window_handle)
+    {
+      [void]$selenium.switchTo().defaultContent()
+    } else {
+
+
+      [void]$selenium.switchTo().window($switch_to_window_handle)
+      Start-Sleep -Seconds 10
+      $window_handle = $selenium.CurrentWindowHandle
+      Write-Output ('WindowHandle : {0}' -f $window_handle)
+
+
+      Write-Output ('Title: {0}' -f $selenium.Title)
+      if ($selenium.Title -match 'Details') { 
+         [OpenQA.Selenium.IJavaScriptExecutor]$jscript = $selenium
+         [string]$URL = $jscript.ExecuteScript("return document.URL")
+         Write-Output $URL
+
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::xpath("//a[contains(text(),'View Headers')]")))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+[OpenQA.Selenium.Remote.RemoteWebElement]$link = $selenium.findElement([OpenQA.Selenium.By]::xpath("//a[contains(text(),'View Headers')]"))
+[NUnit.Framework.Assert]::IsTrue(($link -ne $null))
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$link).Build().Perform()
+
+$text_url = $link.GetAttribute('href')
+if ($PSBoundParameters['click']) {
+  # optional click
+  $link.click()
+}
+try {
+  $selenium.Quit()
+} catch [exception]{
+  # Ignore errors if unable to close the browser
+}
+
+# RawContent is a mix of ascii header
+# and a UTF16 body, 
+
+$result = Invoke-WebRequest -Uri $text_url
+[System.Text.Encoding]$out_encoding = [System.Text.Encoding]::ASCII
+[System.Text.Encoding]$in_encoding = [System.Text.Encoding]::UNICODE
+[byte[]]$bytes = $in_encoding.GetBytes($result.Content)
+$bytes = [System.Text.Encoding]::Convert([System.Text.Encoding]::UNICODE,[System.Text.Encoding]::ASCII,$bytes)
+# NOTE - THIS second conversion IS needed because the way $bytes is returned.
+$bytes = [System.Text.Encoding]::Convert([System.Text.Encoding]::UNICODE,[System.Text.Encoding]::ASCII,$bytes)
+$data = $out_encoding.GetString($bytes)
+
+if ($PSBoundParameters['download']) {
+  $out_file = $text_url
+  $out_file = $out_file -replace '.+/',''
+  write-host ('Saving "{0}"' -f $out_file )
+  Remove-Item -Path $out_file -Force -ErrorAction 'SilentlyContinue'
+  $data | Out-File -FilePath $out_file -Encoding ascii
+}
+
+[NUnit.Framework.Assert]::IsTrue(($data -match 'ASP.NET_SessionId'))
+$data | ForEach-Object {
+  $line = $_
+  $found = $line -match 'ASP.NET_SessionId=([^; ]+);'
+  if ($found) {
+    $session_id = $matches[1]
+  }
+
+}
+
+write-host ('ASP.NET_SessionId="{0}"' -f $session_id)
+
+
+      }
+      Start-Sleep -Seconds 10
+      [void]$selenium.switchTo().window($initial_window_handle)
+    }
+  }
+
+
+}
+
 $css_selector1 = 'div.screenshotTitle'
 [OpenQA.Selenium.IWebElement]$element1 = $null
 try {
