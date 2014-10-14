@@ -35,9 +35,11 @@ function Get-ScriptDirectory
   }
 }
 $shared_assemblies = @(
-  "WebDriver.dll",
-  "WebDriver.Support.dll",
-  "Selenium.WebDriverBackedSelenium.dll"
+  'WebDriver.dll',
+  'WebDriver.Support.dll',
+  'Selenium.WebDriverBackedSelenium.dll',
+  'nunit.core.dll',
+  'nunit.framework.dll'
 )
 
 $env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
@@ -67,7 +69,7 @@ if ($browser -ne $null -and $browser -ne '') {
   elseif ($browser -match 'chrome') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
   }
-  elseif ($browser -match 'ie' ) {
+  elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
   }
   elseif ($browser -match 'safari') {
@@ -82,10 +84,10 @@ if ($browser -ne $null -and $browser -ne '') {
   Write-Host 'Running on phantomjs'
   $phantomjs_executable_folder = "C:\tools\phantomjs"
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
-  $selenium.Capabilities.SetCapability("ssl-protocol","any")
-  $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
-  $selenium.Capabilities.SetCapability("takesScreenshot",$true)
-  $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $selenium.Capabilities.setCapability("ssl-protocol","any")
+  $selenium.Capabilities.setCapability("ignore-ssl-errors",$true)
+  $selenium.Capabilities.setCapability("takesScreenshot",$true)
+  $selenium.Capabilities.setCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
@@ -112,11 +114,11 @@ try {
   # Ignore
   # Timed out waiting for async script result  (Firefox)
   # asynchronous script timeout: result was not received (Chrome)
-  [NUnit.Framework.Assert]::IsTrue(  $_.Exception.Message -match '(?:Timed out waiting for async script result|asynchronous script timeout)')
+  [NUnit.Framework.Assert]::IsTrue($_.Exception.Message -match '(?:Timed out waiting for async script result|asynchronous script timeout)')
 }
-catch [OpenQA.Selenium.NoSuchWindowException] { 
-write-host $_.Exception.Message # Unable to get browser
- $_.Exception | get-member
+catch [OpenQA.Selenium.NoSuchWindowException]{
+  Write-Host $_.Exception.Message # Unable to get browser
+  $_.Exception | Get-Member
 
 }
 $end = (Get-Date -UFormat "%s")
