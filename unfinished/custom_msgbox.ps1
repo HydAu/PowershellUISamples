@@ -413,9 +413,106 @@ public enum MSGRESPONSE
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 
-$o = new-object -type 'nameMSGBOX.MSGBOX'
-$o.SetMessageText("Test", "this is a Lorem Ipsum test", "This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
+$o = New-Object -Type 'nameMSGBOX.MSGBOX'
+$o.SetMessageText("Test","this is a Lorem Ipsum test","This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
 $o.AddIconImage([nameMSGBOX.MSGICON]::Information)
 $o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
 $o.DrawBox()
 $o.frm.ShowDialog()
+
+$MSGICON = New-Object PSObject
+$MSGICON | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
+$MSGICON | Add-Member -NotePropertyName 'Error' -NotePropertyValue 10
+$MSGICON | Add-Member -NotePropertyName 'Information' -NotePropertyValue 20
+$MSGICON | Add-Member -NotePropertyName 'Warning' -NotePropertyValue 30
+$MSGICON | Add-Member -NotePropertyName 'Question' -NotePropertyValue 40
+
+$MSGBUTTON = New-Object PSObject
+$MSGBUTTON | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
+$MSGBUTTON | Add-Member -NotePropertyName 'OK' -NotePropertyValue 1
+$MSGBUTTON | Add-Member -NotePropertyName 'YesNo' -NotePropertyValue 2
+$MSGBUTTON | Add-Member -NotePropertyName 'YesNoCancel' -NotePropertyValue 3
+$MSGBUTTON | Add-Member -NotePropertyName 'RetryCancle' -NotePropertyValue 4
+$MSGBUTTON | Add-Member -NotePropertyName 'AbortRetryIgnore' -NotePropertyValue 5
+
+$MSGRESPONSE = New-Object PSObject
+$MSGRESPONSE | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
+$MSGRESPONSE | Add-Member -NotePropertyName 'Yes' -NotePropertyValue 1
+$MSGRESPONSE | Add-Member -NotePropertyName 'No' -NotePropertyValue 2
+$MSGRESPONSE | Add-Member -NotePropertyName 'OK' -NotePropertyValue 3
+$MSGRESPONSE | Add-Member -NotePropertyName 'Abort' -NotePropertyValue 4
+$MSGRESPONSE | Add-Member -NotePropertyName 'Retry' -NotePropertyValue 5
+$MSGRESPONSE | Add-Member -NotePropertyName 'Ignore' -NotePropertyValue 6
+$MSGRESPONSE | Add-Member -NotePropertyName 'Cancel' -NotePropertyValue 7
+
+function AddButton {
+  # 
+  # AddButton -MSGBTN $MSGBUTTON.YesNoCancel
+  param([psobject]$param)
+
+  switch ($param) {
+    ($MSGBUTTON.None) {
+      $btnOK.Width = 80
+      $btnOK.Height = 24
+      $btnOK.Location = New-Object System.Drawing.Point (391,114)
+      $btnOK.Text = "OK"
+      $formpanel.Controls.Add($btnOK)
+      # $btnOK.Click += new EventHandler(Return_Response)
+    }
+    ($MSGBUTTON.OK) {}
+    ($MSGBUTTON.YesNo) {}
+    ($MSGBUTTON.YesNoCancel) {}
+    ($MSGBUTTON.RetryCancle) {}
+    ($MSGBUTTON.AbortRetryIgnore) {}
+    default {}
+  }
+
+}
+
+
+function AddIconImage {
+  param([psobject]$param)
+
+  switch ($param)
+  {
+    ($MSGICON.Error) {
+      #  icnPicture.Image = SystemIcons.Error.ToBitmap();  
+    }
+    ($MSGICON.Information) {
+      # icnPicture.Image = SystemIcons.Information.ToBitmap();
+    }
+    ($MSGICON.Question) {
+      # icnPicture.Image = SystemIcons.Question.ToBitmap();
+    }
+    ($MSGICON.Warning) {
+      # icnPicture.Image = SystemIcons.Warning.ToBitmap();
+    }
+    default {
+      # icnPicture.Image = SystemIcons.Information.ToBitmap();
+    }
+  }
+
+}
+
+
+function MSGBOX
+{
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  $frm = New-Object System.Windows.Forms.Form
+  $btnDetails = New-Object System.Windows.Forms.Button
+  $btnOK = New-Object System.Windows.Forms.Button
+  $btnYes = New-Object System.Windows.Forms.Button
+  $btnNo = New-Object System.Windows.Forms.Button
+  $btnCancel = New-Object System.Windows.Forms.Button
+  $btnAbort = New-Object System.Windows.Forms.Button
+  $btnRetry = New-Object System.Windows.Forms.Button
+  $btnIgnore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Form.TextBox
+  $icnPicture = New-Object System.Windows.FormPictureBox
+  $formpanel = New-Object System.Windows.Form.Panel
+  $lblmessage = New-Object System.Windows.Form.Label
+  # static MSGRESPONSE msgresponse = new MSGRESPONSE();
+}
