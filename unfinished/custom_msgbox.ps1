@@ -422,11 +422,11 @@ public enum MSGRESPONSE
 
 $MSGICON = @{
 
-'None' =  0;
-'Error' =  10;
-'Information' =  20;
-'Warning' =  30;
-'Question' =  40;
+  'None' = 0;
+  'Error' = 10;
+  'Information' = 20;
+  'Warning' = 30;
+  'Question' = 40;
 
 }
 <#
@@ -507,8 +507,84 @@ function AddIconImage {
 }
 
 
-function MSGBOX
+function btnDetails_click
 {
+
+  param([object]$sender,[System.EventArgs]$eventArgs)
+  if ($btnDetails.Tag.ToString() -match "col")
+  {
+    $frm.Height = frm.Height + $txtDescription.Height + 6
+    $btnDetails.Tag = "exp"
+    $btnDetails.Text = "Hide Details"
+    $txtDescription.WordWrap = true
+    # txtDescription.Focus();
+    # txtDescription.SelectionLength = 0;
+  }
+  elseif ($btnDetails.Tag.ToString() -match "exp")
+  {
+    $frm.Height = $frm.Height - $txtDescription.Height - 6
+    $btnDetails.Tag = "col"
+    $btnDetails.Text = "Show Details"
+  }
+}
+function SetMessageText
+{
+  param(
+    [string]$messageText,
+    [string]$Title,
+    [string]$Description
+  )
+  $lblmessage.Text = messageText
+  if (($Description -ne $null) -and ($Description -ne ''))
+  {
+    $txtDescription.Text = $Description
+  }
+  else
+  {
+    $btnDetails.Visible = $false
+  }
+  if (($Title -ne $null) -and ($Title -ne ''))
+  {
+    $frm.Text = $Title
+  }
+  else
+  {
+    $frm.Text = "Your Message Box From DLL"
+  }
+}
+
+function Show1
+{
+  param([string]$messageText)
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  $frm = New-Object System.Windows.Forms.Form
+  $btnDetails = New-Object System.Windows.Forms.Button
+  $btnOK = New-Object System.Windows.Forms.Button
+  $btnYes = New-Object System.Windows.Forms.Button
+  $btnNo = New-Object System.Windows.Forms.Button
+  $btnCancel = New-Object System.Windows.Forms.Button
+  $btnAbort = New-Object System.Windows.Forms.Button
+  $btnRetry = New-Object System.Windows.Forms.Button
+  $btnIgnore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Form.TextBox
+  $icnPicture = New-Object System.Windows.FormPictureBox
+  $formpanel = New-Object System.Windows.Form.Panel
+  $lblmessage = New-Object System.Windows.Form.Label
+  # static MSGRESPONSE msgresponse = new MSGRESPONSE()
+  SetMessageText $messageText '' $null
+  AddIconImage -param $MSGICON.Information
+  AddButton -param $MSGBUTTON.OK
+  DrawBox
+  $frm.ShowDialog()
+  return $msgresponse
+
+}
+function Show2
+{
+  param param ([string]$messageText)
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
@@ -527,53 +603,84 @@ function MSGBOX
   $formpanel = New-Object System.Windows.Form.Panel
   $lblmessage = New-Object System.Windows.Form.Label
   # static MSGRESPONSE msgresponse = new MSGRESPONSE();
+
+  SetMessageText $messageText $messageTitle $description
+  AddIconImage -param $MSGICON.Information
+  AddButton -param $MSGBUTTON.OK
+  DrawBox
+  $frm.ShowDialog()
+  return $msgresponse
+
 }
 
-function btnDetails_click
-        {
+function Show3
+{
+  param([string]$messageText,
 
-param([object] $sender, [System.EventArgs]$eventArgs )
-            if ($btnDetails.Tag.ToString() -match "col")
-            {
-                $frm.Height = frm.Height + $txtDescription.Height + 6 
-                $btnDetails.Tag = "exp" 
-                $btnDetails.Text = "Hide Details"
-                $txtDescription.WordWrap = true 
-                # txtDescription.Focus();
-                # txtDescription.SelectionLength = 0;
-            }
-            elseif ($btnDetails.Tag.ToString() -match "exp")
-            {
-                $frm.Height = $frm.Height - $txtDescription.Height - 6
-                $btnDetails.Tag = "col"
-                $btnDetails.Text = "Show Details"
-            }
-        }
-function  SetMessageText
-        {
-param (
-[string] $messageText, 
-[string] $Title, 
-[string] $Description
-)
-            $lblmessage.Text = messageText
-            if (($Description -ne $null ) -and ($Description -ne ''))
-            {
-                $txtDescription.Text = $Description
-            }
-            else
-            {
-                $btnDetails.Visible = $false
-            }
-            if (($Title -ne $null ) -and ($Title-ne ''))
-            {
-                $frm.Text = $Title
-            }
-            else
-            {
-                $frm.Text = "Your Message Box From DLL"
-            }
-        }
+    [string]$messageTitle,[string]$description,[object]$IcOn,[object]$btn)
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  $frm = New-Object System.Windows.Forms.Form
+  $btnDetails = New-Object System.Windows.Forms.Button
+  $btnOK = New-Object System.Windows.Forms.Button
+  $btnYes = New-Object System.Windows.Forms.Button
+  $btnNo = New-Object System.Windows.Forms.Button
+  $btnCancel = New-Object System.Windows.Forms.Button
+  $btnAbort = New-Object System.Windows.Forms.Button
+  $btnRetry = New-Object System.Windows.Forms.Button
+  $btnIgnore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Form.TextBox
+  $icnPicture = New-Object System.Windows.FormPictureBox
+  $formpanel = New-Object System.Windows.Form.Panel
+  $lblmessage = New-Object System.Windows.Form.Label
+  # static MSGRESPONSE msgresponse = new MSGRESPONSE();
+
+
+  SetMessageText $messageText $messageTitle $description
+  # // frmMessage.Text = messageTitle;
+  AddIconImage -param $IcOn
+  AddButton -param $btn
+  DrawBox
+  $frm.ShowDialog()
+  # return $msgresponse
+
+}
+
+function ShowException
+{
+  param([System.Exception]$ex)
+
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  $frm = New-Object System.Windows.Forms.Form
+  $btnDetails = New-Object System.Windows.Forms.Button
+  $btnOK = New-Object System.Windows.Forms.Button
+  $btnYes = New-Object System.Windows.Forms.Button
+  $btnNo = New-Object System.Windows.Forms.Button
+  $btnCancel = New-Object System.Windows.Forms.Button
+  $btnAbort = New-Object System.Windows.Forms.Button
+  $btnRetry = New-Object System.Windows.Forms.Button
+  $btnIgnore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Form.TextBox
+  $icnPicture = New-Object System.Windows.FormPictureBox
+  $formpanel = New-Object System.Windows.Form.Panel
+  $lblmessage = New-Object System.Windows.Form.Label
+  # static MSGRESPONSE msgresponse = new MSGRESPONSE();
+
+  SetMessageText $ex.Message $ex.Message $ex.StackTrace
+  # //frmMessage.Text = messageTitle
+  AddIconImage -param MSGICON.Error
+  AddButton -param MSGBUTTON.OK
+  DrawBox
+  $frm.ShowDialog();
+  return $msgresponse
+
+}
+
 
 AddIconImage -param $MSGICON.Information
 
