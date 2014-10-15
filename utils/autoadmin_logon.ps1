@@ -18,9 +18,14 @@ Write-Host -ForegroundColor 'green' ('This call tells if specific account  {0}/{
 function pure_script {
 
 param(
-  [switch]$enforce,
-  [switch]$debug
+  [bool]$enforce
+
 )
+
+  if ($enforce) {
+
+write-host "xxx"
+}
 $settings = @{
   'AutoAdminLogon' = '1';
   # NOTE - account converted to the lower case
@@ -50,7 +55,7 @@ Invalid GET Expression.
     Write-Host -ForegroundColor 'green' (' Reading Setting {0}' -f $name )
     $setting = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -ErrorAction 'SilentlyContinue'
 $results  += $setting
-  if ($PSBoundParameters['enforce']) {
+  if ($enforce) {
     Write-Host -ForegroundColor 'green' ('Setting {0} => xxx' -f $name,$value)
 if ($setting -ne $null) {
 
@@ -66,10 +71,10 @@ if ($setting -ne $null) {
   popd
   return $results
 }
-if (($target_host -eq '') -or ($target_host -eq $null)) {
+if (($target_host -eq '') -or ($target_host -eq $null) -or $target_host -match $env:HOSTNAME) {
   Write-Output 'Run locally'
   if ($PSBoundParameters['enforce']) {
-  $result = pure_script -enforce 
+  $result = pure_script $true
   } else {
   $result = pure_script
   }
@@ -77,7 +82,7 @@ if (($target_host -eq '') -or ($target_host -eq $null)) {
 } else {
   Write-Output 'Run remotely'
   if ($PSBoundParameters['enforce']) {
-  $arg = '-enforce '
+  $arg = $true
   } else {
   $arg = $null
   }
