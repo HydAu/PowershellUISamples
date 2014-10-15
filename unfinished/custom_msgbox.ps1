@@ -413,19 +413,30 @@ public enum MSGRESPONSE
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 
-$o = New-Object -Type 'nameMSGBOX.MSGBOX'
-$o.SetMessageText("Test","this is a Lorem Ipsum test","This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
-$o.AddIconImage([nameMSGBOX.MSGICON]::Information)
-$o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
-$o.DrawBox()
-$o.frm.ShowDialog()
+# $o = New-Object -Type 'nameMSGBOX.MSGBOX'
+# $o.SetMessageText("Test","this is a Lorem Ipsum test","This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
+# $o.AddIconImage([nameMSGBOX.MSGICON]::Information)
+# $o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
+# $o.DrawBox()
+# $o.frm.ShowDialog()
 
+$MSGICON = @{
+
+'None' =  0;
+'Error' =  10;
+'Information' =  20;
+'Warning' =  30;
+'Question' =  40;
+
+}
+<#
 $MSGICON = New-Object PSObject
 $MSGICON | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
 $MSGICON | Add-Member -NotePropertyName 'Error' -NotePropertyValue 10
 $MSGICON | Add-Member -NotePropertyName 'Information' -NotePropertyValue 20
 $MSGICON | Add-Member -NotePropertyName 'Warning' -NotePropertyValue 30
 $MSGICON | Add-Member -NotePropertyName 'Question' -NotePropertyValue 40
+#>
 
 $MSGBUTTON = New-Object PSObject
 $MSGBUTTON | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
@@ -479,6 +490,7 @@ function AddIconImage {
       #  icnPicture.Image = SystemIcons.Error.ToBitmap();  
     }
     ($MSGICON.Information) {
+
       # icnPicture.Image = SystemIcons.Information.ToBitmap();
     }
     ($MSGICON.Question) {
@@ -516,3 +528,60 @@ function MSGBOX
   $lblmessage = New-Object System.Windows.Form.Label
   # static MSGRESPONSE msgresponse = new MSGRESPONSE();
 }
+
+function btnDetails_click
+        {
+
+param([object] $sender, [System.EventArgs]$eventArgs )
+            if ($btnDetails.Tag.ToString() -match "col")
+            {
+                $frm.Height = frm.Height + $txtDescription.Height + 6 
+                $btnDetails.Tag = "exp" 
+                $btnDetails.Text = "Hide Details"
+                $txtDescription.WordWrap = true 
+                # txtDescription.Focus();
+                # txtDescription.SelectionLength = 0;
+            }
+            elseif ($btnDetails.Tag.ToString() -match "exp")
+            {
+                $frm.Height = $frm.Height - $txtDescription.Height - 6
+                $btnDetails.Tag = "col"
+                $btnDetails.Text = "Show Details"
+            }
+        }
+function  SetMessageText
+        {
+param (
+[string] $messageText, 
+[string] $Title, 
+[string] $Description
+)
+            $lblmessage.Text = messageText
+            if (($Description -ne $null ) -and ($Description -ne ''))
+            {
+                $txtDescription.Text = $Description
+            }
+            else
+            {
+                $btnDetails.Visible = $false
+            }
+            if (($Title -ne $null ) -and ($Title-ne ''))
+            {
+                $frm.Text = $Title
+            }
+            else
+            {
+                $frm.Text = "Your Message Box From DLL"
+            }
+        }
+
+AddIconImage -param $MSGICON.Information
+
+# $o = New-Object -Type 'nameMSGBOX.MSGBOX'
+# $o.SetMessageText("Test","this is a Lorem Ipsum test","This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
+# $o.AddIconImage([nameMSGBOX.MSGICON]::Information)
+# $o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
+# $o.DrawBox()
+# $o.frm.ShowDialog()
+
+
