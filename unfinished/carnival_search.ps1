@@ -18,7 +18,8 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 param(
-  [string]$browser,
+  # in the current environment phantomejs is not installed 
+  [string]$browser='firefox',
   [int]$version
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -34,39 +35,141 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
+# http://www.codeproject.com/Tips/816113/Console-Monitor
+Add-Type -TypeDefinition @"
+using System;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+using System.Drawing.Imaging;
+public class WindowHelper
+{
+    private Bitmap _bmp;
+    private Graphics _graphics;
+    private int _count = 0;
+    private Font _font;
+
+    private string _timeStamp;
+    private string _browser;
+    private string _srcImagePath;
+
+    private string _dstImagePath;
+
+    public string DstImagePath
+    {
+        get { return _dstImagePath; }
+        set { _dstImagePath = value; }
+    }
+
+    public string TimeStamp
+    {
+        get { return _timeStamp; }
+        set { _timeStamp = value; }
+    }
+
+    public string SrcImagePath
+    {
+        get { return _srcImagePath; }
+        set { _srcImagePath = value; }
+    }
+
+    public string Browser
+    {
+        get { return _browser; }
+        set { _browser = value; }
+    }
+    public int Count
+    {
+        get { return _count; }
+        set { _count = value; }
+    }
+    public void Screenshot(bool Stamp = false)
+    {
+        _bmp = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+        _graphics = Graphics.FromImage(_bmp);
+        _graphics.CopyFromScreen(0, 0, 0, 0, _bmp.Size);
+        if (Stamp)
+        {
+            StampScreenshot();
+        }
+        else
+        {
+            _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+        }
+        Dispose();
+    }
+
+    public void StampScreenshot()
+    {
+        string firstText = _timeStamp;
+        string secondText = _browser;
+
+        PointF firstLocation = new PointF(10f, 10f);
+        PointF secondLocation = new PointF(10f, 55f);
+        if (_bmp == null)
+        {
+            createFromFile();
+        }
+        _graphics = Graphics.FromImage(_bmp);
+        _font = new Font("Arial", 40);
+        _graphics.DrawString(firstText, _font, Brushes.Black, firstLocation);
+        _graphics.DrawString(secondText, _font, Brushes.Blue, secondLocation);
+        _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+        Dispose();
+
+    }
+    public WindowHelper()
+    {
+    }
+
+    public void Dispose()
+    {
+        _font.Dispose();
+        _bmp.Dispose();
+        _graphics.Dispose();
+
+    }
+
+    private void createFromFile()
+    {
+        try
+        {
+            _bmp = new Bitmap(_srcImagePath);
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        if (_bmp == null)
+        {
+            throw new Exception("failed to load image");
+        }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
+
+
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
   'nunit.framework.dll'
 )
 
-$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
+$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
 
-if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
-  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
-}
-
+$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object {
-
-  if ($host.Version.Major -gt 2) {
-    Unblock-File -Path $_;
-  }
-  Write-Debug $_
-  Add-Type -Path $_
-}
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
-
-$hub_host = '127.0.0.1'
-$hub_port = '4444'
-$uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
 $verificationErrors = New-Object System.Text.StringBuilder
 
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect($hub_host,[int]$hub_port)
+    $connection.Connect("127.0.0.1",4444)
     $connection.Close()
   } catch {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
@@ -86,21 +189,16 @@ if ($browser -ne $null -and $browser -ne '') {
     if ($version -ne $null -and $version -ne 0) {
       $capability.SetCapability("version", $version.ToString());
     }
-    # http://www.browserstack.com/automate/c-sharp   
-  }
 
+  }
   elseif ($browser -match 'safari') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
   }
   else {
     throw "unknown browser choice:${browser}"
   }
-  try{
-    $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
-  } catch [Exception] {
-  Write-Output $_.Exception.Message
-     exit
-  }
+  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
   Write-Host 'Running on phantomjs'
   $phantomjs_executable_folder = "C:\tools\phantomjs"
@@ -113,9 +211,8 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-
-
 $baseURL = "http://www.carnival.com"
+$baseURL = 'http://www4.uatcarnival.com/';
 
 $selenium.Navigate().GoToUrl($baseURL + "/")
 $selenium.Manage().Window.Maximize()
@@ -268,7 +365,20 @@ try {
   $guid = [guid]::NewGuid()
   $image_name = ($guid.ToString())
   [string]$image_path = ('{0}\{1}\{2}.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
+
+  [string]$stamped_image_path = ('{0}\{1}\{2}-stamped.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
   $screenshot.SaveAsFile($image_path,[System.Drawing.Imaging.ImageFormat]::Jpeg)
+
+
+$owner = New-Object WindowHelper
+$owner.count = $iteration
+$owner.Browser = $browser
+$owner.SrcImagePath = $image_path
+$owner.TimeStamp = Get-Date
+$owner.DstImagePath = $stamped_image_path 
+[boolean]$stamp = $false
+
+    $owner.StampScreenshot()
 
 } catch [exception]{
   Write-Output $_.Exception.Message
@@ -277,9 +387,8 @@ try {
 try {
   $selenium.Quit()
 } catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
+  # Ignore errors if unable to close the browser
 }
-
 
 <#
 https://www.youtube.com/watch?v=76qeLNMHgF4
@@ -293,8 +402,3 @@ C:\java\selenium\selenium-server-standalone-2.43.1.jar\core\scripts\selenium-api
 http://www.gazeta.ru/culture/2014/09/26/a_6236173.shtml
 http://blogs.technet.com/b/heyscriptingguy/archive/2010/08/12/august-12-2010.aspx
 #>
-
-# https://code.google.com/p/selenium/wiki/WebDriverJs
-# http://grokbase.com/t/gg/selenium-users/12b2hq0t2p/use-task-scheduler-to-run-ie-node-without-user-logged-in
-# http://sqa.stackexchange.com/questions/5212/selenium-tests-run-in-the-background-when-teamcity-ci-is-run-as-a-windows-servic
-# http://selenium.10932.n7.nabble.com/node-start-on-windows-7-startup-td23699.html
