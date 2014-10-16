@@ -22,259 +22,7 @@ Add-Type -TypeDefinition @"
 
 // "
 // http://www.codeproject.com/Tips/827370/Custom-Message-Box-DLL
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
-using System.Drawing;
-// using System.Drawing.Design;
-using System.Drawing.Imaging;
-using System.ComponentModel;
-using System.Reflection;
-using System.Linq;
-
-
-namespace nameMSGBOX
-{
-public enum MSGICON
-    {
-        Error,
-        Information,
-        Warning,
-        Question,
-    }
-public enum MSGBUTTON
-    {
-        None,
-        OK,
-        YesNo,
-        YesNoCancel,
-        RetryCancle,
-        AbortRetryIgnore
-    }
-public enum MSGRESPONSE
-    {
-        None,
-        Yes,
-        No,
-        OK,
-        Abort,
-        Retry,
-        Ignore,
-        Cancel
-    }
-    public class MSGBOX
-    {
-     public Form frm = new Form();
-     internal Button btnDetails = new Button();
-     Button btnOK = new Button();
-     Button btnYes = new Button();
-     Button btnNo = new Button();
-     Button btnCancel = new Button();
-     Button btnAbort = new Button();
-     Button btnRetry = new Button();
-     Button btnIgnore = new Button();
-     TextBox txtDescription = new TextBox();
-     PictureBox icnPicture = new PictureBox();
-     Panel formpanel = new Panel();
-     Label lblmessage = new Label();
-     static MSGRESPONSE msgresponse = new MSGRESPONSE();
-
-     public void DrawBox()
-        {
-            //draw panel
-            frm.Controls.Add(formpanel);
-            formpanel.Dock = DockStyle.Fill;
-            //draw picturebox
-            icnPicture.Height = 36;
-            icnPicture.Width = 40;
-            icnPicture.Location = new Point(10, 11);
-            formpanel.Controls.Add(icnPicture);
-          //drawing textbox
-            txtDescription.Multiline = true;
-            txtDescription.Height = 183;
-            txtDescription.Width = 464;
-            txtDescription.Location = new Point(6, 143);
-            txtDescription.BorderStyle = BorderStyle.Fixed3D;
-            txtDescription.ScrollBars = ScrollBars.Both;
-            txtDescription.ReadOnly = true;
-            formpanel.Controls.Add(txtDescription);
-
-        //drawing detail button
-            btnDetails.Height = 24;
-            btnDetails.Width = 80;
-            btnDetails.Location = new Point(6, 114);
-            btnDetails.Tag = "exp";
-            btnDetails.Text = "Show Details";
-            formpanel.Controls.Add(btnDetails);
-            this.btnDetails.Click += new EventHandler(this.btnDetails_click);
-            lblmessage.Location = new Point(64, 22);
-            lblmessage.AutoSize = true;
-            formpanel.Controls.Add(lblmessage);
-            frm.Height = 360;
-            frm.Width = 483;
-
-            //set form layout
-            frm.StartPosition = FormStartPosition.CenterScreen;
-            frm.FormBorderStyle = FormBorderStyle.FixedSingle;
-            frm.MaximizeBox = false;
-            frm.MinimizeBox = false;
-            frm.FormClosing += new FormClosingEventHandler(frm_FormClosing);
-            frm.BackColor = System.Drawing.SystemColors.ButtonFace;
-
-            //http://www.iconarchive.com/search?q=ico+files&page=7
-            string p = @"C:\developer\sergueik\powershell_ui_samples\external\Martz90-Circle-Files.ico";
-            frm.Icon = new System.Drawing.Icon( p );
-            if (btnDetails.Tag.ToString() == "exp")
-            {
-                frm.Height = frm.Height - txtDescription.Height - 6;
-                btnDetails.Tag = "col";
-                btnDetails.Text = "Show Details";
-            }
-        }
-
-         public void AddButton(MSGBUTTON MSGBTN)
-        {
-            switch (MSGBTN)
-            {
-               case MSGBUTTON.OK:
-                    {
-                        btnOK.Width = 80;
-                        btnOK.Height = 24;
-                        btnOK.Location = new Point(391, 114);
-                        btnOK.Text = "OK";
-                        formpanel.Controls.Add(btnOK);
-                        btnOK.Click += new EventHandler(Return_Response);
-                    }
-                    break;
-               
-                case MSGBUTTON.YesNo:
-                    {
-                        //btnNo
-                        btnNo.Width = 80;
-                        btnNo.Height = 24;
-                        btnNo.Location = new Point(391, 114);
-                        btnNo.Text = "No";
-                        formpanel.Controls.Add(btnNo);
-                        btnNo.Click += new EventHandler(Return_Response);
-                        //btnYes
-                        btnYes.Width = 80;
-                        btnYes.Height = 24;
-                        btnYes.Location = new Point(btnNo.Location.X - btnNo.Width - 2, 114);
-                        btnYes.Text = "Yes";
-                        formpanel.Controls.Add(btnYes);
-                        btnYes.Click += new EventHandler(Return_Response);
-                    }
-                    break;
-              
-               case MSGBUTTON.YesNoCancel:
-                    {
-                        //btnCancle
-                        btnCancel.Width = 80;
-                        btnCancel.Height = 24;
-                        btnCancel.Location = new Point(391, 114);
-                        btnCancel.Text = "Cancel";
-                        formpanel.Controls.Add(btnCancel);
-                        btnCancel.Click += new EventHandler(Return_Response);
-                        //btnNo
-                        btnNo.Width = 80;
-                        btnNo.Height = 24;
-                        btnNo.Location = new Point(btnCancel.Location.X - btnCancel.Width - 2, 114);
-                        btnNo.Text = "No";
-                        formpanel.Controls.Add(btnNo);
-                        btnNo.Click += new EventHandler(Return_Response);
-                        //btnYes
-                        btnYes.Width = 80;
-                        btnYes.Height = 24;
-                        btnYes.Location = new Point(btnNo.Location.X - btnNo.Width - 2, 114);
-                        btnYes.Text = "Yes";
-                        formpanel.Controls.Add(btnYes);
-                        btnYes.Click += new EventHandler(Return_Response);
-                    }
-                    break;
-
-                  case MSGBUTTON.RetryCancle:
-                    {
-                        //button cancel
-                        btnCancel.Width = 80;
-                        btnCancel.Height = 24;
-                        btnCancel.Location = new Point(391, 114);
-                        btnCancel.Text = "Cancel";
-                        formpanel.Controls.Add(btnCancel);
-                        btnCancel.Click += new EventHandler(Return_Response);
-                        //button Retry
-                        btnRetry.Width = 80;
-                        btnRetry.Height = 24;
-                        btnRetry.Location = new Point(btnCancel.Location.X - btnCancel.Width - 2, 114);
-                        btnRetry.Text = "Retry";
-                        formpanel.Controls.Add(btnRetry);
-                        btnRetry.Click += new EventHandler(Return_Response);
-                    }
-                    break;
-
-                    case MSGBUTTON.AbortRetryIgnore:
-                    {
-                        //button Ignore
-                        btnIgnore.Width = 80;
-                        btnIgnore.Height = 24;
-                        btnIgnore.Location = new Point(391, 114);
-                        btnIgnore.Text = "Ignore";
-                        formpanel.Controls.Add(btnIgnore);
-                        btnIgnore.Click += new EventHandler(Return_Response);
-                        //button Retry
-                        btnRetry.Width = 80;
-                        btnRetry.Height = 24;
-                        btnRetry.Location = new Point(btnIgnore.Location.X - btnIgnore.Width - 2, 114);
-                        btnRetry.Text = "Retry";
-                        formpanel.Controls.Add(btnRetry);
-                        btnRetry.Click += new EventHandler(Return_Response);
-                        //button Abort
-                        btnAbort.Width = 80;
-                        btnAbort.Height = 24;
-                        btnAbort.Location = new Point(btnRetry.Location.X - btnRetry.Width - 2, 114);
-                        btnAbort.Text = "Abort";
-                        formpanel.Controls.Add(btnAbort);
-                        btnAbort.Click += new EventHandler(Return_Response);
-                    }
-                    break;
-
-                   case MSGBUTTON.None:
-                    {
-                        btnOK.Width = 80;
-                        btnOK.Height = 24;
-                        btnOK.Location = new Point(391, 114);
-                        btnOK.Text = "OK";
-                        formpanel.Controls.Add(btnOK);
-                        btnOK.Click += new EventHandler(Return_Response);
-                    }
-                    break;
-            }
-        }
-
-        public void AddIconImage(MSGICON MSGICON)
-        {
-            switch (MSGICON)
-            {
-                case MSGICON.Error:
-                    icnPicture.Image = SystemIcons.Error.ToBitmap();  //Error is key name in 
-                            //imagelist control which uniqly identified images in ImageList control.
-                    break;
-                case MSGICON.Information:
-                    icnPicture.Image = SystemIcons.Information.ToBitmap();
-                    break;
-                case MSGICON.Question:
-                    icnPicture.Image = SystemIcons.Question.ToBitmap();
-                    break;
-                case MSGICON.Warning:
-                    icnPicture.Image = SystemIcons.Warning.ToBitmap();
-                    break;
-                default:
-                    icnPicture.Image = SystemIcons.Information.ToBitmap();
-                    break;
-            }
-        }
-
+/*
         private void btnDetails_click(object sender, EventArgs e)
         {
             if (btnDetails.Tag.ToString() == "col")
@@ -341,84 +89,9 @@ public enum MSGRESPONSE
          frm.Dispose();
         }
 
- public static MSGRESPONSE Show(string messageText)
-        {
-            MSGBOX frmMessage = new MSGBOX();
-            frmMessage.SetMessageText(messageText, "", null);
-            frmMessage.AddIconImage(MSGICON.Information);
-            frmMessage.AddButton(MSGBUTTON.OK);
-            frmMessage.DrawBox();
-            frmMessage.frm.ShowDialog();
-            return msgresponse;
-        }
-    public static MSGRESPONSE Show(string messageText, string messageTitle, string description)
-        {
-            MSGBOX frmMessage = new MSGBOX();
-            frmMessage.SetMessageText(messageText, messageTitle, description);
-            frmMessage.AddIconImage(MSGICON.Information);
-            frmMessage.AddButton(MSGBUTTON.OK);
-            frmMessage.DrawBox();
-            frmMessage.frm.ShowDialog();
-            return msgresponse;
-        }
-
-      public static MSGRESPONSE Show(string messageText, 
-          string messageTitle, string description, MSGICON IcOn, MSGBUTTON btn)
-        {
-            MSGBOX frmMessage = new MSGBOX();
-            frmMessage.SetMessageText(messageText, messageTitle, description);
-            //frmMessage.Text = messageTitle;
-            frmMessage.AddIconImage(IcOn);
-            frmMessage.AddButton(btn);
-            frmMessage.DrawBox();
-            frmMessage.frm.ShowDialog();
-            return msgresponse;
-        }
-
-         public static MSGRESPONSE ShowException(Exception ex)
-        {
-            MSGBOX frmMessage = new MSGBOX();
-            frmMessage.SetMessageText(ex.Message, ex.Message, ex.StackTrace);
-            //frmMessage.Text = messageTitle;
-            frmMessage.AddIconImage(MSGICON.Error);
-            frmMessage.AddButton(MSGBUTTON.OK);
-            frmMessage.DrawBox();
-            frmMessage.frm.ShowDialog();
-            return msgresponse;
-        }
-
-        public void SetMessageText(string messageText, string Title, string Description)
-        {
-            this.lblmessage.Text = messageText;
-            if (!string.IsNullOrEmpty(Description))
-            {
-                this.txtDescription.Text = Description;
-            }
-            else
-            {
-                btnDetails.Visible = false;
-            }
-            if (!string.IsNullOrEmpty(Title))
-            {
-                frm.Text = Title;
-            }
-            else
-            {
-                frm.Text = "Your Message Box From DLL";
-            }
-        }
-    }
-}
-
+*/
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
-
-# $o = New-Object -Type 'nameMSGBOX.MSGBOX'
-# $o.SetMessageText("Test","this is a Lorem Ipsum test","This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
-# $o.AddIconImage([nameMSGBOX.MSGICON]::Information)
-# $o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
-# $o.DrawBox()
-# $o.frm.ShowDialog()
 
 $MSGICON = @{
 
@@ -466,15 +139,99 @@ function AddButton {
       $btnOK.Width = 80
       $btnOK.Height = 24
       $btnOK.Location = New-Object System.Drawing.Point (391,114)
-      $btnOK.Text = "OK"
+      $btnOK.Text = 'OK'
       $formpanel.Controls.Add($btnOK)
       # $btnOK.Click += new EventHandler(Return_Response)
     }
-    ($MSGBUTTON.OK) {}
-    ($MSGBUTTON.YesNo) {}
-    ($MSGBUTTON.YesNoCancel) {}
-    ($MSGBUTTON.RetryCancle) {}
-    ($MSGBUTTON.AbortRetryIgnore) {}
+    ($MSGBUTTON.OK) {
+      $btnOK.Width = 80
+      $btnOK.Height = 24
+      $btnOK.Location = New-Object System.Drawing.Point (391,114)
+      $btnOK.Text = 'OK'
+      $formpanel.Controls.Add($btnOK)
+      #  $btnOK.Click += new EventHandler(Return_Response)
+
+    }
+    ($MSGBUTTON.YesNo) {
+      # btNo
+      $btnNo.Width = 80
+      $btnNo.Height = 24
+      $btnNo.Location = New-Object System.Drawing.Point (391,114)
+      $btnNo.Text = "No"
+      $formpanel.Controls.Add($btnNo)
+      # btnNo.Click += new EventHandler(Return_Response)
+      # btnYes
+      $btnYes.Width = 80
+      $btnYes.Height = 24
+      $btnYes.Location = New-Object System.Drawing.Point (($btnNo.Location.X - $btnNo.Width - 2),114)
+      $btnYes.Text = "Yes"
+      $formpanel.Controls.Add($btnYes)
+      # $btnYes.Click += new EventHandler(Return_Response)
+
+    }
+    ($MSGBUTTON.YesNoCancel) {
+      # btnCancle
+      $btnCancel.Width = 80
+      $btnCancel.Height = 24
+      $btnCancel.Location = New-Object System.Drawing.Point (391,114)
+      $btnCancel.Text = 'Cancel'
+      $formpanel.Controls.Add($btnCancel)
+      # $btnCancel.Click += new EventHandler(Return_Response)
+      # btnNo
+      $btnNo.Width = 80
+      $btnNo.Height = 24
+      $btnNo.Location = New-Object System.Drawing.Point (($btnCancel.Location.X - $btnCancel.Width - 2),114)
+      $btnNo.Text = 'No'
+      $formpanel.Controls.Add($btnNo)
+      #$btnNo.Click += new EventHandler(Return_Response)
+      # btnYes
+      $btnYes.Width = 80
+      $btnYes.Height = 24
+      $btnYes.Location = New-Object System.Drawing.Point (($btnNo.Location.X - $btnNo.Width - 2),114)
+      $btnYes.Text = 'Yes'
+      $formpanel.Controls.Add($btnYes)
+      # $btnYes.Click += new EventHandler(Return_Response)
+    }
+    ($MSGBUTTON.RetryCancle) {
+      # button cancel
+      $btnCancel.Width = 80
+      $btnCancel.Height = 24
+      $btnCancel.Location = New-Object System.Drawing.Point (391,114)
+      $btnCancel.Text = 'Cancel'
+      $formpanel.Controls.Add($btnCancel)
+      #$btnCancel.Click += new EventHandler(Return_Response)
+      #button Retry
+      $btnRetry.Width = 80
+      $btnRetry.Height = 24
+      $btnRetry.Location = New-Object System.Drawing.Point (($btnCancel.Location.X - $btnCancel.Width - 2),114)
+      $btnRetry.Text = 'Retry'
+      $formpanel.Controls.Add($btnRetry)
+      # $btnRetry.Click += new EventHandler(Return_Response)
+
+    }
+    ($MSGBUTTON.AbortRetryIgnore) {
+      #button Ignore
+      $btnIgnore.Width = 80
+      $btnIgnore.Height = 24
+      $btnIgnore.Location = New-Object System.Drawing.Point (391,114)
+      $btnIgnore.Text = 'Ignore'
+      $formpanel.Controls.Add($btnIgnore)
+      #$btnIgnore.Click += new EventHandler(Return_Response)
+      #button Retry
+      $btnRetry.Width = 80
+      $btnRetry.Height = 24
+      $btnRetry.Location = New-Object System.Drawing.Point (($btnIgnore.Location.X - $btnIgnore.Width - 2),114)
+      $btnRetry.Text = 'Retry'
+      $formpanel.Controls.Add($btnRetry)
+      #$btnRetry.Click += new EventHandler(Return_Response)
+      #button Abort
+      $btnAbort.Width = 80
+      $btnAbort.Height = 24
+      $btnAbort.Location = New-Object System.Drawing.Point (($btnRetry.Location.X - $btnRetry.Width - 2),114)
+      $btnAbort.Text = 'Abort'
+      $formpanel.Controls.Add($btnAbort)
+      #$btnAbort.Click += new EventHandler(Return_Response)
+    }
     default {}
   }
 
@@ -487,20 +244,20 @@ function AddIconImage {
   switch ($param)
   {
     ($MSGICON.Error) {
-      #  icnPicture.Image = SystemIcons.Error.ToBitmap();  
+      $icnPicture.Image = ([System.Drawing.SystemIcons]::Error).ToBitmap()
     }
     ($MSGICON.Information) {
 
-      # icnPicture.Image = SystemIcons.Information.ToBitmap();
+      $icnPicture.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
     }
     ($MSGICON.Question) {
-      # icnPicture.Image = SystemIcons.Question.ToBitmap();
+      $icnPicture.Image = ([System.Drawing.SystemIcons]::Question).ToBitmap()
     }
     ($MSGICON.Warning) {
-      # icnPicture.Image = SystemIcons.Warning.ToBitmap();
+      $icnPicture.Image = ([System.Drawing.SystemIcons]::Warning).ToBitmap()
     }
     default {
-      # icnPicture.Image = SystemIcons.Information.ToBitmap();
+      $icnPicture.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
     }
   }
 
@@ -534,7 +291,7 @@ function SetMessageText
     [string]$Title,
     [string]$Description
   )
-  $lblmessage.Text = messageText
+  $lblmessage.Text = $messageText
   if (($Description -ne $null) -and ($Description -ne ''))
   {
     $txtDescription.Text = $Description
@@ -549,13 +306,15 @@ function SetMessageText
   }
   else
   {
-    $frm.Text = "Your Message Box From DLL"
+    $frm.Text = 'Your Message Box From DLL'
   }
 }
 
 function Show1
 {
-  param([string]$messageText)
+  param(
+    [string]$messageText
+  )
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
@@ -569,10 +328,10 @@ function Show1
   $btnAbort = New-Object System.Windows.Forms.Button
   $btnRetry = New-Object System.Windows.Forms.Button
   $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Form.TextBox
-  $icnPicture = New-Object System.Windows.FormPictureBox
-  $formpanel = New-Object System.Windows.Form.Panel
-  $lblmessage = New-Object System.Windows.Form.Label
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icnPicture = New-Object System.Windows.Forms.PictureBox
+  $formpanel = New-Object System.Windows.Forms.Panel
+  $lblmessage = New-Object System.Windows.Forms.Label
   # static MSGRESPONSE msgresponse = new MSGRESPONSE()
   SetMessageText $messageText '' $null
   AddIconImage -param $MSGICON.Information
@@ -582,9 +341,14 @@ function Show1
   return $msgresponse
 
 }
+
 function Show2
 {
-  param param ([string]$messageText)
+  param(
+    [string]$messageText,
+    [string]$messageTitle,
+    [string]$description
+  )
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
@@ -598,12 +362,11 @@ function Show2
   $btnAbort = New-Object System.Windows.Forms.Button
   $btnRetry = New-Object System.Windows.Forms.Button
   $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Form.TextBox
-  $icnPicture = New-Object System.Windows.FormPictureBox
-  $formpanel = New-Object System.Windows.Form.Panel
-  $lblmessage = New-Object System.Windows.Form.Label
-  # static MSGRESPONSE msgresponse = new MSGRESPONSE();
-
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icnPicture = New-Object System.Windows.Forms.PictureBox
+  $formpanel = New-Object System.Windows.Forms.Panel
+  $lblmessage = New-Object System.Windows.Forms.Label
+  # static MSGRESPONSE msgresponse = new MSGRESPONSE()
   SetMessageText $messageText $messageTitle $description
   AddIconImage -param $MSGICON.Information
   AddButton -param $MSGBUTTON.OK
@@ -615,9 +378,13 @@ function Show2
 
 function Show3
 {
-  param([string]$messageText,
-
-    [string]$messageTitle,[string]$description,[object]$IcOn,[object]$btn)
+  param(
+    [string]$messageText,
+    [string]$messageTitle,
+    [string]$description,
+    [object]$IcOn,
+    [object]$btn
+  )
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
@@ -631,11 +398,11 @@ function Show3
   $btnAbort = New-Object System.Windows.Forms.Button
   $btnRetry = New-Object System.Windows.Forms.Button
   $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Form.TextBox
-  $icnPicture = New-Object System.Windows.FormPictureBox
-  $formpanel = New-Object System.Windows.Form.Panel
-  $lblmessage = New-Object System.Windows.Form.Label
-  # static MSGRESPONSE msgresponse = new MSGRESPONSE();
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icnPicture = New-Object System.Windows.Forms.PictureBox
+  $formpanel = New-Object System.Windows.Forms.Panel
+  $lblmessage = New-Object System.Windows.Forms.Label
+  # static MSGRESPONSE msgresponse = new MSGRESPONSE()
 
 
   SetMessageText $messageText $messageTitle $description
@@ -665,10 +432,10 @@ function ShowException
   $btnAbort = New-Object System.Windows.Forms.Button
   $btnRetry = New-Object System.Windows.Forms.Button
   $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Form.TextBox
-  $icnPicture = New-Object System.Windows.FormPictureBox
-  $formpanel = New-Object System.Windows.Form.Panel
-  $lblmessage = New-Object System.Windows.Form.Label
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icnPicture = New-Object System.Windows.Forms.PictureBox
+  $formpanel = New-Object System.Windows.Forms.Panel
+  $lblmessage = New-Object System.Windows.Forms.Label
   # static MSGRESPONSE msgresponse = new MSGRESPONSE();
 
   SetMessageText $ex.Message $ex.Message $ex.StackTrace
@@ -676,19 +443,70 @@ function ShowException
   AddIconImage -param MSGICON.Error
   AddButton -param MSGBUTTON.OK
   DrawBox
-  $frm.ShowDialog();
+  $frm.ShowDialog()
   return $msgresponse
 
 }
 
 
-AddIconImage -param $MSGICON.Information
+# AddIconImage -param $MSGICON.Information
 
-# $o = New-Object -Type 'nameMSGBOX.MSGBOX'
-# $o.SetMessageText("Test","this is a Lorem Ipsum test","This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.")
-# $o.AddIconImage([nameMSGBOX.MSGICON]::Information)
-# $o.AddButton([nameMSGBOX.MSGBUTTON]::OK)
-# $o.DrawBox()
-# $o.frm.ShowDialog()
+function DrawBox
+{
+  # draw panel
+  $frm.Controls.Add($formpanel)
+  $formpanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+  # draw picturebox
+  $icnPicture.Height = 36
+  $icnPicture.Width = 40
+  $icnPicture.Location = New-Object System.Drawing.Point (10,11)
+  $formpanel.Controls.Add($icnPicture)
+  # drawing textbox
+  $txtDescription.Multiline = $true
+  $txtDescription.Height = 183
+  $txtDescription.Width = 464
+  $txtDescription.Location = New-Object System.Drawing.Point (6,143)
+  $txtDescription.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
+  $txtDescription.ScrollBars = [System.Windows.Forms.ScrollBars]::Both
+  $txtDescription.ReadOnly = $true
+  $formpanel.Controls.Add($txtDescription)
 
+  # drawing detail button
+  $btnDetails.Height = 24
+  $btnDetails.Width = 80
+  $btnDetails.Location = New-Object System.Drawing.Point (6,114)
+  $btnDetails.Tag = "exp"
+  $btnDetails.Text = "Show Details"
+  $formpanel.Controls.Add($btnDetails)
+  ## this.btnDetails.Click += new EventHandler(this.btnDetails_click)
+  $lblmessage.Location = New-Object System.Drawing.Point (64,22)
+  $lblmessage.AutoSize = $true
+  $formpanel.Controls.Add($lblmessage)
+  $frm.Height = 360
+  $frm.Width = 483
 
+  # set form layout
+  $frm.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+  $frm.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
+  $frm.MaximizeBox = $false
+  $frm.MinimizeBox = $false
+  ## frm.FormClosing += new FormClosingEventHandler(frm_FormClosing);
+  $frm.BackColor = [System.Drawing.SystemColors]::ButtonFace
+
+  ##//http://www.iconarchive.com/search?q=ico+files&page=7
+  [string]$p = "C:\developer\sergueik\powershell_ui_samples\external\Martz90-Circle-Files.ico"
+  $frm.Icon = New-Object System.Drawing.Icon ($p)
+  if ($btnDetails.Tag.ToString() -match "exp")
+  {
+    $frm.Height = $frm.Height - $txtDescription.Height - 6
+    $btnDetails.Tag = "col"
+    $btnDetails.Text = "Show Details"
+  }
+}
+
+$text = "this is a Lorem Ipsum test"
+$description = "This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
+# Show1 -Message "test"
+# Show2 -messageText "test" -messageTitle "title" -Description "description"
+
+Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
