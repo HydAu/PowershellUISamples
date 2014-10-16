@@ -21,30 +21,33 @@
 Add-Type -TypeDefinition @"
 
 // "
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
 
-/*
-        private void btnDetails_click(object sender, EventArgs e)
-        {
-            if (btnDetails.Tag.ToString() == "col")
-            {
-                frm.Height = frm.Height + txtDescription.Height + 6;
-                btnDetails.Tag = "exp";
-                btnDetails.Text = "Hide Details";
-                txtDescription.WordWrap = true;
-                //txtDescription.Focus();
-                //txtDescription.SelectionLength = 0;
-            }
-            else if (btnDetails.Tag.ToString() == "exp")
-            {
-                frm.Height = frm.Height - txtDescription.Height - 6;
-                btnDetails.Tag = "col";
-                btnDetails.Text = "Show Details";
-            }
-        }
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
-*/
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 
 
 $MSGICON = @{
@@ -88,37 +91,37 @@ function Return_Response
 
   if ($buttonText -eq "Yes")
   {
-    $Global:response = $MSGRESPONSE.Yes
+    $caller.Data = $MSGRESPONSE.Yes
   }
   elseif ($buttonText -eq 'No')
   {
-    $Global:response =  $MSGRESPONSE.No
+    $caller.Data =  $MSGRESPONSE.No
   }
   elseif ($buttonText -eq "Cancel")
   {
-    $Global:response =  $MSGRESPONSE.Cancel
+    $caller.Data =  $MSGRESPONSE.Cancel
   }
   elseif ($buttonText -eq "OK")
   {
-    $Global:response =  $MSGRESPONSE.OK
+    $caller.Data =  $MSGRESPONSE.OK
   }
   elseif ($buttonText -eq "Abort")
   {
-    $Global:response =  $MSGRESPONSE.Abort
+    $caller.Data =  $MSGRESPONSE.Abort
   }
   elseif ($buttonText -eq 'Retry')
   {
-    $Global:response =  $MSGRESPONSE.Retry
+    $caller.Data =  $MSGRESPONSE.Retry
   }
   elseif ($buttonText -eq "Ignore")
   {
-    $Global:response =  $MSGRESPONSE.Ignore
+    $caller.Data =  $MSGRESPONSE.Ignore
   }
   else
   {
     # $response  =  $response
   }
-  write-host ('--->' + $Global:response )
+  write-host ('--->' + $caller.Data )
 
   $frm.Dispose()
 }
@@ -469,6 +472,8 @@ function Show3
     [object]$btn
   )
 
+  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
@@ -492,9 +497,13 @@ function Show3
   # // frmMessage.Text = messageTitle;
   AddIconImage -param $IcOn
   AddButton -param $btn
+  $caller.Data =  $MSGRESPONSE.Cancel
+
   DrawBox
-  $frm.ShowDialog()
-  # return $response
+  [void]$frm.ShowDialog([win32window ]($caller))
+  $frm.Dispose()
+
+  return $caller.Data
 
 }
 
@@ -520,7 +529,6 @@ function ShowException
   $formpanel = New-Object System.Windows.Forms.Panel
   $lblmessage = New-Object System.Windows.Forms.Label
   # static MSGRESPONSE $response =  new MSGRESPONSE();
-  $Global:response =  $MSGRESPONSE.Cancel
   SetMessageText $ex.Message $ex.Message $ex.StackTrace
   # //frmMessage.Text = messageTitle
   AddIconImage -param MSGICON.Error
