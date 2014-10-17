@@ -212,9 +212,19 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 $baseURL = "http://www.carnival.com"
-$baseURL = 'http://www4.uatcarnival.com/';
+# $baseURL = 'http://www4.uatcarnival.com/';
 
 $selenium.Navigate().GoToUrl($baseURL + "/")
+
+[void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(360))
+# protect from blank page
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+$wait.PollingInterval = 150
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::ClassName("logo")))
+
+$selenium.Title
+
+
 $selenium.Manage().Window.Maximize()
 <#
             $selenium.FindElement([OpenQA.Selenium.By]::Id("ccl_header_expand-login-link")).Click()
