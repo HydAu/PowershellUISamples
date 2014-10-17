@@ -304,6 +304,12 @@ try {
 [NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
 $element1.Click()
 
+
+$check_iframes =  $selenium.FindElements([OpenQA.Selenium.By]::TagName("iframe"))
+if ($check_iframes -ne $null -and $check_iframes.count -ge 1) {
+$check_iframes[0].GetAttribute("id")
+}
+
 <#
 
 [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("scroll(0, 500)", $null)
@@ -350,6 +356,22 @@ $element1.Click()
 
 $css_selector1 = 'path[fill="#f00"]'
 [OpenQA.Selenium.IWebElement]$element1 = $null
+$check_alert_indicators = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+for ($item_cnt = 0 ; $item_cnt -ne $check_alert_indicators.Count ; $item_cnt ++ ){
+$element7 = $check_alert_indicators[$item_cnt]
+$coord = $element7.Coordinates
+$coord.LocationInViewport.X
+$coord.LocationInViewport.Y
+[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions2.MoveToElement($element7).Build().Perform();
+
+#$coord|get-member
+#write-host 
+#
+#write-host $check_alert_indicators[$item_cnt].Coordinates.Y
+}
+# $check_alert_indicators[0] | get-member
 
 try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(120))
@@ -365,6 +387,7 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 $element1.Click()
 
 Start-Sleep 4
+
 
 $initial_window_handle = $selenium.CurrentWindowHandle
 
@@ -443,6 +466,8 @@ if ($handles.Count -gt 1) {
         Write-Host ('ASP.NET_SessionId : {0}' -f $session_id)
       }
       [void]$selenium.switchTo().Window($initial_window_handle)
+      [void]$selenium.switchTo().Window($switch_to_window_handle).Close()
+      start-sleep -seconds 10
     }
   }
 
