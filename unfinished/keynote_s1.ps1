@@ -370,9 +370,30 @@ for ($item_cnt = 0; $item_cnt -ne $check_alert_indicators.count; $item_cnt++) {
 
 
   # optional highlight
+  #  http://stackoverflow.com/questions/2631820/im-storing-click-coordinates-in-my-db-and-then-reloading-them-later-and-showing/2631931#2631931
+  [string]$script = @"
+function getPathTo(element) {
+    if (element.id!=='')
+        return 'id("'+element.id+'")';
+    if (element===document.body)
+        return element.tagName;
+
+    var ix= 0;
+    var siblings= element.parentNode.childNodes;
+    for (var i= 0; i<siblings.length; i++) {
+        var sibling= siblings[i];
+        if (sibling===element)
+            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
+            ix++;
+    }
+}
+return getPathTo(arguments[0]);
+"@
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element7,'color: blue; border: 4px solid blue;')
   Start-Sleep 1
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element7,'')
+ $result =  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);${script}",$element7,'')
+$result
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
 
