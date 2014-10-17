@@ -23,7 +23,9 @@ param(
   [int]$version,
   [string]$base_url = 'https://my.keynote.com/newmykeynote/logon.do',
   [string]$username,
-  [string]$password
+  [string]$password,
+  [switch]$display
+
 )
 [string]$device = 'CCL - Carnival.com'
 if ($base_url -eq '') {
@@ -361,13 +363,8 @@ $check_alert_indicators = $selenium.FindElements([OpenQA.Selenium.By]::CssSelect
 for ($item_cnt = 0; $item_cnt -ne $check_alert_indicators.count; $item_cnt++) {
   $element7 = $check_alert_indicators[$item_cnt]
   $coord = $element7.Coordinates
-  Write-Host ('Processing tick at ({0},{1})' -f $coord.LocationInViewport.X,$coord.LocationInViewport.Y)
-  [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-  $actions2.MoveToElement($element7).Build().Perform()
-
-
   [NUnit.Framework.Assert]::IsTrue(($element7 -ne $null))
-
+  Write-Host ('Processing tick at ({0},{1})' -f $coord.LocationInViewport.X,$coord.LocationInViewport.Y)
 
   # optional highlight
   #  http://stackoverflow.com/questions/2631820/im-storing-click-coordinates-in-my-db-and-then-reloading-them-later-and-showing/2631931#2631931
@@ -390,11 +387,31 @@ function getPathTo(element) {
 }
 return getPathTo(arguments[0]);
 "@
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element7,'color: blue; border: 4px solid blue;')
-  Start-Sleep 1
- $result =  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);${script}",$element7,'')
-$result
-  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  if ($PSBoundParameters['display']) {
+    [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+    $actions2.MoveToElement($element7).Build().Perform()
+
+    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element7,'color: blue; border: 4px solid blue;')
+    Start-Sleep 1
+    $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("arguments[0].setAttribute('style', arguments[1]);${script}",$element7,'')).ToString()
+  } else {
+    $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element7,'')).ToString()
+  }
+
+
+
+  Write-Output $result
+  try {
+
+    [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+    $wait.PollingInterval = 100
+    $xpath = ('//{0}' -f $result)
+    Write-Output $xpath
+
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::xpath($xpath)))
+  } catch [exception]{
+    Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  }
 
 
   Start-Sleep 4
