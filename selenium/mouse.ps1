@@ -28,7 +28,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 //declaration
-public static class StaticExtentions
+public class MouseHelper
 {
 
 // http://www.pinvoke.net/default.aspx/user32.mouse_event
@@ -45,6 +45,21 @@ private const int MOUSEEVENTF_LEFTUP = 0x04;
 private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
 private const int MOUSEEVENTF_RIGHTUP = 0x10;
 private const int MOUSEEVENTF_WHEEL = 0x800;
+
+    public MouseHelper()
+    {
+    }
+
+    public void MouseHelper_mouse_event(int X, int Y)
+    {
+mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, X, Y, 0, 0); 
+    }
+
+    public void MouseHelper_SetCursorPos(int X, int Y)
+    {
+SetCursorPos(X,Y);
+    }
+
 }
 
 /* usage
@@ -172,13 +187,16 @@ $coord.LocationInDom.X = 100
 $coord.LocationInDom.Y = 100
 $coord  | format-list
 $coord | get-member
-[System.Drawing.Point]$point = $coord.LocationInDom
-$point | get-member 
+# [System.Drawing.Point]$point = $coord.LocationInDom
+# $point | get-member 
+$o = new-object -typename MouseHelper
+
 # $mouse.MouseMove($coord)
 # $mouse.Click($coord)
-
-# SetCursorPos(X, Y);
-# mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); 
+# ListDragTarget.Location = new System.Drawing.Point(154, 17)
+$o.MouseHelper_SetCursorPos(100, 100)
+# ($coord.LocationInDom.X, $coord.LocationInDom.Y )
+$o.MouseHelper_mouse_event(200, 200) # ($coord.LocationInDom.X, $coord.LocationInDom.Y)
 
 try {
   $selenium.Quit()
