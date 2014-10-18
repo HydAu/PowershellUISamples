@@ -378,7 +378,7 @@ $actions2.MoveToElement($element1).Build().Perform()
 Start-Sleep -Seconds 3
 Write-Output ('Clicking on {0}' -f $element1.Text)
 
-
+$element1.Displayed
 $element1.Click()
 
 $css_selector1 = 'path[fill="#f00"]'
@@ -438,7 +438,6 @@ return getPathTo(arguments[0]);
 
 #>
 
-  # Start-Sleep 4
 
   if ($item_cnt -eq $check_alert_indicators.count - 1) {
 
@@ -446,6 +445,8 @@ return getPathTo(arguments[0]);
     $actions2.MoveToElement($element7).Build().Perform()
 
     $element7.Click()
+
+    Start-Sleep 10
 
     $initial_window_handle = $selenium.CurrentWindowHandle
 
