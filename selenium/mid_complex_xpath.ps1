@@ -109,6 +109,8 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability('phantomjs.executable.path',$phantomjs_executable_folder)
 }
 
+# http://www.w3schools.com/xpath/xpath_axes.asp
+
 $baseURL = "file:///C:/developer/sergueik/powershell_ui_samples/external/forms_test.html"
 $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
@@ -132,12 +134,13 @@ Parameter name: key
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 [OpenQA.Selenium.ILocatable]$loc = ([OpenQA.Selenium.ILocatable]$element)
-$element
+Write-Output ('{0} id = {1}' -f $element.TagName,$element.GetAttribute('id'))
+
 [OpenQA.Selenium.IMouse]$mouse = ([OpenQA.Selenium.IHasInputDevices]$selenium).Mouse
 $coord = $loc.Coordinates
 $mouse.MouseMove($coord)
 
-Write-Output ('checked = {0}' -f $element.GetAttribute('checked'))
+Write-Output ('Checked = {0}' -f $element.GetAttribute('checked'))
 $mouse.Click($coord)
 Start-Sleep 1
 
@@ -166,11 +169,9 @@ try {
   Write-Output ("Exception : {0} ...`n(ignored)" -f (($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-$element
-# [OpenQA.Selenium.ILocatable]$loc = ([OpenQA.Selenium.ILocatable]$element)
+Write-Output ('{0} id = {1}' -f $element.TagName,$element.GetAttribute('id'))
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-# $mouse.Click($coord)
 Start-Sleep 1
 $alert = $selenium.switchTo().alert()
 Write-Output ('Clicking on {0}' -f $alert.Text)
@@ -182,9 +183,6 @@ Start-Sleep 1
 
 $name = 'shyam Kumar'
 $class = 'contentdiv_listdiv'
-# span[text()='{0}']//following-sibling::input[@type='checkbox']
-$xpath = ('//div[@class="{0}"]//input[@type="checkbox"]' -f $class)
-$xpath = ('//div[@class="{0}"]/span[text()="{1}"]/following-sibling::input[@type="checkbox"]' -f $class,$name)
 $xpath = ('//div[@class="{0}"]/span[text()="{1}"]' -f $class,$name)
 
 try {
@@ -196,32 +194,9 @@ try {
   Write-Output ("Exception : {0} ...`n(ignored)" -f (($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-$element
-# the name is not clickable
-Start-Sleep 1
+Write-Output ('{0} id = {1}' -f $element.TagName,$element.GetAttribute('id'))
+# The name is not clickable
 
-
-
-# locator # 3
-
-$name = 'shyam Kumar'
-$class = 'contentdiv_listdiv'
-# span[text()='{0}']//following-sibling::input[@type='checkbox']
-$xpath = ('//div[@class="{0}"]//input[@type="checkbox"]' -f $class)
-$xpath = ('//div[@class="{0}"]/span[text()="{1}"]/following-sibling::input[@type="checkbox"]' -f $class,$name)
-$xpath = ('//div[@class="{0}"]/span[text()="{1}"]' -f $class,$name)
-
-try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 25
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
-
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n(ignored)" -f (($_.Exception.Message) -split "`n")[0])
-}
-[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-$element
-# the name is not clickable
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: darkblue; border: 4px solid darkblue;')
 Start-Sleep 1
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
@@ -230,7 +205,6 @@ Start-Sleep 1
 
 
 # locator # 4
-# http://www.w3schools.com/xpath/xpath_axes.asp
 $name = 'shyam Kumar'
 $class = 'contentdiv_listdiv'
 $xpath = ('//div[@class="{0}"]/span[text()="{1}"]/following-sibling::*' -f $class,$name)
@@ -246,7 +220,6 @@ try {
 $elements | ForEach-Object {
   $element = $_
   Write-Output ('Highlighting element: {0} class={1}' -f $element.TagName,$element.GetAttribute('class'))
-  # the name is not clickable
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: #CC6600; border: 4px solid #CC3300;')
   Start-Sleep 1
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
@@ -256,7 +229,7 @@ $elements | ForEach-Object {
 
 
 # locator # 5
-# http://www.w3schools.com/xpath/xpath_axes.asp
+
 $name = 'shyam Kumar'
 $class = 'contentdiv_listdiv'
 $xpath = ('//div[@class="{0}"]/span[text()="{1}"]/following-sibling::*//input[@type="checkbox"]' -f $class,$name)
@@ -268,13 +241,136 @@ try {
   Write-Output ("Exception : {0} ...`n(ignored)" -f (($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-$element
 [OpenQA.Selenium.ILocatable]$loc = ([OpenQA.Selenium.ILocatable]$element)
 
 [OpenQA.Selenium.IMouse]$mouse = ([OpenQA.Selenium.IHasInputDevices]$selenium).Mouse
 $coord = $loc.Coordinates
 $mouse.MouseMove($coord)
 $mouse.Click($coord)
+Start-Sleep 1
+$alert = $selenium.switchTo().alert()
+Write-Output ('Clicking on {0}' -f $alert.Text)
+$alert.accept()
+Start-Sleep 1
+
+
+# locator # 6
+
+$name = 'shyam Kumar'
+$class = 'contentdiv_listdiv'
+$xpath = ('//div[@class="{0}"]/span[text()="{1}"]/following-sibling::*//input[@type="checkbox"]' -f $class,$name)
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 25
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n(ignored)" -f (($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+Write-Output ('{0} id = {1}' -f $element.TagName,$element.GetAttribute('id'))
+[OpenQA.Selenium.ILocatable]$loc = ([OpenQA.Selenium.ILocatable]$element)
+
+[string]$script = @"
+function getPathTo(element) {
+    if (element.id!=='')
+        return '*[@id="'+element.id+'"]';
+    if (element===document.body)
+        return element.tagName;
+
+    var ix= 0;
+    var siblings= element.parentNode.childNodes;
+    for (var i= 0; i<siblings.length; i++) {
+        var sibling= siblings[i];
+        if (sibling===element)
+            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
+            ix++;
+    }
+}
+return getPathTo(arguments[0]);
+"@
+$result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element,'')).ToString()
+
+
+
+Write-Output ('Javascript-generated XPath = "{0}"' -f $result)
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  $xpath = ('//{0}' -f $result)
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+Start-Sleep 1
+$alert = $selenium.switchTo().alert()
+Write-Output ('Clicking on {0}' -f $alert.Text)
+$alert.accept()
+Start-Sleep 1
+
+
+# locator # 7
+
+$name = 'shyam Kumar'
+$class = 'contentdiv_listdiv'
+$xpath = ('//div[@class="{0}"]/span[text()="{1}"]/following-sibling::*//input[@type="checkbox"]' -f $class,$name)
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 25
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n(ignored)" -f (($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+Write-Output ('{0} id = {1}' -f $element.TagName,$element.GetAttribute('id'))
+[OpenQA.Selenium.ILocatable]$loc = ([OpenQA.Selenium.ILocatable]$element)
+
+[string]$script = @"
+function getPathTo(element) {
+    if (element.id!=='')
+        return 'id("'+element.id+'")';
+    if (element===document.body)
+        return element.tagName;
+
+    var ix= 0;
+    var siblings= element.parentNode.childNodes;
+    for (var i= 0; i<siblings.length; i++) {
+        var sibling= siblings[i];
+        if (sibling===element)
+            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
+            ix++;
+    }
+}
+return getPathTo(arguments[0]);
+"@
+$result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element,'')).ToString()
+
+Write-Output ('Javascript-generated XPath = "{0}"' -f $result)
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  $xpath = ('{0}' -f $result)
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 Start-Sleep 1
 $alert = $selenium.switchTo().alert()
 Write-Output ('Clicking on {0}' -f $alert.Text)
