@@ -80,8 +80,9 @@ $verificationErrors = New-Object System.Text.StringBuilder
 $hub_host = '127.0.0.1'
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
+# 
+$base_url = 'file:///C:/developer/sergueik/powershell_ui_samples/selenium/popup.html'
 
-$baseURL = 'http://localhost/jOrgChart-master2/example.html'
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
@@ -122,13 +123,15 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$selenium.Navigate().GoToUrl("file:///C:/developer/sergueik/powershell_ui_samples/selenium/popup.html" )
+$selenium.Navigate().GoToUrl( $base_url )
 $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Maximize()
 
 start-sleep 3
 
-[OpenQA.Selenium.Remote.RemoteWebElement]$button = $selenium.findElement([OpenQA.Selenium.By]::xpath("//input[@type='button']"))
+$xpath = "//input[@type='button']"
+
+[OpenQA.Selenium.Remote.RemoteWebElement]$button = $selenium.findElement([OpenQA.Selenium.By]::XPath($xpath ))
 
 $button.click()
 # http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.Alert
