@@ -1,0 +1,48 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Demo</title>
+</head>
+<body>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.gen_checkbox').change(function() {
+        if($(this).is(":checked")) {
+            var returnVal = confirm("Checked " + $(this).attr("id"));
+           $(this).attr("checked", returnVal);
+        } else { 
+            alert("Cleared " + $(this).attr("id"));
+
+        }
+    });
+});
+</script>
+<div class="contentdiv_listdiv">
+<span class="span1">
+<img style="width: 23px; height: 23px" src="http://qa.uploads.clientuploads.schoolinsites.com/COMMON/FC8672C1-4407-43C6-98B9-43C71A47929C/fb529743-e6b2-41cb-a0ed-5140fbc7ec34.jpg">
+</span>
+<span class="span2">shyam Kumar</span>
+<span class="span2"></span>
+<span class="roundedTwo span3">
+<input type="checkbox" class="gen_checkbox" title="shyam Kumar" accesskey="User" value="None" id="7a18efeb-427c-4eec-880d-13cbec2bec17" name="check">
+<label for="7a18efeb-427c-4eec-880d-13cbec2bec17">
+<span class="margtop-17"></span>
+</label>
+</span></div>
+<div class="contentdiv_listdiv">
+<span class="span1">
+<img style="width: 23px; height: 23px" src="http://qa.common.productfiles.schoolinsites.com/Images/Icons/Common/icon_Camera.png?ver=1">
+</span>
+<span class="span2">Mary Wilson</span>
+<span class="span2"></span>
+<span class="roundedTwo span3">
+<input type="checkbox" class="gen_checkbox" title="Mary Wilson" accesskey="User" value="None" id="a7f76cd7-b08f-4008-b701-3c55de9d3e17" name="check">
+<label for="a7f76cd7-b08f-4008-b701-3c55de9d3e17">
+<span class="margtop-17"></span>
+</label>
+</span></div>
+
+
+
+</body></html>
