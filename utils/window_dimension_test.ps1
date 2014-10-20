@@ -244,14 +244,5 @@ try {
 }
 
 <#
-https://www.youtube.com/watch?v=76qeLNMHgF4
-
-Powershell from salt stack on w2k12 R2  - slow 
-https://www.youtube.com/watch?v=miK25mDV9ik
-
-There is plenty of organizations who are still locked to running full Windows images hosting 
-legacy GUI applications for which do not have remote management options
-C:\java\selenium\selenium-server-standalone-2.43.1.jar\core\scripts\selenium-api.js
-http://www.gazeta.ru/culture/2014/09/26/a_6236173.shtml
-http://blogs.technet.com/b/heyscriptingguy/archive/2010/08/12/august-12-2010.aspx
+@('ie', 'chrome' , 'firefox') | foreach-object { .\window_dimension_test.ps1 -browser $_ }
 #>
