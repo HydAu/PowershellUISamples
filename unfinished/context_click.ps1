@@ -19,7 +19,9 @@
 #THE SOFTWARE.
 param(
   [string]$browser,
-  [int]$version
+  [int]$version,
+  [int]$test
+
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -126,13 +128,99 @@ $selenium.Manage().Window.Maximize()
 Start-Sleep 1
 $element = $selenium.FindElement([OpenQA.Selenium.By]::Id("logo"))
 
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$context = $actions.ContextClick($element)
-Start-Sleep -Seconds 1
+# Save Link as...
+# Copy link location
 
-[void]$context.Build().Perform()
+if ($test -eq '1') {
+  Write-Output $test
+
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $context = $actions.ContextClick($element)
+  Start-Sleep -Seconds 1
+
+  [void]$context.Build().Perform()
+  [void]$context.MoveByOffset(10,95)
+  # [void]$context.MoveByOffset(10,100)
+  [void]$context.Build().Perform()
+  Start-Sleep -Seconds 3
+  [void]$context.Click()
+  [void]$context.Build().Perform()
+  Start-Sleep 4
+
+}
 # 
 
+if ($test -eq '2') {
+  Write-Output $test
+
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $context = $actions.ContextClick($element)
+  Start-Sleep -Seconds 1
+  [void]$context.SendKeys([OpenQA.Selenium.Keys]::ARROW_DOWN).SendKeys([OpenQA.Selenium.Keys]::ARROW_DOWN).SendKeys([OpenQA.Selenium.Keys]::ARROW_DOWN).SendKeys([OpenQA.Selenium.Keys]::ARROW_DOWN).SendKeys([OpenQA.Selenium.Keys]::ARROW_DOWN).
+  SendKeys([OpenQA.Selenium.Keys]::RETURN)
+  [void]$context.Build().Perform()
+
+  Start-Sleep 4
+
+}
+# 
+
+
+if ($test -eq '3') {
+  Write-Output $test
+
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $context = $actions.ContextClick($element)
+  Start-Sleep -Seconds 1
+
+  [string]$keys = @(
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::RETURN
+  )
+  [void]$context.SendKeys(($keys -join ''))
+  [void]$context.Build().Perform()
+
+  Start-Sleep -Seconds 4
+
+}
+
+if ($test -eq '4') {
+  Write-Output $test
+
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $context = $actions.ContextClick($element)
+  Start-Sleep -Seconds 1
+
+  [string]$keys = @(
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    # [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    # [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    # [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::ARROW_DOWN,
+    [OpenQA.Selenium.Keys]::RETURN
+  )
+  $keys | ForEach-Object {
+    [void]$context.SendKeys($_)
+    Start-Sleep -Milliseconds 200
+  }
+
+  [void]$context.Build().Perform()
+
+  Start-Sleep -Seconds 4
+
+}
+
+<# hmm
+
+[void]$context.SendKeys(Keys.ARROW_DOWN).SendKeys(Keys.ARROW_DOWN).SendKeys(Keys.ARROW_DOWN).SendKeys(Keys.ARROW_DOWN).SendKeys(Keys.ARROW_DOWN).sendKeys(Keys.ARROW_DOWN).SendKeys(Keys.ARROW_RIGHT).SendKeys(Keys.ARROW_DOWN).perform();
+[void]$context.Build().Perform()
+#>
 # Save Link as...
 # $context.MoveByOffset(10,95)
 # Copy link location
