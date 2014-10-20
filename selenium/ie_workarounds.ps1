@@ -21,6 +21,7 @@
 param(
   [string]$browser = 'ie',
   [string]$base_url =  'http://www.msn.com/',
+  [switch]$all_zones,
   [int]$version
 )
 
@@ -105,7 +106,60 @@ if ($browser -ne $null -and $browser -ne '') {
   # http://jimevansmusic.blogspot.com/2012/08/youre-doing-it-wrong-protected-mode-and.html
   $capability.SetCapability("IntroduceInstabilityByIgnoringProtectedModeSettings",  $true);
 
-  # REGISTRY tweaks: WIP
+  # REGISTRY tweaks:
+  
+  $zones = @( '4','3')
+
+if ($PSBoundParameters["all_zones"]) {
+  # Proceed to two remaining zones
+
+  $zones += @( '2','1')
+
+}
+
+
+$zones | ForEach-Object {
+
+  $zone = $_
+  $hive = 'HKCU:'
+  $path = ('/Software/Microsoft/Windows/CurrentVersion/Internet Settings/Zones/{0}' -f $zone)
+
+  $data = @{ '2500' = '3';
+    '2707' = '0'
+  }
+
+
+  pushd $hive
+  cd $path
+
+  $description = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name 'DisplayName' -ErrorAction 'SilentlyContinue'
+  if ($description -eq $null) {
+    $description = '???'
+
+  } else {
+    $description = $description.DisplayName }
+
+  Write-Output ('Configuring Zone {0} - "{1}"' -f $zone,$description)
+
+
+  $data.Keys | ForEach-Object {
+    $name = $_
+    $value = $data.Item($name)
+    Write-Output ('Writing Settings {0}' -f $name)
+    $setting = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -ErrorAction 'SilentlyContinue'
+    if ($setting -ne $null) {
+      Set-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -Value $value
+    } else {
+      if ($setting -ne $value) {
+        New-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -Value $value -PropertyType DWORD
+
+      }
+    }
+  }
+  popd
+
+}
+
 
   }
   elseif ($browser -match 'safari') {
