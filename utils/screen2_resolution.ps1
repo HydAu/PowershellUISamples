@@ -9,8 +9,6 @@ using System;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-
-
 public class Resulution_Helper
 {
 
@@ -74,14 +72,14 @@ public class Resulution_Helper
     public const int DISP_CHANGE_SUCCESSFUL = 0;
     public const int DISP_CHANGE_RESTART = 1;
     public const int DISP_CHANGE_FAILED = -1;
-        private int tempHeight=0,tempWidth=0;
+    private int tempHeight = 0, tempWidth = 0;
 
     public Resulution_Helper()
     {
-			Screen Srn=Screen.PrimaryScreen;
-			tempHeight=Srn.Bounds.Width;
-			tempWidth=Srn.Bounds.Height;
-    Console.WriteLine("Current Width:{0} Height:{1}", tempWidth, tempHeight) ; 
+        Screen Srn = Screen.PrimaryScreen;
+        tempHeight = Srn.Bounds.Width;
+        tempWidth = Srn.Bounds.Height;
+        Console.WriteLine("Current Width:{0} Height:{1}", tempWidth, tempHeight);
 
         DEVMODE1 vDevMode = new DEVMODE1();
 
@@ -98,9 +96,66 @@ public class Resulution_Helper
         }
 
     }
+    public void Change_Resulution(int iWidth, int iHeight)
+    {
+        DEVMODE1 dm = new DEVMODE1();
+        dm.dmDeviceName = new String(new char[32]);
+        dm.dmFormName = new String(new char[32]);
+        dm.dmSize = (short)Marshal.SizeOf(dm);
+	Console.WriteLine("1");
+        if (0 != EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref dm))
+        {
+
+	Console.WriteLine("2");
+            dm.dmPelsWidth = iWidth;
+            dm.dmPelsHeight = iHeight;
+
+            int iRet = ChangeDisplaySettings(ref dm, CDS_TEST);
+
+            if (iRet == DISP_CHANGE_FAILED)
+            {
+	Console.WriteLine(" Failed ");
+            }
+            else
+            {
+                iRet = ChangeDisplaySettings(ref dm, CDS_UPDATEREGISTRY);
+
+                switch (iRet)
+                {
+                    case DISP_CHANGE_SUCCESSFUL:
+                        {
+	Console.WriteLine(" Success");
+                            break;
+
+
+                            //successfull change
+                        }
+                    case DISP_CHANGE_RESTART:
+                        {
+                            Console.WriteLine(" You Need To Reboot For The Change To Happen.\n If You Feel Any Problem After Rebooting Your Machine\nThen Try To Change Resolution In Safe Mode.");
+                            break;
+                            //windows 9x series you have to restart
+                        }
+                    default:
+                        {
+
+                            Console.WriteLine("Failed To Change The Resolution.");
+                            break;
+                            //failed to change
+                        }
+                }
+
+            }
+        }
+    }
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
-
 $caller = New-Object -typename 'Resulution_Helper'
+# TODO 
+try {
+ $caller.Change_Resulution(1280,1024 )
+} catch [Exception] {
+write-output $_.Exception.Message
+}
