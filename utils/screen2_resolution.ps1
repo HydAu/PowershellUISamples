@@ -1,5 +1,13 @@
 # http://www.pinvoke.net/default.aspx/user32.enumdisplaysettings
 # http://www.codeproject.com/Articles/6810/Dynamic-Screen-Resolution
+param (
+  [switch]$test,
+  [int]$width,
+  [int]$height,
+  [switch]$change_resolution
+)
+
+
 
 Add-Type @"
 
@@ -13,135 +21,147 @@ public class Resulution_Helper
 {
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct DEVMODE1
+    public struct DEVMODE
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string dmDeviceName;
-        public short dmSpecVersion;
-        public short dmDriverVersion;
-        public short dmSize;
-        public short dmDriverExtra;
-        public int dmFields;
+        public string _dmDeviceName;
+        public short _dmSpecVersion;
+        public short _dmDriverVersion;
+        public short _dmSize;
+        public short _dmDriverExtra;
+        public int _dmFields;
 
-        public short dmOrientation;
-        public short dmPaperSize;
-        public short dmPaperLength;
-        public short dmPaperWidth;
+        public short _dmOrientation;
+        public short _dmPaperSize;
+        public short _dmPaperLength;
+        public short _dmPaperWidth;
 
-        public short dmScale;
-        public short dmCopies;
-        public short dmDefaultSource;
-        public short dmPrintQuality;
-        public short dmColor;
-        public short dmDuplex;
-        public short dmYResolution;
-        public short dmTTOption;
-        public short dmCollate;
+        public short _dmScale;
+        public short _dmCopies;
+        public short _dmDefaultSource;
+        public short _dmPrintQuality;
+        public short _dmColor;
+        public short _dmDuplex;
+        public short _dmYResolution;
+        public short _dmTTOption;
+        public short _dmCollate;
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string dmFormName;
-        public short dmLogPixels;
-        public short dmBitsPerPel;
-        public int dmPelsWidth;
-        public int dmPelsHeight;
+        public string _dmFormName;
+        public short _dmLogPixels;
+        public short _dmBitsPerPel;
+        public int _dmPelsWidth;
+        public int _dmPelsHeight;
 
-        public int dmDisplayFlags;
-        public int dmDisplayFrequency;
+        public int _dmDisplayFlags;
+        public int _dmDisplayFrequency;
 
-        public int dmICMMethod;
-        public int dmICMIntent;
-        public int dmMediaType;
-        public int dmDitherType;
-        public int dmReserved1;
-        public int dmReserved2;
+        public int _dmICMMethod;
+        public int _dmICMIntent;
+        public int _dmMediaType;
+        public int _dmDitherType;
+        public int _dmReserved1;
+        public int _dmReserved2;
 
-        public int dmPanningWidth;
-        public int dmPanningHeight;
+        public int _dmPanningWidth;
+        public int _dmPanningHeight;
     };
 
 
     [DllImport("user32.dll")]
-    public static extern int EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE1 devMode);
+    public static extern int EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
 
+    public void EnumDisplaySettings_Helper()
+    {
+
+    }
 
     [DllImport("user32.dll")]
-    public static extern int ChangeDisplaySettings(ref DEVMODE1 devMode, int flags);
+    public static extern int ChangeDisplaySettings(ref DEVMODE devMode, int flags);
 
     public const int ENUM_CURRENT_SETTINGS = -1;
     public const int CDS_UPDATEREGISTRY = 0x01;
     public const int CDS_TEST = 0x02;
+    // origin: 
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd183411%28v=vs.85%29.aspx
     public const int DISP_CHANGE_SUCCESSFUL = 0;
     public const int DISP_CHANGE_RESTART = 1;
     public const int DISP_CHANGE_FAILED = -1;
-    private int tempHeight = 0, tempWidth = 0;
+    public const int DISP_CHANGE_BADMODE = -2;
+    public const int DISP_CHANGE_NOTUPDATED = -3;
+    public const int DISP_CHANGE_BADFLAGS = -4;
+    public const int DISP_CHANGE_BADPARAM = -5;
+    public const int DISP_CHANGE_BADDUALVIEW = -6;
+
+    private int _height = 0, _width = 0;
 
     public Resulution_Helper()
     {
-        Screen Srn = Screen.PrimaryScreen;
-        tempHeight = Srn.Bounds.Width;
-        tempWidth = Srn.Bounds.Height;
-        Console.WriteLine("Current Width:{0} Height:{1}", tempWidth, tempHeight);
+    }
+    public void List()
+    {
+        Screen _screen = Screen.PrimaryScreen;
+        _height= _screen.Bounds.Height;
+        _width  = _screen.Bounds.Width;
+        Console.WriteLine("Current resolution:\nWidth:{0} Height:{1}", _width, _height);
 
-        DEVMODE1 vDevMode = new DEVMODE1();
-
+        DEVMODE _dm = new DEVMODE();
         int i = 0;
         Console.WriteLine("Available resolutions:");
-        while (0 != EnumDisplaySettings(null, i, ref vDevMode))
+        while (0 != EnumDisplaySettings(null, i, ref _dm))
         {
             Console.WriteLine("Width:{0} Height:{1} Color:{2} Frequency:{3}",
-                vDevMode.dmPelsWidth,
-                vDevMode.dmPelsHeight,
-                vDevMode.dmBitsPerPel, vDevMode.dmDisplayFrequency
+                _dm._dmPelsWidth,
+                _dm._dmPelsHeight,
+                _dm._dmBitsPerPel, _dm._dmDisplayFrequency
             );
             i++;
         }
 
     }
-    public void Change_Resulution(int iWidth, int iHeight)
+    public void Change_Resulution(int width, int height)
     {
-        DEVMODE1 dm = new DEVMODE1();
-        dm.dmDeviceName = new String(new char[32]);
-        dm.dmFormName = new String(new char[32]);
-        dm.dmSize = (short)Marshal.SizeOf(dm);
-	Console.WriteLine("1");
-        if (0 != EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref dm))
+        DEVMODE _dm = new DEVMODE();
+        _dm._dmDeviceName = new String(new char[32]);
+        _dm._dmFormName = new String(new char[32]);
+        _dm._dmSize = (short)Marshal.SizeOf(_dm);
+        if (0 != EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref _dm))
         {
 
-	Console.WriteLine("2");
-            dm.dmPelsWidth = iWidth;
-            dm.dmPelsHeight = iHeight;
+            _dm._dmPelsWidth = width;
+            _dm._dmPelsHeight = height;
 
-            int iRet = ChangeDisplaySettings(ref dm, CDS_TEST);
+            int _result = ChangeDisplaySettings(ref _dm, CDS_TEST);
 
-            if (iRet == DISP_CHANGE_FAILED)
+            if (_result == DISP_CHANGE_FAILED)
             {
-	Console.WriteLine(" Failed ");
+                Console.WriteLine("Failed");
             }
             else
             {
-                iRet = ChangeDisplaySettings(ref dm, CDS_UPDATEREGISTRY);
+                _result = ChangeDisplaySettings(ref _dm, CDS_UPDATEREGISTRY);
 
-                switch (iRet)
+                switch (_result)
                 {
                     case DISP_CHANGE_SUCCESSFUL:
                         {
-	Console.WriteLine(" Success");
+                            Console.WriteLine(" Success");
                             break;
-
-
-                            //successfull change
                         }
                     case DISP_CHANGE_RESTART:
                         {
                             Console.WriteLine(" You Need To Reboot For The Change To Happen.\n If You Feel Any Problem After Rebooting Your Machine\nThen Try To Change Resolution In Safe Mode.");
                             break;
-                            //windows 9x series you have to restart
+                        }
+
+                    case DISP_CHANGE_BADMODE:
+                        {
+                            Console.WriteLine("Invalid / bad resolution.");
+                            break;
                         }
                     default:
                         {
-
-                            Console.WriteLine("Failed To Change The Resolution.");
+                            Console.WriteLine("Error during The Resolution Change : {0}", _result);
                             break;
-                            //failed to change
                         }
                 }
 
@@ -153,9 +173,12 @@ public class Resulution_Helper
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
 $caller = New-Object -typename 'Resulution_Helper'
-# TODO 
+$caller.List() 
+
+            if ($PSBoundParameters['change_resolution']) {
 try {
- $caller.Change_Resulution(1280,1024 )
+ $caller.Change_Resulution($with,$height )
 } catch [Exception] {
 write-output $_.Exception.Message
+}
 }
