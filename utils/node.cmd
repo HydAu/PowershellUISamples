@@ -15,6 +15,9 @@ set APP_VERSION=2.43.1
 set JAVA_VERSION=1.6.0_45
 set JAVA_HOME=c:\progra~1\java\jdk%JAVA_VERSION%
 set JAVA_HOME=c:\java\jdk%JAVA_VERSION%
+set MAX_MEMORY=-Xmx256m
+set STACK_SIZE=-Xss8m
+
 rem Need to keep 1.7 and 1.6 both installed
 set GROOVY_HOME=c:\java\groovy-2.3.2
 set HUB_URL=http://127.0.0.1:4444/grid/register
@@ -36,7 +39,9 @@ where.exe iexplore.exe
 CHOICE /T 1 /C ync /CS /D y
 
 set LAUNCHER_OPTS=-XX:MaxPermSize=1028M -Xmn128M
+set LAUNCHER_OPTS=%MAX_MEMORY% %STACK_SIZE%
 
+set LOG_FILE=NODE.log
 
 java %LAUNCHER_OPTS% ^
 -jar selenium-server-standalone-%APP_VERSION%.jar ^
@@ -48,6 +53,10 @@ java %LAUNCHER_OPTS% ^
 -Dwebdriver.chrome.driver=chromedriver.exe ^
 -nodeConfig %NODE_CONFIG%  ^
 -browserTimeout 12000 -timeout 12000 ^
+-ensureCleanSession true ^
+-trustAllSSLCertificates ^
+-log %LOG_FILE% ^
+
 
 REM Blank line
 goto :EOF
