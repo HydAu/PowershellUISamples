@@ -15,6 +15,9 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
+<#
+@('ie', 'chrome' , 'firefox') | foreach-object { ./window_dimension_test.ps1 -browser $_ }
+#>
 
 param(
   # in the current environment phantomejs is not installed 
@@ -22,6 +25,18 @@ param(
   [string]$base_url = 'http://www.priceline.com/',
   [int]$version
 )
+
+function cleanup
+{
+  param([object]$selenium_ref)
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    # Ignore errors if unable to close the browser
+  }
+
+}
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -198,12 +213,17 @@ if ($browser -ne $null -and $browser -ne '') {
     throw "unknown browser choice:${browser}"
   }
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
-  <# 
-TODO: catch
-New-Object : Exception calling ".ctor" with "2" argument(s): "Error forwarding
-the new session cannot find : Capabilities [{platform=WINDOWS,browserName=internet explorer, version=11}]"
-#>
-  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  try
+  {
+    $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  } catch [exception]{
+    Write-Output $_.Exception.Message
+    if ($selenium -ne $null) {
+
+      cleanup ([ref]$selenium)
+    }
+    return -1
+  }
 } else {
   Write-Host 'Running on phantomjs'
   $phantomjs_executable_folder = "C:\tools\phantomjs"
@@ -231,7 +251,7 @@ Start-Sleep 10
 
 $window_size = $selenium.Manage().Window.Size
 $window_position = $selenium.Manage().Window.Position
-$window_size | Get-Member
+write-output ('Width:{0}, Height:{1}' -f $window_size.Width,  $window_size.Height )
 
 
 try {
@@ -258,12 +278,5 @@ try {
   Write-Output $_.Exception.Message
 }
 # Cleanup
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
 
-<#
-@('ie', 'chrome' , 'firefox') | foreach-object { .\window_dimension_test.ps1 -browser $_ }
-#>
+cleanup ([ref]$selenium)
