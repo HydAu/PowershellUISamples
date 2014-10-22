@@ -1,6 +1,25 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 param(
   # in the current environment phantomejs is not installed 
-  [string]$browser='firefox',
+  [string]$browser = 'firefox',
+  [string]$base_url = 'http://www.priceline.com/',
   [int]$version
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -168,7 +187,7 @@ if ($browser -ne $null -and $browser -ne '') {
   elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
     if ($version -ne $null -and $version -ne 0) {
-      $capability.SetCapability("version", $version.ToString());
+      $capability.SetCapability("version",$version.ToString());
     }
 
   }
@@ -179,6 +198,11 @@ if ($browser -ne $null -and $browser -ne '') {
     throw "unknown browser choice:${browser}"
   }
   $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
+  <# 
+TODO: catch
+New-Object : Exception calling ".ctor" with "2" argument(s): "Error forwarding
+the new session cannot find : Capabilities [{platform=WINDOWS,browserName=internet explorer, version=11}]"
+#>
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
   Write-Host 'Running on phantomjs'
@@ -192,29 +216,26 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$baseURL = "http://www.carnival.com"
-# $baseURL = 'http://www4.uatcarnival.com/';
-# $baseURL = 'www3.syscarnival.com'
-$selenium.Navigate().GoToUrl($baseURL + "/")
+$selenium.Navigate().GoToUrl($base_url)
 
 # block until the search button is visible.
 $css_selector1 = 'div.actions > a.search'
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+$wait.PollingInterval = 150
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
 
 
 $selenium.Manage().Window.Maximize()
 
 Start-Sleep 10
 
-$window_size = $selenium.Manage().window.Size
-$window_position = $selenium.Manage().window.Position
-$window_size  | get-member
+$window_size = $selenium.Manage().Window.Size
+$window_position = $selenium.Manage().Window.Position
+$window_size | Get-Member
 
 
 try {
-  [OpenQA.Selenium.Screenshot]$screenshot =  $selenium.GetScreenshot()
+  [OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
   $guid = [guid]::NewGuid()
   $image_name = ($guid.ToString())
   [string]$image_path = ('{0}\{1}\{2}.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
@@ -223,15 +244,15 @@ try {
   $screenshot.SaveAsFile($image_path,[System.Drawing.Imaging.ImageFormat]::Jpeg)
 
 
-$owner = New-Object WindowHelper
-$owner.count = $iteration
-$owner.Browser = ("{0} {1},{2}"-f $browser, $window_size.Width , $window_size.Height)
-$owner.SrcImagePath = $image_path
-$owner.TimeStamp = Get-Date
-$owner.DstImagePath = $stamped_image_path 
-[boolean]$stamp = $false
+  $owner = New-Object WindowHelper
+  $owner.count = $iteration
+  $owner.Browser = ("{0} {1},{2}" -f $browser,$window_size.Width,$window_size.Height)
+  $owner.SrcImagePath = $image_path
+  $owner.TimeStamp = Get-Date
+  $owner.DstImagePath = $stamped_image_path
+  [boolean]$stamp = $false
 
-    $owner.StampScreenshot()
+  $owner.StampScreenshot()
 
 } catch [exception]{
   Write-Output $_.Exception.Message

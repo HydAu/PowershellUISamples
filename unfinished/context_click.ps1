@@ -125,7 +125,7 @@ $baseURL = "http://www.urbandictionary.com"
 $selenium.Navigate().GoToUrl($baseURL + "/")
 $selenium.Manage().Window.Maximize()
 # $element = $selenium.FindElement([OpenQA.Selenium.By]::ClassName("main-photo"))
-Start-Sleep 1
+Start-Sleep 5
 $element = $selenium.FindElement([OpenQA.Selenium.By]::Id("logo"))
 
 # Save Link as...
@@ -143,9 +143,15 @@ if ($test -eq '1') {
   # [void]$context.MoveByOffset(10,100)
   [void]$context.Build().Perform()
   Start-Sleep -Seconds 3
-  [void]$context.Click()
+  $keys = @(
+    [OpenQA.Selenium.Keys]::RETURN
+  )
+  [void]$context.SendKeys(($keys -join ''))
   [void]$context.Build().Perform()
-  Start-Sleep 4
+
+ # [void]$context.Click()
+ # [void]$context.Build().Perform()
+ # Start-Sleep 4
 
 }
 # 
