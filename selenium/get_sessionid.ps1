@@ -151,7 +151,7 @@ try {
 }
 
 [void]$driver.manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://www.google.com';
+[string]$baseURL = $driver.Url = 'http://192.168.56.101/';
 $driver.Navigate().GoToUrl($baseURL)
 
 [NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)

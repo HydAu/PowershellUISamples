@@ -238,8 +238,10 @@ if ($browser -ne $null -and $browser -ne '') {
 
 $selenium.Navigate().GoToUrl($base_url)
 
-# block until the search button is visible.
-$css_selector1 = 'div.actions > a.search'
+# block until the logo is visible.
+$css_selector1 = 'a.logo'
+# $css_selector1 = 'a#logo'
+
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 150
 [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))

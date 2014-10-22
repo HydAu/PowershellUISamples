@@ -19,7 +19,8 @@
 #THE SOFTWARE.
 
 param(
-  [string]$browser
+  [string]$browser,
+  [string]$version
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -100,6 +101,10 @@ if ($browser -ne $null -and $browser -ne '') {
   }
   elseif ($browser -match 'chrome') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+    if ($version -ne $null -and $version -ne 0) {
+      $capability.SetCapability("version",$version.ToString());
+    }
+
   }
   elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()

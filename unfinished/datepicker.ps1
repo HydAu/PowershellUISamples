@@ -1,3 +1,44 @@
+# http://techlearn.in/content/how-select-particular-date-date-picker-selenium-web-driver
+<#
+
+package TechLearndotin;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.Select;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterTest;
+import com.thoughtworks.selenium.Selenium;
+
+public class Rightclick {
+      public WebDriver driver;
+      public Selenium selenium;
+    
+ @Test 
+       public void Datepicker() throws Exception {
+       driver.get("http://techlearn.in");
+       driver.findElement(By.linkText("Register")).click();
+       Thread.sleep(3000); // Selecting date from Date picker using the following code Ex: My Date of Birth is : October 21 1988.
+       new Select(driver.findElement(By.id("edit-submitted-date-of-birth-month"))).selectByVisibleText("Oct");
+       new Select(driver.findElement(By.id("edit-submitted-date-of-birth-day"))).selectByVisibleText("21");
+       new Select(driver.findElement(By.id("edit-submitted-date-of-birth-year"))).selectByVisibleText("1988");
+       }
+   
+ @BeforeTest
+      public void beforeTest() {
+      driver = new FirefoxDriver();
+      driver.manage().window().maximize();
+      }
+
+ @AfterTest
+      public void afterTest() {
+      }
+      }
+
+ 
+#>
+
 # http://www.mythoughts.co.in/2013/04/selecting-date-from-datepicker-using.html#.VERjLYXwAQd
 # 
 
