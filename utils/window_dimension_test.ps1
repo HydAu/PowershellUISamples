@@ -68,6 +68,10 @@ public class WindowHelper
     private string _browser;
     private string _srcImagePath;
 
+    // NOTE: do not use _imageFormat / ImageFormat for members 
+    // due to class name collision
+    private string _imgFormat;
+
     private string _dstImagePath;
 
     public string DstImagePath
@@ -86,6 +90,12 @@ public class WindowHelper
     {
         get { return _srcImagePath; }
         set { _srcImagePath = value; }
+    }
+
+    public string ImgFormat
+    {
+        get { return _imgFormat; }
+        set { _imgFormat = value; }
     }
 
     public string Browser
@@ -109,10 +119,38 @@ public class WindowHelper
         }
         else
         {
-            _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+            _bmp.Save(_dstImagePath, GetImageFormat(ImgFormat) );
         }
         Dispose();
     }
+
+
+public ImageFormat GetImageFormat(string ext)
+    {
+      switch (ext.ToUpper())
+      {
+        case "BMP":
+          return ImageFormat.Bmp;
+        case "PNG":
+          return ImageFormat.Png;
+        case "GIF":
+          return ImageFormat.Gif;
+        case "ICO":
+          return ImageFormat.Icon;
+        case "JPEG":
+        case "JPG":
+        case "JPE":
+          return ImageFormat.Jpeg;
+        case "TIF":
+        case "TIFF":
+          return ImageFormat.Tiff;
+        case "WMF":
+          return ImageFormat.Wmf;
+        default:
+          return ImageFormat.Bmp;
+      }
+    }
+
 
     public void StampScreenshot()
     {
@@ -129,7 +167,7 @@ public class WindowHelper
         _font = new Font("Arial", 40);
         _graphics.DrawString(firstText, _font, Brushes.Black, firstLocation);
         _graphics.DrawString(secondText, _font, Brushes.Blue, secondLocation);
-        _bmp.Save(_dstImagePath, ImageFormat.Jpeg);
+        _bmp.Save(_dstImagePath, GetImageFormat(ImgFormat) );
         Dispose();
 
     }
@@ -163,7 +201,6 @@ public class WindowHelper
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
-
 
 
 $shared_assemblies = @(
@@ -267,6 +304,7 @@ try {
 
 
   $owner = New-Object WindowHelper
+  $owner.ImgFormat = "JPG"
   $owner.count = $iteration
   $owner.Browser = ("{0} {1},{2}" -f $browser,$window_size.Width,$window_size.Height)
   $owner.SrcImagePath = $image_path
