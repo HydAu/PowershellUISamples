@@ -63,7 +63,8 @@ public class WindowHelper
     private Graphics _graphics;
     private int _count = 0;
     private Font _font;
-
+    private static int thumbWidth = 96;
+    private static int thumbHeight = 96;
     private string _timeStamp;
     private string _browser;
     private string _srcImagePath;
@@ -124,8 +125,19 @@ public class WindowHelper
         Dispose();
     }
 
+        // http://www.java2s.com/Code/CSharp/2D-Graphics/CreateThumbnail.htm
+    public byte[] CreateThumbnail(string filename, string dest )
+    {
+      using (MemoryStream s = new MemoryStream())
+      using (Image image = Image.FromFile(filename).GetThumbnailImage(thumbWidth, thumbHeight, null, new IntPtr()))
+      {
+        image.Save(s, ImageFormat.Jpeg);
+        image.Save(dest , GetImageFormat(ImgFormat) );
+        return s.ToArray();
+      }
+    }
 
-public ImageFormat GetImageFormat(string ext)
+    public ImageFormat GetImageFormat(string ext)
     {
       switch (ext.ToUpper())
       {
@@ -150,7 +162,6 @@ public ImageFormat GetImageFormat(string ext)
           return ImageFormat.Bmp;
       }
     }
-
 
     public void StampScreenshot()
     {
@@ -309,10 +320,13 @@ try {
   $owner.Browser = ("{0} {1},{2}" -f $browser,$window_size.Width,$window_size.Height)
   $owner.SrcImagePath = $image_path
   $owner.TimeStamp = Get-Date
-  $owner.DstImagePath = $stamped_image_path
+  # $owner.ThumbImagePath = ('{0}_1.jpg' -f $image_path )
+  $owner.DstImagePath = $stamped_image_path 
   [boolean]$stamp = $false
 
   $owner.StampScreenshot()
+  [void]$owner.CreateThumbnail($image_path , ('{0}_1.jpg' -f $image_path ))
+
 
 } catch [exception]{
   Write-Output $_.Exception.Message
