@@ -267,12 +267,8 @@ $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Build().Perform()
 
 $element5.SendKeys([OpenQA.Selenium.Keys]::RETURN)
 
-# scroll away
+# scroll away from tool bar
 [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 300)',$null)
-Start-Sleep -Seconds 1
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 100)',$null)
-Start-Sleep -Seconds 1
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 100)',$null)
 Start-Sleep -Seconds 1
 
 # Select device by first filtering
@@ -287,19 +283,21 @@ $web_element.SendKeys($device)
 [NUnit.Framework.Assert]::IsTrue(($element5.Text -match '')) # Text will be still blank
 # NOTE: Do not send ENTER key
 # $web_element.SendKeys([OpenQA.Selenium.Keys]::RETURN)
-Start-Sleep -Seconds 3
 
 [OpenQA.Selenium.IWebElement]$element1 = $null
 try {
-  $element1 = $selenium.FindElement([OpenQA.Selenium.By]::Id('mlist'))
+  $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector('select#mlist'))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 [NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+
 [NUnit.Framework.Assert]::IsTrue(($element1.Text -match $device))
+write-output ( 'Accessing select option: {0}' -f $element1.Text )
 
-$element1.Click()
 
+[System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$elements_list = $element1.findElements([OpenQA.Selenium.By]::TagName('option'))
+$elements_list[0].Click()
 [OpenQA.Selenium.IWebElement]$element1 = $null
 
 $css_selector1 = 'span.scatter'
@@ -315,12 +313,6 @@ try {
 }
 [NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
 $element1.Click()
-
-
-$check_iframes = $selenium.FindElements([OpenQA.Selenium.By]::TagName("iframe"))
-if ($check_iframes -ne $null -and $check_iframes.count -ge 1) {
-  $check_iframes[0].GetAttribute("id")
-}
 
 if ($PSBoundParameters['test']) {
   $css_selector1 = 'input[type=RADIO][name=TimeMode][value=Relative]'
@@ -338,21 +330,9 @@ if ($PSBoundParameters['test']) {
   [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
   $actions2.MoveToElement($element1).Build().Perform()
 
-  Start-Sleep -Seconds 3
   $element1.SendKeys([OpenQA.Selenium.Keys]::SPACE)
   $element1.GetAttribute("Selected")
-
-  Start-Sleep -Seconds 3
-
 }
-<#
-
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("scroll(0, 500)", $null)
-Start-Sleep -Seconds 1
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("scroll(0, 0)", $null)
-Start-Sleep -Seconds 1
-
-#>
 
 $css_selector1 = 'div#step4btn > a'
 $id1 = 'step4btn'
@@ -375,77 +355,35 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions2.MoveToElement($element1).Build().Perform()
 
-Start-Sleep -Seconds 3
+
 Write-Output ('Clicking on {0}' -f $element1.Text)
 
 $element1.Displayed
 $element1.Click()
+Start-Sleep -Seconds 3
 
+write-output 'Processing the Graph' 
 $css_selector1 = 'path[fill="#f00"]'
 [OpenQA.Selenium.IWebElement]$element1 = $null
 $check_alert_indicators = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
+$count_elements = $check_alert_indicators.count
 
-for ($item_cnt = 0; $item_cnt -ne $check_alert_indicators.count; $item_cnt++) {
+for ($item_cnt = 0; $item_cnt -ne $count_elements; $item_cnt++) {
+  $css_selector1 = 'path[fill="#f00"]'
+  $check_alert_indicators = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
   $element7 = $check_alert_indicators[$item_cnt]
   $coord = $element7.Coordinates
   [NUnit.Framework.Assert]::IsTrue(($element7 -ne $null))
-  Write-Host ('Processing tick at ({0},{1})' -f $coord.LocationInViewport.X,$coord.LocationInViewport.Y)
+  if ($item_cnt -eq  0) {
 
-  # optional highlight
-  #  http://stackoverflow.com/questions/2631820/im-storing-click-coordinates-in-my-db-and-then-reloading-them-later-and-showing/2631931#2631931
-  [string]$script = @"
-function getPathTo(element) {
-    if (element.id!=='')
-        return 'id("'+element.id+'")';
-    if (element===document.body)
-        return element.tagName;
-
-    var ix= 0;
-    var siblings= element.parentNode.childNodes;
-    for (var i= 0; i<siblings.length; i++) {
-        var sibling= siblings[i];
-        if (sibling===element)
-            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
-        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
-            ix++;
-    }
-}
-return getPathTo(arguments[0]);
-"@
-  if ($PSBoundParameters['display']) {
-    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element7,'color: blue; border: 4px solid blue;')
-    Start-Sleep 1
-    $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("arguments[0].setAttribute('style', arguments[1]);${script}",$element7,'')).ToString()
-  } else {
-    $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element7,'')).ToString()
-  }
-
-
-
-  Write-Output $result
-  <#
-  try {
-
-    [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-    $wait.PollingInterval = 100
-    $xpath = ('//{0}' -f $result)
-    Write-Output $xpath
-
-    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::xpath($xpath)))
-  } catch [exception]{
-    Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-  }
-
-#>
-
-
-  if ($item_cnt -eq $check_alert_indicators.count - 1) {
+    write-output 'Processing First element' 
 
     [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
     $actions2.MoveToElement($element7).Build().Perform()
 
     $element7.Click()
 
+    write-output 'Navigating to the details' 
     Start-Sleep 10
 
     $initial_window_handle = $selenium.CurrentWindowHandle
@@ -482,6 +420,8 @@ return getPathTo(arguments[0]);
               [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(4))
               $wait.PollingInterval = 100
               [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::xpath($xpath1)))
+
+
             } catch [exception]{
               Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
             }
@@ -491,6 +431,9 @@ return getPathTo(arguments[0]);
             [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
             $actions.MoveToElement([OpenQA.Selenium.IWebElement]$link).Build().Perform()
+            [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$link,'color: yellow; border: 4px solid yellow;')
+            Start-Sleep 3
+            [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$link,'')
 
             $text_url = $link.GetAttribute('href')
             # RawContent is a mix of ascii header
@@ -525,8 +468,11 @@ return getPathTo(arguments[0]);
             Write-Host ('ASP.NET_SessionId : {0}' -f $session_id)
           }
           [void]$selenium.switchTo().Window($initial_window_handle)
+          [void]$selenium.SwitchTo().DefaultContent()
           [void]$selenium.switchTo().Window($switch_to_window_handle).Close()
-          Start-Sleep -Seconds 4
+          Write-Debug ('Switched back to WindowHandle : {0}' -f $selenium.CurrentWindowHandle)
+          Start-Sleep -Seconds 1
+
         }
       }
     }
