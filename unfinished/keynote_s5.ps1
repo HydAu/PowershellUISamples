@@ -2,7 +2,7 @@ param(
   [string]$browser = 'firefox',
   [int]$version,
   [string]$base_url = 'https://my.keynote.com/newmykeynote/logon.do',
-  [string]$username  = 'kouzmine_serguei@yahoo.com',
+  [string]$username = 'kouzmine_serguei@yahoo.com',
   [string]$password = 'd1emW02m_@',
   [string]$device = 'Business 40 TxP',
   [switch]$test,
@@ -89,8 +89,8 @@ if ($browser -ne $null -and $browser -ne '') {
     $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c d:\java\selenium\node.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
   Write-Debug "Running on ${browser}"
@@ -181,7 +181,7 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 Write-Output ('Clicking on "{0}"' -f $element1.GetAttribute('value'))
 
 $element1.Click()
-Write-Output  'Logged in' 
+Write-Output 'Logged in'
 
 # Navigate the menu to select 'Analyze'
 
@@ -257,7 +257,7 @@ try {
 }
 [NUnit.Framework.Assert]::IsTrue(($web_element -ne $null))
 $web_element.SendKeys($device)
-write-output 'sent device into filter'
+Write-Output 'sent device into filter'
 [NUnit.Framework.Assert]::IsTrue(($element5.Text -match '')) # Text will be still blank
 # NOTE: Do not send ENTER key
 # $web_element.SendKeys([OpenQA.Selenium.Keys]::RETURN)
@@ -271,34 +271,54 @@ try {
 [NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
 
 [NUnit.Framework.Assert]::IsTrue(($element1.Text -match $device))
-write-output ( 'inspecting options of select: '  + $element1.Text )
+Write-Output ('inspecting options of select: ' + $element1.Text)
 
 
 [System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$elements_list = $element1.findElements([OpenQA.Selenium.By]::TagName('option'))
-$elements_list[0]
-$elements_enumerator = $elements_list.GetEnumerator()
 $elements_list[0].Click()
 
-<#
-$cnt = 0
-while ($elements_enumerator.MoveNext()) {
-  if ($cnt++ -gt $max_count) {
-    continue
-  }
-
-  $current = $elements_enumerator.Current
-#  [string]$xPath = ('/html/body//select[@id="searchLanguage"]/option[@value="{0}"]' -f $current.GetAttribute('value'))
-#  $result = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xPath))
-#  [NUnit.Framework.Assert]::AreEqual($result.Text,$current.Text)
-  Write-Output $current.Text
-}
-#>
-<#
-$element1.Click()
-# graphtypedbtnsid
 [OpenQA.Selenium.IWebElement]$element1 = $null
+$css_selector1 = 'table.modTimeRange'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
 
-$css_selector1 = 'span.scatter'
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+
+}
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+# TODO: investigate more
+$element1
+
+[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 100)',$null)
+Start-Sleep -Seconds 1
+
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 3
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+
+# table.modTimeRange
+[OpenQA.Selenium.IWebElement]$element1 = $null
+$css_selector1 = 'input[type=RADIO][name=TimeMode][value=Relative]'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+
+}
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+$element1
+
+
 ###
 $css_selector1 = 'span.agent'
 try {
@@ -315,36 +335,6 @@ try {
 $element1.Click()
 
 
-$check_iframes = $selenium.FindElements([OpenQA.Selenium.By]::TagName("iframe"))
-if ($check_iframes -ne $null -and $check_iframes.count -ge 1) {
-  $check_iframes[0].GetAttribute("id")
-}
-
-if ($PSBoundParameters['test']) {
-  $css_selector1 = 'input[type=RADIO][name=TimeMode][value=Relative]'
-  try {
-    [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
-    $wait.PollingInterval = 100
-    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-    $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-
-  } catch [exception]{
-    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-
-  }
-  # $element1.Click()
-  [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-  $actions2.MoveToElement($element1).Build().Perform()
-
-  Start-Sleep -Seconds 3
-  $element1.SendKeys([OpenQA.Selenium.Keys]::SPACE)
-  $element1.GetAttribute("Selected")
-
-  Start-Sleep -Seconds 3
-
-}
-
-Write-Output 'Clicking on blue button'
 $css_selector1 = 'div#step4btn > a'
 $id1 = 'step4btn'
 [OpenQA.Selenium.IWebElement]$element1 = $null
@@ -366,14 +356,97 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions2.MoveToElement($element1).Build().Perform()
 
-Start-Sleep -Seconds 3
+
 Write-Output ('Clicking on {0}' -f $element1.Text)
 
 $element1.Displayed
 $element1.Click()
+Start-Sleep -Seconds 3
+# SAVEGRAPH
+[OpenQA.Selenium.IWebElement]$element1 = $null
+$css_selector1 = 'a#openEditGraphParams'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
 
-start-sleep 10 
-#>
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+
+}
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+$element1.Click()
+
+Start-Sleep -Seconds 3
+
+[OpenQA.Selenium.IWebElement]$element1 = $null
+$css_selector1 = 'input[type=radio][name=TimeMode][value=Relative]'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+
+}
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+$element1
+
+# 
+# 
+
+[OpenQA.Selenium.IWebElement]$element1 = $null
+$css_selector1 = 'select#RelativeHours'
+# option value="3600"
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+
+}
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+
+#  $element1.Click()
+
+
+try {
+  [System.Collections.ObjectModel.ReadOnlyCollection[OpenQA.Selenium.IWebElement]]$web_element_list = $element1.findElements([OpenQA.Selenium.By]::TagName('option'))
+} catch [exception]{
+}
+[NUnit.Framework.Assert]::IsTrue(($web_element_list -ne $null))
+# $web_element_list
+
+# $web_element_list|get-member
+$web_element_list[0].Text # 1 Hour
+$web_element_list[0].Click()
+
+[OpenQA.Selenium.IWebElement]$element1 = $null
+$css_selector1 = 'a#generateGraph'
+try {
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 100
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+
+}
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+
+[NUnit.Framework.Assert]::IsTrue(($element1 -ne $null))
+$element1.Click()
+Start-Sleep -Seconds 10
+
 try {
   $selenium.Quit()
 } catch [exception]{
