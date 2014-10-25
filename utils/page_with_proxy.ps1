@@ -15,6 +15,8 @@ param(
 if ($SOLVED_UTF16_BUG -and $host.version.major -gt 2 ) {
 
   <# WARNING Tee-Object corrupts files with utf16
+     WARNING:  Tee-Object in Powershell v2 does not have append option:
+     Tee-Object : A parameter cannot be found that matches parameter name 'append'.
     PS D:\java\Jenkins\master\jobs\SQL_RUNNER_2\workspace> 
     Tee-Object  -FilePath 'test.properties' -append -InputObject 'hello world'
     hello world
@@ -54,6 +56,29 @@ $proxy.useDefaultCredentials = $true
 $req = [system.Net.WebRequest]::Create($url)
 $req.proxy = $proxy
 $req.useDefaultCredentials = $true
+
+# Use current user NTLM credentials do deal with corporate firewall
+# Note github returns a json result saying that it requires authentication 
+# normally the server returns a "classic" 401 html page
+<#
+[WebRequest] request = (HttpWebRequest)WebRequest.Create("https://api.github.com/user")
+String username = "sergueik"
+String password = "D0ss1aXML"
+String encoded = System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(username + ":" + password));
+httpWebRequest.Headers.Add("Authorization", "Basic " + encoded);
+
+request.Credentials = new NetworkCredential("githubUsername", "githubPassword");
+request.PreAuthenticate = true;
+var response = request.GetResponse();
+
+CookieContainer myContainer = new CookieContainer();
+HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://telematicoprova.agenziadogane.it/TelematicoServiziDiUtilitaWeb/ServiziDiUtilitaAutServlet?UC=22&SC=1&ST=2");
+request.Credentials = new NetworkCredential(xxx,xxx);
+request.CookieContainer = myContainer;
+request.PreAuthenticate = true;
+HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+#>
+
 for ($i = 0 ; $i -ne $max_retries  ; $i ++ ) {
 
 
