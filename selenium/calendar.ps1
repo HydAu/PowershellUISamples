@@ -46,8 +46,7 @@ private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
 private const int MOUSEEVENTF_RIGHTUP = 0x10;
 private const int MOUSEEVENTF_WHEEL = 0x800;
 
-    public MouseHelper()
-    {
+public MouseHelper(){
     }
 
     public void MouseHelper_mouse_event(int X, int Y)
@@ -57,7 +56,7 @@ mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, X, Y, 0, 0);
 
     public void MouseHelper_SetCursorPos(int X, int Y)
     {
-SetCursorPos(X,Y);
+      SetCursorPos(X,Y);
     }
 
 }
@@ -69,7 +68,22 @@ var Y = element.Location.Y;
 SetCursorPos(X, Y);
 mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); 
 */
+
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -205,10 +219,9 @@ write-output '3'
 
 #currentDay.click()
 start-sleep -second 3
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+
+# Cleanup
+
+cleanup ([ref]$selenium)
 
 

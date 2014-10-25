@@ -21,6 +21,21 @@
 param(
   [string]$browser
 )
+
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -131,10 +146,6 @@ Exception calling "ExecuteAsyncScript" with "1" argument(s):
 #>
 Start-Sleep 3
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+# Cleanup
 
-
+cleanup ([ref]$selenium)

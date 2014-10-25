@@ -124,35 +124,35 @@ if ($browser -ne $null -and $browser -ne '') {
   else {
     throw "unknown browser choice:${browser}"
   }
-  $driver = New-Object CustomeRemoteDriver ($uri,$capability)
+  $selenium = New-Object CustomeRemoteDriver ($uri,$capability)
 } else {
   # this example 
   # will not work with phantomjs 
   $phantomjs_executable_folder = "c:\tools\phantomjs"
   Write-Host 'Running on phantomjs'
-  $driver = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
-  $driver.Capabilities.SetCapability("ssl-protocol","any")
-  $driver.Capabilities.SetCapability("ignore-ssl-errors",$true)
-  $driver.Capabilities.SetCapability("takesScreenshot",$true)
-  $driver.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
+  $selenium.Capabilities.SetCapability("ssl-protocol","any")
+  $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
+  $selenium.Capabilities.SetCapability("takesScreenshot",$true)
+  $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
 
 try {
-  $sessionid = $driver.GetSessionId()
+  $sessionid = $selenium.GetSessionId()
 
 } catch [exception]{
   # Method invocation failed because [OpenQA.Selenium.PhantomJS.PhantomJSDriver] doesn't contain a method named 'GetSessionId'.
-  $driver.Quit()
+  $selenium.Quit()
   return
 
 }
 
-[void]$driver.manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://192.168.56.101/';
-$driver.Navigate().GoToUrl($baseURL)
+[void]$selenium.manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
+[string]$baseURL = $selenium.Url = 'http://192.168.56.101/';
+$selenium.Navigate().GoToUrl($baseURL)
 
 [NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)
 
@@ -181,18 +181,15 @@ $result = $sr.ReadToEnd()
 $proxyinfo_json_object = ConvertFrom-Json -InputObject $result
 $proxyinfo_json_object | Format-List
 
-$window_handle = $driver.CurrentWindowHandle
+$window_handle = $selenium.CurrentWindowHandle
 
 Write-Output ("CurrentWindowHandle = {0}`n" -f $window_handle)
 
-$driver_capabilities = $driver.Capabilities
-$driver_capabilities | Format-List
+$selenium_capabilities = $selenium.Capabilities
+$selenium_capabilities | Format-List
 
-try {
-  # IE 11 does not quit
-  $driver.Quit()
-} catch [exception]{
-  Write-Output $_.Exception.Message
-  # Ignore errors if unable to close the browser
-}
+# Cleanup
+
+cleanup ([ref]$selenium)
+
 return

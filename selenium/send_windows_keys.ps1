@@ -21,6 +21,21 @@ param(
   [string]$browser
 )
 
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
@@ -166,9 +181,4 @@ $dirs_image = $selenium.FindElementByXPath("//div[@class='dirs']")
 $dirs_image.Click()
 $button_image.Click()
 #>
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-}
-
+cleanup ([ref]$selenium)

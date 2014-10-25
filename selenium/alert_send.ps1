@@ -1,4 +1,3 @@
-
 #Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -35,6 +34,21 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
+
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
@@ -154,8 +168,6 @@ start-sleep -second 3
 # http://seleniumeasy.com/selenium-tutorials/how-to-handle-javascript-alerts-confirmation-prompts
 # e.g. need to be able to copy a url from a dialog box pop up and paste it into a new browser window
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-}
+# Cleanup
+
+cleanup ([ref]$selenium)

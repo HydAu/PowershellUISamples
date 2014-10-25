@@ -35,6 +35,21 @@ function Get-ScriptDirectory
   }
 }
 
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
+
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
@@ -167,11 +182,8 @@ for (var i = 0; i < cookies.length; i++) {
 # Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
 # https://code.google.com/p/selenium/issues/detail?id=6511  
 
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeScript($script);
+[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeScript($script)
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+# Cleanup
 
+cleanup ([ref]$selenium)

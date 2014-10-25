@@ -35,6 +35,22 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
+
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
+
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
@@ -153,10 +169,5 @@ $alert.accept()
 
 Start-Sleep 3
 
+cleanup ([ref]$selenium)
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-}

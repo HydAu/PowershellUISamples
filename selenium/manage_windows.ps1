@@ -20,6 +20,20 @@
 param(
   [string]$browser
 )
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
 
 $shared_assemblies = @(
   'WebDriver.dll',
@@ -144,10 +158,8 @@ if ($handles.Count -gt 1) {
   [void]$selenium.switchTo().defaultContent()
 
 }
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-  # Ignore errors if unable to close the browser
-}
+# Cleanup
+
+cleanup ([ref]$selenium)
+
 return
