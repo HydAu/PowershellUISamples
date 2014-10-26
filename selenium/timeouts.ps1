@@ -22,6 +22,21 @@ param(
   [string]$browser
 )
 
+function set_timeouts{ 
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref ,
+  [int]$explicit = 10 ,
+  [int]$page_load = 60 ,
+  [int]$script = 30 
+  )
+
+[void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
+[void]($selenium_ref.Value.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
+[void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
+
+}
+
+
 function cleanup
 {
   param(
@@ -114,7 +129,11 @@ $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
 
 # http://roadtoautomation.blogspot.com/2013/10/webdriver-implicit-and-explicit-wait.html
-[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
+# [void]$selenium.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
+# [void]$selenium.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds(50))
+# [void]$selenium.manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(20))
+set_timeouts ([ref]$selenium)
+
 
 [int]$timeout = 4000
 # change $timeout to see if the WevDriver is waiting on page  sctript to execute
@@ -147,5 +166,4 @@ Exception calling "ExecuteAsyncScript" with "1" argument(s):
 Start-Sleep 3
 
 # Cleanup
-
 cleanup ([ref]$selenium)
