@@ -120,47 +120,47 @@ public class WindowHelper
         }
         else
         {
-            _bmp.Save(_dstImagePath, GetImageFormat(ImgFormat) );
+            _bmp.Save(_dstImagePath, GetImageFormat(ImgFormat));
         }
         Dispose();
     }
 
-        // http://www.java2s.com/Code/CSharp/2D-Graphics/CreateThumbnail.htm
-    public byte[] CreateThumbnail(string filename, string dest )
+    // http://www.java2s.com/Code/CSharp/2D-Graphics/CreateThumbnail.htm
+    public byte[] CreateThumbnail(string filename, string dest)
     {
-      using (MemoryStream s = new MemoryStream())
-      using (Image image = Image.FromFile(filename).GetThumbnailImage(thumbWidth, thumbHeight, null, new IntPtr()))
-      {
-        image.Save(s, ImageFormat.Jpeg);
-        image.Save(dest , GetImageFormat(ImgFormat) );
-        return s.ToArray();
-      }
+        using (MemoryStream s = new MemoryStream())
+        using (Image image = Image.FromFile(filename).GetThumbnailImage(thumbWidth, thumbHeight, null, new IntPtr()))
+        {
+            image.Save(s, ImageFormat.Jpeg);
+            image.Save(dest, GetImageFormat(ImgFormat));
+            return s.ToArray();
+        }
     }
 
     public ImageFormat GetImageFormat(string ext)
     {
-      switch (ext.ToUpper())
-      {
-        case "BMP":
-          return ImageFormat.Bmp;
-        case "PNG":
-          return ImageFormat.Png;
-        case "GIF":
-          return ImageFormat.Gif;
-        case "ICO":
-          return ImageFormat.Icon;
-        case "JPEG":
-        case "JPG":
-        case "JPE":
-          return ImageFormat.Jpeg;
-        case "TIF":
-        case "TIFF":
-          return ImageFormat.Tiff;
-        case "WMF":
-          return ImageFormat.Wmf;
-        default:
-          return ImageFormat.Bmp;
-      }
+        switch (ext.ToUpper())
+        {
+            case "BMP":
+                return ImageFormat.Bmp;
+            case "PNG":
+                return ImageFormat.Png;
+            case "GIF":
+                return ImageFormat.Gif;
+            case "ICO":
+                return ImageFormat.Icon;
+            case "JPEG":
+            case "JPG":
+            case "JPE":
+                return ImageFormat.Jpeg;
+            case "TIF":
+            case "TIFF":
+                return ImageFormat.Tiff;
+            case "WMF":
+                return ImageFormat.Wmf;
+            default:
+                return ImageFormat.Bmp;
+        }
     }
 
     public void StampScreenshot()
@@ -178,7 +178,7 @@ public class WindowHelper
         _font = new Font("Arial", 40);
         _graphics.DrawString(firstText, _font, Brushes.Black, firstLocation);
         _graphics.DrawString(secondText, _font, Brushes.Blue, secondLocation);
-        _bmp.Save(_dstImagePath, GetImageFormat(ImgFormat) );
+        _bmp.Save(_dstImagePath, GetImageFormat(ImgFormat));
         Dispose();
 
     }
