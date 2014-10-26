@@ -110,7 +110,7 @@ if ($PSBoundParameters['browser']) {
   }
 
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-  $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
+  $uri = [System.Uri]('http://104.131.159.44:4444/wd/hub')
   $driver = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
   $driver = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)

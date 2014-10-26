@@ -21,6 +21,18 @@
 param(
   [switch]$browser
 )
+
+function cleanup
+{
+  param([object]$selenium_ref)
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    # Ignore errors if unable to close the browser
+  }
+
+}
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -113,11 +125,5 @@ $elapsed = New-TimeSpan -Seconds  ( $end - $start )
 Write-Output  ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds ,  ( $end - $start ))
 start-sleep 3
 
-
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
-
-
+# Cleanup
+cleanup ([ref]$selenium)
