@@ -126,13 +126,13 @@ if ($PSBoundParameters['browser']) {
 
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
   $uri = [System.Uri]('http://104.131.159.44:4444/wd/hub')
-  $driver = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
-  $driver = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
-  $driver.Capabilities.SetCapability('ssl-protocol','any');
-  $driver.Capabilities.SetCapability('ignore-ssl-errors',$true);
-  $driver.Capabilities.SetCapability("takesScreenshot",$false);
-  $driver.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
+  $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
+  $selenium.Capabilities.SetCapability('ssl-protocol','any');
+  $selenium.Capabilities.SetCapability('ignore-ssl-errors',$true);
+  $selenium.Capabilities.SetCapability("takesScreenshot",$false);
+  $selenium.Capabilities.SetCapability("userAgent","Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.34 (KHTML, like Gecko) PhantomJS/1.9.7 Safari/534.34")
 
   # currently unused 
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
@@ -140,25 +140,42 @@ if ($PSBoundParameters['browser']) {
 
 }
 # http://selenium.googlecode.com/git/docs/api/dotnet/index.html
-[void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
-$driver.Navigate().GoToUrl(('{0}/' -f $baseURL))
-[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
+[void]$selenium.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
+[string]$baseURL = $selenium.Url = 'http://www.wikipedia.org';
+$selenium.Navigate().GoToUrl(('{0}/' -f $baseURL))
+[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 
 $queryBox.Clear()
 $queryBox.SendKeys('Selenium')
 $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
-$driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
-$title = $driver.Title
+$selenium.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
+$title = $selenium.Title
 # -browser "browserName=safari,version=6.1,platform=OSX,javascriptEnable=true"
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1) } -Message $title
-assert -Script { ($driver.SessionId -eq $null) } -Message 'non null session id'
+assert -Script { ($selenium.SessionId -eq $null) } -Message 'non null session id'
+# write-debug $selenium.PageSource
+$elements = [OpenQA.Selenium.Remote.RemoteWebElement[]]$selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
+$elements.GetType()
+$elements_list = New-Object 'System.Collections.Generic.List[OpenQA.Selenium.Remote.RemoteWebElement]'
+$elements_list.AddRange($elements)
 
+$MatchEvaluator = 
+{  
+  param($item) 
+
+  if ($item.Text.Contains("software")) 
+  { 
+    return $true 
+  } 
+  return  $false
+}
+
+$elements_list.Find($MatchEvaluator).Click()
 <#
 # Take screenshot identifying the browser
-$driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
-[OpenQA.Selenium.Screenshot]$screenshot = $driver.GetScreenshot()
+$selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
+[OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
 
 $screenshot.SaveAsFile(Path.Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
 #>
