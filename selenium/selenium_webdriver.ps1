@@ -20,6 +20,7 @@
 
 
 param(
+  [string] $filename = 'screenshot',
   [switch]$browser
 )
 
@@ -145,7 +146,7 @@ assert -Script { ($driver.SessionId -eq $null) } -Message 'non null session id'
 $driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 [OpenQA.Selenium.Screenshot]$screenshot = $driver.GetScreenshot()
 
-$screenshot.SaveAsFile(('{0}\{1}' -f $screenshot_path, 'a.png' ), [System.Drawing.Imaging.ImageFormat]::Png)
+$screenshot.SaveAsFile(Path.Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
 #>
 # Cleanup
 try {

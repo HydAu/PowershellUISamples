@@ -1,3 +1,4 @@
+
 #Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -37,24 +38,21 @@ function Get-ScriptDirectory
 
 function cleanup
 {
-  param(
-  [System.Management.Automation.PSReference]$selenium_ref 
-  )
+  param([object]$selenium_ref)
   try {
     $selenium_ref.Value.Quit()
   } catch [exception]{
-  # Ignore errors if unable to close the browser
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-
+    # Ignore errors if unable to close the browser
   }
+
 }
+
 
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
   'nunit.core.dll',
   'nunit.framework.dll'
-
 )
 
 $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
@@ -168,6 +166,8 @@ start-sleep -second 3
 # http://seleniumeasy.com/selenium-tutorials/how-to-handle-javascript-alerts-confirmation-prompts
 # e.g. need to be able to copy a url from a dialog box pop up and paste it into a new browser window
 
-# Cleanup
-
-cleanup ([ref]$selenium)
+try {
+  $selenium.Quit()
+} catch [exception]{
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+}
