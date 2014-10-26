@@ -169,28 +169,28 @@ $phantomjs_executable_folder = 'C:\tools\phantomjs'
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
   $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
-  $driver = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 
 # http://selenium.googlecode.com/git/docs/api/dotnet/index.html
-[void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$base_url = $driver.Url = 'http://www.wikipedia.org';
-$driver.Navigate().GoToUrl(('{0}/' -f $base_url))
+[void]$selenium.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
+[string]$base_url = $selenium.Url = 'http://www.wikipedia.org';
+$selenium.Navigate().GoToUrl(('{0}/' -f $base_url))
 
 
-[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
+[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 $queryBox.Clear()
 $queryBox.SendKeys('Selenium')
 $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
-$driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
-$title = $driver.Title
+$selenium.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
+$title = $selenium.Title
 
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1) } -Message $title
-assert -Script { ($driver.SessionId -eq $null) } -Message 'non null session id'
+assert -Script { ($selenium.SessionId -eq $null) } -Message 'non null session id'
 
 # Take screenshot identifying the browser
-$driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
-[OpenQA.Selenium.Screenshot]$screenshot = $driver.GetScreenshot()
+$selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
+[OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
 
 $screenshot.SaveAsFile(('{0}\{1}.{2}' -f $screenshot_path, $filename,  'png' ), [System.Drawing.Imaging.ImageFormat]::Png)
 
