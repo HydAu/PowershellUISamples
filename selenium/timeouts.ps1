@@ -128,15 +128,12 @@ if ($browser -ne $null -and $browser -ne '') {
 $selenium.Navigate().GoToUrl($baseURL)
 $selenium.Navigate().Refresh()
 
-# http://roadtoautomation.blogspot.com/2013/10/webdriver-implicit-and-explicit-wait.html
-# [void]$selenium.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-# [void]$selenium.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds(50))
-# [void]$selenium.manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(20))
 set_timeouts ([ref]$selenium)
-
+# var hasJQueryLoaded = (bool) js.ExecuteScript("return (window.jQuery != null) && (jQuery.active === 0);");
 
 [int]$timeout = 4000
 # change $timeout to see if the WevDriver is waiting on page  sctript to execute
+
 [string]$script = "window.setTimeout(function(){document.getElementById('searchInput').value = 'test'}, ${timeout});"
 
 $start = (Get-Date -UFormat "%s")
