@@ -1,6 +1,6 @@
 # http://msexchange.me/2014/03/11/powershell-custom-gui-input-box-for-passing-values-to-variables/
 
-unction button ($title,$mailbx, $WF, $TF) {
+Function button ($title,$mailbx, $WF, $TF) {
 
 ###################Load Assembly for creating form & button######
 
