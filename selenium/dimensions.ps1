@@ -34,6 +34,20 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
+
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
@@ -81,15 +95,12 @@ $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Size = new-Object System.Drawing.Size(600, 400)
 $window_size = $selenium.Manage().Window.Size
 
-
 write-output ('height={0},width={1}' -f $window_size.Height, $window_size.Width)
 $selenium.Manage().Window.Position = new-Object System.Drawing.Point(0 , 0)
 $window_position = $selenium.Manage().Window.Position
 write-output ('x={0},y={1}' -f $window_position.X, $window_position.Y)
+start-sleep -seconds 3
 
-start-sleep -seconds 10
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+# Cleanup
+cleanup ([ref]$selenium)
+

@@ -32,6 +32,20 @@ function Get-ScriptDirectory {
   }
 }
 
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
+
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
@@ -77,8 +91,9 @@ $selenium.Navigate().GoToUrl($baseURL)
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')
 Start-Sleep 3
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
-try {
-  $selenium.Quit()
-} catch [exception]{
-}
+
+
+# Cleanup
+cleanup ([ref]$selenium)
+
 [NUnit.Framework.Assert]::AreEqual($verificationErrors.Length,0)

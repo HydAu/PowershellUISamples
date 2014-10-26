@@ -21,6 +21,20 @@ param(
   [string]$browser
 )
 
+
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
@@ -28,6 +42,7 @@ $shared_assemblies = @(
   'nunit.core.dll',
   'nunit.framework.dll'
 )
+
 
 $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
@@ -130,9 +145,5 @@ Write-Debug '4'
 # TODO:
 # [void]$selenium.SwitchOutOfIFrame()
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (( $_.Exception.Message ) -split "`n" )[0]
-}
-
+# Cleanup
+cleanup ([ref]$selenium)

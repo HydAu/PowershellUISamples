@@ -21,6 +21,21 @@ param(
   [string]$browser
 )
 
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
+
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
@@ -29,12 +44,21 @@ $shared_assemblies = @(
   'nunit.framework.dll'
 )
 
-$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
 
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
 
 # Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
@@ -168,11 +192,7 @@ $cookies.Name -split '`n' | ForEach-Object {
 
 }
 
-try {
-  # IE 11 does not quit
-  $driver.Quit()
-} catch [exception]{
-  Write-Output $_.Exception.Message
-  # Ignore errors if unable to close the browser
-}
-return
+
+# Cleanup
+cleanup ([ref]$selenium)
+

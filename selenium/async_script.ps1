@@ -24,13 +24,15 @@ param(
 
 function cleanup
 {
-  param([object]$selenium_ref)
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
   try {
     $selenium_ref.Value.Quit()
   } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
     # Ignore errors if unable to close the browser
   }
-
 }
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed

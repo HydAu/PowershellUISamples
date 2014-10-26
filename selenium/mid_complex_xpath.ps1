@@ -22,6 +22,18 @@ param(
   [string]$browser
 )
 
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -377,12 +389,6 @@ Write-Output ('Clicking on {0}' -f $alert.Text)
 $alert.accept()
 Start-Sleep 1
 
-
-
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
-
+# Cleanup
+cleanup ([ref]$selenium)
 

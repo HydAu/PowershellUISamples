@@ -20,7 +20,7 @@
 
 param(
   [string]$browser = 'ie',
-  [string]$base_url =  'http://www.msn.com/',
+  [string]$base_url = 'http://www.msn.com/',
   [switch]$all_zones,
   [int]$version
 )
@@ -33,6 +33,20 @@ if (($base_url -eq '') -or ($base_url -eq $null)) {
   Write-Error 'The required parameter is missing : BASE_URL'
   exit (1)
 }
+
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -102,63 +116,61 @@ if ($browser -ne $null -and $browser -ne '') {
     if ($version -ne $null -and $version -ne 0) {
       $capability.SetCapability("version",$version.ToString());
     }
-  # Selenium quirks:
-  # http://jimevansmusic.blogspot.com/2012/08/youre-doing-it-wrong-protected-mode-and.html
-  $capability.SetCapability("IntroduceInstabilityByIgnoringProtectedModeSettings",  $true);
+    # Selenium quirks:
+    # http://jimevansmusic.blogspot.com/2012/08/youre-doing-it-wrong-protected-mode-and.html
+    $capability.SetCapability("IntroduceInstabilityByIgnoringProtectedModeSettings",$true);
 
-  # REGISTRY tweaks:
-  
-  $zones = @( '4','3')
+    # REGISTRY tweaks:
 
-if ($PSBoundParameters["all_zones"]) {
-  # Proceed to two remaining zones
+    $zones = @( '4','3')
 
-  $zones += @( '2','1')
+    if ($PSBoundParameters["all_zones"]) {
+      # Proceed to two remaining zones
 
-}
+      $zones += @( '2','1')
 
-
-$zones | ForEach-Object {
-
-  $zone = $_
-  $hive = 'HKCU:'
-  $path = ('/Software/Microsoft/Windows/CurrentVersion/Internet Settings/Zones/{0}' -f $zone)
-
-  $data = @{ '2500' = '3';
-    '2707' = '0'
-  }
-
-
-  pushd $hive
-  cd $path
-
-  $description = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name 'DisplayName' -ErrorAction 'SilentlyContinue'
-  if ($description -eq $null) {
-    $description = '???'
-
-  } else {
-    $description = $description.DisplayName }
-
-  Write-Output ('Configuring Zone {0} - "{1}"' -f $zone,$description)
-
-
-  $data.Keys | ForEach-Object {
-    $name = $_
-    $value = $data.Item($name)
-    Write-Output ('Writing Settings {0}' -f $name)
-    $setting = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -ErrorAction 'SilentlyContinue'
-    if ($setting -ne $null) {
-      Set-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -Value $value
-    } else {
-      if ($setting -ne $value) {
-        New-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -Value $value -PropertyType DWORD
-
-      }
     }
-  }
-  popd
 
-}
+    $zones | ForEach-Object {
+
+      $zone = $_
+      $hive = 'HKCU:'
+      $path = ('/Software/Microsoft/Windows/CurrentVersion/Internet Settings/Zones/{0}' -f $zone)
+
+      $data = @{ '2500' = '3';
+        '2707' = '0'
+      }
+
+      pushd $hive
+      cd $path
+
+      $description = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name 'DisplayName' -ErrorAction 'SilentlyContinue'
+      if ($description -eq $null) {
+        $description = '???'
+
+      } else {
+        $description = $description.DisplayName }
+
+      Write-Output ('Configuring Zone {0} - "{1}"' -f $zone,$description)
+
+
+      $data.Keys | ForEach-Object {
+        $name = $_
+        $value = $data.Item($name)
+        Write-Output ('Writing Settings {0}' -f $name)
+        $setting = Get-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -ErrorAction 'SilentlyContinue'
+        if ($setting -ne $null) {
+          Set-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -Value $value
+        } else {
+          if ($setting -ne $value) {
+            New-ItemProperty -Path ('{0}/{1}' -f $hive,$path) -Name $name -Value $value -PropertyType DWORD
+
+          }
+        }
+      }
+      popd
+
+    }
 
 
   }
@@ -183,9 +195,8 @@ $zones | ForEach-Object {
 
 $selenium.Navigate().GoToUrl($base_url)
 # $selenium.Manage().Window.Maximize()
-start-sleep -second 10
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-}
+Start-Sleep -Second 10
+
+# Cleanup
+cleanup ([ref]$selenium)
+

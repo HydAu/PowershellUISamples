@@ -21,6 +21,20 @@
 param(
   [switch]$browser
 )
+
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -40,11 +54,21 @@ $shared_assemblies = @(
   "Selenium.WebDriverBackedSelenium.dll"
 )
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
+
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
 
 <# 
@@ -99,12 +123,8 @@ Write-Output $title
 Write-Output $title
 [string]$title = $selenium.ExecuteScript("return document.title")
 Write-Output $title
-Start-Sleep -Seconds 10
+Start-Sleep -Seconds 4
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
-
+# Cleanup
+cleanup ([ref]$selenium)
 

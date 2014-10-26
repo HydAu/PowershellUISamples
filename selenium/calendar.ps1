@@ -74,14 +74,13 @@ mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 function cleanup
 {
   param(
-  [System.Management.Automation.PSReference]$selenium_ref 
+    [System.Management.Automation.PSReference]$selenium_ref
   )
   try {
     $selenium_ref.Value.Quit()
   } catch [exception]{
-  # Ignore errors if unable to close the browser
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-
+    # Ignore errors if unable to close the browser
+    Write-Output (($_.Exception.Message) -split "`n")[0]
   }
 }
 
@@ -186,39 +185,39 @@ $selenium.Manage().Window.Maximize()
 
 $element1 = $selenium.FindElement([OpenQA.Selenium.By]::Id('txtOnwardCalendar'))
 
-$element1.Click()
+$element1.click()
 
 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
-  $wait.PollingInterval = 100
-  $element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector('div#rbcal_txtOnwardCalendar')))
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
+$wait.PollingInterval = 100
+$element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector('div#rbcal_txtOnwardCalendar')))
 
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')
 Start-Sleep 3
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
 
-write-output '1'
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
-  $wait.PollingInterval = 100
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath("//div[@id='rbcal_txtOnwardCalendar']")))
+Write-Output '1'
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
+$wait.PollingInterval = 100
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath("//div[@id='rbcal_txtOnwardCalendar']")))
 
-write-output '2'
+Write-Output '2'
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
-  $wait.PollingInterval = 100
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath("/html/body/div[7]/table[1]/tbody/tr[1]/td[2]")))
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
+$wait.PollingInterval = 100
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath("/html/body/div[7]/table[1]/tbody/tr[1]/td[2]")))
 
-write-output '3'
+Write-Output '3'
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
-  $wait.PollingInterval = 100
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath("//div[@id='rbcal_txtOnwardCalendar']/table[@class='monthTablefirst']//td[@class='current day']")))
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(20))
+$wait.PollingInterval = 100
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath("//div[@id='rbcal_txtOnwardCalendar']/table[@class='monthTablefirst']//td[@class='current day']")))
 
 #        WebElement currentDay = (new WebDriverWait(driver,10)).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@id='rbcal_txtOnwardCalendar']/table[@class='monthTablefirst']//td[@class='current day']"))) ;
 
 #currentDay.click()
-start-sleep -second 3
+Start-Sleep -Second 3
 
 # Cleanup
 

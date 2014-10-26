@@ -22,29 +22,39 @@ param(
   [string]$browser
 )
 
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-//declaration
 public class MouseHelper
 {
+    // http://www.pinvoke.net/default.aspx/user32.mouse_event
+    [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+    public static extern void mouse_event(uint dwFlags, int dx, int dy, uint cButtons, uint dwExtraInfo);
+    // static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
 
-// http://www.pinvoke.net/default.aspx/user32.mouse_event
-[DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-public static extern void mouse_event(uint dwFlags, int dx, int dy, uint cButtons, uint dwExtraInfo);
-// static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);
+    [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+    public static extern long SetCursorPos(int X, int Y);
 
-
-[DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-public static extern long SetCursorPos(int X, int Y);
-
-private const int MOUSEEVENTF_LEFTDOWN = 0x02;
-private const int MOUSEEVENTF_LEFTUP = 0x04;
-private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
-private const int MOUSEEVENTF_RIGHTUP = 0x10;
-private const int MOUSEEVENTF_WHEEL = 0x800;
+    private const int MOUSEEVENTF_LEFTDOWN = 0x02;
+    private const int MOUSEEVENTF_LEFTUP = 0x04;
+    private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
+    private const int MOUSEEVENTF_RIGHTUP = 0x10;
+    private const int MOUSEEVENTF_WHEEL = 0x800;
 
     public MouseHelper()
     {
@@ -52,12 +62,12 @@ private const int MOUSEEVENTF_WHEEL = 0x800;
 
     public void MouseHelper_mouse_event(int X, int Y)
     {
-mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, X, Y, 0, 0); 
+        mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, X, Y, 0, 0);
     }
 
     public void MouseHelper_SetCursorPos(int X, int Y)
     {
-SetCursorPos(X,Y);
+        SetCursorPos(X, Y);
     }
 
 }
@@ -69,6 +79,7 @@ var Y = element.Location.Y;
 SetCursorPos(X, Y);
 mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); 
 */
+
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -198,10 +209,6 @@ $o.MouseHelper_SetCursorPos(100, 100)
 # ($coord.LocationInDom.X, $coord.LocationInDom.Y )
 $o.MouseHelper_mouse_event(200, 200) # ($coord.LocationInDom.X, $coord.LocationInDom.Y)
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
-
+# Cleanup
+cleanup ([ref]$selenium)
 

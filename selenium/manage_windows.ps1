@@ -161,5 +161,4 @@ if ($handles.Count -gt 1) {
 # Cleanup
 
 cleanup ([ref]$selenium)
-
 return

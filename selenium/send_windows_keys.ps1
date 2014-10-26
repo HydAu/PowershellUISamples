@@ -35,7 +35,6 @@ function cleanup
   }
 }
 
-
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',

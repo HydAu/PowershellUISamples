@@ -42,6 +42,20 @@ function Get-ScriptDirectory
   }
 }
 
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
+
 # http://poshcode.org/1942
 function assert {
   [CmdletBinding()]
@@ -148,9 +162,7 @@ $driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 
 $screenshot.SaveAsFile(Path.Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
 #>
+
 # Cleanup
-try {
-  $driver.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+cleanup ([ref]$selenium)
+

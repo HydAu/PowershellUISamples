@@ -38,13 +38,15 @@ function Get-ScriptDirectory
 
 function cleanup
 {
-  param([object]$selenium_ref)
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
   try {
     $selenium_ref.Value.Quit()
   } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
     # Ignore errors if unable to close the browser
   }
-
 }
 
 
@@ -144,30 +146,26 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 
-[OpenQA.Selenium.IWebElement]$button = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath ))
+[OpenQA.Selenium.IWebElement]$button = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 
 $button.click()
 # http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.Alert
 # NOTE: do not explicitly declare the type here
 # [OpenQA.Selenium.Remote.RemoteAlert]
 [OpenQA.Selenium.Remote.RemoteAlert]$alert = $selenium.switchTo().alert()
-start-sleep -second 3
-write-output $alert.Text
+Start-Sleep -Second 3
+Write-Output $alert.Text
 
 $alert.SendKeys("this is a prompt")
-write-output $alert.Text
+Write-Output $alert.Text
 
-start-sleep -second 3
-$alert.accept()
-
-start-sleep -second 3
-
+Start-Sleep -Second 3
 # This works on FF, Chrome, IE 8 - 11
 # http://seleniumeasy.com/selenium-tutorials/how-to-handle-javascript-alerts-confirmation-prompts
 # e.g. need to be able to copy a url from a dialog box pop up and paste it into a new browser window
+$alert.accept()
+Start-Sleep -Second 3
 
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-}
+# Cleanup
+cleanup ([ref]$selenium)
+
