@@ -160,18 +160,26 @@ $elements.GetType()
 $elements_list = New-Object 'System.Collections.Generic.List[OpenQA.Selenium.Remote.RemoteWebElement]'
 $elements_list.AddRange($elements)
 
-$MatchEvaluator = 
+$match_evaluator1 = 
 {  
   param($item) 
-
-  if ($item.Text.Contains("software")) 
-  { 
-    return $true 
-  } 
-  return  $false
+  $item.Text.Contains("software")
+}
+$match_evaluator2 = 
+{  
+$args[0].Text.Contains("software")
 }
 
-$elements_list.Find($MatchEvaluator).Click()
+$element = $null
+$element = $elements_list.Find($match_evaluator1)
+$element
+# .Click()
+$element = $null
+$element = $elements_list.Find($match_evaluator2)
+$element
+# .Click()
+$element = $null
+
 <#
 # Take screenshot identifying the browser
 $selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
