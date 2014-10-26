@@ -162,6 +162,12 @@ $driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 
 $screenshot.SaveAsFile(Path.Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
 #>
+<#
+   // 2. Get screenshot of specific element
+        IWebElement element = FindElement(by);
+        var cropArea = new Rectangle(element.Location, element.Size);
+        return bmpScreen.Clone(cropArea, bmpScreen.PixelFormat);
+#>
 
 # Cleanup
 cleanup ([ref]$selenium)
