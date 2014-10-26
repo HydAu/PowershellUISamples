@@ -17,21 +17,45 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
-<#
-PS C:\developer\sergueik\powershell_ui_samples\selenium> @(1,2,3,4,5) | foreach-object { Start-Job -FilePath .\selenium_cloud.ps1  -argumentlist @( $_ )}
 
-Mode                LastWriteTime     Length Name
-----                -------------     ------ ----
--a---        10/22/2014   7:08 PM     389133 1.png
--a---        10/22/2014   7:15 PM     383573 2.png
--a---        10/22/2014   7:15 PM     232634 3.png
--a---        10/22/2014   7:15 PM     414813 4.png
--a---        10/22/2014   7:08 PM     267876 5.png
+<#
+ CLOUD : '104.131.159.44'
+ HOST ONLY : '192.168.56.101'
+ BRIDGED : '192.168.0.13'
 #>
 
 param (
-[string] $filename = 'a'
+[string] $filename = 'screenshot',
+[string] $hub_host = '',
+[string] $hub_port = '4444'
+
 )
+
+if ($hub_host -eq '') {
+  $hub_host = $env:HUB_HOST
+}
+
+if ($hub_host -eq '') {
+  $hub_host = $env:HUB_HOST
+}
+
+if ((($hub_host -eq $null) -or ($hub_host -eq ''))) {
+  $(throw "Please specify a HUB to run.")
+  exit 1
+}
+
+
+function cleanup
+{
+  param([object]$selenium_ref)
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    # Ignore errors if unable to close the browser
+  }
+
+}
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -86,27 +110,54 @@ function assert {
   }
 }
 
+function cleanup
+{
+  param([object]$selenium_ref)
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    # Ignore errors if unable to close the browser
+  }
+
+}
+
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
   'Selenium.WebDriverBackedSelenium.dll',
-  'Moq.dll'
+  'nunit.core.dll',
+  'nunit.framework.dll'
 )
-$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
+
 $env:SCREENSHOT_PATH = 'C:\developer\sergueik\powershell_ui_samples'
 
-
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 $screenshot_path = $env:SCREENSHOT_PATH
+
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
+
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
+
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
 
 $phantomjs_executable_folder = 'C:\tools\phantomjs'
 
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect('104.131.159.44',4444)
+    $connection.Connect($hub_host,[int]$hub_port)
+
+    $connection = (New-Object Net.Sockets.TcpClient)
     $connection.Close()
   }
   catch {
@@ -116,22 +167,24 @@ $phantomjs_executable_folder = 'C:\tools\phantomjs'
   }
 
   $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-  $uri = [System.Uri]('http://104.131.159.44:4444/wd/hub')
+  $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
+
   $driver = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 
 # http://selenium.googlecode.com/git/docs/api/dotnet/index.html
 [void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
-$driver.Navigate().GoToUrl(('{0}/' -f $baseURL))
-[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
+[string]$base_url = $driver.Url = 'http://www.wikipedia.org';
+$driver.Navigate().GoToUrl(('{0}/' -f $base_url))
 
+
+[OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 $queryBox.Clear()
 $queryBox.SendKeys('Selenium')
 $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
 $driver.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
 $title = $driver.Title
-# -browser "browserName=safari,version=6.1,platform=OSX,javascriptEnable=true"
+
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1) } -Message $title
 assert -Script { ($driver.SessionId -eq $null) } -Message 'non null session id'
 
@@ -142,8 +195,5 @@ $driver.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 $screenshot.SaveAsFile(('{0}\{1}.{2}' -f $screenshot_path, $filename,  'png' ), [System.Drawing.Imaging.ImageFormat]::Png)
 
 # Cleanup
-try {
-  $driver.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+
+cleanup ([ref]$selenium)
