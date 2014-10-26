@@ -193,7 +193,7 @@ assert -Script { ($selenium.SessionId -eq $null) } -Message 'non null session id
 # Take screenshot identifying the browser
 $selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 [OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
-$screenshot.SaveAsFile(Path.Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
+$screenshot.SaveAsFile([System.IO.Path]::Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
 
 # Cleanup
 cleanup ([ref]$selenium)

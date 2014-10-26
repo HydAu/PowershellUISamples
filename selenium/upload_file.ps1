@@ -21,6 +21,21 @@ param(
   [string]$browser
 )
 
+function cleanup
+{
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref 
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+  # Ignore errors if unable to close the browser
+  Write-Output (($_.Exception.Message) -split "`n")[0]
+
+  }
+}
+
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -35,6 +50,19 @@ function Get-ScriptDirectory
   }
 }
 
+function set_timeouts{ 
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref ,
+  [int]$explicit = 120 ,
+  [int]$page_load = 120 ,
+  [int]$script = 120 
+  )
+
+[void]($selenium_ref.Value.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
+[void]($selenium_ref.Value.Manage().timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
+[void]($selenium_ref.Value.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
+
+}
 
 $shared_assemblies = @(
   'WebDriver.dll',
@@ -109,9 +137,9 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-[void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
 $base_url = 'http://www.freetranslation.com/'
+$selenium.Navigate().GoToUrl($base_url)
 
 <# 
 has the following fragment:
@@ -122,10 +150,25 @@ has the following fragment:
     </div>
 </div>
 #>
-$text_file = ('{0}\{1}' -f (Get-ScriptDirectory),'testfile.txt')
+
+$text_file = [System.IO.Path]::Combine( (Get-ScriptDirectory),'testfile.txt')
 Write-Output 'good morning driver' | Out-File -FilePath $text_file -Encoding ascii
-$selenium.Navigate().GoToUrl($base_url)
-$selenium.Manage().Window.Maximize()
+
+set_timeouts ([ref]$selenium)
+
+[void]$selenium.Manage().Window.Maximize()
+[void]$selenium.Navigate()
+
+
+# protect from blank page
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+$wait.PollingInterval = 10
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector('a.brand')))
+
+$element = [OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector('a.brand'))
+$element  | get-member
+
+
 $upload_element = $selenium.FindElement([OpenQA.Selenium.By]::ClassName('ajaxupload-input'))
 $upload_element.SendKeys($text_file)
 <#
@@ -147,9 +190,6 @@ $text_url = $element1.getAttribute('href')
 # http://weblog.west-wind.com/posts/2007/May/21/Downloading-a-File-with-a-Save-As-Dialog-in-ASPNET
 $result = Invoke-WebRequest -Uri $text_url
 [NUnit.Framework.Assert]::IsTrue(($result.RawContent -match 'Bonjour pilote'))
-try {
-  $selenium.Quit()
-} catch [exception]{
-  Write-Output (($_.Exception.Message) -split "`n")[0]
-}
 
+# Cleanup
+cleanup ([ref]$selenium)
