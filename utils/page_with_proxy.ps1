@@ -3,7 +3,6 @@ param (
 [String]$url = 'https://haldev.service-now.com/api/now/table/change_request',
 [switch]$use_proxy ,
 [String]$password = 'passtest'
-
 )
 
 function log_message {
@@ -16,6 +15,7 @@ param(
   write-output -InputObject $message 
   write-output -InputObject $message  | out-file -FilePath $logfile -Encoding ascii -Force -append
 }
+
 
 function page_content {
 param (
