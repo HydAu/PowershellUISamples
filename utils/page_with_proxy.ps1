@@ -21,8 +21,8 @@ function page_content {
 param (
 [String]$username = 'sergueik',
 [String]$url = '',
-[String]$password = '',
-[switch]$use_proxy 
+[string]$password = '',
+[string]$use_proxy 
 )
 
 if ($url -eq $null -or $url -eq ''){ 
@@ -42,11 +42,9 @@ $expected_status  = 200
 
 
 $log_file  = 'healthcheck.txt' 
-# $url = "http://haldev.service-now.com/api/now/table/change_request"
-# $url =  "https://my.keynote.com/newmykeynote/scatterplotdrilldown.do?transid=1972395&agentid=40187&butd=561933119&profid=0&pageid=1"
 
-##
-##  if ($PSBoundParameters['use_proxy']) {
+
+if ($PSBoundParameters['use_proxy']) {
 
 # Use current user NTLM credentials do deal with corporate firewall
 $proxyAddr = (get-itemproperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').ProxyServer
@@ -64,7 +62,7 @@ $proxy.Address = $proxyAddr
 write-host  ("Probing {0}" -f $proxy.Address )
 $proxy.useDefaultCredentials = $true
 
-## }
+}
 <#
 request.Credentials = new NetworkCredential(xxx,xxx);
 CookieContainer myContainer = new CookieContainer();
@@ -78,11 +76,11 @@ request.PreAuthenticate = true;
 $request.Headers.Add("Authorization", "Basic " + $encoded)
 
 
-##  if ($PSBoundParameters['use_proxy']) {
+ if ($PSBoundParameters['use_proxy']) {
 write-host   ('Use Proxy:{0}'-f $proxy.Address )
 $request.proxy = $proxy
 $request.useDefaultCredentials = $true
-##}
+}
 # Note github returns a json result saying that it requires authentication 
 # normally the server returns a "classic" 401 html page
 
@@ -152,8 +150,9 @@ return $result_page
    [string]$use_proxy_arg = $null 
 # TODO pass switches correctly
  if ($PSBoundParameters['use_proxy']) {
-   $use_proxy_arg = '-use_proxy'
+   $use_proxy_arg = @('-use_proxy',  $true) -join ' '
 }
+write-host "page_content -username $username -password $password -url $url $use_proxy_arg"
 page_content -username $username -password $password -url $url $use_proxy_arg
 # write-output ( page_content -username $username -password $password -url $url $use_proxy_arg)
 
