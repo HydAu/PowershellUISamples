@@ -1,8 +1,8 @@
 param (
-[String]$username = 'egarcia',
+[String]$username = '',
 [String]$url = 'https://haldev.service-now.com/api/now/table/change_request',
 [switch]$use_proxy ,
-[String]$password = 'passtest'
+[String]$password = ''
 )
 
 function log_message {
