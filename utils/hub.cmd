@@ -22,19 +22,26 @@ REM
 REM java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar -port %HTTP_PORT% -role hub
 
 REM Be ready to load additional jars through CLASSPATH
-echo on
 java %LAUNCHER_OPTS% ^
--Dlog4j.configfile=file:///%SELENIUM_HOME%/log4j.properties ^
--Dlog4jConfigLocation=file:///%SELENIUM_HOME%/log4j.xml ^
--Djava.util.logging.config.file=file:///%SELENIUM_HOME%/logging.properties ^
 -classpath ^
-%SELENIUM_HOME%/log4j.xml;%SELENIUM_HOME%/log4j.properties;^
+%SELENIUM_HOME%/log4j-1.2.17.jar;^
 %SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar;^
-%SELENIUM_HOME%/jul-to-slf4j-1.7.2.jar;^
-%SELENIUM_HOME%/slf4j-api-1.7.2.jar;^
-%SELENIUM_HOME%/slf4j-log4j12-1.7.2.jar;^
-%SELENIUM_HOME%/log4j-1.2.17.jar ^
  ^
+-Dlog4j.configuration=log4j.properties ^
+org.openqa.grid.selenium.GridLauncher ^
+-port %HTTP_PORT% ^
+-role hub ^
+
+REM Keep the Blank line above intact
+goto :EOF
+
+
+java %LAUNCHER_OPTS% ^
+-classpath ^
+%SELENIUM_HOME%/log4j-1.2.17.jar;^
+%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar;^
+ ^
+-Dlog4j.configuration=log4j.properties ^
 org.openqa.grid.selenium.GridLauncher ^
 -port %HTTP_PORT% ^
 -role hub ^
@@ -43,7 +50,5 @@ REM Keep the Blank line above intact
 goto :EOF
 REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
 REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
-
-
 
 
