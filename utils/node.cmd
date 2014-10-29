@@ -42,13 +42,15 @@ CHOICE /T 1 /C ync /CS /D y
 set LAUNCHER_OPTS=-XX:MaxPermSize=1028M -Xmn128M
 set LAUNCHER_OPTS=%MAX_MEMORY% %STACK_SIZE%
 
-set LOG_FILE=NODE.log
-
 REM java %LAUNCHER_OPTS% ^
 REM -jar selenium-server-standalone-%APP_VERSION%.jar ^
 
 java %LAUNCHER_OPTS% ^
--classpath %SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar ^
+-classpath ^
+%SELENIUM_HOME%/log4j-1.2.17.jar;^
+%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar;^
+ ^
+-Dlog4j.configuration=node.log4j.properties ^
 org.openqa.grid.selenium.GridLauncher ^
 -role node ^
 -host %NODE_HOST% ^
@@ -59,8 +61,8 @@ org.openqa.grid.selenium.GridLauncher ^
 -nodeConfig %NODE_CONFIG%  ^
 -browserTimeout 12000 -timeout 12000 ^
 -ensureCleanSession true ^
--trustAllSSLCertificates ^
--log %LOG_FILE% ^
+-trustAllSSLCertificates 
+
 
 REM Keep the Blank line above intact
 goto :EOF
