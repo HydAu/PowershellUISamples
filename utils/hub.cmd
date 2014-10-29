@@ -23,14 +23,16 @@ REM java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar -port
 
 REM Be ready to load additional jars through CLASSPATH
 java %LAUNCHER_OPTS% ^
--classpath ^
-%SELENIUM_HOME%/log4j-1.2.17.jar;^
-%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar;^
- ^
--Dlog4j.configuration=log4j.properties ^
+-classpath %SELENIUM_HOME%/log4j-1.2.17.jar;%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar; ^
+-Dlog4j.configuration=hub.log4j.properties ^
 org.openqa.grid.selenium.GridLauncher ^
 -port %HTTP_PORT% ^
 -role hub ^
+-ensureCleanSession true ^
+-trustAllSSLCertificates true ^
+-maxSession 20 ^
+-newSessionWaitTimeout 600000 ^
+
 
 REM Keep the Blank line above intact
 goto :EOF

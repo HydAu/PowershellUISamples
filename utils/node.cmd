@@ -46,11 +46,7 @@ REM java %LAUNCHER_OPTS% ^
 REM -jar selenium-server-standalone-%APP_VERSION%.jar ^
 
 java %LAUNCHER_OPTS% ^
--classpath ^
-%SELENIUM_HOME%/log4j-1.2.17.jar;^
-%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar;^
- ^
--Dlog4j.configuration=node.log4j.properties ^
+-classpath %SELENIUM_HOME%/log4j-1.2.17.jar;%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar; ^-Dlog4j.configuration=node.log4j.properties ^
 org.openqa.grid.selenium.GridLauncher ^
 -role node ^
 -host %NODE_HOST% ^
