@@ -1,5 +1,6 @@
 @echo OFF
 pushd %~dp0
+set SELENIUM_HOME=%CD:\=/%
 
 set NODE_HTTP_PORT=%1
 set NODE_HOST=%2
@@ -43,8 +44,12 @@ set LAUNCHER_OPTS=%MAX_MEMORY% %STACK_SIZE%
 
 set LOG_FILE=NODE.log
 
+REM java %LAUNCHER_OPTS% ^
+REM -jar selenium-server-standalone-%APP_VERSION%.jar ^
+
 java %LAUNCHER_OPTS% ^
--jar selenium-server-standalone-%APP_VERSION%.jar ^
+-classpath %SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar ^
+org.openqa.grid.selenium.GridLauncher ^
 -role node ^
 -host %NODE_HOST% ^
 -port %NODE_HTTP_PORT% ^
@@ -57,14 +62,11 @@ java %LAUNCHER_OPTS% ^
 -trustAllSSLCertificates ^
 -log %LOG_FILE% ^
 
-
-REM Blank line
+REM Keep the Blank line above intact
 goto :EOF
+REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
+REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
+REM http://seleniumonlinetrainingexpert.wordpress.com/2012/12/11/how-do-i-start-the-internet-explorer-webdriver-for-selenium/
 
-REM https://code.google.com/p/selenium/wiki/InternetExplorerDriver
-rem http://seleniumonlinetrainingexpert.wordpress.com/2012/12/11/how-do-i-start-the-internet-explorer-webdriver-for-selenium/
-
-
-REM NOTE: http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
 
 

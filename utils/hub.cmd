@@ -1,5 +1,6 @@
 @echo OFF
 pushd %~dp0
+set SELENIUM_HOME=%CD:\=/%
 set HTTP_PORT=4444
 set HTTPS_PORT=-1
 set APP_VERSION=2.43.1
@@ -25,24 +26,22 @@ set LAUNCHER_OPTS=-XX:MaxPermSize=1028M -Xmn128M
 set SERVLET_OPTS=
 set SERVLET_JARS=
 
-java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar ^
-     %SERVLET_OPTS% ^
-     -role hub  ^
+REM java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar ^
+REM      %SERVLET_OPTS% ^
+REM Be ready to load additional jars through CLASSPATH
+
+java %LAUNCHER_OPTS% ^
+     -classpath %SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar ^
+     org.openqa.grid.selenium.GridLauncher ^
+     -port %HTTP_PORT% ^
+     -role hub ^
      -ensureCleanSession true ^
      -trustAllSSLCertificates true ^
      -maxSession 20 ^
      -newSessionWaitTimeout 600000^
-     
 
+REM Keep the Blank line above intact
+goto :EOF
 
-REM Blank line
-goto :EOF 
-
-REM https://code.google.com/p/selenium/wiki/InternetExplorerDriver
-rem http://seleniumonlinetrainingexpert.wordpress.com/2012/12/11/how-do-i-start-the-internet-explorer-webdriver-for-selenium/
-goto :EOF 
-
-REM 
-REM pushd c:\Users\sergueik\AppData\Local\Mozilla Firefox
-REM mklink /D c:\tools\firefox .
-REM symbolic link created for c:\tools\firefox <<===>> .
+REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
+REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
