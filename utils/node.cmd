@@ -6,9 +6,12 @@ set NODE_HTTP_PORT=%1
 set NODE_HOST=%2
 
 if "%NODE_HTTP_PORT%" equ "" set NODE_HTTP_PORT=5555
+REM NOTE - DNS may be not available
+SET NODE_HOST=192.168.56.102
 if "%NODE_HOST%" equ "" set NODE_HOST=%COMPUTERNAME%
-
-set HUB_HOST=127.0.0.1
+set NODE_HOST
+REM GOTO :EOF
+if "%HUB_HOST%" equ "" set HUB_HOST=127.0.0.1
 set HUB_HTTP_PORT=4444
 
 set HTTPS_PORT=-1
@@ -26,14 +29,21 @@ REM cannot use paths
 set NODE_CONFIG=NODE.json
 PATH=%JAVA_HOME%\bin;%PATH%;%GROOVY_HOME%\bin
 
+IF "%PROCESSOR_ARCHITECTURE%"=="x86" GOTO :PATH_x86
+PATH=%PATH%;%ProgramFiles(x86)%\Google\Chrome\Application
+PATH=%PATH%;%ProgramFiles(x86)%\Mozilla Firefox
+PATH=%PATH%;%ProgramFiles(x86)%\Internet Explorer
+GOTO :END_PATH
+:PATH_x86
 REM Browsers are installed in WOW6432
-REM No
-PATH=%PATH%;C:\Program Files (x86)\Google\Chrome\Application
-PATH=%PATH%;C:\Program Files (x86)\Mozilla Firefox
-PATH=%PATH%;C:\Program Files (x86)\Internet Explorer
+PATH=%PATH%;%ProgramFiles%\Google\Chrome\Application
+PATH=%PATH%;%ProgramFiles%\Mozilla Firefox
+PATH=%PATH%;%ProgramFiles%\Internet Explorer
+GOTO :END_PATH
+:END_PATH
 
 where.exe firefox.exe
-CHOICE /T 1 /C ync /CS /D y
+CHOICE /T 1 /C ync /CS /D y 
 where.exe chrome.exe
 CHOICE /T 1 /C ync /CS /D y
 where.exe iexplore.exe

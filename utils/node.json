@@ -20,18 +20,14 @@
     }
   ],
   "configuration": {
-    "host": "HOSTNAME_OF_THE_NODE",
     "role": "node",
     "maxSession": 1,
-    "port": 5557,
     "nodeTimeout": 12000,
     "nodePolling": 2000,
     "registerCycle": 1000,
     "cleanUpCycle": 2000,
     "timeout": 30000,
     "loggingPrefs" : webdriver.logging.Level.ALL,
-    "register": true,
-    "hubPort": 4444,
-    "hubHost": "192.168.0.8"	
+    "register": true
   }
 }
