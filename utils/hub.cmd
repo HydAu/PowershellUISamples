@@ -4,16 +4,11 @@ set SELENIUM_HOME=%CD:\=/%
 set HTTP_PORT=4444
 set HTTPS_PORT=-1
 set APP_VERSION=2.43.1
-set JAVA_VERSION=1.7.0_55
-REM 
-set JAVA_HOME=c:\progra~1\java\jdk%JAVA_VERSION%
-rem Need to keep 1.7 and 1.6 both installed
+set JAVA_HOME=c:\java\jdk1.6.0_45
 set GROOVY_HOME=c:\java\groovy-2.3.2
-set HUB_URL=http://127.0.0.1:4444/grid/register
-REM cannot use paths
-set NODE_CONFIG=NODE_config_local.json
 PATH=%JAVA_HOME%\bin;%PATH%;%GROOVY_HOME%\bin
-
+PATH=%PATH%;c:\Program Files\Mozilla Firefox
+REM 
 REM Error occurred during initialization of VM
 REM The size of the object heap + VM data exceeds the maximum representable size
 REM Error occurred during initialization of VM
@@ -23,25 +18,32 @@ REM Then
 REM This setting needs adjustment.
 REM set LAUNCHER_OPTS=-XX:PermSize=512M -XX:MaxPermSize=1028M -Xmn128M -Xms512M -Xmx1024M
 set LAUNCHER_OPTS=-XX:MaxPermSize=1028M -Xmn128M
-set SERVLET_OPTS=
-set SERVLET_JARS=
+REM 
+REM java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar -port %HTTP_PORT% -role hub
 
-REM java %LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar ^
-REM      %SERVLET_OPTS% ^
 REM Be ready to load additional jars through CLASSPATH
-
+echo on
 java %LAUNCHER_OPTS% ^
-     -classpath %SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar ^
-     org.openqa.grid.selenium.GridLauncher ^
-     -port %HTTP_PORT% ^
-     -role hub ^
-     -ensureCleanSession true ^
-     -trustAllSSLCertificates true ^
-     -maxSession 20 ^
-     -newSessionWaitTimeout 600000^
+-Dlog4j.configfile=file:///%SELENIUM_HOME%/log4j.properties ^
+-Dlog4jConfigLocation=file:///%SELENIUM_HOME%/log4j.xml ^
+-Djava.util.logging.config.file=file:///%SELENIUM_HOME%/logging.properties ^
+-classpath ^
+%SELENIUM_HOME%/log4j.xml;%SELENIUM_HOME%/log4j.properties;^
+%SELENIUM_HOME%/selenium-server-standalone-%APP_VERSION%.jar;^
+%SELENIUM_HOME%/jul-to-slf4j-1.7.2.jar;^
+%SELENIUM_HOME%/slf4j-api-1.7.2.jar;^
+%SELENIUM_HOME%/slf4j-log4j12-1.7.2.jar;^
+%SELENIUM_HOME%/log4j-1.2.17.jar ^
+ ^
+org.openqa.grid.selenium.GridLauncher ^
+-port %HTTP_PORT% ^
+-role hub ^
 
 REM Keep the Blank line above intact
 goto :EOF
-
 REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
 REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
+
+
+
+
