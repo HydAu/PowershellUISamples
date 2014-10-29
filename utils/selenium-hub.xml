@@ -44,7 +44,8 @@ http://www.thecoderanger.com/how-to-setup-auto-login-for-a-domain-account-on-win
     The following value assumes that you have java in your PATH.
   -->
   <executable>c:\Progra~1\java\jdk1.7.0_67\bin\java.exe</executable>
-  <arguments>%LAUNCHER_OPTS% -jar selenium-server-standalone-%APP_VERSION%.jar -port %HUB_HTTP_PORT% -role hub -ensureCleanSession true -trustAllSSLCertificates true -maxSession 20 -newSessionWaitTimeout 600000</arguments>
+
+  <arguments>%LAUNCHER_OPTS% -classpath C:/selenium-dotnet/log4j-1.2.17.jar;C:/selenium-dotnet/selenium-server-standalone-%APP_VERSION%.jar -Dlog4j.configuration=log4j.properties org.openqa.grid.selenium.GridLauncher -port %HUB_HTTP_PORT% -role hub -ensureCleanSession true -trustAllSSLCertificates true -maxSession 20 -newSessionWaitTimeout 600000</arguments>
   <!--
     interactive flag causes the empty black Java window to be displayed.
     I'm still debugging this.
