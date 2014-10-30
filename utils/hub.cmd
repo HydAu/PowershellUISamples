@@ -40,3 +40,6 @@ REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
 REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
 
 
+
+http://stackoverflow.com/questions/1140358/how-to-initialize-log4j-properly
+http://logging.apache.org/log4j/1.2/manual.html
