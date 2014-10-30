@@ -138,7 +138,8 @@ Add-ons
     $profiles.GetType()
     $selected_profile_object = $null
     $profiles | ForEach-Object { if ($_ -match $profile) {
-        $selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($_)
+        # $selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($_)
+        [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
       } }
     $selected_profile_object
     $selected_profile_object.GetType()
