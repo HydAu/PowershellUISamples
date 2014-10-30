@@ -19,6 +19,7 @@
 #THE SOFTWARE.
 
 param(
+  [string]$hub_host = '127.0.0.1',
   [string]$browser,
   [string]$version
 )
@@ -94,7 +95,7 @@ $verificationErrors = New-Object System.Text.StringBuilder
 
 # use Default Web Site to host the page. Enable Directory Browsing.
 
-$hub_host = '127.0.0.1'
+
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 # 
