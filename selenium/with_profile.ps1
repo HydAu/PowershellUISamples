@@ -22,7 +22,7 @@ param(
   [string]$hub_host = '127.0.0.1',
   [string]$browser,
   [string]$version,
-  [string]$profile='Selenium'
+  [string]$profile = 'Selenium'
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -41,13 +41,13 @@ function Get-ScriptDirectory
 function cleanup
 {
   param(
-  [System.Management.Automation.PSReference]$selenium_ref 
+    [System.Management.Automation.PSReference]$selenium_ref
   )
   try {
     $selenium_ref.Value.Quit()
   } catch [exception]{
-  # Ignore errors if unable to close the browser
-  Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+    Write-Output (($_.Exception.Message) -split "`n")[0]
 
   }
 }
@@ -111,17 +111,20 @@ if ($browser -ne $null -and $browser -ne '') {
     $connection.Connect($hub_host,[int]$hub_port)
     $connection.Close()
   } catch {
+    #   Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+
     Start-Sleep -Seconds 10
   }
   Write-Host "Running on ${browser}"
   if ($browser -match 'firefox') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+    $capability.SetCapability("ssl-protocol","any")
 
+    <#
 
-<#
-
+Add-ons
 
  Directory of C:\Users\sergueik\AppData\Roaming\Mozilla\Firefox\Profiles\webwebweb.selenium\extensions
 
@@ -130,45 +133,49 @@ if ($browser -ne $null -and $browser -ne '') {
                2 File(s)      4,605,223 bytes
 
 #>
-[Object]$profile_manager = new-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
-
-[OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
-$profiles.GetType()
-
-$profiles | foreach-object {if ($_ -match $profile){
-$selected_profile_object = new-object OpenQA.Selenium.Firefox.FirefoxProfile($_)
-} } 
-$selected_profile_object
-$selected_profile_object.GetType()
-$selected_profile_object | get-member
-$selected_profile_object.ToString()
-# [void] SetPreference(string name, string value)
-# .AcceptUntrustedCertificates
-# .AlwaysLoadNoFocusLibrary
-# .EnableNativeEvents
-# profile.setPreferences("foo.bar", 23);
-
+    [object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
+    [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
+    $profiles.GetType()
+    $selected_profile_object = $null
+    $profiles | ForEach-Object { if ($_ -match $profile) {
+        $selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($_)
+      } }
+    $selected_profile_object
+    $selected_profile_object.GetType()
+    $selected_profile_object | Get-Member
+    $selected_profile_object.ToString()
+    # [void] SetPreference(string name, string value)
+    # .AcceptUntrustedCertificates
+    # .AlwaysLoadNoFocusLibrary
+    # .EnableNativeEvents
+    $selected_profile_object.setPreference("general.useragent.override",
+      "Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0")
   }
 
   else {
-     write-output 'This example only works with Firefox'
-     exit  0
+    Write-Output 'This example only works with Firefox'
+    exit 0
   }
+  # .SetCapability(FirefoxDriver.Profile
+  $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
+
+  #   $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver($selected_profile_object)
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+
 } else {
-     write-output 'This example only works with Firefox'
-     exit  0
+  Write-Output 'This example only works with Firefox'
+  exit 0
 }
 
-$selenium.Navigate().GoToUrl( $base_url )
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 # $selenium.Manage().Window.Maximize()
 
-start-sleep 3
+Start-Sleep 3
 
 $xpath = "//input[@type='button']"
 
-[OpenQA.Selenium.Remote.RemoteWebElement]$button = $selenium.findElement([OpenQA.Selenium.By]::XPath($xpath ))
+[OpenQA.Selenium.Remote.RemoteWebElement]$button = $selenium.findElement([OpenQA.Selenium.By]::XPath($xpath))
 
 $button.click()
 # http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.Alert
@@ -176,7 +183,7 @@ $button.click()
 # [OpenQA.Selenium.Remote.RemoteAlert]
 $alert = $selenium.switchTo().alert()
 
-write-output $alert.Text
+Write-Output $alert.Text
 $alert.accept()
 
 # This works on FF, Chrome, IE 8 - 11
