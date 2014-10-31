@@ -15,7 +15,7 @@ if "%HUB_HOST%" equ "" set HUB_HOST=127.0.0.1
 set HUB_HTTP_PORT=4444
 
 set HTTPS_PORT=-1
-set APP_VERSION=2.43.1
+set APP_VERSION=2.44.0
 set JAVA_VERSION=1.6.0_45
 set JAVA_HOME=c:\progra~1\java\jdk%JAVA_VERSION%
 set JAVA_HOME=c:\java\jdk%JAVA_VERSION%

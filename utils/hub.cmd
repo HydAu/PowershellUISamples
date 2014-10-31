@@ -3,7 +3,7 @@ pushd %~dp0
 set SELENIUM_HOME=%CD:\=/%
 set HTTP_PORT=4444
 set HTTPS_PORT=-1
-set APP_VERSION=2.43.1
+set APP_VERSION=2.44.0
 set JAVA_HOME=c:\java\jdk1.6.0_45
 set GROOVY_HOME=c:\java\groovy-2.3.2
 PATH=%JAVA_HOME%\bin;%PATH%;%GROOVY_HOME%\bin
