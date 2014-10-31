@@ -99,6 +99,7 @@ $verificationErrors = New-Object System.Text.StringBuilder
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 # 
+$base_url = 'file:///root/popup.html'
 $base_url = 'file:///C:/developer/sergueik/powershell_ui_samples/selenium/popup.html'
 
 if ($browser -ne $null -and $browser -ne '') {
@@ -147,7 +148,7 @@ if ($browser -ne $null -and $browser -ne '') {
 
 $selenium.Navigate().GoToUrl( $base_url )
 $selenium.Navigate().Refresh()
-$selenium.Manage().Window.Maximize()
+# $selenium.Manage().Window.Maximize()
 
 start-sleep 3
 
