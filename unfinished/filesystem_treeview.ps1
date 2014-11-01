@@ -126,8 +126,8 @@ namespace C2C.FileSystem
             _systemIcons.Clear();
             _imageList.Images.Clear();
             Nodes.Clear();
-
-            Icon folderIcon = new Icon(typeof(FileSystemTreeView), "icons.folder.ico");
+            string icon_path = @"C:\developer\sergueik\powershell_ui_samples\unfinished\folder.ico" ;
+            Icon folderIcon = new Icon(icon_path);
 
             _imageList.Images.Add(folderIcon);
             _systemIcons.Add(FileSystemTreeView.Folder, 0);
@@ -609,7 +609,9 @@ $chooser = New-Object -typeName 'C2C.FileSystem.FileSystemTreeView' -ArgumentLis
          $treePanel.Size = New-Object System.Drawing.Size(721, 530)
          $treePanel.TabIndex = 1
 
-         # 
+         $treePanel.Controls.Add($chooser);
+         $chooser.Dock = [System.Windows.Forms.DockStyle]::Fill
+         $chooser.Load( 'C:\' )   
          # Form1
          # 
          $form.AutoScaleBaseSize = New-Object System.Drawing.Size(5, 13)
