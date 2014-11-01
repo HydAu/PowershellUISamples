@@ -1,0 +1,12 @@
+SERVICE_INFO=$(/sbin/service --status-all | egrep -i 'vncserver|xvnc')
+echo $SERVICE_INFO
+STATUS=$(expr "$SERVICE_INFO" : '.* is \(.*\)')
+echo $STATUS | grep -ivn 'runnng'  > /dev/null
+if [ $? != 0 ]
+then
+# May need to export DISPLAY here
+echo Starting service
+/sbin/service vncserver start
+fi
+export DISPLAY=:1.0
+
