@@ -344,18 +344,16 @@ namespace C2C.FileSystem
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
-$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$chooser = New-Object 'C2C.FileSystem.FileSystemTreeView' -ArgumentList ($caller)
-
 
 <#
+Add-Type -TypeDefinition @"
 using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
-using C2C.FileSystem;
+// using C2C.FileSystem;
 
 namespace DirectoryTreeView
 {
@@ -527,5 +525,120 @@ namespace DirectoryTreeView
       }
 	}
 }
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll'
+
+# does not compile
+#>
+
+$caller = New-Object -typeName  'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$chooser = New-Object -typeName 'C2C.FileSystem.FileSystemTreeView' -ArgumentList ($caller)
+
+# $container = new-Object -typename 'DirectoryTreeView.Form1'
+# $container.Show()
+
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
+
+  # set up form
+  $form = New-Object System.Windows.Forms.Form
+  $form.Text = $title
+
+
+  $form.Size = New-Object System.Drawing.Size ($width,400)
+
+  $panel = New-Object System.Windows.Forms.Panel
+
+
+         $panel1 = New-Object System.Windows.Forms.Panel
+         $btnDirectory = New-Object System.Windows.Forms.Button
+         $label1 = New-Object System.Windows.Forms.Label
+         $txtDirectory = New-Object System.Windows.Forms.TextBox
+         $treePanel = New-Object System.Windows.Forms.Panel
+         $panel1.SuspendLayout()
+         $form.SuspendLayout()
+
+         # 
+         # panel1
+         # 
+         $panel1.Controls.Add($btnDirectory)
+         $panel1.Controls.Add($label1)
+         $panel1.Controls.Add($txtDirectory)
+         $panel1.Dock =  [System.Windows.Forms.DockStyle]::Top
+         $panel1.Location = New-Object System.Drawing.Point(0, 0)
+         $panel1.Name = "panel1"
+         $panel1.Size = New-Object System.Drawing.Size(721, 57)
+         $panel1.TabIndex = 0
+         # 
+         # btnDirectory
+         # 
+         $btnDirectory.Location = New-Object System.Drawing.Point(615, 27)
+         $btnDirectory.Name = "btnDirectory"
+         $btnDirectory.Size = New-Object System.Drawing.Size(30, 21)
+         $btnDirectory.TabIndex = 2
+         $btnDirectory.Text = "..."
+         # $btnDirectory.Click += New-Object System.EventHandler($btnDirectory_Click)
+
+         # 
+         # label1
+         # 
+         $label1.Location = New-Object System.Drawing.Point(9, 9)
+         $label1.Name = "label1"
+         $label1.Size = New-Object System.Drawing.Size(102, 18)
+         $label1.TabIndex = 1
+         $label1.Text = "Directory:"
+
+         # 
+         # txtDirectory
+         # 
+         $txtDirectory.Location = New-Object System.Drawing.Point(9, 27)
+         $txtDirectory.Name = "txtDirectory"
+         $txtDirectory.Size = New-Object System.Drawing.Size(603, 20)
+         $txtDirectory.TabIndex = 0
+         $txtDirectory.Text = ""
+         # $txtDirectory.KeyDown += New-Object System.Windows.Forms.KeyEventHandler($txtDirectory_KeyDown)
+         # $txtDirectory.KeyPress += New-Object System.Windows.Forms.KeyPressEventHandler($txtDirectory_KeyPress)
+
+         # 
+         # treePanel
+         # 
+         $treePanel.Dock =  [System.Windows.Forms.DockStyle]::Fill
+         $treePanel.Location = New-Object System.Drawing.Point(0, 57)
+         $treePanel.Name = "treePanel"
+         $treePanel.Size = New-Object System.Drawing.Size(721, 530)
+         $treePanel.TabIndex = 1
+
+         # 
+         # Form1
+         # 
+         $form.AutoScaleBaseSize = New-Object System.Drawing.Size(5, 13)
+         $form.ClientSize = New-Object System.Drawing.Size(721, 587)
+         $form.Controls.Add($treePanel)
+         $form.Controls.Add($panel1)
+         $form.Name = "Form1"
+         $form.Text = "Demo Application"
+         #  $form.Load += New-Object System.EventHandler($form.Form1_Load)
+         $panel1.ResumeLayout($false)
+         $form.ResumeLayout($false)
+<#
+  $panel.Dock = "Fill"
+  $form.Controls.Add($panel)
+
+  $lv = New-Object windows.forms.ListView
+  $panel.Controls.Add($lv)
 
 #>
+
+  $form.Add_Shown({ $form.Activate() })
+  $form.KeyPreview = $True
+  $form.Add_KeyDown({
+
+      if ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_CANCEL }
+      else { return }
+      $form.Close()
+    })
+
+  [void]$form.ShowDialog([win32window ]($caller))
+
+  $form.Dispose()
