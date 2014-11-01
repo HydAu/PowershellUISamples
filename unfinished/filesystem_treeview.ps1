@@ -71,8 +71,16 @@ namespace C2C.FileSystem
 
     public String Data
     {
-        get { return _data; }
-        set { _data = value; }
+        get { return this._data; }
+        set { this._data = value; }
+    }
+
+    private bool _debug = false;
+
+    public bool Debug
+    {
+        get { return this._debug; }
+        set { this._debug = value; }
     }
 
         public static readonly int Folder = 0;
@@ -125,8 +133,9 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
 // e.Action = Unknown
    if (_selectedNode != null && _selectedNode.Parent != null)
    {
+       if (_debug){
       MessageBox.Show(String.Format("....{0}", _selectedNode.FullPath.ToString())); 
-    // 
+     }
       this._data  = _selectedNode.FullPath.ToString();
    }
 }
@@ -371,7 +380,7 @@ $form = New-Object System.Windows.Forms.Form
 $form.Text = $title
 
 
-$form.Size = New-Object System.Drawing.Size ($width,400)
+$form.Size = New-Object System.Drawing.Size (700,450)
 
 $panel = New-Object System.Windows.Forms.Panel
 
@@ -392,34 +401,44 @@ $panel1.Controls.Add($label1)
 $panel1.Controls.Add($txtDirectory)
 $panel1.Dock = [System.Windows.Forms.DockStyle]::Top
 $panel1.Location = New-Object System.Drawing.Point (0,0)
-$panel1.Name = "panel1"
-$panel1.Size = New-Object System.Drawing.Size (721,57)
+$panel1.Name = 'panel1'
+$panel1.Size = New-Object System.Drawing.Size (681,57)
 $panel1.TabIndex = 0
+
+$objADcheckbox = New-Object System.Windows.Forms.CheckBox
+$objADcheckbox.Location = New-Object System.Drawing.Point (515,27)
+$objADcheckbox.Size = New-Object System.Drawing.Size (120,20)
+$objADcheckbox.Text = 'Files'
+
+$panel1.Controls.Add($objADcheckbox)
+$objADcheckbox.add_click({ if ($objADcheckbox.Checked -eq $true) { $chooser.ShowFiles = $true } else { $chooser.ShowFiles = $false } })
+
+
 # 
 # btnDirectory
 # 
-$btnDirectory.Location = New-Object System.Drawing.Point (615,27)
+$btnDirectory.Location = New-Object System.Drawing.Point (560,27)
 $btnDirectory.Name = "btnDirectory"
-$btnDirectory.Size = New-Object System.Drawing.Size (30,21)
+$btnDirectory.Size = New-Object System.Drawing.Size (60,21)
 $btnDirectory.TabIndex = 2
-$btnDirectory.Text = "..."
-# $btnDirectory.Click += New-Object System.EventHandler($btnDirectory_Click)
+$btnDirectory.Text = 'Select'
+$btnDirectory.add_click({ if ($caller.Data -ne $null) { $form.Close() } })
 
 # 
 # label1
 # 
 $label1.Location = New-Object System.Drawing.Point (9,9)
-$label1.Name = "label1"
+$label1.Name = 'label1'
 $label1.Size = New-Object System.Drawing.Size (102,18)
 $label1.TabIndex = 1
-$label1.Text = "Directory:"
+$label1.Text = 'Selection:'
 
 # 
 # txtDirectory
 # 
 $txtDirectory.Location = New-Object System.Drawing.Point (9,27)
 $txtDirectory.Name = "txtDirectory"
-$txtDirectory.Size = New-Object System.Drawing.Size (603,20)
+$txtDirectory.Size = New-Object System.Drawing.Size (503,20)
 $txtDirectory.TabIndex = 0
 $txtDirectory.Text = ""
 # $txtDirectory.KeyDown += New-Object System.Windows.Forms.KeyEventHandler($txtDirectory_KeyDown)
@@ -431,22 +450,22 @@ $txtDirectory.Text = ""
 $treePanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $treePanel.Location = New-Object System.Drawing.Point (0,57)
 $treePanel.Name = "treePanel"
-$treePanel.Size = New-Object System.Drawing.Size (721,530)
+$treePanel.Size = New-Object System.Drawing.Size (621,130)
 $treePanel.TabIndex = 1
 
 $treePanel.Controls.Add($chooser)
 $chooser.ShowFiles = $false
 $chooser.Dock = [System.Windows.Forms.DockStyle]::Fill
-$chooser.Add_AfterSelect({ $caller.Data = $chooser.Data;  }) 
+$chooser.Add_AfterSelect({ $txtDirectory.Text = $caller.Data = $chooser.Data })
 $chooser.Load('C:\')
 # Form1
 # 
 $form.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
-$form.ClientSize = New-Object System.Drawing.Size (721,587)
+$form.ClientSize = New-Object System.Drawing.Size (621,427)
 $form.Controls.Add($treePanel)
 $form.Controls.Add($panel1)
-$form.Name = "Form1"
-$form.Text = "Demo Application"
+$form.Name = 'Form1'
+$form.Text = 'Demo Chooser'
 $panel1.ResumeLayout($false)
 $form.ResumeLayout($false)
 $form.Add_Shown({ $form.Activate() })
@@ -461,4 +480,4 @@ $form.Add_KeyDown({
 [void]$form.ShowDialog([win32window ]($caller))
 
 $form.Dispose()
-write-output $caller.Data
+Write-Output $caller.Data
