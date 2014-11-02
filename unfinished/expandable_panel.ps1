@@ -81,7 +81,7 @@ using System.Windows.Forms;
 namespace ExpandablePanelSample
 {
 
-    public class frmMain : System.Windows.Forms.Form
+    public class frmMain : System.Windows.Forms.Panel
     {
 
         public frmMain()
@@ -117,7 +117,6 @@ namespace ExpandablePanelSample
             this.pnlMenuGroup1 = new System.Windows.Forms.Panel();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
-            // this.btnAbout = new System.Windows.Forms.Button();
             this.btnMenuGroup1 = new System.Windows.Forms.Button();
             this.lblMenu = new System.Windows.Forms.Label();
             this.pnlMenu.SuspendLayout();
@@ -282,7 +281,6 @@ namespace ExpandablePanelSample
             // 
             this.pnlMenuGroup1.Controls.Add(this.button3);
             this.pnlMenuGroup1.Controls.Add(this.button2);
-            // this.pnlMenuGroup1.Controls.Add(this.btnAbout);
             this.pnlMenuGroup1.Controls.Add(this.btnMenuGroup1);
             this.pnlMenuGroup1.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlMenuGroup1.Location = new System.Drawing.Point(0, 23);
@@ -318,23 +316,6 @@ namespace ExpandablePanelSample
             this.button2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.button2.UseVisualStyleBackColor = false;
             // 
-            // btnAbout
-            // 
-            /*
-            this.btnAbout.BackColor = System.Drawing.Color.Silver;
-            this.btnAbout.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnAbout.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnAbout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAbout.Location = new System.Drawing.Point(0, 25);
-            this.btnAbout.Name = "btnAbout";
-            this.btnAbout.Size = new System.Drawing.Size(200, 25);
-            this.btnAbout.TabIndex = 1;
-            this.btnAbout.Text = "About";
-            this.btnAbout.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnAbout.UseVisualStyleBackColor = false;
-            this.btnAbout.Click += new System.EventHandler(this.btnAbout_Click); 
-            */
-            // 
             // btnMenuGroup1
             // 
             this.btnMenuGroup1.BackColor = System.Drawing.Color.Gray;
@@ -362,18 +343,18 @@ namespace ExpandablePanelSample
             this.lblMenu.TabIndex = 0;
             this.lblMenu.Text = "Main Menu";
             this.lblMenu.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // frmMain
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+
+
             this.ClientSize = new System.Drawing.Size(200, 449);
             this.Controls.Add(this.pnlMenu);
-            this.IsMdiContainer = true;
-            this.Name = "frmMain";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Expandable Panel Sample Program";
-            this.Load += new System.EventHandler(this.frmMain_Load);
+            pnlMenuGroup1.Height = 25;
+            pnlMenuGroup2.Height = 25;
+            pnlMenuGroup3.Height = 25;
+
+            btnMenuGroup1.Image =
+            btnMenuGroup2.Image =
+            btnMenuGroup3.Image = new Bitmap(@"C:\developer\sergueik\powershell_ui_samples\unfinished\down.png");
+
             this.pnlMenu.ResumeLayout(false);
             this.pnlMenuGroup3.ResumeLayout(false);
             this.pnlMenuGroup2.ResumeLayout(false);
@@ -399,8 +380,6 @@ namespace ExpandablePanelSample
         private System.Windows.Forms.Button btnMenuGroup2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
-        // private System.Windows.Forms.Button btnAbout;
-
 
         private void frmMain_Load(object sender, EventArgs e)
         {
@@ -459,115 +438,44 @@ namespace ExpandablePanelSample
             }
         }
 
-        private void btnAbout_Click(object sender, EventArgs e)
-        {
-            /*
-                        frmAbout frmChild = new frmAbout();
-                        frmChild.MdiParent = this;
-                        frmChild.Show();
-            */
-        }
     }
-
-    /*
-    public class frmAbout : Form
-    {
-        public frmAbout()
-        {
-            InitializeComponent();
-            this.Text = String.Format("About {0}", AssemblyTitle);
-            this.labelProductName.Text = AssemblyProduct;
-            this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
-        }
-
-        public string AssemblyTitle
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
-                if (attributes.Length > 0)
-                {
-                    AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-                    if (titleAttribute.Title != "")
-                    {
-                        return titleAttribute.Title;
-                    }
-                }
-                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
-            }
-        }
-
-        public string AssemblyVersion
-        {
-            get
-            {
-                return Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            }
-        }
-
-        public string AssemblyDescription
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyDescriptionAttribute)attributes[0]).Description;
-            }
-        }
-
-        public string AssemblyProduct
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyProductAttribute)attributes[0]).Product;
-            }
-        }
-
-        public string AssemblyCopyright
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
-            }
-        }
-
-        public string AssemblyCompany
-        {
-            get
-            {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyCompanyAttribute)attributes[0]).Company;
-            }
-        }
-        private void okButton_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-    }
-      */
 }
 //
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Xml.Linq', 'System.Xml', 'System.Data'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Xml.Linq','System.Xml','System.Data'
 
 
-$test = New-Object -TypeName 'ExpandablePanelSample.frmMain' 
+
+# [void]$test.ShowDialog([win32window ]($caller))
+
+function PromptExpandable {
+  param
+  (
+    [string]$title,
+    [object]$caller
+  )
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
+
+  $f.ClientSize = New-Object System.Drawing.Size (288,248)
+  $panel = New-Object -TypeName 'ExpandablePanelSample.frmMain'
+  $f.Controls.AddRange(@( $panel))
+  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+  $f.MaximizeBox = $false
+  $panel.ResumeLayout($false)
+  $f.ResumeLayout($false)
+
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
+
+}
+
+# $test = New-Object -TypeName 'ExpandablePanelSample.frmMain' 
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-[void]$test.ShowDialog([win32window ]($caller))
+PromptExpandable -caller $caller -Title 'Expandable Panel Sample'
