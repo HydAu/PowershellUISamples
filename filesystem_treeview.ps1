@@ -18,6 +18,24 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
+param(
+  [switch]$debug
+)
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
+}
+
+
 Add-Type -TypeDefinition @"
 
 // "
@@ -48,7 +66,6 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 Add-Type -TypeDefinition @"
-
 using System;
 using System.IO;
 using System.Windows.Forms;
@@ -63,25 +80,36 @@ namespace C2C.FileSystem
     {
         private TreeNode _selectedNode;
         private bool _showFiles = true;
+        public bool ShowFiles
+        {
+            get { return this._showFiles; }
+            set { this._showFiles = value; }
+        }
+
         private ImageList _imageList = new ImageList();
         private Hashtable _systemIcons = new Hashtable();
         private IWin32Window _caller;
 
-    private string _data;
+        private string _data;
+        public String Data
+        {
+            get { return this._data; }
+            set { this._data = value; }
+        }
 
-    public String Data
-    {
-        get { return this._data; }
-        set { this._data = value; }
-    }
+        private string _iconPath = @"C:\developer\sergueik\powershell_ui_samples\unfinished\folder.ico";
+        public String IconPath
+        {
+            get { return this._iconPath; }
+            set { this._iconPath = value; }
+        }
 
-    private bool _debug = false;
-
-    public bool Debug
-    {
-        get { return this._debug; }
-        set { this._debug = value; }
-    }
+        private bool _debug = false;
+        public bool Debug
+        {
+            get { return this._debug; }
+            set { this._debug = value; }
+        }
 
         public static readonly int Folder = 0;
 
@@ -93,13 +121,9 @@ namespace C2C.FileSystem
         }
 
         public FileSystemTreeView(IWin32Window caller)
+            : this()
         {
-            this.ImageList = _imageList;
             this._caller = caller;
-            this.MouseDown += new MouseEventHandler(FileSystemTreeView_MouseDown);
-            this.BeforeExpand += new TreeViewCancelEventHandler(FileSystemTreeView_BeforeExpand);
-            this.AfterSelect += new TreeViewEventHandler(FileSystemTreeView_AfterSelect);
-
         }
 
         void FileSystemTreeView_MouseDown(object sender, MouseEventArgs e)
@@ -108,8 +132,7 @@ namespace C2C.FileSystem
             _selectedNode = node;
             if (node == null)
                 return;
-
-            this.SelectedNode = node; //select the node under the mouse         
+            this.SelectedNode = node; //selected the node under the mouse         
         }
 
         void FileSystemTreeView_BeforeExpand(object sender, TreeViewCancelEventArgs e)
@@ -126,31 +149,29 @@ namespace C2C.FileSystem
                     node.LoadFiles();
             }
         }
-        //--
-private void FileSystemTreeView_AfterSelect(System.Object sender, 
-		System.Windows.Forms.TreeViewEventArgs e)
-{
-// e.Action = Unknown
-   if (_selectedNode != null && _selectedNode.Parent != null)
-   {
-       if (_debug){
-      MessageBox.Show(String.Format("....{0}", _selectedNode.FullPath.ToString())); 
-     }
-      this._data  = _selectedNode.FullPath.ToString();
-   }
-}
+        private void FileSystemTreeView_AfterSelect(System.Object sender,
+                System.Windows.Forms.TreeViewEventArgs e)
+        {
+            // e.Action = Unknown
+            if (_selectedNode != null && _selectedNode.Parent != null)
+            {
+                if (_debug)
+                {
+                    MessageBox.Show(String.Format("AfterSelect: {0}", _selectedNode.FullPath.ToString()));
+                }
+                this._data = _selectedNode.FullPath.ToString();
+            }
+        }
 
-        //--
         public void Load(string directoryPath)
         {
             if (Directory.Exists(directoryPath) == false)
-                throw new DirectoryNotFoundException("Directory Not Found");
+                throw new DirectoryNotFoundException(String.Format("Directory Not Found: {0}", directoryPath));
 
             _systemIcons.Clear();
             _imageList.Images.Clear();
             Nodes.Clear();
-            string icon_path = @"C:\developer\sergueik\powershell_ui_samples\unfinished\folder.ico";
-            Icon folderIcon = new Icon(icon_path);
+            Icon folderIcon = new Icon(this._iconPath);
 
             _imageList.Images.Add(folderIcon);
             _systemIcons.Add(FileSystemTreeView.Folder, 0);
@@ -173,11 +194,6 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
             return (int)_systemIcons[Path.GetExtension(path)];
         }
 
-        public bool ShowFiles
-        {
-            get { return this._showFiles; }
-            set { this._showFiles = value; }
-        }
     }
 
     public class DirectoryNode : TreeNode
@@ -291,14 +307,6 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
         }
     }
 
-    /// <summary>
-    /// Summary description for ShellIcon.
-    /// </summary>
-    /// <summary>
-    /// Summary description for ShellIcon.  Get a small or large Icon with an easy C# function call
-    /// that returns a 32x32 or 16x16 System.Drawing.Icon depending on which function you call
-    /// either GetSmallIcon(string fileName) or GetLargeIcon(string fileName)
-    /// </summary>
     public class ShellIcon
     {
         [StructLayout(LayoutKind.Sequential)]
@@ -313,13 +321,11 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
             public string szTypeName;
         };
 
-
         class Win32
         {
             public const uint SHGFI_ICON = 0x100;
             public const uint SHGFI_LARGEICON = 0x0; // 'Large icon
             public const uint SHGFI_SMALLICON = 0x1; // 'Small icon
-
 
             [DllImport("shell32.dll")]
             public static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
@@ -328,9 +334,7 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
 
         public ShellIcon()
         {
-            //
             // TODO: Add constructor logic here
-            //
         }
 
 
@@ -339,10 +343,8 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
             IntPtr hImgSmall; //the handle to the system image list
             SHFILEINFO shinfo = new SHFILEINFO();
 
-
             //Use this to get the small Icon
             hImgSmall = Win32.SHGetFileInfo(fileName, 0, ref shinfo, (uint)Marshal.SizeOf(shinfo), Win32.SHGFI_ICON | Win32.SHGFI_SMALLICON);
-
 
             //The icon is returned in the hIcon member of the shinfo struct
             return System.Drawing.Icon.FromHandle(shinfo.hIcon);
@@ -354,10 +356,8 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
             IntPtr hImgLarge; //the handle to the system image list
             SHFILEINFO shinfo = new SHFILEINFO();
 
-
             //Use this to get the large Icon
             hImgLarge = Win32.SHGetFileInfo(fileName, 0, ref shinfo, (uint)Marshal.SizeOf(shinfo), Win32.SHGFI_ICON | Win32.SHGFI_LARGEICON);
-
 
             //The icon is returned in the hIcon member of the shinfo struct
             return System.Drawing.Icon.FromHandle(shinfo.hIcon);
@@ -368,14 +368,19 @@ private void FileSystemTreeView_AfterSelect(System.Object sender,
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
-$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$chooser = New-Object -TypeName 'C2C.FileSystem.FileSystemTreeView' -ArgumentList ($caller)
-
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
 
 # set up form
+
+$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$chooser = New-Object -TypeName 'C2C.FileSystem.FileSystemTreeView' -ArgumentList ($caller)
+$chooser.IconPath = [System.IO.Path]::Combine( (Get-ScriptDirectory),  'folder.ico'  )
+if ($PSBoundParameters["debug"]) {
+    $chooser.Debug = $true
+}
+
 $form = New-Object System.Windows.Forms.Form
 $form.Text = $title
 
