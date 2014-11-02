@@ -87,6 +87,17 @@ if ($browser -ne $null -and $browser -ne '') {
   }
   elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+<#
+# The following registry key describes the state of the 'Delete Browsing history on exit' checkbox 
+
+pushd 'HKCU:'
+cd '/Software/Microsoft/Internet Explorer/Privacy'
+get-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy'
+set-itemproperty -name 'ClearBrowsingHistoryOnExit' -path 'HKCU:/Software/Microsoft/Internet Explorer/Privacy' -value '1'
+popd
+
+#>
+
   }
   elseif ($browser -match 'safari') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
@@ -140,10 +151,51 @@ try {
 
 $selenium.Navigate().Refresh()
 
+<#
+
+# http://www.milincorporated.com/a2_cookies.html
+ pushd "${env:USERPROFILE}\AppData\Roaming\Microsoft\Windows\Cookies"
+ pushd "${env:USERPROFILE}\AppData\Roaming\Microsoft\Windows\Cookies\Low\"
+NOTE: Recent Files in the latter directory  are present even before the browser is open first time after the cold boot.
+# Session cookies ?
+ pushd "${env:USERPROFILE}\Local Settings\Temporary Internet Files\Content.IE5"
+#>
+
 # http://stackoverflow.com/questions/7413966/delete-cookies-in-webdriver 
+<#
+
+
+
+$target_server = '...'
+function clear_cookies{
+
+$command = 'C:\Windows\System32\rundll32.exe InetCpl.cpl,ClearMyTracksByProcess 2'
+[void](invoke-expression -command $command  )
+} 
+
+$remote_run_step = invoke-command -computer $target_server -ScriptBlock ${function:clear_cookies}
+# note one may try to do the same using java runtime:
+http://girixh.blogspot.com/2013/10/how-to-clear-cookies-from-internet.html
+try {
+  Runtime.getRuntime().exec("RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 2");
+ } catch (IOException e) {
+  // TODO Auto-generated catch block
+  e.printStackTrace();
+#>
+<#
+caps.setCapability(CapabilityType.ForSeleniumServer.ENSURING_CLEAN_SESSION, true); 
+WebDriver driver = new InternetExplorerDriver(caps);
+
+Once initialized, you can use:
+
+driver.manage().deleteAllCookies()
+
+
+# note this is a very very old post:
 
 # http://stackoverflow.com/questions/595228/how-can-i-delete-all-cookies-with-javascript
 # http://stackoverflow.com/questions/2144386/javascript-delete-cookie
+#>
 
 $script = @"
 
