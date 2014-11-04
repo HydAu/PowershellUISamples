@@ -12,9 +12,6 @@ function convert_to_unc2 {
   return $unc_file_path
 }
 
-
-
-
 #######
 function assert_config_data {
   param(
@@ -46,25 +43,42 @@ function assert_config_data {
     }
   }
 
-  Write-Output ('Probing {0}' -f $target_unc_path)
+  Write-Host ('Probing "{0}"' -f $target_unc_path)
   [xml]$xml_config = Get-Content -Path $target_unc_path
   $object_ref = ([ref]$xml_config)
-  $result = ''
+  $result = @()
   $result_ref = ([ref]$result)
 
   Invoke-Command $script_block -ArgumentList $object_ref,$result_ref
 
-  Write-Host ('result = {0} ' -f $result)
+  Write-Host ("Result:`n---`n{0}`n---`n" -f ($result -join "`n" ))
   # B {Write-Host 2; &$block}.GetNewClosure()
 }
-<#
-# 2.	On the webservers (web21, ... web31) should point to NON _parallel databases
-[xml]$xml_config = Get-Content -Path '\\cclprdecoweb21\e$\Projects\prod.carnival.com\Carnival\App_Config\ConnectionStrings.config'
-$xml_config.connectionStrings.add.connectionString | Format-Table -AutoSize
 
-# 1.	Look at connection strings config file on cclprdecocms1, cms2, cms3.
-# proceed or skip based on domain
-#>
+
+[scriptblock]$CONFIGURATION_DISCOVERY = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref)
+  $data = @()
+  if ($debug) {
+    Write-Host $object_ref.Value
+    Write-Host $object_ref.Value.connectionStrings
+    Write-Host $object_ref.Value.connectionStrings.add
+  }
+  $nodes = $object_ref.Value.connectionStrings.add
+  if ($debug) {
+    Write-Host $nodes.count
+  }
+  for ($cnt = 0; $cnt -ne $nodes.count; $cnt++) {
+    $data += $object_ref.Value.connectionStrings.add[$cnt].connectionString
+  }
+  if ($debug) {
+    Write-Host 'Data:'
+    Write-Host $data
+  }
+  $result_ref.Value = $data
+}
 
 
 $configuration_paths = @{
@@ -113,45 +127,36 @@ $configuration_paths = @{
 };
 
 
-$configuration_paths.GetType()
 foreach ($role in $configuration_paths.Keys) {
   $configuration = $configuration_paths.Item($role)
   Write-Output ('Starting {0}' -f $configuration['COMMENT'])
   if ($configuration.Containskey('SERVERS')) {
-
     $servers = $configuration['SERVERS']
     $unc_paths = @()
-    $servers | ForEach-Object { $server = $_; if ($server -eq $null) { return } $unc_paths += convert_to_unc2 (('\\{0}\{1}' -f $server,$configuration['PATH'])) }
+    $configuration['RESULTS'] = @{}  # keyed by server
+    $configuration_details = @{ }
+    $servers | ForEach-Object { $server = $_; if ($server -eq $null) { return } $unc_paths += convert_to_unc2 (('\\{0}\{1}' -f $server,$configuration['PATH'])) 
+    }
   }
   elseif ($configuration.Containskey('UNC_PATHS')) {
     $unc_paths = $configuration['UNC_PATHS']
 
   }
-  Write-Output $configuration['DOMAIN']
-  [scriptblock]$script_block = {
-    param(
-      [System.Management.Automation.PSReference]$object_ref,
-      [System.Management.Automation.PSReference]$result_ref)
-    $data = @()
-    if ($debug) {
-      Write-Host $object_ref.Value
-      Write-Host $object_ref.Value.connectionStrings
-      Write-Host $object_ref.Value.connectionStrings.add
-    }
-    $nodes = $object_ref.Value.connectionStrings.add
-    if ($debug) {
-    Write-Host $nodes.count
-}
-    for ($cnt = 0; $cnt -ne $nodes.count; $cnt++) {
-      $data += $object_ref.Value.connectionStrings.add[$cnt].connectionString
-    }
-    if ($debug) {
-    Write-Host 'Data:'
-    Write-Host $data
-}
-    $result_ref.Value = $data
-  }
-
-  $unc_paths | ForEach-Object { $target_unc_path = $_; if ($target_unc_path -eq $null) { return } assert_config_data -target_domain $configuration['DOMAIN'] -target_unc_path $target_unc_path -powerless $true  -script_block $script_block}
+  [scriptblock]$script_block = $CONFIGURATION_DISCOVERY
+  Write-Output ( "Inspecfing nodes in the domain {0}" -f $configuration['DOMAIN'] )
+  $unc_paths | ForEach-Object { $target_unc_path = $_; if ($target_unc_path -eq $null) { return } 
+  $configuration_details[$target_unc_path] = @() 
+  assert_config_data -target_domain $configuration['DOMAIN'] `
+                     -target_unc_path $target_unc_path `
+                     -powerless $true `
+                     -script_block $script_block }
 
 }
+
+
+<# Business logic 
+# 2.	On the webservers (web21, ... web31) should point to NON _parallel databases
+
+# 1.	Look at connection strings config file on cclprdecocms1, cms2, cms3.
+# proceed or skip based on domain
+#>
