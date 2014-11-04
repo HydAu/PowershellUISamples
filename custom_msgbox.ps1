@@ -139,15 +139,12 @@ function Return_Response
   {
     # $response  =  $response
   }
-  Write-Host ('$Caller.Data = ' + $caller.Data)
 
   $frm.Dispose()
 }
 
 
 function AddButton {
-  # 
-  # AddButton -param $MSGBUTTON.YesNoCancel
   param([psobject]$param)
 
   switch ($param) {
@@ -441,8 +438,9 @@ function Show1
   AddIconImage -param $MSGICON.Information
   AddButton -param $MSGBUTTON.OK
   DrawBox
-  $frm.ShowDialog()
-  return $response
+  [void]$frm.ShowDialog([win32window ]($caller))
+  Write-Host ('$Caller.Data = ' + $caller.Data)
+  return $caller.Data
 
 }
 
@@ -475,8 +473,9 @@ function Show2
   AddIconImage -param $MSGICON.Information
   AddButton -param $MSGBUTTON.OK
   DrawBox
-  $frm.ShowDialog()
-  return $response
+  [void]$frm.ShowDialog([win32window ]($caller))
+  Write-Host ('$Caller.Data = ' + $caller.Data)
+  return $caller.Data
 
 }
 
@@ -517,7 +516,7 @@ function Show3
   DrawBox
   [void]$frm.ShowDialog([win32window ]($caller))
   $frm.Dispose()
-
+  Write-Host ('$Caller.Data = ' + $caller.Data)
   return $caller.Data
 
 }
@@ -529,6 +528,7 @@ function ShowException
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
   $frm = New-Object System.Windows.Forms.Form
   $btnDetails = New-Object System.Windows.Forms.Button
@@ -544,12 +544,12 @@ function ShowException
   $formpanel = New-Object System.Windows.Forms.Panel
   $lblmessage = New-Object System.Windows.Forms.Label
   SetMessageText $ex.Message $ex.Message $ex.StackTrace
-  # //frmMessage.Text = messageTitle
-  AddIconImage -param MSGICON.Error
-  AddButton -param MSGBUTTON.OK
+  AddIconImage -param $MSGICON.Error
+  AddButton -param $MSGBUTTON.YesNo
   DrawBox
-  $frm.ShowDialog()
-  return $response
+  [void]$frm.ShowDialog([win32window ]($caller))
+  Write-Host ('$Caller.Data = ' + $caller.Data)
+  return $caller.Data
 
 }
 
@@ -617,14 +617,6 @@ function DrawBox
   }
 }
 
-$text = 'This is a Lorem Ipsum test'
-$description = "This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
-
-# Show1 -Message 'This is a test'
-# Show2 -messageText "test" -messageTitle "title" -Description "description"
-
-# Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Information -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
-# Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
 
 # http://poshcode.org/1942
 function assert {
@@ -657,6 +649,8 @@ function assert {
     }
   }
 
+# ShowException
+
   if (!$success) {
     $action = Show3 -messageText $message `
        -messageTitle 'Assert failed' `
@@ -677,4 +671,20 @@ function test_assert {
   assert -Script { ($color.IndexOf('Black') -gt -1) } -Message "Unexpected color: ${color}"
 }
 
-test_assert
+$text = 'This is a Lorem Ipsum test'
+$description = "This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
+
+#  Show1 -Message 'This is a test'
+# return
+# Show2 -messageText "test" -messageTitle "title" -Description "description"
+
+# Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Information -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
+# Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
+
+# test_assert 
+try {
+get-item -path 'C:\NONE' -errorAction STOP
+
+} catch [Exception] {
+ShowException -ex $_.Exception 
+}
