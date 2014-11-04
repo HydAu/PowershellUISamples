@@ -44,12 +44,12 @@ using System.Windows.Forms;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _data;
+    private string _result;
 
-    public int Data
+    public string Result
     {
-        get { return _data; }
-        set { _data = value; }
+        get { return _result; }
+        set { _result = value; }
     }
 
     public Win32Window(IntPtr handle)
@@ -88,13 +88,13 @@ $MSGBUTTON = @{
 # or generate dynamically 
 $MSGRESPONSE = New-Object PSObject
 $MSGRESPONSE | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
-$MSGRESPONSE | Add-Member -NotePropertyName 'Yes' -NotePropertyValue 1
-$MSGRESPONSE | Add-Member -NotePropertyName 'No' -NotePropertyValue 2
-$MSGRESPONSE | Add-Member -NotePropertyName 'OK' -NotePropertyValue 3
-$MSGRESPONSE | Add-Member -NotePropertyName 'Abort' -NotePropertyValue 4
-$MSGRESPONSE | Add-Member -NotePropertyName 'Retry' -NotePropertyValue 5
-$MSGRESPONSE | Add-Member -NotePropertyName 'Ignore' -NotePropertyValue 6
-$MSGRESPONSE | Add-Member -NotePropertyName 'Cancel' -NotePropertyValue 7
+$MSGRESPONSE | Add-Member -NotePropertyName 'Yes' -NotePropertyValue 'Yes'
+$MSGRESPONSE | Add-Member -NotePropertyName 'No' -NotePropertyValue 'No'
+$MSGRESPONSE | Add-Member -NotePropertyName 'OK' -NotePropertyValue 'OK'
+$MSGRESPONSE | Add-Member -NotePropertyName 'Abort' -NotePropertyValue 'Abort'
+$MSGRESPONSE | Add-Member -NotePropertyName 'Retry' -NotePropertyValue 'Retry'
+$MSGRESPONSE | Add-Member -NotePropertyName 'Ignore' -NotePropertyValue 'Ignore'
+$MSGRESPONSE | Add-Member -NotePropertyName 'Cancel' -NotePropertyValue 'Cancel'
 
 
 
@@ -109,38 +109,38 @@ function Return_Response
 
   if ($buttonText -eq 'Yes')
   {
-    $caller.Data = $MSGRESPONSE.Yes
+    $caller.Result = $MSGRESPONSE.Yes
   }
   elseif ($buttonText -eq 'No')
   {
-    $caller.Data = $MSGRESPONSE.No
+    $caller.Result = $MSGRESPONSE.No
   }
   elseif ($buttonText -eq 'Cancel')
   {
-    $caller.Data = $MSGRESPONSE.Cancel
+    $caller.Result = $MSGRESPONSE.Cancel
   }
   elseif ($buttonText -eq 'OK')
   {
-    $caller.Data = $MSGRESPONSE.OK
+    $caller.Result = $MSGRESPONSE.OK
   }
   elseif ($buttonText -eq 'Abort')
   {
-    $caller.Data = $MSGRESPONSE.Abort
+    $caller.Result = $MSGRESPONSE.Abort
   }
   elseif ($buttonText -eq 'Retry')
   {
-    $caller.Data = $MSGRESPONSE.Retry
+    $caller.Result = $MSGRESPONSE.Retry
   }
   elseif ($buttonText -eq 'Ignore')
   {
-    $caller.Data = $MSGRESPONSE.Ignore
+    $caller.Result = $MSGRESPONSE.Ignore
   }
   else
   {
     # $response  =  $response
   }
 
-  $frm.Dispose()
+  $f.Dispose()
 }
 
 
@@ -371,7 +371,7 @@ function btnDetails_click
   )
   if ($btnDetails.Tag.ToString() -match "col")
   {
-    $frm.Height = $frm.Height + $txtDescription.Height + 6
+    $f.Height = $f.Height + $txtDescription.Height + 6
     $btnDetails.Tag = "exp"
     $btnDetails.Text = "Hide Details"
     $txtDescription.WordWrap = true
@@ -380,7 +380,7 @@ function btnDetails_click
   }
   elseif ($btnDetails.Tag.ToString() -match "exp")
   {
-    $frm.Height = $frm.Height - $txtDescription.Height - 6
+    $f.Height = $f.Height - $txtDescription.Height - 6
     $btnDetails.Tag = "col"
     $btnDetails.Text = "Show Details"
   }
@@ -403,11 +403,11 @@ function SetMessageText
   }
   if (($Title -ne $null) -and ($Title -ne ''))
   {
-    $frm.Text = $Title
+    $f.Text = $Title
   }
   else
   {
-    $frm.Text = 'Your Message Box'
+    $f.Text = 'Your Message Box'
   }
 }
 
@@ -421,7 +421,7 @@ function Show1
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-  $frm = New-Object System.Windows.Forms.Form
+  $f = New-Object System.Windows.Forms.Form
   $btnDetails = New-Object System.Windows.Forms.Button
   $btnOK = New-Object System.Windows.Forms.Button
   $btnYes = New-Object System.Windows.Forms.Button
@@ -438,9 +438,9 @@ function Show1
   AddIconImage -param $MSGICON.Information
   AddButton -param $MSGBUTTON.OK
   DrawBox
-  [void]$frm.ShowDialog([win32window ]($caller))
-  Write-Host ('$Caller.Data = ' + $caller.Data)
-  return $caller.Data
+  [void]$f.ShowDialog([win32window ]($caller))
+  Write-Host ('$caller.Result = ' + $caller.Result)
+  return $caller.Result
 
 }
 
@@ -456,7 +456,7 @@ function Show2
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-  $frm = New-Object System.Windows.Forms.Form
+  $f = New-Object System.Windows.Forms.Form
   $btnDetails = New-Object System.Windows.Forms.Button
   $btnOK = New-Object System.Windows.Forms.Button
   $btnYes = New-Object System.Windows.Forms.Button
@@ -473,9 +473,9 @@ function Show2
   AddIconImage -param $MSGICON.Information
   AddButton -param $MSGBUTTON.OK
   DrawBox
-  [void]$frm.ShowDialog([win32window ]($caller))
-  Write-Host ('$Caller.Data = ' + $caller.Data)
-  return $caller.Data
+  [void]$f.ShowDialog([win32window ]($caller))
+  Write-Host ('$caller.Result = ' + $caller.Result)
+  return $caller.Result
 
 }
 
@@ -494,7 +494,7 @@ function Show3
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
-  $frm = New-Object System.Windows.Forms.Form
+  $f = New-Object System.Windows.Forms.Form
   $btnDetails = New-Object System.Windows.Forms.Button
   $btnOK = New-Object System.Windows.Forms.Button
   $btnYes = New-Object System.Windows.Forms.Button
@@ -511,13 +511,13 @@ function Show3
   SetMessageText $messageText $messageTitle $description
   AddIconImage -param $IcOn
   AddButton -param $btn
-  $caller.Data = $MSGRESPONSE.Cancel
+  $caller.Result = $MSGRESPONSE.Cancel
 
   DrawBox
-  [void]$frm.ShowDialog([win32window ]($caller))
-  $frm.Dispose()
-  Write-Host ('$Caller.Data = ' + $caller.Data)
-  return $caller.Data
+  [void]$f.ShowDialog([win32window ]($caller))
+  $f.Dispose()
+  Write-Host ('$caller.Result = ' + $caller.Result)
+  return $caller.Result
 
 }
 
@@ -530,7 +530,7 @@ function ShowException
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-  $frm = New-Object System.Windows.Forms.Form
+  $f = New-Object System.Windows.Forms.Form
   $btnDetails = New-Object System.Windows.Forms.Button
   $btnOK = New-Object System.Windows.Forms.Button
   $btnYes = New-Object System.Windows.Forms.Button
@@ -543,13 +543,13 @@ function ShowException
   $icnPicture = New-Object System.Windows.Forms.PictureBox
   $formpanel = New-Object System.Windows.Forms.Panel
   $lblmessage = New-Object System.Windows.Forms.Label
-  SetMessageText $ex.Message $ex.Message $ex.StackTrace
+  SetMessageText -Title 'Exception' -messageText $ex.Message -Description $ex.StackTrace
   AddIconImage -param $MSGICON.Error
   AddButton -param $MSGBUTTON.YesNo
   DrawBox
-  [void]$frm.ShowDialog([win32window ]($caller))
-  Write-Host ('$Caller.Data = ' + $caller.Data)
-  return $caller.Data
+  [void]$f.ShowDialog([win32window ]($caller))
+  Write-Host ('$caller.Result = ' + $caller.Result)
+  return $caller.Result
 
 }
 
@@ -557,7 +557,7 @@ function ShowException
 function DrawBox
 {
   # draw panel
-  $frm.Controls.Add($formpanel)
+  $f.Controls.Add($formpanel)
   $formpanel.Dock = [System.Windows.Forms.DockStyle]::Fill
   # draw picturebox
   $icnPicture.Height = 36
@@ -595,23 +595,23 @@ function DrawBox
   $lblmessage.Location = New-Object System.Drawing.Point (64,22)
   $lblmessage.AutoSize = $true
   $formpanel.Controls.Add($lblmessage)
-  $frm.Height = 360
-  $frm.Width = 483
+  $f.Height = 360
+  $f.Width = 483
 
   # set form layout
-  $frm.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-  $frm.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
-  $frm.MaximizeBox = $false
-  $frm.MinimizeBox = $false
+  $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
+  $f.MaximizeBox = $false
+  $f.MinimizeBox = $false
   ## frm.FormClosing += new FormClosingEventHandler(frm_FormClosing);
-  $frm.BackColor = [System.Drawing.SystemColors]::ButtonFace
+  $f.BackColor = [System.Drawing.SystemColors]::ButtonFace
 
   ## origin http://www.iconarchive.com/search?q=ico+files&page=7
   [string]$p = [System.IO.Path]::Combine((Get-ScriptDirectory),"Martz90-Circle-Files.ico")
-  $frm.Icon = New-Object System.Drawing.Icon ($p)
+  $f.Icon = New-Object System.Drawing.Icon ($p)
   if ($btnDetails.Tag.ToString() -match "exp")
   {
-    $frm.Height = $frm.Height - $txtDescription.Height - 6
+    $f.Height = $f.Height - $txtDescription.Height - 6
     $btnDetails.Tag = "col"
     $btnDetails.Text = "Show Details"
   }
@@ -649,7 +649,7 @@ function assert {
     }
   }
 
-# ShowException
+  # ShowException
 
   if (!$success) {
     $action = Show3 -messageText $message `
@@ -660,7 +660,6 @@ function assert {
 
 
     if ($action -ne $MSGRESPONSE.Ignore) {
-      # (Get-PSCallStack)[1] | get-member
       throw $message
     }
   }
@@ -681,10 +680,16 @@ $description = "This is is a long established fact that a reader will be distrac
 # Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Information -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
 # Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
 
-# test_assert 
-try {
-get-item -path 'C:\NONE' -errorAction STOP
 
-} catch [Exception] {
-ShowException -ex $_.Exception 
+test_assert
+return
+try {
+  Get-Item -Path 'C:\NONE' -ErrorAction STOP
+
+} catch [exception]{
+  $action = ShowException -ex $_.Exception
+  if ($action -ne $MSGRESPONSE.Ignore) {
+    throw $_.Exception
+  }
+
 }
