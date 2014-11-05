@@ -24,6 +24,22 @@ param(
   [string]$version,
   [string]$profile = 'Selenium'
 )
+
+function set_timeouts{ 
+  param(
+  [System.Management.Automation.PSReference]$selenium_ref ,
+  [int]$explicit = 10 ,
+  [int]$page_load = 60 ,
+  [int]$script = 30 
+  )
+
+[void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
+[void]($selenium_ref.Value.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
+[void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
+
+}
+
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -60,20 +76,7 @@ $shared_assemblies = @(
   'nunit.framework.dll'
 
 )
-<#
 
-Add-Type : Could not load file or assembly 
-'file:///C:\developer\sergueik\csharp\SharedAssemblies\WebDriver.dll' 
-or one of its dependencies. This assembly is built by a runtime newer than the currently loaded runtime and cannot be loaded.
-
-Add-Type : Could not load file or assembly 
-'file:///C:\developer\sergueik\csharp\SharedAssemblies\nunit.framework.dll' or one of its dependencies. 
-Operation is not supported. (Exception from HRESULT: 0x80131515) 
-
-use fixw2k3.ps1
-
-Add-Type : Unable to load one or more of the requested types. Retrieve the LoaderExceptions property for more information.
-#>
 
 $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
@@ -99,12 +102,7 @@ $verificationErrors = New-Object System.Text.StringBuilder
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
-# we are loading a file - path varies
-# remote node is linux, 
 
-$base_url = 'file:///root/popup.html'
-# local testing 
-$base_url = 'file:///C:/developer/sergueik/powershell_ui_samples/selenium/popup.html'
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
@@ -119,81 +117,84 @@ if ($browser -ne $null -and $browser -ne '') {
   }
   Write-Host "Running on ${browser}"
   if ($browser -match 'firefox') {
-    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-    $capability.SetCapability("ssl-protocol","any")
 
-    <#
+    # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+    # $capability.SetCapability("ssl-protocol","any")
 
-Add-ons
-
- Directory of C:\Users\sergueik\AppData\Roaming\Mozilla\Firefox\Profiles\webwebweb.selenium\extensions
-
-10/30/2014  01:09 PM         4,222,513 firebug@software.joehewitt.com.xpi
-10/30/2014  01:08 PM           382,710 jid1-aPwS0JCl36iLkQ@jetpack.xpi
-               2 File(s)      4,605,223 bytes
-
-#>
     [object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
     [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
-    $profiles.GetType()
+    # assert $profiles.GetType() <-  FirefoxProfile[]
     $selected_profile_object = $null
-    $profiles | ForEach-Object { if ($_ -match $profile) {
-        # $selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($_)
-        [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-      } }
-    $selected_profile_object
-    $selected_profile_object.GetType()
-    $selected_profile_object | Get-Member
-    $selected_profile_object.ToString()
-    # [void] SetPreference(string name, string value)
+    $profiles | ForEach-Object { 
+       $profile = $_
+       # TODO - find how to extract information about all profiles
+       $p   
+    }
+  # RemoteDriver ignores profile capability request
+  # .SetCapability(FirefoxDriver.Profile
+  # $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
+  # $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+  [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
+  $selected_profile_object
+  # $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
+  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver($selected_profile_object)
+
+    $selected_profile_object.setPreference("general.useragent.override",
+      "Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0")
+    # TODO:
     # .AcceptUntrustedCertificates
     # .AlwaysLoadNoFocusLibrary
     # .EnableNativeEvents
-    $selected_profile_object.setPreference("general.useragent.override",
-      "Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0")
+    # [void] SetPreference(string name, string value)
   }
 
   else {
-    Write-Output 'This example only works with Firefox'
+    Write-Output 'This example only works with Firefox browser'
     exit 0
   }
-  # .SetCapability(FirefoxDriver.Profile
-  $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
-
-  #   $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver($selected_profile_object)
-  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 
 } else {
   Write-Output 'This example only works with Firefox'
   exit 0
 }
 
+$base_url = 'http://www.wikipedia.org'
+
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
-# $selenium.Manage().Window.Maximize()
 
-Start-Sleep 3
+set_timeouts ([ref]$selenium)
+# var hasJQueryLoaded = (bool) js.ExecuteScript("return (window.jQuery != null) && (jQuery.active === 0);");
 
-$xpath = "//input[@type='button']"
+[int]$timeout = 4000
+# change $timeout to see if the WevDriver is waiting on page  sctript to execute
 
-[OpenQA.Selenium.Remote.RemoteWebElement]$button = $selenium.findElement([OpenQA.Selenium.By]::XPath($xpath))
+[string]$script = "window.setTimeout(function(){document.getElementById('searchInput').value = 'test'}, ${timeout});"
 
-$button.click()
-# http://www.programcreek.com/java-api-examples/index.php?api=org.openqa.selenium.Alert
-# NOTE: do not explicitly declare the type here
-# [OpenQA.Selenium.Remote.RemoteAlert]
-$alert = $selenium.switchTo().alert()
+$start = (Get-Date -UFormat "%s")
 
-Write-Output $alert.Text
-$alert.accept()
+try {
+  [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeAsyncScript($script);
 
-# This works on FF, Chrome, IE 8 - 11
-# http://seleniumeasy.com/selenium-tutorials/how-to-handle-javascript-alerts-confirmation-prompts
-# e.g. need to be able to copy a url from a dialog box pop up and paste it into a new browser window
+} catch [OpenQA.Selenium.WebDriverTimeoutException]{
+  # Ignore
+  # Timed out waiting for async script result  (Firefox)
+  # asynchronous script timeout: result was not received (Chrome)
+  [NUnit.Framework.Assert]::IsTrue($_.Exception.Message -match '(?:Timed out waiting for async script result|asynchronous script timeout)')
+}
+catch [OpenQA.Selenium.NoSuchWindowException]{
+  Write-Host $_.Exception.Message # Unable to get browser
+  $_.Exception | Get-Member
 
-Start-Sleep 3
+}
+$end = (Get-Date -UFormat "%s")
+$elapsed = New-TimeSpan -Seconds ($end - $start)
+Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
+Start-Sleep 30
 
+# Cleanup
 cleanup ([ref]$selenium)
+
 
 
 
