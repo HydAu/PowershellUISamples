@@ -25,17 +25,17 @@ param(
   [string]$profile = 'Selenium'
 )
 
-function set_timeouts{ 
+function set_timeouts {
   param(
-  [System.Management.Automation.PSReference]$selenium_ref ,
-  [int]$explicit = 10 ,
-  [int]$page_load = 60 ,
-  [int]$script = 30 
+    [System.Management.Automation.PSReference]$selenium_ref,
+    [int]$explicit = 10,
+    [int]$page_load = 60,
+    [int]$script = 30
   )
 
-[void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
-[void]($selenium_ref.Value.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
-[void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
+  [void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
+  [void]($selenium_ref.Value.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
+  [void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
 
 }
 
@@ -103,63 +103,57 @@ $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
 
-if ($browser -ne $null -and $browser -ne '') {
-  try {
-    $connection = (New-Object Net.Sockets.TcpClient)
-    $connection.Connect($hub_host,[int]$hub_port)
-    $connection.Close()
-  } catch {
-    #   Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+try {
+  $connection = (New-Object Net.Sockets.TcpClient)
+  $connection.Connect($hub_host,[int]$hub_port)
+  $connection.Close()
+} catch {
+  Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
+  Start-Sleep -Seconds 5
+}
+if ($browser -ne $null -and $browser -ne '' -and $browser -match 'firefox') {
 
-    Start-Sleep -Seconds 10
+
+  [object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
+  [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
+  # assert $profiles.GetType() <-  FirefoxProfile[]
+  $selected_profile_object = $null
+  $profiles | ForEach-Object {
+    $item = $_
+    # TODO - find how to extract information about all profiles
+    # $item
   }
-  Write-Host "Running on ${browser}"
-  if ($browser -match 'firefox') {
 
-    # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-    # $capability.SetCapability("ssl-protocol","any")
-
-    [object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
-    [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
-    # assert $profiles.GetType() <-  FirefoxProfile[]
-    $selected_profile_object = $null
-    $profiles | ForEach-Object { 
-       $profile = $_
-       # TODO - find how to extract information about all profiles
-       $p   
-    }
   # RemoteDriver ignores profile capability request
+  # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  # $capability.SetCapability("ssl-protocol","any")
   # .SetCapability(FirefoxDriver.Profile
   # $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
   # $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
   [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-  $selected_profile_object
+  # $selected_profile_object.GetType()
+  # TODO - find how to extract information about the profile
+  # $selected_profile_object.ProfileDirectory
+  # start-sleep 4
   # $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
-  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver($selected_profile_object)
+  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
 
-    $selected_profile_object.setPreference("general.useragent.override",
-      "Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0")
-    # TODO:
-    # .AcceptUntrustedCertificates
-    # .AlwaysLoadNoFocusLibrary
-    # .EnableNativeEvents
-    # [void] SetPreference(string name, string value)
-  }
+  # $selected_profile_object.setPreference("general.useragent.override", "Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0")
+  # TODO:
+  # .AcceptUntrustedCertificates
+  # .AlwaysLoadNoFocusLibrary
+  # .EnableNativeEvents
+  # [void] SetPreference(string name, string value)
+}
 
-  else {
-    Write-Output 'This example only works with Firefox browser'
-    exit 0
-  }
-
-} else {
-  Write-Output 'This example only works with Firefox'
+else {
+  Write-Output 'This example only works with Firefox browser'
   exit 0
 }
 
-$base_url = 'http://www.wikipedia.org'
 
+$base_url = 'http://www.wikipedia.org/'
+$selenium
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 
@@ -190,8 +184,7 @@ catch [OpenQA.Selenium.NoSuchWindowException]{
 $end = (Get-Date -UFormat "%s")
 $elapsed = New-TimeSpan -Seconds ($end - $start)
 Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
-Start-Sleep 30
-
+# Start-Sleep 30
 # Cleanup
 cleanup ([ref]$selenium)
 
