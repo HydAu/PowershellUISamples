@@ -168,7 +168,7 @@ $phantomjs_executable_folder = 'C:\tools\phantomjs'
   return -2 
   }
 
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
   $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
@@ -193,7 +193,7 @@ assert -Script { ($selenium.SessionId -eq $null) } -Message 'non null session id
 # Take screenshot identifying the browser
 $selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 [OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
-$screenshot.SaveAsFile([System.IO.Path]::Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) ), [System.Drawing.Imaging.ImageFormat]::Png)
+$screenshot.SaveAsFile([System.IO.Path]::Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) , [System.Drawing.Imaging.ImageFormat]::Png )
 
 # Cleanup
 cleanup ([ref]$selenium)
