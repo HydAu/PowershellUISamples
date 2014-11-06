@@ -75,6 +75,7 @@ goto :EOF
 REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
 REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
 REM http://seleniumonlinetrainingexpert.wordpress.com/2012/12/11/how-do-i-start-the-internet-explorer-webdriver-for-selenium/
-
+REM Using setCapability("chrome.binary","path where my chromebrowser is\chrome.exe")
+REM https://groups.google.com/forum/#!msg/selenium-users/mro5VhedG4I/kD7oohEVuzEJ
 
 
