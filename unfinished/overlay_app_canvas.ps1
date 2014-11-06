@@ -53,153 +53,114 @@ using System.Data;
 
 namespace BitmapOther_c
 {
-    /// <summary>
-    /// Summary description for BitmapOther.
-    /// </summary>
-  public class BitmapOther : System.Windows.Forms.Form
-  {
-    /// <summary>
-    /// Required designer variable.
-    /// </summary>
-    private System.ComponentModel.Container components = null;
-
-    public BitmapOther()
+    public class BitmapOther : System.Windows.Forms.Form
     {
-      //
-      // Required for Windows Form Designer support
-      //
-      InitializeComponent();
+        private System.ComponentModel.Container components = null;
 
-      //
-      // TODO: Add any constructor code after InitializeComponent call
-      //
-    }
-
-    /// <summary>
-    /// Clean up any resources being used.
-    /// </summary>
-    protected override void Dispose( bool disposing )
-    {
-      if( disposing )
-      {
-        if (components != null) 
+        public BitmapOther()
         {
-          components.Dispose();
+            InitializeComponent();
         }
-      }
-      base.Dispose( disposing );
-    }
 
-        #region Windows Form Designer generated code
-    /// <summary>
-    /// Required method for Designer support - do not modify
-    /// the contents of this method with the code editor.
-    /// </summary>
-    private void InitializeComponent()
-    {
-      // 
-      // BitmapOther
-      // 
-      this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-      this.ClientSize = new System.Drawing.Size(292, 273);
-      this.Name = "BitmapOther";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-      this.Text = "BitmapOther";
-      this.Load += new System.EventHandler(this.BitmapOther_Load);
-
-    }
-        #endregion
-
-    /// <summary>
-    /// The main entry point for the application.
-    /// </summary>
-    [STAThread]
-    static void Main() 
-    {
-      Application.Run(new BitmapOther());
-    }
-
-    private void BitmapOther_Load(object sender, System.EventArgs e)
-    {
-    
-    }
-
-    protected override void OnPaint ( PaintEventArgs e )
-    {
-Bitmap Bmp;
-      String BackgroundImage = @"C:\developer\sergueik\powershell_ui_samples\Colorbars.JPG" ;
-    // Paint background image 
-     if (BackgroundImage != null)
-     {
-          Bmp = new Bitmap(BackgroundImage);
-          Bmp.MakeTransparent(Color.White);
-         Bmp.SetPixel(15,20,Color.Black);
-      Point Pt = new Point(20,20);
-//          e.Graphics.DrawImage(Bmp, 20,20, Width, Height);
-     }
-
-
-      e.Graphics.DrawLine(new Pen(Brushes.GreenYellow,30),60,60,200,60);
-
-      String DetaildImage = @"C:\developer\sergueik\powershell_ui_samples\database.bmp" ;
-          Bmp = new Bitmap(DetaildImage );
-          Bmp.MakeTransparent(Color.White);
-
-
-          e.Graphics.DrawImage(Bmp, 40,10, Bmp.Width/2, Bmp.Height/2);
-          e.Graphics.DrawImage(Bmp, 40,60, Bmp.Width/2, Bmp.Height/2);
-
-      DetaildImage = @"C:\developer\sergueik\powershell_ui_samples\app.bmp" ;
-          Bmp = new Bitmap(DetaildImage );
-          Bmp.MakeTransparent(Color.White);
-
-
-          e.Graphics.DrawImage(Bmp, 70,10, Bmp.Width/2, Bmp.Height/2);
-          e.Graphics.DrawImage(Bmp, 85,25, Bmp.Width/2, Bmp.Height/2);
-
-
-      
-    }
-
-// # http://stackoverflow.com/questions/6956222/is-there-a-way-to-overlay-or-merge-a-drawing-bitmap-and-a-drawingimage
-// ...
-private System.Drawing.Image MergeImages(System.Drawing.Image backgroundImage,
-                          System.Drawing.Image overlayImage)
-{
-    Image theResult = backgroundImage;
-    if (null != overlayImage)
-    {
-        Image theOverlay = overlayImage;
-        if (PixelFormat.Format32bppArgb != overlayImage.PixelFormat)
+        protected override void Dispose(bool disposing)
         {
-            theOverlay = new Bitmap(overlayImage.Width,
-                                    overlayImage.Height,
-                                    PixelFormat.Format32bppArgb);
-            using (Graphics graphics = Graphics.FromImage(theOverlay))
+            if (disposing)
             {
-                graphics.DrawImage(overlayImage,
-                                   new Rectangle(0, 0, theOverlay.Width, theOverlay.Height),
-                                   new Rectangle(0, 0, overlayImage.Width, overlayImage.Height),
-                                   GraphicsUnit.Pixel);
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
-            ((Bitmap)theOverlay).MakeTransparent();
+            base.Dispose(disposing);
         }
 
-        using (Graphics graphics = Graphics.FromImage(theResult))
+        private void InitializeComponent()
         {
-            graphics.DrawImage(theOverlay,
-                               new Rectangle(0, 0, theResult.Width, theResult.Height),
-                               new Rectangle(0, 0, theOverlay.Width, theOverlay.Height),
-                               GraphicsUnit.Pixel);
+            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+            this.ClientSize = new System.Drawing.Size(292, 273);
+            this.Name = "BitmapOther";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "BitmapOther";
+            this.Load += new System.EventHandler(this.BitmapOther_Load);
+        }
+
+        [STAThread]
+        static void Main()
+        {
+            Application.Run(new BitmapOther());
+        }
+
+        private void BitmapOther_Load(object sender, System.EventArgs e)
+        {
+
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Bitmap Bmp;
+            String BackgroundImage = @"C:\developer\sergueik\powershell_ui_samples\Colorbars.JPG";
+            // Paint background image 
+            if (BackgroundImage != null)
+            {
+                Bmp = new Bitmap(BackgroundImage);
+                Bmp.MakeTransparent(Color.White);
+                Bmp.SetPixel(15, 20, Color.Black);
+                Point Pt = new Point(20, 20);
+                // e.Graphics.DrawImage(Bmp, 20,20, Width, Height);
+            }
+
+            e.Graphics.DrawLine(new Pen(Brushes.GreenYellow, 30), 60, 60, 200, 60);
+            String DetaildImage = @"C:\developer\sergueik\powershell_ui_samples\database.bmp";
+            Bmp = new Bitmap(DetaildImage);
+            Bmp.MakeTransparent(Color.White);
+
+
+            e.Graphics.DrawImage(Bmp, 40, 10, Bmp.Width / 2, Bmp.Height / 2);
+            e.Graphics.DrawImage(Bmp, 40, 60, Bmp.Width / 2, Bmp.Height / 2);
+
+            DetaildImage = @"C:\developer\sergueik\powershell_ui_samples\app.bmp";
+            Bmp = new Bitmap(DetaildImage);
+            Bmp.MakeTransparent(Color.White);
+
+            e.Graphics.DrawImage(Bmp, 70, 10, Bmp.Width / 2, Bmp.Height / 2);
+            e.Graphics.DrawImage(Bmp, 85, 25, Bmp.Width / 2, Bmp.Height / 2);
+        }
+
+        // # http://stackoverflow.com/questions/6956222/is-there-a-way-to-overlay-or-merge-a-drawing-bitmap-and-a-drawingimage
+        private System.Drawing.Image MergeImages(System.Drawing.Image backgroundImage,
+                                  System.Drawing.Image overlayImage)
+        {
+            Image theResult = backgroundImage;
+            if (null != overlayImage)
+            {
+                Image theOverlay = overlayImage;
+                if (PixelFormat.Format32bppArgb != overlayImage.PixelFormat)
+                {
+                    theOverlay = new Bitmap(overlayImage.Width,
+                                            overlayImage.Height,
+                                            PixelFormat.Format32bppArgb);
+                    using (Graphics graphics = Graphics.FromImage(theOverlay))
+                    {
+                        graphics.DrawImage(overlayImage,
+                                           new Rectangle(0, 0, theOverlay.Width, theOverlay.Height),
+                                           new Rectangle(0, 0, overlayImage.Width, overlayImage.Height),
+                                           GraphicsUnit.Pixel);
+                    }
+                    ((Bitmap)theOverlay).MakeTransparent();
+                }
+
+                using (Graphics graphics = Graphics.FromImage(theResult))
+                {
+                    graphics.DrawImage(theOverlay,
+                                       new Rectangle(0, 0, theResult.Width, theResult.Height),
+                                       new Rectangle(0, 0, theOverlay.Width, theOverlay.Height),
+                                       GraphicsUnit.Pixel);
+                }
+            }
+            return theResult;
         }
     }
-
-    return theResult;
 }
-
-   }
-
-    }
 
 
 
