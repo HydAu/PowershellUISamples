@@ -31,7 +31,9 @@ public class Test
 
   wait.until(ExpectedConditions.elementToBeClickable(By.className("logo")));
   wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("logo")));
-   
+  string value1 = "dest";
+  string css_selector1 = "a[data-param=' +$value1 + ']";
+  driver.findElement(By.cssSelector(css_selector1).click();
    
 
  //take a screenshot
