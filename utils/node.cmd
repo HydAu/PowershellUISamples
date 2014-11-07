@@ -78,4 +78,4 @@ REM http://seleniumonlinetrainingexpert.wordpress.com/2012/12/11/how-do-i-start-
 REM Using setCapability("chrome.binary","path where my chromebrowser is\chrome.exe")
 REM https://groups.google.com/forum/#!msg/selenium-users/mro5VhedG4I/kD7oohEVuzEJ
 
-
+REM MAVEN project https://github.com/Ardesco/Selenium-Maven-Template
