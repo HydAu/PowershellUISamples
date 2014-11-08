@@ -87,7 +87,7 @@ $MSGBUTTON = @{
 
 # or generate dynamically 
 $MSGRESPONSE = New-Object PSObject
-$MSGRESPONSE | Add-Member -NotePropertyName 'None' -NotePropertyValue 0
+$MSGRESPONSE | Add-Member -NotePropertyName 'None' -NotePropertyValue 'None'
 $MSGRESPONSE | Add-Member -NotePropertyName 'Yes' -NotePropertyValue 'Yes'
 $MSGRESPONSE | Add-Member -NotePropertyName 'No' -NotePropertyValue 'No'
 $MSGRESPONSE | Add-Member -NotePropertyName 'OK' -NotePropertyValue 'OK'
@@ -105,41 +105,42 @@ function Return_Response
     [System.EventArgs]$eventargs
   )
 
-  [string ]$buttonText = ([System.Windows.Forms.Button]$sender[0]).Text
+  [string ]$button_text = ([System.Windows.Forms.Button]$sender[0]).Text
 
-  if ($buttonText -eq 'Yes')
-  {
-    $caller.Result = $MSGRESPONSE.Yes
+  switch ($button_text) {
+    ('Yes') 
+    {
+      $caller.Result = $MSGRESPONSE.Yes
+    }
+    ('No')
+    {
+      $caller.Result = $MSGRESPONSE.No
+    }
+    ('Cancel')
+    {
+      $caller.Result = $MSGRESPONSE.Cancel
+    }
+    ('OK')
+    {
+      $caller.Result = $MSGRESPONSE.OK
+    }
+    ('Abort')
+    {
+      $caller.Result = $MSGRESPONSE.Abort
+    }
+    ('Retry')
+    {
+      $caller.Result = $MSGRESPONSE.Retry
+    }
+    ('Ignore')
+    {
+      $caller.Result = $MSGRESPONSE.Ignore
+    }
+    default
+    {
+      # $response  =  $response
+    }
   }
-  elseif ($buttonText -eq 'No')
-  {
-    $caller.Result = $MSGRESPONSE.No
-  }
-  elseif ($buttonText -eq 'Cancel')
-  {
-    $caller.Result = $MSGRESPONSE.Cancel
-  }
-  elseif ($buttonText -eq 'OK')
-  {
-    $caller.Result = $MSGRESPONSE.OK
-  }
-  elseif ($buttonText -eq 'Abort')
-  {
-    $caller.Result = $MSGRESPONSE.Abort
-  }
-  elseif ($buttonText -eq 'Retry')
-  {
-    $caller.Result = $MSGRESPONSE.Retry
-  }
-  elseif ($buttonText -eq 'Ignore')
-  {
-    $caller.Result = $MSGRESPONSE.Ignore
-  }
-  else
-  {
-    # $response  =  $response
-  }
-
   $f.Dispose()
 }
 
