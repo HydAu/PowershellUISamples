@@ -13,7 +13,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver; 
 
-public class Test
+public class App
 {  public static void main(String[] args) {
   
   
