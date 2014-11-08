@@ -88,7 +88,6 @@ namespace C2C.FileSystem
 
         private ImageList _imageList = new ImageList();
         private Hashtable _systemIcons = new Hashtable();
-        private IWin32Window _caller;
 
         private string _data;
         public String Data
@@ -118,12 +117,7 @@ namespace C2C.FileSystem
             this.ImageList = _imageList;
             this.MouseDown += new MouseEventHandler(FileSystemTreeView_MouseDown);
             this.BeforeExpand += new TreeViewCancelEventHandler(FileSystemTreeView_BeforeExpand);
-        }
-
-        public FileSystemTreeView(IWin32Window caller)
-            : this()
-        {
-            this._caller = caller;
+            this.AfterSelect += new TreeViewEventHandler (FileSystemTreeView_AfterSelect);
         }
 
         void FileSystemTreeView_MouseDown(object sender, MouseEventArgs e)
@@ -152,6 +146,8 @@ namespace C2C.FileSystem
         private void FileSystemTreeView_AfterSelect(System.Object sender,
                 System.Windows.Forms.TreeViewEventArgs e)
         {
+
+            // MessageBox.Show(this._debug.ToString());
             // e.Action = Unknown
             if (_selectedNode != null && _selectedNode.Parent != null)
             {
@@ -331,12 +327,10 @@ namespace C2C.FileSystem
             public static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
         }
 
-
         public ShellIcon()
         {
             // TODO: Add constructor logic here
         }
-
 
         public static Icon GetSmallIcon(string fileName)
         {
@@ -349,7 +343,6 @@ namespace C2C.FileSystem
             //The icon is returned in the hIcon member of the shinfo struct
             return System.Drawing.Icon.FromHandle(shinfo.hIcon);
         }
-
 
         public static Icon GetLargeIcon(string fileName)
         {
@@ -372,117 +365,119 @@ namespace C2C.FileSystem
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
 
-# set up form
-
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$chooser = New-Object -TypeName 'C2C.FileSystem.FileSystemTreeView' -ArgumentList ($caller)
-$chooser.IconPath = [System.IO.Path]::Combine( (Get-ScriptDirectory),  'folder.ico'  )
-if ($PSBoundParameters["debug"]) {
-    $chooser.Debug = $true
-}
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = $title
+$f = New-Object System.Windows.Forms.Form
+$f.Text = $title
 
 
-$form.Size = New-Object System.Drawing.Size (700,450)
+$f.Size = New-Object System.Drawing.Size (700,450)
 
 $panel = New-Object System.Windows.Forms.Panel
 
 
-$panel1 = New-Object System.Windows.Forms.Panel
-$btnDirectory = New-Object System.Windows.Forms.Button
-$label1 = New-Object System.Windows.Forms.Label
-$txtDirectory = New-Object System.Windows.Forms.TextBox
-$treePanel = New-Object System.Windows.Forms.Panel
-$panel1.SuspendLayout()
-$form.SuspendLayout()
+$p1 = New-Object System.Windows.Forms.Panel
+$b2 = New-Object System.Windows.Forms.Button
+$l1 = New-Object System.Windows.Forms.Label
+$t1 = New-Object System.Windows.Forms.TextBox
+$t = New-Object System.Windows.Forms.Panel
+$p1.SuspendLayout()
+$f.SuspendLayout()
 
 # 
 # panel1
 # 
-$panel1.Controls.Add($btnDirectory)
-$panel1.Controls.Add($label1)
-$panel1.Controls.Add($txtDirectory)
-$panel1.Dock = [System.Windows.Forms.DockStyle]::Top
-$panel1.Location = New-Object System.Drawing.Point (0,0)
-$panel1.Name = 'panel1'
-$panel1.Size = New-Object System.Drawing.Size (681,57)
-$panel1.TabIndex = 0
+$p1.Controls.Add($b2)
+$p1.Controls.Add($l1)
+$p1.Controls.Add($t1)
+$p1.Dock = [System.Windows.Forms.DockStyle]::Top
+$p1.Location = New-Object System.Drawing.Point (0,0)
+$p1.Name = 'panel1'
+$p1.Size = New-Object System.Drawing.Size (681,57)
+$p1.TabIndex = 0
 
-$objADcheckbox = New-Object System.Windows.Forms.CheckBox
-$objADcheckbox.Location = New-Object System.Drawing.Point (515,27)
-$objADcheckbox.Size = New-Object System.Drawing.Size (120,20)
-$objADcheckbox.Text = 'Files'
+#
+# Include? Files checkbox
+#
+$cb1 = New-Object System.Windows.Forms.CheckBox
+$cb1.Location = New-Object System.Drawing.Point (515,27)
+$cb1.Size = New-Object System.Drawing.Size (120,20)
+$cb1.Text = 'Files'
 
-$panel1.Controls.Add($objADcheckbox)
-$objADcheckbox.add_click({ if ($objADcheckbox.Checked -eq $true) { $chooser.ShowFiles = $true } else { $chooser.ShowFiles = $false } })
+$p1.Controls.Add($cb1)
 
-
-# 
-# btnDirectory
-# 
-$btnDirectory.Location = New-Object System.Drawing.Point (560,27)
-$btnDirectory.Name = "btnDirectory"
-$btnDirectory.Size = New-Object System.Drawing.Size (60,21)
-$btnDirectory.TabIndex = 2
-$btnDirectory.Text = 'Select'
-$btnDirectory.add_click({ if ($caller.Data -ne $null) { $form.Close() } })
 
 # 
-# label1
+# Close Button
 # 
-$label1.Location = New-Object System.Drawing.Point (9,9)
-$label1.Name = 'label1'
-$label1.Size = New-Object System.Drawing.Size (102,18)
-$label1.TabIndex = 1
-$label1.Text = 'Selection:'
+$b2.Location = New-Object System.Drawing.Point (560,27)
+$b2.Name = "btnDirectory"
+$b2.Size = New-Object System.Drawing.Size (60,21)
+$b2.TabIndex = 2
+$b2.Text = 'Select'
+$b2.add_click({ if ($caller.Data -ne $null) { $f.Close() } })
 
 # 
-# txtDirectory
+# Current Selection Label
 # 
-$txtDirectory.Location = New-Object System.Drawing.Point (9,27)
-$txtDirectory.Name = "txtDirectory"
-$txtDirectory.Size = New-Object System.Drawing.Size (503,20)
-$txtDirectory.TabIndex = 0
-$txtDirectory.Text = ""
-# $txtDirectory.KeyDown += New-Object System.Windows.Forms.KeyEventHandler($txtDirectory_KeyDown)
-# $txtDirectory.KeyPress += New-Object System.Windows.Forms.KeyPressEventHandler($txtDirectory_KeyPress)
+$l1.Location = New-Object System.Drawing.Point (9,9)
+$l1.Name = 'label1'
+$l1.Size = New-Object System.Drawing.Size (102,18)
+$l1.TabIndex = 1
+$l1.Text = 'Selection:'
+
+# 
+# Current Selection Result
+# 
+$t1.Location = New-Object System.Drawing.Point (9,27)
+$t1.Name = 'txtDirectory'
+$t1.Size = New-Object System.Drawing.Size (503,20)
+$t1.TabIndex = 0
+$t1.Text = ''
 
 # 
 # treePanel
 # 
-$treePanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$treePanel.Location = New-Object System.Drawing.Point (0,57)
-$treePanel.Name = "treePanel"
-$treePanel.Size = New-Object System.Drawing.Size (621,130)
-$treePanel.TabIndex = 1
+$t.Dock = [System.Windows.Forms.DockStyle]::Fill
+$t.Location = New-Object System.Drawing.Point (0,57)
+$t.Name = "treePanel"
+$t.Size = New-Object System.Drawing.Size (621,130)
+$t.TabIndex = 1
 
-$treePanel.Controls.Add($chooser)
-$chooser.ShowFiles = $false
-$chooser.Dock = [System.Windows.Forms.DockStyle]::Fill
-$chooser.Add_AfterSelect({ $txtDirectory.Text = $caller.Data = $chooser.Data })
-$chooser.Load('C:\')
+$c = New-Object -TypeName 'C2C.FileSystem.FileSystemTreeView'
+$c.IconPath = [System.IO.Path]::Combine((Get-ScriptDirectory),'folder.ico')
+if ($PSBoundParameters["debug"]) {
+  $c.Debug = $true
+}
+
+$c.ShowFiles = $false
+$c.Dock = [System.Windows.Forms.DockStyle]::Fill
+$c.Add_AfterSelect({ if ($c.Debug) { Write-Host $c.Data; } $t1.Text = $caller.Data = $c.Data })
+$c.Load('C:\')
+$t.Controls.Add($c)
+
+$cb1.add_click({ if ($cb1.Checked -eq $true) { $c.ShowFiles = $true } else { $c.ShowFiles = $false } })
+
 # Form1
 # 
-$form.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
-$form.ClientSize = New-Object System.Drawing.Size (621,427)
-$form.Controls.Add($treePanel)
-$form.Controls.Add($panel1)
-$form.Name = 'Form1'
-$form.Text = 'Demo Chooser'
-$panel1.ResumeLayout($false)
-$form.ResumeLayout($false)
-$form.Add_Shown({ $form.Activate() })
-$form.KeyPreview = $True
-$form.Add_KeyDown({
+$f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
+$f.ClientSize = New-Object System.Drawing.Size (621,427)
+$f.Controls.Add($t)
+$f.Controls.Add($p1)
+$f.Name = 'Form1'
+$f.Text = 'Demo Chooser'
+$p1.ResumeLayout($false)
+$f.ResumeLayout($false)
+$f.Add_Shown({ $f.Activate() })
+$f.KeyPreview = $True
+$f.Add_KeyDown({
 
     if ($_.KeyCode -eq 'Escape') { $caller.Data = $null }
     else { return }
-    $form.Close()
+    $f.Close()
   })
 
-[void]$form.ShowDialog([win32window ]($caller))
+[void]$f.ShowDialog([win32window ]($caller))
 
-$form.Dispose()
+$f.Dispose()
 Write-Output $caller.Data
