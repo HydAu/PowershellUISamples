@@ -195,6 +195,8 @@ return timings;
 # executeScript works fine with Chrome or Firefox 31, ie 10, but not IE 11.
 # Exception calling "ExecuteScript" with "1" argument(s): "Unable to get browser
 # https://code.google.com/p/selenium/issues/detail?id=6511  
+# 
+# https://code.google.com/p/selenium/source/browse/java/client/src/org/openqa/selenium/remote/HttpCommandExecutor.java?r=3f4622ced689d2670851b74dac0c556bcae2d0fe
 
 $result = ([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeScript($script);
 $result

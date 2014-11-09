@@ -19,9 +19,9 @@
 #THE SOFTWARE.
 
 <#
- CLOUD : '104.131.159.44'
- HOST ONLY : '192.168.56.101'
- BRIDGED : '192.168.0.13'
+ example CLOUD : '104.131.159.44'
+ example HOST ONLY : '192.168.56.101'
+ example BRIDGED : '192.168.0.13'
 #>
 
 param (
