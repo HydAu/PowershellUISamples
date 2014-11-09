@@ -19,7 +19,7 @@ set JAVA_HOME=c:\progra~1\java\jdk%JAVA_VERSION%
 set JAVA_HOME=c:\java\jdk%JAVA_VERSION%
 set MAX_MEMORY=-Xmx256m
 set STACK_SIZE=-Xss8m
-set LOGFILE=node.log4j1.log
+set LOGFILE=node.log4j.log
 
 rem Need to keep 1.7 and 1.6 both installed
 set GROOVY_HOME=c:\java\groovy-2.3.2
