@@ -14,7 +14,7 @@ import org.apache.http.HttpResponse;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.openqa.selenium.WebElement;
 
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 // ??
