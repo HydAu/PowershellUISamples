@@ -50,41 +50,37 @@ import java.nio.charset.Charset;
 public class App
 {  public static void main(String[] args) {
 
-	   // System.setProperty("webdriver.chrome.driver", "C:\\java\\selenium\\chromedriver.exe");
-	   // DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-	   /* RemoteWebDriver driver = null;
-	   try {
-		   driver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
-	   } catch (MalformedURLException ex) { }
-           */ 
            WebDriver driver = new AndroidDriver();
     
-	   try{
 //		   driver.manage().timeouts().pageLoadTimeout(900, TimeUnit.SECONDS);
 //		   driver.manage().timeouts().implicitlyWait(300, TimeUnit.SECONDS);
-try{
+           try{
 		   driver.get("http://www.carnival.com/");
 
 
-}	   catch(Exception ex2) {
+           }	
+           catch(Exception ex) {
 
-		   System.out.println(ex2.toString());
+		   System.out.println(ex.toString());
 
 	   }
 		   WebDriverWait wait = new WebDriverWait(driver, 300);
 
-		   // http://assertselenium.com/2013/01/29/webdriver-wait-commands/
-
+	   try{
 /*		   wait.until(ExpectedConditions.elementToBeClickable(By.className("logo")));
 		   wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("logo")));
 		   String value1 = "dest";
 		   String css_selector1 = String.format("a[data-param='%s']", value1);
 		   driver.findElement(By.cssSelector(css_selector1)).click();
-
-		   // print the node information
-		   //String result = getIPOfNode(driver);
-		   //System.out.println(result);
 */
+	   }
+
+	   catch(Exception ex) {
+
+		   System.out.println(ex.toString());
+
+	   }
+	   try{
 		   //take a screenshot
 		   File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 
@@ -103,35 +99,5 @@ try{
 		   driver.close();
 		   driver.quit();
 	   }
-   }
-   private static String getIPOfNode(RemoteWebDriver remoteDriver)
-   {
-	   String hostFound = null;
-	   try  {
-		   HttpCommandExecutor ce = (HttpCommandExecutor) remoteDriver.getCommandExecutor();
-		   String hostName = ce.getAddressOfRemoteServer().getHost();
-		   int port = ce.getAddressOfRemoteServer().getPort();
-		   HttpHost host = new HttpHost(hostName, port);
-		   DefaultHttpClient client = new DefaultHttpClient();
-		   URL sessionURL = new URL(String.format("http://%s:%d/grid/api/testsession?session=%s", hostName, port, remoteDriver.getSessionId()));
-		   BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest( "POST", sessionURL.toExternalForm());
-		   HttpResponse response = client.execute(host, r);
-		   JSONObject object = extractObject(response);
-		   URL myURL = new URL(object.getString("proxyId"));
-		   if ((myURL.getHost() != null) && (myURL.getPort() != -1)) {
-			   hostFound = myURL.getHost();
-		   }
-	   } catch (Exception e) {
-		   System.err.println(e);
-	   }
-	   return hostFound;
-   }
-
-   private static JSONObject extractObject(HttpResponse resp) throws IOException, JSONException {
-	   InputStream contents = resp.getEntity().getContent();
-	   StringWriter writer = new StringWriter();
-	   IOUtils.copy(contents, writer, "UTF8");
-	   JSONObject objToReturn = new JSONObject(writer.toString());
-	   return objToReturn;
    }
 }
