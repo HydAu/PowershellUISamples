@@ -1,0 +1,238 @@
+
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Processes specified Akamai logs for specified HTTP Status codes &#xd;
+This version requires Perl&#xd;
+The results are available in Splunk</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>3</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>MAXFILES</name>
+          <description>Leave 0  to do all files. Note it takes approx. 1 hour to process 100 files.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>20</string>
+              <string>30</string>
+              <string>40</string>
+              <string>50</string>
+              <string>100</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>APPLICATION</name>
+          <description>Application logs to process</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>carnival</string>
+              <string>goccl</string>
+              <string>secure_carnival</string>
+              <string>carnival_au</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SKIP</name>
+          <description>Skip specified number of files to prevent dealing with the same files for subsequent reruns</description>
+          <defaultValue>0</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEBUG</name>
+          <description>Program logs details of its  execution when DEBUG is set</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DEST_LOG_SHARE</name>
+          <description></description>
+          <defaultValue>D:\AKAMAI_LOGS\</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LOG_SHARE</name>
+          <description>AKAMAI Logs share </description>
+          <defaultValue>\\vnx5700cifs\akamai_logs\carnival</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>LAST</name>
+          <description>MAX age of logs to process in seconds
+NOTE that currently there is no separate parameter for timezone .
+The value of this parameter is somewhat misleading.</description>
+          <defaultValue>2000</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>HEADER</name>
+          <description>Keep the header lines in the filtered logs, listing the column names. Default is no headers</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>DATABASE</name>
+          <description>Use database to track the history. Select path outside of WORKSPACE</description>
+          <defaultValue>history.sqlite</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>USE_DATABASE</name>
+          <description></description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition plugin="extended-choice-parameter@0.34">
+          <name>SELECT_MATCHING</name>
+          <description>Select to collect all statuses, select to collect every other</description>
+          <quoteValue>false</quoteValue>
+          <visibleItemCount>2</visibleItemCount>
+          <type>PT_RADIO</type>
+          <value>true,false</value>
+          <defaultValue>true</defaultValue>
+          <multiSelectDelimiter>,</multiSelectDelimiter>
+        </com.cwctravel.hudson.plugins.extended__choice__parameter.ExtendedChoiceParameterDefinition>
+        <hudson.model.TextParameterDefinition>
+          <name>STATUS_CODES</name>
+          <description>List of HTTP status codes to collect</description>
+          <defaultValue>5\d\d
+301
+302
+400
+404
+</defaultValue>
+        </hudson.model.TextParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>ESCAPE</name>
+          <description>Set checked to treat parameter literally</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.copyartifact.CopyArtifactPermissionProperty plugin="copyartifact@1.30">
+      <projectNameList/>
+    </hudson.plugins.copyartifact.CopyArtifactPermissionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>CCLPRDKEYNOTE1</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@echo OFF 
+echo Running with parameters:
+echo APPLICATION=%APPLICATION%
+echo SKIP=%SKIP%
+echo MAXFILES=%MAXFILES%
+echo DEST_LOG_SHARE=%DEST_LOG_SHARE%
+echo LOG_SHARE=%LOG_SHARE%
+echo LAST=%LAST%
+echo HEADER=%HEADER%
+
+ECHO Delete old results 
+REM Delete old results - both compressed and flat 
+del /q *.filtered.log.*
+REM
+ECHO Delete Database
+del /q logs.*.db 
+del /q logs.db
+
+
+copy /Y NUL dummy.filtered.log.gz</command>
+    </hudson.tasks.BatchFile>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.2">
+      <command>&lt;# 
+pushd env:
+dir 
+popd
+#&gt;
+# $env:STATUS_CODES= 
+#
+write-output ( &quot;STATUS_CODES=&apos;{0}&apos;&quot; -f $env:STATUS_CODES )
+
+
+
+$env:PATH=&quot;D:\PERL\BIN;$}env:PATH}&quot;
+New-Item -Path &quot;${env:DEST_LOG_SHARE}\${env:APPLICATION}&quot; -ItemType directory -force -erroraction &apos;SilentlyContinue&apos;
+
+# Patch the inputs 
+[string]$escape_flag = &apos;&apos; 
+
+
+# Patch the inputs 
+[string]$debug_flag = &apos;&apos; 
+if (($env:DEBUG -ne &apos;&apos;) -and ($env:DEBUG -ne $null) -and ($env:DEBUG -match &apos;true&apos;))  {
+$debug_flag = &apos;-debug&apos;
+}
+write-output &quot;Processing STATUS_CODES build parameter (raw):`n`n-------`n${env:STATUS_CODES}`n-------`n&quot;
+
+# NOTE double quotes.
+$status_codes_formatted = ($env:STATUS_CODES -replace &quot;`n&quot;, &apos;,&apos;) 
+write-output &quot;[1]Extracted Status Codes:`n`n-------`n${status_codes_formatted}`n-------`n&quot;
+
+&lt;#  this is not working 
+if ($status_codes_formatted -match  &quot;STATUS_CODES=&apos;(.+)&apos;&quot;) {
+$status_codes_formatted = $status_codes_formatted -replace &quot;STATUS_CODES=&apos;(.+)&apos;&quot;, &quot;$1&quot;
+}
+#&gt; 
+if ($status_codes_formatted -match  &quot;STATUS_CODES=&apos;(.+)&apos;&quot;) {
+$regex = new-object System.Text.RegularExpressions.Regex(&quot;(STATUS_CODES)=`&apos;(.+)`&apos;&quot;)
+# 
+# $regex.Replace($status_codes_formatted, &quot;$2&quot;)
+$result = ($regex.Match($status_codes_formatted)).Groups[2]
+$status_codes_formatted = $result.Value
+}
+
+write-output &quot;[2]Extracted Status Codes:`n`n-------`n${status_codes_formatted}`n-------`n&quot;
+
+
+# There 
+[string]$command =  (&apos;perl log_filter.pl -maxfiles {0} -skip {1} -app {2} -last {3} -root &quot;{4}&quot; -status_codes &quot;{6}&quot; {7} -flat {5} &apos; -f
+   $env:MAXFILES ,       # [0]
+   $env:SKIP ,               # [1]
+   $env:APPLICATION ,  # [2]
+   $env:LAST ,             # [3]
+   $env:LOG_SHARE ,   # [4]
+   $debug_flag ,  # [5]
+   $status_codes_formatted  ,# [6]
+   $escape_flag # [7]
+   )
+write-output (&quot;Executing:`n  $command {0}&quot; -f $command ) 
+invoke-expression -command $command 
+
+</command>
+    </hudson.plugins.powershell.PowerShell>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.2">
+      <command>$logs_to_copy  = get-childitem -Filter &quot;*filtered.log*&quot; | where-object { -not  ( $_.Name -match &apos;dummy&apos; ) }
+
+if ( $logs_to_copy -eq $null -or ($logs_to_copy.count  -eq 0) ){
+write-output &apos;No new logs&apos;
+exit 0 
+} 
+
+$dest_path = &quot;${env:DEST_LOG_SHARE}\${env:APPLICATION}&quot;
+write-output (&apos;Copying new logs to {0}&apos; -f  $dest_path )
+$logs_to_copy |select-object -Property Name,Length | format-table -autosize 
+
+write-output @&quot;
+Copy-item -Path &apos;*filtered.log*&apos; -Destination  &quot;${dest_path}&quot; -force -ErrorAction &apos;SilentlyContinue&apos;  
+&quot;@
+copy-item -Path &apos;*filtered.log*&apos; -Destination &quot;${dest_path}&quot;  -force -ErrorAction &apos;SilentlyContinue&apos; 
+popd
+</command>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>**/*filtered.log*</artifacts>
+      <latestOnly>false</latestOnly>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers/>
+</project>
