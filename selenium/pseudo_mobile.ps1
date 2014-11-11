@@ -262,9 +262,8 @@ try {
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
 $more_cnt = 3
 
-for ($cnt = 0; $cnt -ne $more_cnt; $cnt++) {
-  $element.Click()
-  Start-Sleep -Milliseconds 500
+for ($cnt = 0 ; $cnt -ne $more_cnt; $cnt++  ){
+$element.Click()
 }
 
 try {
@@ -281,9 +280,9 @@ try {
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
 $more_cnt = 3
-for ($cnt = 0; $cnt -ne $more_cnt; $cnt++) {
-  $element.Click()
-  Start-Sleep -Milliseconds 500
+for ($cnt = 0 ; $cnt -ne $more_cnt; $cnt++  ){
+$element.Click()
+# Start-Sleep -Milliseconds 500
 
 }
 
@@ -384,7 +383,7 @@ try {
 # write-output $element
 
 
-$text1 = 'Liberty'
+$text1 = 'Dream'
 
 $index = 0
 $max_count = 20
@@ -400,29 +399,81 @@ foreach ($item in $elements)
     continue
   }
 
-  Write-Output $index
-  Write-Output $item.Text
-  Write-Output $text1
-
   if ($item.Text -match $text1) {
-    Write-Output '*'
-    $item
+
+   [NUnit.Framework.Assert]::AreEqual($item.Text,'Carnival Dream')
+#    write-output $index 
+#    write-output '*'
+#    write-output $item.Text
 
     $found = $true
     [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-    # need checkbox
-    $actions.MoveToElement([OpenQA.Selenium.IWebElement]$item).Click().Build().Perform()
-    $item.Click()
+    $cbs = $item.FindElement([OpenQA.Selenium.By]::CssSelector("div.custom-checkbox"))
+ 
+     $cbs.Click()
+     [void]$actions.SendKeys($cbs,[OpenQA.Selenium.Keys]::SPACE)
+   # $item | get-member
 
-    # [void]$actions.SendKeys($item,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
   }
   $index++
 }
 
 
 
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = 'a#filterResults'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+$element.Click()
+
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = 'div.sailing-dates'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+[NUnit.Framework.Assert]::AreEqual($element.Text,'Show Sailing Dates')
+
+
+$element.Click()
+# scroll away from tool bar
+[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
+Start-Sleep -Seconds 1
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = 'i.fa-chevron-circle-right'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+$element.Click()
+
+
 Start-Sleep -Milliseconds 10000
+
 
 # Cleanup
 cleanup ([ref]$selenium)
+
 
