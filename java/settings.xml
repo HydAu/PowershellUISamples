@@ -5,8 +5,8 @@
       <protocol>http</protocol>
       <host>proxy.carnival.com</host>
       <port>8080</port>
-      <username>carnival\sergueik</username>
-      <password>1enBu!lds</password>
+      <username></username>
+      <password></password>
       <nonProxyHosts></nonProxyHosts>
     </proxy>
   </proxies>
