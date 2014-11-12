@@ -16,9 +16,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.openqa.selenium.WebElement;
 
+
+import    org.openqa.selenium.Dimension;
+
+
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 // ??
-import  org.apache.http.impl.client.DefaultHttpClient;
+import org.openqa.selenium.interactions.Actions;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,81 +52,92 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 public class App
-{  public static void main(String[] args) {
+{  public static void main(String[] args) throws InterruptedException {
 
-	   // System.setProperty("webdriver.chrome.driver", "C:\\java\\selenium\\chromedriver.exe");
-	   DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-	   RemoteWebDriver driver = null;
-	   try {
-		   driver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
-	   } catch (MalformedURLException ex) { }
+       DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+       RemoteWebDriver driver = null;
+       try {
+           driver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
+       } catch (MalformedURLException ex) { }
 
-	   try{
+       try{
+           driver.manage().window().setSize(new Dimension(600, 800));
+           driver.manage().timeouts().pageLoadTimeout(50, TimeUnit.SECONDS);
+           driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+           driver.get("http://m.carnival.com/");
+           WebDriverWait wait = new WebDriverWait(driver, 30);
+           String value1 = null;
+          
+           wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("ccl-logo")));
+           value1 = "ddlDestinations";
+   
+           String xpath_selector1 = String.format("//select[@id='%s']", value1);
+		   wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath_selector1)));
+		   WebElement element = driver.findElement(By.xpath(xpath_selector1));
+           
+		   System.out.println( element.getAttribute("id"));
+		   Actions builder = new Actions(driver);
+		   builder.moveToElement(element).build().perform();
 
-		   driver.manage().timeouts().pageLoadTimeout(50, TimeUnit.SECONDS);
-		   driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
-		   driver.get("http://www.carnival.com/");
-		   WebDriverWait wait = new WebDriverWait(driver, 30);
+           String csspath_selector2 = "div.find-cruise-submit > a" ;         
+		   WebElement element2 = driver.findElement(By.cssSelector(csspath_selector2));
+		   System.out.println( element2.getText());
+		   new Actions(driver).moveToElement(element2).click().build().perform();
+           Thread.sleep(5000);
 
-		   // http://assertselenium.com/2013/01/29/webdriver-wait-commands/
+           // print the node information
+           //String result = getIPOfNode(driver);
+           //System.out.println(result);
 
-		   wait.until(ExpectedConditions.elementToBeClickable(By.className("logo")));
-		   wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("logo")));
-		   String value1 = "dest";
-		   String css_selector1 = String.format("a[data-param='%s']", value1);
-		   driver.findElement(By.cssSelector(css_selector1)).click();
+           //take a screenshot
+           //File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 
-		   // print the node information
-		   String result = getIPOfNode(driver);
-		   System.out.println(result);
+           //save the screenshot in png format on the disk.
+           //FileUtils.copyFile(scrFile, new File(System.getProperty("user.dir") + "\\screenshot.png"));
 
-		   //take a screenshot
-		   File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+       }
 
-		   //save the screenshot in png format on the disk.
-		   FileUtils.copyFile(scrFile, new File(System.getProperty("user.dir") + "\\screenshot.png"));
+       catch(Exception ex) {
 
-	   }
+           System.out.println(ex.toString());
 
-	   catch(Exception ex) {
+       }
+       finally {
 
-		   System.out.println(ex.toString());
-
-	   }
-	   finally {
-
-		   driver.close();
-		   driver.quit();
-	   }
+           driver.close();
+           driver.quit();
+       }
    }
    private static String getIPOfNode(RemoteWebDriver remoteDriver)
    {
-	   String hostFound = null;
-	   try  {
-		   HttpCommandExecutor ce = (HttpCommandExecutor) remoteDriver.getCommandExecutor();
-		   String hostName = ce.getAddressOfRemoteServer().getHost();
-		   int port = ce.getAddressOfRemoteServer().getPort();
-		   HttpHost host = new HttpHost(hostName, port);
-		   DefaultHttpClient client = new DefaultHttpClient();
-		   URL sessionURL = new URL(String.format("http://%s:%d/grid/api/testsession?session=%s", hostName, port, remoteDriver.getSessionId()));
-		   BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest( "POST", sessionURL.toExternalForm());
-		   HttpResponse response = client.execute(host, r);
-		   JSONObject object = extractObject(response);
-		   URL myURL = new URL(object.getString("proxyId"));
-		   if ((myURL.getHost() != null) && (myURL.getPort() != -1)) {
-			   hostFound = myURL.getHost();
-		   }
-	   } catch (Exception e) {
-		   System.err.println(e);
-	   }
-	   return hostFound;
+       String hostFound = null;
+       try  {
+           HttpCommandExecutor ce = (HttpCommandExecutor) remoteDriver.getCommandExecutor();
+           String hostName = ce.getAddressOfRemoteServer().getHost();
+           int port = ce.getAddressOfRemoteServer().getPort();
+           HttpHost host = new HttpHost(hostName, port);
+           DefaultHttpClient client = new DefaultHttpClient();
+           URL sessionURL = new URL(String.format("http://%s:%d/grid/api/testsession?session=%s", hostName, port, remoteDriver.getSessionId()));
+           BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest( "POST", sessionURL.toExternalForm());
+           HttpResponse response = client.execute(host, r);
+           JSONObject object = extractObject(response);
+           URL myURL = new URL(object.getString("proxyId"));
+           if ((myURL.getHost() != null) && (myURL.getPort() != -1)) {
+               hostFound = myURL.getHost();
+           }
+       } catch (Exception e) {
+           System.err.println(e);
+       }
+       return hostFound;
    }
 
    private static JSONObject extractObject(HttpResponse resp) throws IOException, JSONException {
-	   InputStream contents = resp.getEntity().getContent();
-	   StringWriter writer = new StringWriter();
-	   IOUtils.copy(contents, writer, "UTF8");
-	   JSONObject objToReturn = new JSONObject(writer.toString());
-	   return objToReturn;
+       InputStream contents = resp.getEntity().getContent();
+       StringWriter writer = new StringWriter();
+       IOUtils.copy(contents, writer, "UTF8");
+       JSONObject objToReturn = new JSONObject(writer.toString());
+       return objToReturn;
    }
 }
+
+
