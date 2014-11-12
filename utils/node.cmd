@@ -12,6 +12,8 @@ if "%NODE_HOST%" equ "" set NODE_HOST=%COMPUTERNAME%
 if "%HUB_HOST%" equ "" set HUB_HOST=127.0.0.1
 set HUB_HTTP_PORT=4444
 
+
+
 set HTTPS_PORT=-1
 set APP_VERSION=2.44.0
 set JAVA_VERSION=1.6.0_45
@@ -40,6 +42,7 @@ PATH=%PATH%;%ProgramFiles%\Mozilla Firefox
 PATH=%PATH%;%ProgramFiles%\Internet Explorer
 GOTO :END_PATH
 :END_PATH
+PATH=%PATH%;%LOCALAPPDATA%\Mozilla Firefox
 
 where.exe firefox.exe
 CHOICE /T 1 /C ync /CS /D y 

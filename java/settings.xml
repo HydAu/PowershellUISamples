@@ -1,0 +1,15 @@
+<settings>
+<proxies>
+   <proxy><!--  Forefront TMG requires authorization -->
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>proxy.carnival.com</host>
+      <port>8080</port>
+      <username></username>
+      <password></password>
+      <nonProxyHosts></nonProxyHosts>
+    </proxy>
+  </proxies>
+  <mirrors>
+  </mirrors>
+</settings>
