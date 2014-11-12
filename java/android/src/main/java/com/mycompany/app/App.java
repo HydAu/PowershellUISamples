@@ -15,10 +15,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.openqa.selenium.android.AndroidDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.WebElement;
+
 
 // http://stackoverflow.com/questions/10715378/java-lang-noclassdeffounderror-org-openqa-selenium-android-androidwebdriver-err
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-// ??
 import  org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,12 +53,34 @@ public class App
 {  public static void main(String[] args) {
 
            WebDriver driver = new AndroidDriver();
-    
+//    
 //		   driver.manage().timeouts().pageLoadTimeout(900, TimeUnit.SECONDS);
-//		   driver.manage().timeouts().implicitlyWait(300, TimeUnit.SECONDS);
            try{
 		   driver.get("http://www.carnival.com/");
+           WebDriverWait wait = new WebDriverWait(driver, 30);
+           String value1 = null;
+/*          
+           wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("ccl-logo")));
+           value1 = "ddlDestinations";
 
+           String xpath_selector1 = String.format("//select[@id='%s']", value1);
+		   wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath_selector1)));
+		   WebElement element = driver.findElement(By.xpath(xpath_selector1));
+           
+		   System.out.println( element.getAttribute("id"));
+		   Actions builder = new Actions(driver);
+		   builder.moveToElement(element).build().perform();
+*/
+           String csspath_selector2 = "div.find-cruise-submit > a" ;         
+		   WebElement element2 = driver.findElement(By.cssSelector(csspath_selector2));
+		   System.out.println( element2.getText());
+		   // new Actions(driver).moveToElement(element2).click().build().perform();
+                   element2.click();
+// org.openqa.selenium.WebDriverException: Underlying driver does not implement advnced user interactions yet.
+           Thread.sleep(5000);
+
+
+Thread.sleep(2000);
 
            }	
            catch(Exception ex) {
@@ -64,15 +88,18 @@ public class App
 		   System.out.println(ex.toString());
 
 	   }
-		   WebDriverWait wait = new WebDriverWait(driver, 300);
+
+
+		  // driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		  // WebDriverWait wait = new WebDriverWait(driver, 30);
 
 	   try{
-/*		   wait.until(ExpectedConditions.elementToBeClickable(By.className("logo")));
-		   wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("logo")));
-		   String value1 = "dest";
-		   String css_selector1 = String.format("a[data-param='%s']", value1);
+		   // wait.until(ExpectedConditions.elementToBeClickable(By.className("ccl-logo")));
+		//   wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("ccl-logo")));
+		   String value1 = "ddlDestinations";
+		   String css_selector1 = String.format("select#%s", value1);
 		   driver.findElement(By.cssSelector(css_selector1)).click();
-*/
+
 	   }
 
 	   catch(Exception ex) {
