@@ -28,92 +28,7 @@ $attributes_preview = @{
 
 }
 
-
-[scriptblock]$CONFIGURATION_EXTRACT = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref)
-
-  $result_ref.Value = $object_ref.Value.Configuration.JACombinerAndOptimizerGroup.combinerSettings.Getattribute("imagesCdnHostToPrepend")
-}
-
-
-[scriptblock]$CONFIGURATION_EXTRACT4 = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [string]$key = 'PersonalizationDomain'
-  )
-  [scriptblock]$s = $CONFIGURATION_EXTRACT2
-  $local:result = $null
-  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
-  $debug = $false
-  if ($debug) {
-    Write-Host ('returning {0}' -f $local:result)
-  }
-  $result_ref.Value = $local:result
-}
-
-[scriptblock]$CONFIGURATION_EXTRACT5 = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [string]$key = 'SecureLoginUrl'
-  )
-  [scriptblock]$s = $CONFIGURATION_EXTRACT2
-  $local:result = $null
-  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
-  $result_ref.Value = $local:result
-}
-
-
-
-[scriptblock]$CONFIGURATION_EXTRACT6 = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [string]$key = 'CarnivalHeaderHtmlUrl'
-  )
-  [scriptblock]$s = $CONFIGURATION_EXTRACT2
-  $local:result = $null
-  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
-  $result_ref.Value = $local:result
-}
-
-[scriptblock]$CONFIGURATION_EXTRACT7 = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [string]$key = 'CarnivalFooterHtmlUrl'
-  )
-  [scriptblock]$s = $CONFIGURATION_EXTRACT2
-  $local:result = $null
-  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
-  $result_ref.Value = $local:result
-}
-
-
-[scriptblock]$CONFIGURATION_EXTRACT3 = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [string]$key = 'RESTProxyDomain'
-  )
-  [scriptblock]$s = $CONFIGURATION_EXTRACT2
-  # temporary extra variables /  reference  for debugging  
-  $local:result2 = $null
-  $result_ref2 = ([ref]$local:result2)
-  Invoke-Command $s -ArgumentList $object_ref,$result_ref2,$key
-
-
-  if ($debug) {
-    Write-Host ('returning {0}' -f $result_ref2.Value)
-  }
-  $result_ref.Value = $result_ref2.Value
-}
-
-
-[scriptblock]$CONFIGURATION_EXTRACT2 = {
+[scriptblock]$Extract_appSettings = {
   param(
     [System.Management.Automation.PSReference]$object_ref,
     [System.Management.Automation.PSReference]$result_ref,
@@ -159,17 +74,275 @@ $attributes_preview = @{
   $result_ref.Value = $data[$key]
 }
 
-$attributes_extraction_code = @{
-  'imagesCdnHostToPrepend' = $CONFIGURATION_EXTRACT;
-  'RESTProxyDomain' = $CONFIGURATION_EXTRACT3;
-  'PersonalizationDomain' = $CONFIGURATION_EXTRACT4;
-  'SecureLoginUrl' = $CONFIGURATION_EXTRACT5;
-  'CarnivalHeaderHtmlUrl' = $CONFIGURATION_EXTRACT6;
 
-  'CarnivalFooterHtmlUrl' = $CONFIGURATION_EXTRACT7;
+[scriptblock]$Extract_imagesCdnHostToPrepend = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref)
+  $result_ref.Value = $object_ref.Value.Configuration.JACombinerAndOptimizerGroup.combinerSettings.Getattribute("imagesCdnHostToPrepend")
+}
+
+
+[scriptblock]$Extract_PersonalizationDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'PersonalizationDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $debug = $false
+  if ($debug) {
+    Write-Host ('returning {0}' -f $local:result)
+  }
+  $result_ref.Value = $local:result
+}
+
+[scriptblock]$Extract_SecureLoginUrl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'SecureLoginUrl'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+[scriptblock]$Extract_CarnivalHeaderHtmlUrl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'CarnivalHeaderHtmlUrl'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+[scriptblock]$Extract_CarnivalFooterHtmlUrl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'CarnivalFooterHtmlUrl'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+[scriptblock]$Extract_RESTProxyDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'RESTProxyDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  # temporary extra variables /  reference  for debugging  
+  $local:result2 = $null
+  $result_ref2 = ([ref]$local:result2)
+  Invoke-Command $s -ArgumentList $object_ref,$result_ref2,$key
+
+
+  if ($debug) {
+    Write-Host ('returning {0}' -f $result_ref2.Value)
+  }
+  $result_ref.Value = $result_ref2.Value
+}
+
+
+[scriptblock]$Extract_SecureLoginUrl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'SecureLoginUrl'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+[scriptblock]$Extract_SecureUrl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'SecureUrl'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+[scriptblock]$Extract_DefaultRobotsDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'DefaultRobotsDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+[scriptblock]$Extract_DeckPlanServiceDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'DeckPlanServiceDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+[scriptblock]$Extract_USDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'USDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+[scriptblock]$Extract_USDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'USDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+[scriptblock]$Extract_UKDomain = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'UKDomain'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+[scriptblock]$Extract_UKDomains = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'UKDomains'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+[scriptblock]$Extract_FullSiteURL = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = 'FullSiteURL'
+  )
+  [scriptblock]$s = $Extract_appSettings
+  $local:result = $null
+  Invoke-Command $s -ArgumentList $object_ref,([ref]$local:result),$key
+  $result_ref.Value = $local:result
+}
+
+
+$attributes_extraction_code = @{
+  'imagesCdnHostToPrepend' = $Extract_imagesCdnHostToPrepend;
+  'SecureLoginUrl' = $Extract_SecureLoginUrl;
+  'CarnivalHeaderHtmlUrl' = $Extract_CarnivalHeaderHtmlUrl;
+  'CarnivalFooterHtmlUrl' = $Extract_CarnivalFooterHtmlUrl;
+  'SecureUrl' = $Extract_SecureUrl;
+  'DefaultRobotsDomain' = $Extract_DefaultRobotsDomain;
+  'DeckPlanServiceDomain' = $Extract_DeckPlanServiceDomain;
+  'USDomain' = $Extract_USDomain;
+  'UKDomain' = $Extract_UKDomain;
+  'UKDomains' = $Extract_UKDomains;
+  'FullSiteURL' = $Extract_FullSiteURL;
+  'RESTProxyDomain' = $Extract_RESTProxyDomain
+  'PersonalizationDomain' = $Extract_PersonalizationDomain;
+
 
 }
 
+
+
+[scriptblock]$Update_appSettings = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    # Position must be last
+    [string]$key = $null,
+    [string]$value = $null
+  )
+
+
+  $data = @{}
+  $debug = $false
+  if ($false -and $debug) {
+    Write-Host $object_ref.Value
+    Write-Host $object_ref.Value.Configuration
+    Write-Host $object_ref.Value.Configuration.location.appSettings.add
+  }
+  $nodes = $object_ref.Value.Configuration.location.appSettings.add
+  if ($debug) {
+    Write-Host $nodes.count
+  }
+  for ($cnt = 0; $cnt -ne $nodes.count; $cnt++) {
+
+    $k = $object_ref.Value.Configuration.location.appSettings.add[$cnt].Getattribute('key')
+
+    if ($k -match $key) {
+       write-output  ('Updating {0} with {1}' -f  $k, $value )
+       $object_ref.Value.Configuration.location.appSettings.add[$cnt].Setattribute('value', $value )
+    }
+
+  }
+
+}
+
+
+[scriptblock]$Update_SecureLoginUrl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [string]$key = 'SecureLoginUrl'
+  )
+  $local:value = $attributes_modified[$key]
+  [scriptblock]$s = $Update_appSettings
+  Invoke-Command $s -ArgumentList $object_ref,$key,$local:value
+}
+
+
+$attributes_setter_code = @{
+'SecureLoginUrl'  = $Update_SecureLoginUrl ; 
+}
+
+$attributes_modified = @{
+'SecureLoginUrl'  = 'https://xxx';
+
+}
 
 # $attributes_prod | Get-Member
 
@@ -209,12 +382,52 @@ $attributes_preview.Keys | ForEach-Object {
     Write-Output ('{0}  = {1}' -f $k,$result_ref.Value)
 
   } else {
+    Write-Output ('extract function not defined for {0}' -f $k )
+  }
+}
+
+
+$attributes_setter_code.Keys | ForEach-Object {
+  $k = $_
+  $v = $attributes_preview[$k]
+  [scriptblock]$s = $attributes_setter_code[$k]
+  if ($s -ne $null) {
+    $local:result = $null
+    $result_ref = ([ref]$local:result)
+    Invoke-Command $s -ArgumentList $object_ref
+
+  } else {
+  }
+}
+
+ $new_config_file_path = 'C:\Users\sergueik\code\powershell\example\prod-preview.web.NEW.config'
+ Write-Output ('Saving to {0} ' -f $new_config_file_path)
+# 
+  $object.Save($new_config_file_path)
+
+
+$config_file_path = '.\prod-preview.web.NEW.config'
+
+[xml]$object = Get-Content -Path $config_file_path
+$object_ref = ([ref]$object)
+
+
+$attributes_preview.Keys | ForEach-Object {
+  $k = $_
+  $v = $attributes_preview[$k]
+  [scriptblock]$s = $attributes_extraction_code[$k]
+  if ($s -ne $null) {
+    # [scriptblock]$script_block = $attributes_extraction_code['imagesCdnHostToPrepend']
+    $local:result = $null
+    $result_ref = ([ref]$local:result)
+    Invoke-Command $s -ArgumentList $object_ref,$result_ref
+
+    Write-Output ('{0}  = {1}' -f $k,$result_ref.Value)
+
+  } else {
+    Write-Output ('extract function not defined for {0}' -f $k )
   }
 }
 
 
 # http://blogs.msdn.com/b/sonam_rastogi_blogs/archive/2014/05/14/update-xml-file-using-powershell.aspx
-# $new_config_file_path = 'C:\Users\sergueik\code\powershell\example\ConnectionStrings.config.back'
-# Write-Output ('Saving to {0} ' -f $new_config_file_path)
-# 
-#  $object.Save($new_config_file_path)
