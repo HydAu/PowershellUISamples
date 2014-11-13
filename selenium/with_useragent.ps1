@@ -208,15 +208,18 @@ try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
-  $csspath = 'div'
+  $csspath = 'div > span.stay-col'
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 
-if ($element -eq $null) {
-  Write-Output 'Iterate directly...'
+if ($element -ne $null) {
+  $element
+
+} else {
+  Write-Output 'Iterate directly over buttons...'
   $csspath = 'div'
   [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($csspath))
   $element5 = $null
@@ -225,7 +228,6 @@ if ($element -eq $null) {
   $elements | ForEach-Object { $element3 = $_
     if ($element5 -eq $null -and $element3.Displayed -and $element3.Text -match 'choose a location') {
       Write-Output $element3
-
       $element5 = $element3
     }
     $cnt++
@@ -235,19 +237,77 @@ if ($element -eq $null) {
   $elements2 | ForEach-Object { $element2 = $_
     if ($element6 -eq $null -and $element2.Displayed -and $element2.Text -match 'choose a location') {
       Write-Output $element3
-
       $element6 = $element2
     }
   }
 }
-$element6.Click()
-Start-Sleep 10
 
+[NUnit.Framework.Assert]::IsTrue(($element6.GetAttribute('class') -match 'stay-col'))
+
+$element6.Click()
+Start-Sleep 1
+$element = $null
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = 'ul#city_search_top50'
+  $csspath = 'ul'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+
+if ($element -ne $null) {
+  $element5 = $null
+  [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
+  $found = $false
+
+  $elements | ForEach-Object { $element3 = $_
+    if ($false -and $element3.Displayed) {
+      # $element5 -eq $null 
+      #  -and $element3.Text -match 'choose a location'
+      Write-Output $element3.Text
+      $element3
+      $element5 = $element3
+    }
+    $cnt++
+  }
+  # $element.Click()
+
+} else {
+
+  Write-Output 'Iterate directly over cities...'
+  [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
+  $element5 = $null
+  $elements | ForEach-Object { $element3 = $_
+    if (($element3.Displayed)) {
+      if ($element3.Text -match 'Miami') {
+        Write-Output $element3.Text
+        $element5 = $element3
+      }
+
+    }
+    $cnt++
+  }
+
+  [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
+  Start-Sleep -Seconds 1
+
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Click().Build().Perform()
+  Start-Sleep 4
+
+
+  # $element5.Click()
+}
 
 # [NUnit.Framework.Assert]::AreEqual($element.Text,'Show Sailing Dates')
 
 
-#$element.Click()
 <#
 # scroll away from tool bar
 [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
