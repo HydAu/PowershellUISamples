@@ -227,7 +227,7 @@ if ($element -ne $null) {
 
   $elements | ForEach-Object { $element3 = $_
     if ($element5 -eq $null -and $element3.Displayed -and $element3.Text -match 'choose a location') {
-      Write-Output $element3
+      # Write-Output $element3
       $element5 = $element3
     }
     $cnt++
@@ -276,7 +276,6 @@ if ($element -ne $null) {
     }
     $cnt++
   }
-  # $element.Click()
 
 } else {
 
@@ -301,13 +300,32 @@ if ($element -ne $null) {
   $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Click().Build().Perform()
   Start-Sleep 4
 
-
-  # $element5.Click()
 }
 
-# [NUnit.Framework.Assert]::AreEqual($element.Text,'Show Sailing Dates')
 
+$element = $null
+try {
 
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = "h2[role~=heading]"
+
+  $xpath = "//input[@category='HotelSearch']"
+  Write-Output ('Trying XPath "{0}"' -f $xpath)
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+if ($element -ne $null) {
+  $element.Text
+  $element.GetAttribute('category')
+
+  $element.Click()
+}
+Start-Sleep 10
 <#
 # scroll away from tool bar
 [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
