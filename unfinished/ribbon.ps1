@@ -20,7 +20,7 @@
 
 param(
   [switch]$test,
-  [switch]$debug )
+  [switch]$debug)
 
 
 # http://www.codeproject.com/Tips/842376/Create-Floating-Sliding-Moving-Menu-in-Csharp-NET
@@ -28,7 +28,6 @@ param(
 Add-Type -TypeDefinition @"
 using System;
 using System.Collections.Generic;
-// using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Linq;
@@ -38,7 +37,7 @@ using System.Windows.Forms;
 namespace Ribbon
 {
 
-    public class Form1 : Form
+    public class Panel : System.Windows.Forms.Panel
     {
 
         private System.Windows.Forms.Panel panel1;
@@ -145,36 +144,32 @@ namespace Ribbon
             this.timer2.Interval = 5;
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
-            // Form1
+
+            // Panel
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightGray;
             this.ClientSize = new System.Drawing.Size(474, 312);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Name = "Form1";
+            this.Name = "Panel";
             this.Padding = new System.Windows.Forms.Padding(5);
             this.Text = "Floating Menu Sample Project";
-            this.Load += new System.EventHandler(this.Form1_Load);
+
+            usrCtrl.Left = usrCtrl.Top = 0;
+            panel2.Controls.Add(usrCtrl);
+            usrCtrl.Show();
+
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
 
-        public Form1()
+        public Panel()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            usrCtrl.Left = usrCtrl.Top = 0;
-            panel2.Controls.Add(usrCtrl);
-            usrCtrl.Show();
-        }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -671,8 +666,40 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
+
+function PromptRibbon {
+
+  param(
+    [string]$title,
+    [string]$message,
+    [object]$caller
+  )
+
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
+
+  $f.Size = New-Object System.Drawing.Size (470,135)
+  $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
+  $f.StartPosition = 'CenterScreen'
+  $r = New-Object -TypeName 'Ribbon.Panel'
+
+  $r.Size = $f.Size
+
+  $f.Controls.Add($r)
+  $f.Topmost = $True
+
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
+  $f.Dispose()
+}
+
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 
-$helper = New-Object -TypeName 'Ribbon.Form1'
-[void]$helper.ShowDialog([win32window ]($caller))
+PromptRibbon -Title 'title' -caller $caller
