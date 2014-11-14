@@ -21,6 +21,8 @@
 
 # for Microsoft.VisualStudio.TestTools.UnitTesting.dll
 # http://msdn.microsoft.com/en-us/library/microsoft.visualstudio.testtools.unittesting.assert.aspx
+# for Nunit 
+# http://www.nunit.org/index.php?p=assertions&r=2.2.7
 # note CodedUI  HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{6077292c-6751-4483-8425-9026bc0187b6}
 
 function read_registry{
