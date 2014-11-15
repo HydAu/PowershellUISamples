@@ -1113,3 +1113,10 @@ namespace NotificationWindow
     }
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+
+$helper = new-object -typename 'NotificationWindow.PopupNotifier'
+$helper.popup("Message Type Error" , "Message Detail Message Detail Message Detail", 10, 10, 10, 10,       ([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type Error" , "Message Detail Message Detail Message Detail", 10, 10, 10, 10,       ([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type Error" , "Message Detail Message Detail Message Detail", 10, 10, 10, 10,       ([System.Drawing.SystemIcons]::Error).ToBitmap())
+
+# popupNotifier1.popup("Message Type" , "Message Detail Message Detail Message Detail ", 10, 10, 10, 10, Properties.Resources._1);
