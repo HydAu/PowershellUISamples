@@ -47,9 +47,7 @@ namespace Ribbon
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Timer timer2;
-
-
-        public UserControl usrCtrl = null;
+        public  System.Windows.Forms.UserControl usrCtrl = null;
 
         private System.ComponentModel.IContainer components = null;
         protected override void Dispose(bool disposing)
@@ -157,10 +155,6 @@ namespace Ribbon
             this.Padding = new System.Windows.Forms.Padding(5);
             this.Text = "Floating Menu Sample Project";
 
-            // usrCtrl.Left = usrCtrl.Top = 0;
-            // panel2.Controls.Add(usrCtrl);
-            // usrCtrl.Show();
-            // usrCtrl =
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -171,7 +165,12 @@ namespace Ribbon
         {
             InitializeComponent();
         }
-
+/*
+        public Panel(System.Windows.Forms.UserControl u):this()
+        {
+            this.UsrCtl = u;
+        }
+*/
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -688,9 +687,6 @@ function PromptRibbon {
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
   $f.StartPosition = 'CenterScreen'
-  $r = New-Object -TypeName 'Ribbon.Panel'
-
-  $r.Size = $f.Size
 
   $u = New-Object System.Windows.Forms.UserControl
   $p1 = New-Object System.Windows.Forms.Panel
@@ -724,11 +720,11 @@ function PromptRibbon {
   $b20 = New-Object System.Windows.Forms.Button
   $l5 = New-Object System.Windows.Forms.Label
   $p1.SuspendLayout()
-  $p2.SuspendLayout
-  $p3.SuspendLayout
-  $p4.SuspendLayout
-  $p5.SuspendLayout
-  $u.SuspendLayout
+  $p2.SuspendLayout()
+  $p3.SuspendLayout()
+  $p4.SuspendLayout()
+  $p5.SuspendLayout()
+  $u.SuspendLayout()
   #  
   #  panel1
   #  
@@ -1058,6 +1054,11 @@ function PromptRibbon {
   $p4.ResumeLayout($false)
   $p5.ResumeLayout($false)
   $u.ResumeLayout($false)
+
+  $r = New-Object -TypeName 'Ribbon.Panel'
+# -ArgumentList $u
+  $r.Size = $f.Size
+
   $bp = $r.panel2
 
   $bp.BackColor = [System.Drawing.Color]::White
@@ -1086,8 +1087,3 @@ $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.
 
 PromptRibbon -Title 'Floating Menu Sample Project' -caller $caller
 
-<#
-
-
-
-#>
