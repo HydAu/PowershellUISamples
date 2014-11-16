@@ -78,8 +78,6 @@ namespace NotificationWindow
         private int posCurrent = 0;
         bool animation_working = false;
 
-        #region Properties
-
         [Category("Header"), DefaultValue(typeof(Color), "ControlDark")]
         [Description("Color of the window header.")]
         public Color HeaderColor { get; set; }
@@ -271,11 +269,6 @@ namespace NotificationWindow
         [Description("Size of the window.")]
         public Size Size { get; set; }
 
-        #endregion
-
-        /// <summary>
-        /// Create a new instance of the popup component.
-        /// </summary>
         public PopupNotifier()
         {
             // set default values
@@ -1112,11 +1105,59 @@ namespace NotificationWindow
         }
     }
 }
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
-$helper = new-object -typename 'NotificationWindow.PopupNotifier'
-$helper.popup("Message Type Error" , "Message Detail Message Detail Message Detail", 10, 10, 10, 10,       ([System.Drawing.SystemIcons]::Error).ToBitmap())
-$helper.popup("Message Type Error" , "Message Detail Message Detail Message Detail", 10, 10, 10, 10,       ([System.Drawing.SystemIcons]::Error).ToBitmap())
-$helper.popup("Message Type Error" , "Message Detail Message Detail Message Detail", 10, 10, 10, 10,       ([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper = New-Object -TypeName 'NotificationWindow.PopupNotifier'
+
+$helper.AnimationDuration = 250
+$helper.AnimationInterval = 1
+$helper.BodyColor = [System.Drawing.SystemColors]::GradientActiveCaption
+$helper.BorderColor = [System.Drawing.Color]::Aqua
+$helper.ButtonBorderColor = [System.Drawing.Color]::FromArgb([int]([byte]192),[int]([byte]255),[int]([byte]255))
+$helper.ContentFont = New-Object System.Drawing.Font ("Tahoma",8)
+$helper.ContentPadding = New-Object System.Windows.Forms.Padding (0,17,0,0)
+$helper.ContentText = $null
+$helper.GradientPower = 300
+$helper.HeaderColor = [System.Drawing.Color]::SteelBlue
+$helper.HeaderFont = New-Object System.Drawing.Font ("Bookman Old Style",`
+     9.75,`
+     [System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold -bor [System.Drawing.FontStyle]::Italic),`
+     [System.Drawing.GraphicsUnit]::Point,[byte]0)
+$helper.HeaderHeight = 20
+$helper.HeaderPadding = New-Object System.Windows.Forms.Padding (0)
+$helper.HeaderText = "Header Text"
+#  $helper.Image = global::try_pop_up.Properties.Resources]::DispatcherIcon
+$helper.ImagePadding = New-Object System.Windows.Forms.Padding (10,13,0,0)
+$helper.ImageSize = New-Object System.Drawing.Size (30,30)
+$helper.OptionsMenu = $null
+# $helper.Scroll = $false
+# $helper.ShowCloseButton = $false
+$helper.Size = New-Object System.Drawing.Size (220,75)
+$helper.TitleColor = [System.Drawing.Color]::Black;
+$helper.TitleFont = New-Object System.Drawing.Font ("Segoe UI",`
+     9.75,`
+     [System.Drawing.FontStyle]::Bold,`
+     [System.Drawing.GraphicsUnit]::Point,`
+     [byte]0)
+$helper.TitlePadding = New-Object System.Windows.Forms.Padding (0,2,0,0)
+$helper.TitleText = "Hello"
+
+
+$helper.TitleText = "Hello"
+$helper.ContentText = "content text"
+$helper.ShowCloseButton = $true
+$helper.ShowOptionsButton = $false
+$helper.ShowGripText = $true
+$helper.Delay = 5000
+$helper.AnimationInterval = 1
+$helper.AnimationDuration = 400
+$helper.Scroll = $true
+$helper.ShowCloseButton = $true
+
+$helper.popup("Message Type 0","Message Detail Message Detail Message Detail 0",10,10,10,10,([System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap()))
+$helper.popup("Message Type 2","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 1","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 3","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 4","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
 
 # popupNotifier1.popup("Message Type" , "Message Detail Message Detail Message Detail ", 10, 10, 10, 10, Properties.Resources._1);
