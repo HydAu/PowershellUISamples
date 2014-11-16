@@ -1154,10 +1154,10 @@ $helper.AnimationDuration = 400
 $helper.Scroll = $true
 $helper.ShowCloseButton = $true
 
-$helper.popup("Message Type 0","Message Detail Message Detail Message Detail 0",10,10,10,10,([System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap()))
-$helper.popup("Message Type 2","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
-$helper.popup("Message Type 1","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
-$helper.popup("Message Type 3","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
-$helper.popup("Message Type 4","Message Detail Message Detail Message Detail",10,10,10,10,([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 0","Message Detail Message Detail Message Detail 0",10,10,10,10,[System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 2","Message Detail Message Detail Message Detail",10,10,10,10,[System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 1","Message Detail Message Detail Message Detail",10,10,10,10,[System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 3","Message Detail Message Detail Message Detail",10,10,10,10,[System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap())
+$helper.popup("Message Type 4","Message Detail Message Detail Message Detail",10,10,10,10,[System.Drawing.Image]([System.Drawing.SystemIcons]::Error).ToBitmap())
 
 # popupNotifier1.popup("Message Type" , "Message Detail Message Detail Message Detail ", 10, 10, 10, 10, Properties.Resources._1);
