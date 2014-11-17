@@ -306,10 +306,7 @@ function PromptRibbon {
   #  
   $p1.BackColor = [System.Drawing.Color]::Silver
   $p1.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p1.Controls.Add($b4)
-  $p1.Controls.Add($b3)
-  $p1.Controls.Add($b2)
-  $p1.Controls.Add($b1)
+  $p1.Controls.AddRange(@($b4,$b3,$b2,$b1))
   $p1.Controls.Add($l1)
   $p1.Dock = [System.Windows.Forms.DockStyle]::Left
   $p1.Location = New-Object System.Drawing.Point (0,0)
@@ -380,10 +377,7 @@ function PromptRibbon {
   #  
   $p2.BackColor = [System.Drawing.Color]::Silver
   $p2.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p2.Controls.Add($b5)
-  $p2.Controls.Add($b6)
-  $p2.Controls.Add($b7)
-  $p2.Controls.Add($b8)
+  $p2.Controls.AddRange(@($b5,$b6,$b7,$b8))
   $p2.Controls.Add($l2)
   $p2.Dock = [System.Windows.Forms.DockStyle]::Left
   $p2.Location = New-Object System.Drawing.Point (178,0)
@@ -442,10 +436,7 @@ function PromptRibbon {
   #  
   $p3.BackColor = [System.Drawing.Color]::Silver
   $p3.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p3.Controls.Add($b9)
-  $p3.Controls.Add($b10)
-  $p3.Controls.Add($b11)
-  $p3.Controls.Add($b12)
+  $p3.Controls.AddRange(@($b9,$b10,$b11,$b12))
   $p3.Controls.Add($l3)
   $p3.Dock = [System.Windows.Forms.DockStyle]::Left
   $p3.Location = New-Object System.Drawing.Point (356,0)
@@ -504,10 +495,7 @@ function PromptRibbon {
   #  
   $p4.BackColor = [System.Drawing.Color]::Silver
   $p4.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p4.Controls.Add($b13)
-  $p4.Controls.Add($b14)
-  $p4.Controls.Add($b15)
-  $p4.Controls.Add($b16)
+  $p4.Controls.AddRange(@($b13,$b14,$b15,$b16))
   $p4.Controls.Add($l4)
   $p4.Dock = [System.Windows.Forms.DockStyle]::Left
   $p4.Location = New-Object System.Drawing.Point (534,0)
@@ -579,10 +567,7 @@ function PromptRibbon {
   #  
   $p5.BackColor = [System.Drawing.Color]::Silver
   $p5.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p5.Controls.Add($b17)
-  $p5.Controls.Add($b18)
-  $p5.Controls.Add($b19)
-  $p5.Controls.Add($b20)
+  $p5.Controls.AddRange(@($b17,$b18,$b19,$b20))
   $p5.Controls.Add($l5)
   $p5.Dock = [System.Windows.Forms.DockStyle]::Left
   $p5.Location = New-Object System.Drawing.Point (712,0)
@@ -642,11 +627,8 @@ function PromptRibbon {
   $u.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
   $u.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $u.BackColor = [System.Drawing.Color]::Gainsboro
-  $u.Controls.Add($p5)
-  $u.Controls.Add($p4)
-  $u.Controls.Add($p3)
-  $u.Controls.Add($p2)
-  $u.Controls.Add($p1)
+
+  $u.Controls.AddRange(@($p5,$p4,$p3,$p2, $p1))
   $u.Name = "UserControl1"
   $u.Size = New-Object System.Drawing.Size (948,100)
   $p1.ResumeLayout($false)
