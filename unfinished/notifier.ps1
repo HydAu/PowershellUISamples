@@ -24,6 +24,19 @@ param(
 
 
 # http://www.codeproject.com/Tips/836101/Sliding-Up-Notification-Like-Skype
+$shared_assemblies = @(
+  "NotificationWindow.dll",
+  "nunit.framework.dll"
+)
+
+$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+pushd $shared_assemblies_path
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; Write-Debug ("Loaded {0} " -f $_) }
+popd
+
+
+<#
 Add-Type -TypeDefinition @"
 #pragma warning disable 0649,0414,0169,0067
 using System;
@@ -1106,7 +1119,7 @@ namespace NotificationWindow
     }
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
-
+#>
 $helper = New-Object -TypeName 'NotificationWindow.PopupNotifier'
 
 $helper.AnimationDuration = 250
