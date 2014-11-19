@@ -108,7 +108,10 @@ try {
   $connection.Connect($hub_host,[int]$hub_port)
   $connection.Close()
 } catch {
-  Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
+    Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList 'start cmd.exe /c c:\java\selenium\hub.cmd'
+    Start-Process -FilePath 'C:\Windows\System32\cmd.exe' -ArgumentList 'start cmd.exe /c c:\java\selenium\node.cmd'
+
+#   Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
   Start-Sleep -Seconds 5
 }
 if ($browser -ne $null -and $browser -ne '' -and $browser -match 'firefox') {
@@ -121,23 +124,14 @@ if ($browser -ne $null -and $browser -ne '' -and $browser -match 'firefox') {
   $profiles | ForEach-Object {
     $item = $_
     # TODO - find how to extract information about all profiles
-    # $item
+    $item
   }
-
-  # RemoteDriver ignores profile capability request
-  # $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
-  # $capability.SetCapability("ssl-protocol","any")
-  # .SetCapability(FirefoxDriver.Profile
-  # $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
-  # $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
-  [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-  # $selected_profile_object.GetType()
-  # TODO - find how to extract information about the profile
-  # $selected_profile_object.ProfileDirectory
-  # start-sleep 4
-  # $capability.SetCapability([OpenQA.Selenium.Firefox.FirefoxDriver]::Profile,$selected_profile_object)
-  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
-
+  # OpenQA.Selenium.Firefox.FirefoxBinary.StartProfile
+  [string]$profilePath =  "c:\Users\sergueik\AppData\Roaming\Mozilla\Firefox\Profiles\nmkd7a04.Selenium" 
+  [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = new-object OpenQA.Selenium.Firefox.FirefoxProfile($profilePath)
+#  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver($selected_profile_object)
+#
+  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver("C:\Program Files\Mozilla Firefox\firefox.exe", $null)
   # $selected_profile_object.setPreference("general.useragent.override", "Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0")
   # TODO:
   # .AcceptUntrustedCertificates
@@ -153,9 +147,9 @@ else {
 
 
 $base_url = 'http://www.wikipedia.org/'
-$selenium
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
+$selenium
 
 set_timeouts ([ref]$selenium)
 # var hasJQueryLoaded = (bool) js.ExecuteScript("return (window.jQuery != null) && (jQuery.active === 0);");
