@@ -64,7 +64,7 @@ public class App
 
 // String profilePath =  "c:\\Users\\sergueik\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\nmkd7a04.Selenium" ;
 //  profilePath =  "c:\\Users\\sergueik\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\wfywwbuv.default" ;
-
+// http://ted-gao.blogspot.com/2012/02/selenium-2-webdriver-and-firefox.html
 
 // FirefoxProfile profile = new FirefoxProfile(new File(profilePath));                  
 // WebDriver driver = new FirefoxDriver(profile);
