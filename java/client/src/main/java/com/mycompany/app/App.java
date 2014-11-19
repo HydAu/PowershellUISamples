@@ -19,9 +19,9 @@ import org.openqa.selenium.WebElement;
 
 import    org.openqa.selenium.Dimension;
 
-
+import org.openqa.selenium.Platform;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-// ??
+
 import org.openqa.selenium.interactions.Actions;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
@@ -35,6 +35,9 @@ import org.openqa.selenium.remote.HttpCommandExecutor;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import org.openqa.selenium.firefox.FirefoxDriver;
+// import org.openqa.selenium.firefox.ProfileManager;
+import org.openqa.selenium.firefox.internal.ProfilesIni;
+import org.openqa.selenium.firefox.FirefoxProfile ;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -54,15 +57,30 @@ import java.nio.charset.Charset;
 public class App
 {  public static void main(String[] args) throws InterruptedException {
 // http://stackoverflow.com/questions/6787095/how-to-stop-selenium-from-creating-temporary-firefox-profiles-using-web-driver
-System.setProperty("webdriver.firefox.profile", "Selenium");
-WebDriver driver = new FirefoxDriver();
-/*
+
+
+// System.setProperty("webdriver.firefox.profile", "Selenium");
+// WebDriver driver = new FirefoxDriver();
+
+// String profilePath =  "c:\\Users\\sergueik\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\nmkd7a04.Selenium" ;
+//  profilePath =  "c:\\Users\\sergueik\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\wfywwbuv.default" ;
+
+
+// FirefoxProfile profile = new FirefoxProfile(new File(profilePath));                  
+// WebDriver driver = new FirefoxDriver(profile);
+
        DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+
+capabilities =   new DesiredCapabilities("firefox", "", Platform.ANY);
+FirefoxProfile profile = new ProfilesIni().getProfile("default");
+capabilities.setCapability("firefox_profile", profile);
+// WebDriver webdriver = new RemoteWebDriver(capabilities);
+
        RemoteWebDriver driver = null;
        try {
            driver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
        } catch (MalformedURLException ex) { }
-*/
+
 
 
        try{
