@@ -53,12 +53,17 @@ import java.nio.charset.Charset;
 
 public class App
 {  public static void main(String[] args) throws InterruptedException {
-
+// http://stackoverflow.com/questions/6787095/how-to-stop-selenium-from-creating-temporary-firefox-profiles-using-web-driver
+System.setProperty("webdriver.firefox.profile", "Selenium");
+WebDriver driver = new FirefoxDriver();
+/*
        DesiredCapabilities capabilities = DesiredCapabilities.firefox();
        RemoteWebDriver driver = null;
        try {
            driver = new RemoteWebDriver(new URL("http://127.0.0.1:4444/wd/hub"), capabilities);
        } catch (MalformedURLException ex) { }
+*/
+
 
        try{
            driver.manage().window().setSize(new Dimension(600, 800));
