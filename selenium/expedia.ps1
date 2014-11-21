@@ -122,6 +122,8 @@ $options = New-Object OpenQA.Selenium.Chrome.ChromeOptions
 $options.AddArgument('--user-agent=Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
 $selenium = New-Object OpenQA.Selenium.Chrome.ChromeDriver ($options)
 
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+
 $selenium.Manage().Window.Size = New-Object System.Drawing.Size (600,800)
 $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
 
@@ -136,6 +138,24 @@ $base_url = 'http://www.expedia.com/MobileHotel'
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 set_timeouts ([ref]$selenium)
+
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = 'li.hotels'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+# $element.Text
+[NUnit.Framework.Assert]::AreEqual('Hotels',$element.Text)
+
+$element.Click()
 
 try {
 
@@ -234,7 +254,82 @@ try {
 $element2.Click()
 
 
-Start-Sleep -Seconds 10
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $csspath = 'input#a-city'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+[NUnit.Framework.Assert]::IsTrue($element.GetAttribute('placeholder') -match 'City')
+
+$element.SendKeys('Miami')
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+
+[void]$actions.SendKeys($element,[OpenQA.Selenium.Keys]::Enter)
+# Write-Output ('Check-in = {0}' -f (($element.GetAttribute -split "`n")[0]))
+Start-Sleep -Seconds 1
+
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  $csspath = 'a[data-type="HOTEL"]'
+  [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+Start-Sleep -Seconds 1
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+$element.Text
+[NUnit.Framework.Assert]::IsTrue($element.Text -match 'Miami International Airport Hotel')
+
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Build().Perform()
+[void]$actions.SendKeys($element,[OpenQA.Selenium.Keys]::Space)
+
+try {
+  $element.Click() }
+catch [exception]{
+  #  Exception calling "Click" with "0" argument(s): "timeout: Timed out receiving message from renderer: 0.000
+
+}
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  $csspath = 'button#a-searchBtn'
+  [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+Start-Sleep -Seconds 1
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+$element.Text
+[NUnit.Framework.Assert]::IsTrue($element.Text -match 'Search')
+
+Write-Output ('Highlighting element: {0} disabled={1}' -f $element.TagName,$element.GetAttribute('disabled'))
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: #CC6600; border: 4px solid #CC3300;')
+Start-Sleep 1
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
+Start-Sleep 1
+
+$element.Click()
+
+
+Start-Sleep -Seconds 50
 # Cleanup
 cleanup ([ref]$selenium)
 
