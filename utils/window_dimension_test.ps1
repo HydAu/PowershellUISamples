@@ -17,6 +17,12 @@
 
 <#
 @('ie', 'chrome' , 'firefox') | foreach-object { ./window_dimension_test.ps1 -browser $_ }
+
+GRID warmup
+@('8','8','8','8','8','8','10','11','11','11','11','9','10') | foreach-object {Start-Job -FilePath .\windows_dimension_test.ps1  -argumentlist @('ie' , $_)}
+for ($cnt = 0; $cnt -ne 12 ; $cnt ++)  {Start-Job -FilePath .\windows_dimension_test.ps1  -argumentlist @('chrome' )}
+for ($cnt = 0; $cnt -ne 12 ; $cnt ++)  {Start-Job -FilePath .\windows_dimension_test.ps1  -argumentlist @('firefox' )}
+
 #>
 
 param(
