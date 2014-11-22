@@ -40,12 +40,12 @@ function TabsWithTreeViews (
   $f.SuspendLayout()
 
   $panel2.Location = New-Object System.Drawing.Point (4,22)
-  $panel2.Name = "tabPage2"
+  $panel2.Name = 'tabPage2'
   $panel2.Padding = New-Object System.Windows.Forms.Padding (3)
   $panel2.Size = New-Object System.Drawing.Size (259,352)
   $panel2.AutoSize = $true
   $panel2.TabIndex = 1
-  $panel2.Text = "Source Node"
+  $panel2.Text = 'Source Node'
 
   $l1 = New-Object System.Windows.Forms.Label
   $l1.Location = New-Object System.Drawing.Point (8,12)
@@ -65,8 +65,6 @@ function TabsWithTreeViews (
   $groupBox1.TabIndex = 0
   $groupBox1.TabStop = $false
   $groupBox1.Text = 'status'
-
-
   $panel2.Controls.Add($groupBox1)
 
   $t2 = New-Object System.Windows.Forms.TreeView
@@ -75,14 +73,12 @@ function TabsWithTreeViews (
   $i = New-Object System.Windows.Forms.ImageList ($components)
   $i.Images.Add([System.Drawing.SystemIcons]::Application)
   $t2.ImageList = $i
-
-
   $t2.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
          -bor [System.Windows.Forms.AnchorStyles]::Left) `
        -bor [System.Windows.Forms.AnchorStyles]::Right)
   $t2.ImageIndex = -1
   $t2.Location = New-Object System.Drawing.Point (4,5)
-  $t2.Name = "treeFood"
+  $t2.Name = 'treeFood'
   $t2.SelectedImageIndex = -1
   $t2.Size = New-Object System.Drawing.Size (284,224)
 
@@ -113,26 +109,25 @@ function TabsWithTreeViews (
       $t2.ResumeLayout($false)
       $t2.PerformLayout()
     })
-
-
   $panel1.Location = New-Object System.Drawing.Point (4,22)
-  $panel1.Name = "tabPage1"
+  $panel1.Name = 'tabPage1'
   $panel1.Padding = New-Object System.Windows.Forms.Padding (3)
   $panel1.Size = New-Object System.Drawing.Size (259,252)
   $panel1.TabIndex = 0
-  $panel1.Text = "Destination Node"
+  $panel1.Text = 'Destination Node'
 
   $t1 = New-Object System.Windows.Forms.TreeView
   $t1.Font = New-Object System.Drawing.Font ('Tahoma',10.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
 
   $t1.ImageList = $i
 
-  $t1.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
-         -bor [System.Windows.Forms.AnchorStyles]::Left) `
-       -bor [System.Windows.Forms.AnchorStyles]::Right)
+  $t1.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top `
+        -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
+        -bor [System.Windows.Forms.AnchorStyles]::Left) `
+        -bor [System.Windows.Forms.AnchorStyles]::Right)
   $t1.ImageIndex = -1
   $t1.Location = New-Object System.Drawing.Point (4,5)
-  $t1.Name = "treeFood"
+  $t1.Name = 'treeFood'
   $t1.SelectedImageIndex = -1
   $t1.Size = New-Object System.Drawing.Size (284,224)
 
@@ -162,7 +157,7 @@ function TabsWithTreeViews (
   $tab_contol1.Controls.Add($panel2)
 
   $tab_contol1.Location = New-Object System.Drawing.Point (13,13)
-  $tab_contol1.Name = "tabControl1"
+  $tab_contol1.Name = 'tabControl1'
   $tab_contol1.SelectedIndex = 1
   $tab_contol1.Size = New-Object System.Drawing.Size (267,288)
   $tab_contol1.TabIndex = 0
@@ -177,19 +172,14 @@ function TabsWithTreeViews (
   $f.ResumeLayout($false)
 
   $f.Topmost = $true
-
-
   $f.Add_Shown({ $f.Activate() })
   $f.KeyPreview = $True
-
-
   [void]$f.ShowDialog([win32window ]($caller))
 
   $f.Dispose()
 }
 
 Add-Type -TypeDefinition @"
-
 // "
 using System;
 using System.Windows.Forms;
@@ -204,8 +194,6 @@ public class Win32Window : IWin32Window
   get { return _data; }
   set { _data = value; }
     }
-
-
     public string Message
     {
   get { return _message; }
