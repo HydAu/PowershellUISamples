@@ -35,9 +35,9 @@
   <proxies>
     <proxy>
       <!--  Forefront TMG requires authorization -->
-      <active>true</active>
+      <active>false</active>
       <protocol>http</protocol>
-      <host>proxy.carnival.com</host>
+      <host/>
       <port>8080</port>
       <username/>
       <password/>
