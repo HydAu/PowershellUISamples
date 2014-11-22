@@ -180,14 +180,40 @@ if ($elements3 -ne $null) {
     [NUnit.Framework.Assert]::IsTrue(($element3 -ne $null))
     [NUnit.Framework.Assert]::IsTrue(($element3.Displayed))
 
-    #   $xpath = ("//td[@class= 'selected'][@data-id != '{0}']" -f $data_id)
-    $xpath = ("div//div//div//div//div[@class= '{0}']" -f 'transactionAmount')
+    $xpath = 'div/div/div/div/div'
+
     Write-Output ('Trying XPath "{0}"' -f $xpath)
     [OpenQA.Selenium.IWebElement[]]$element4 = $element3.FindElement([OpenQA.Selenium.By]::XPath($xpath))
     [NUnit.Framework.Assert]::IsTrue(($element4 -ne $null))
     [NUnit.Framework.Assert]::IsTrue(($element4.Displayed))
 
+    $element4.GetAttribute('class')
     $element4.Text
+
+    $xpath = ("div/div/div/div/div[@class]" -f 'transactionAmount')
+    Write-Output ('Trying XPath "{0}"' -f $xpath)
+    [OpenQA.Selenium.IWebElement[]]$element5 = $element3.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+    [NUnit.Framework.Assert]::IsTrue(($element5 -ne $null))
+    [NUnit.Framework.Assert]::IsTrue(($element5.Displayed))
+    $element5.GetAttribute('class')
+    $element5.Text
+
+    $xpath = ("div/div/div/div/div[contains(@class,'{0}')]" -f 'transactionAmount')
+    Write-Output ('Trying XPath "{0}"' -f $xpath)
+    [OpenQA.Selenium.IWebElement[]]$element6 = $element3.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+    [NUnit.Framework.Assert]::IsTrue(($element6 -ne $null))
+    [NUnit.Framework.Assert]::IsTrue(($element6.Displayed))
+    $element6.GetAttribute('class')
+    $element6.Text
+
+    $xpath = ("div/div/div/div/div[@class = '{0}']" -f 'transactionAmount')
+    Write-Output ('Trying XPath "{0}"' -f $xpath)
+    [OpenQA.Selenium.IWebElement[]]$element7 = $element3.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+    [NUnit.Framework.Assert]::IsTrue(($element7 -ne $null))
+    [NUnit.Framework.Assert]::IsTrue(($element7.Displayed))
+    $element7.GetAttribute('class')
+    $element7.Text
+
   }
   $cnt++
 }
