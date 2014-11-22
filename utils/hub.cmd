@@ -6,7 +6,7 @@ set HTTPS_PORT=-1
 set APP_VERSION=2.44.0
 set JAVA_HOME=c:\java\jdk1.6.0_45
 set GROOVY_HOME=c:\java\groovy-2.3.2
-set LOGFILE=hub.log4j.log
+set LOGFILE=hub.log
 
 PATH=%JAVA_HOME%\bin;%PATH%;%GROOVY_HOME%\bin
 PATH=%PATH%;c:\Program Files\Mozilla Firefox
@@ -42,6 +42,7 @@ REM Keep the Blank line above intact
 goto :EOF
 
 REM To run the hub servlet, add the jar to the list and the main class via -servlets e.g.
+REM Note to match the class name of the servlet
 
 java %LAUNCHER_OPTS% ^
 -classpath %SELENIUM_HOME%/log4j-1.2.17.jar;^
@@ -65,4 +66,4 @@ REM http://www.deepshiftlabs.com/sel_blog/?p=2155&&lang=en-us
 REM http://grokbase.com/t/gg/webdriver/1282vm4ej0/how-to-set-the-command-line-switches-for-iedriverserver-exe-when-running-it-along-with-grid-node 
 REM http://stackoverflow.com/questions/1140358/how-to-initialize-log4j-properly
 REM http://logging.apache.org/log4j/1.2/manual.html
-
+REM https://groups.google.com/forum/#!topic/selenium-users/MaGHl-qRI38
