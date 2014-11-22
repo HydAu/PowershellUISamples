@@ -1,3 +1,23 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
@@ -5,35 +25,18 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 
-// inline callback class 
 namespace DataGridBinding
 {
-    /// <summary>
-    /// Summary description for CustomDataGridColumnForm.
-    /// </summary>
     public class CustomDataGridColumnForm : System.Windows.Forms.Form
     {
         internal System.Windows.Forms.DataGrid grid;
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.Container components = null;
 
         public CustomDataGridColumnForm()
         {
-            //
-            // Required for Windows Form Designer support
-            //
             InitializeComponent();
-
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
         }
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
         protected override void Dispose( bool disposing )
         {
             if( disposing )
@@ -46,19 +49,11 @@ namespace DataGridBinding
             base.Dispose( disposing );
         }
 
-        #region Windows Form Designer generated code
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.grid = new System.Windows.Forms.DataGrid();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             this.SuspendLayout();
-            // 
-            // grid
-            // 
             this.grid.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
                 | System.Windows.Forms.AnchorStyles.Left) 
                 | System.Windows.Forms.AnchorStyles.Right);
@@ -68,9 +63,6 @@ namespace DataGridBinding
             this.grid.Name = "grid";
             this.grid.Size = new System.Drawing.Size(272, 232);
             this.grid.TabIndex = 1;
-            // 
-            // CustomDataGridColumnForm
-            // 
             this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
             this.ClientSize = new System.Drawing.Size(292, 266);
             this.Controls.AddRange(new System.Windows.Forms.Control[] {
@@ -80,9 +72,7 @@ namespace DataGridBinding
             this.Load += new System.EventHandler(this.CustomDataGridColumnForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
             this.ResumeLayout(false);
-
         }
-        #endregion
 
         [STAThread]
         static void Main() 
@@ -211,17 +201,10 @@ public class DataGridPriceIconColumn : DataGridColumnStyle
     {
         this.Paint(g, bounds, source, rowNum, Brushes.White, Brushes.Black, false);
     }
-
 }
-
-    
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll', 'System.Xml.dll'
-
-
-
-
 
 $process_window = New-Object DataGridBinding.CustomDataGridColumnForm 
 #   -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
