@@ -18,8 +18,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-
-
 # http://powershell.cz/2013/04/04/hide-and-show-console-window-from-gui/
 Add-Type -Name Window -Namespace Console -MemberDefinition @"
 [DllImport("Kernel32.dll")]
@@ -57,10 +55,7 @@ function toggle_console_display {
   $SW_SHOWDEFAULT = 10
   $SW_FORCEMINIMIZE = 11
   $SW_MAX = 11
-
-
   [Console.Window]::ShowWindow([Console.Window]::GetConsoleWindow(),$ShowWindowCommand)
-
 }
 
 $s.Location = New-Object System.Drawing.Point (10,12)

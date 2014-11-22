@@ -18,6 +18,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 # http://www.codeproject.com/Tips/827370/Custom-Message-Box-DLL
+
 param(
   [switch]$debug
 )
@@ -37,7 +38,6 @@ function Get-ScriptDirectory
 }
 
 Add-Type -TypeDefinition @"
-
 // "
 using System;
 using System.Windows.Forms;
@@ -67,13 +67,11 @@ public class Win32Window : IWin32Window
 
 # define constants statically
 $MSGICON = @{
-
   'None' = 0;
   'Error' = 10;
   'Information' = 20;
   'Warning' = 30;
   'Question' = 40;
-
 }
 
 $MSGBUTTON = @{
@@ -95,8 +93,6 @@ $MSGRESPONSE | Add-Member -NotePropertyName 'Abort' -NotePropertyValue 'Abort'
 $MSGRESPONSE | Add-Member -NotePropertyName 'Retry' -NotePropertyValue 'Retry'
 $MSGRESPONSE | Add-Member -NotePropertyName 'Ignore' -NotePropertyValue 'Ignore'
 $MSGRESPONSE | Add-Member -NotePropertyName 'Cancel' -NotePropertyValue 'Cancel'
-
-
 
 function Return_Response
 {
@@ -144,7 +140,6 @@ function Return_Response
   $f.Dispose()
 }
 
-
 function AddButton {
   param([psobject]$param)
 
@@ -180,8 +175,6 @@ function AddButton {
           )
           Return_Response ($sender,$eventargs)
         })
-
-
     }
     ($MSGBUTTON.YesNo) {
       # btNo
@@ -333,9 +326,7 @@ function AddButton {
     }
     default {}
   }
-
 }
-
 
 function AddIconImage {
   param([psobject]$param)
@@ -359,9 +350,7 @@ function AddIconImage {
       $icnPicture.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
     }
   }
-
 }
-
 
 function btnDetails_click
 {
@@ -370,22 +359,23 @@ function btnDetails_click
     [object]$sender,
     [System.EventArgs]$eventArgs
   )
-  if ($btnDetails.Tag.ToString() -match "col")
+  if ($btnDetails.Tag.ToString() -match 'col')
   {
     $f.Height = $f.Height + $txtDescription.Height + 6
-    $btnDetails.Tag = "exp"
-    $btnDetails.Text = "Hide Details"
+    $btnDetails.Tag = 'exp'
+    $btnDetails.Text = 'Hide Details'
     $txtDescription.WordWrap = true
     # txtDescription.Focus();
     # txtDescription.SelectionLength = 0;
   }
-  elseif ($btnDetails.Tag.ToString() -match "exp")
+  elseif ($btnDetails.Tag.ToString() -match 'exp')
   {
     $f.Height = $f.Height - $txtDescription.Height - 6
-    $btnDetails.Tag = "col"
-    $btnDetails.Text = "Show Details"
+    $btnDetails.Tag = 'col'
+    $btnDetails.Text = 'Show Details'
   }
 }
+
 function SetMessageText
 {
   param(
@@ -442,7 +432,6 @@ function Show1
   [void]$f.ShowDialog([win32window ]($caller))
   Write-Host ('$caller.Result = ' + $caller.Result)
   return $caller.Result
-
 }
 
 function Show2
@@ -477,7 +466,6 @@ function Show2
   [void]$f.ShowDialog([win32window ]($caller))
   Write-Host ('$caller.Result = ' + $caller.Result)
   return $caller.Result
-
 }
 
 function Show3
@@ -519,14 +507,11 @@ function Show3
   $f.Dispose()
   Write-Host ('$caller.Result = ' + $caller.Result)
   return $caller.Result
-
 }
 
 function ShowException
 {
   param([System.Exception]$ex)
-
-
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
@@ -551,9 +536,7 @@ function ShowException
   [void]$f.ShowDialog([win32window ]($caller))
   Write-Host ('$caller.Result = ' + $caller.Result)
   return $caller.Result
-
 }
-
 
 function DrawBox
 {
@@ -591,8 +574,6 @@ function DrawBox
       btnDetails_click ($sender,$eventargs)
     })
 
-
-
   $lblmessage.Location = New-Object System.Drawing.Point (64,22)
   $lblmessage.AutoSize = $true
   $formpanel.Controls.Add($lblmessage)
@@ -617,7 +598,6 @@ function DrawBox
     $btnDetails.Text = "Show Details"
   }
 }
-
 
 # http://poshcode.org/1942
 function assert {
@@ -658,8 +638,6 @@ function assert {
        -icon $MSGICON.Error `
        -Btn $MSGBUTTON.RetryCancle `
        -Description ("Try:{0}`r`nScript:{1}`r`nLine:{2}`r`nFunction:{3}" -f $Script,(Get-PSCallStack)[1].ScriptName,(Get-PSCallStack)[1].ScriptLineNumber,(Get-PSCallStack)[1].FunctionName)
-
-
     if ($action -ne $MSGRESPONSE.Ignore) {
       throw $message
     }
@@ -680,10 +658,9 @@ $description = "This is is a long established fact that a reader will be distrac
 
 # Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Information -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
 # Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
-
-
 test_assert
 return
+
 try {
   Get-Item -Path 'C:\NONE' -ErrorAction STOP
 

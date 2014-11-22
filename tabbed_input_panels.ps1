@@ -61,8 +61,6 @@ function PromptWithTabs (
 
   $l1.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0);
   $panel2.Controls.Add($l1)
-
-
   $textbox1.Add_Leave({
       param(
         [object]$sender,
@@ -86,8 +84,6 @@ function PromptWithTabs (
   $panel1.Size = New-Object System.Drawing.Size (259,52)
   $panel1.TabIndex = 0
   $panel1.Text = "Action Tab"
-
-
 
   $button1.Location = New-Object System.Drawing.Point (74,7)
   $button1.Name = "buttonShowMessage"
@@ -125,19 +121,14 @@ function PromptWithTabs (
   $f.ActiveControl = $textbox1
 
   $f.Topmost = $true
-
-
   $f.Add_Shown({ $f.Activate() })
   $f.KeyPreview = $True
-
-
   [void]$f.ShowDialog([win32window ]($caller))
 
   $f.Dispose()
 }
 
 Add-Type -TypeDefinition @"
-
 // "
 using System;
 using System.Windows.Forms;
@@ -152,8 +143,6 @@ public class Win32Window : IWin32Window
         get { return _data; }
         set { _data = value; }
     }
-
-
     public string Message
     {
         get { return _message; }
