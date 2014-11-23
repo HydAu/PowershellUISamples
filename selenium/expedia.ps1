@@ -114,8 +114,6 @@ try {
   Start-Sleep -Seconds 3
 }
 
-
-
 #  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
 
 $options = New-Object OpenQA.Selenium.Chrome.ChromeOptions
@@ -152,6 +150,9 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+
+Start-Sleep -Seconds 3
+
 # $element.Text
 [NUnit.Framework.Assert]::AreEqual('Hotels',$element.Text)
 
@@ -170,7 +171,7 @@ try {
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
 # $element.Text
-[NUnit.Framework.Assert]::AreEqual('20Today',$element.Text)
+[NUnit.Framework.StringAssert]::Contains('Today',$element.Text,{})
 
 $element.Click()
 
@@ -296,6 +297,7 @@ $element.Text
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Build().Perform()
 [void]$actions.SendKeys($element,[OpenQA.Selenium.Keys]::Space)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 try {
   $element.Click() }
@@ -309,24 +311,26 @@ try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
   $csspath = 'button#a-searchBtn'
-  [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
+
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 
-Start-Sleep -Seconds 1
+Start-Sleep -Seconds 3
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
-$element.Text
 [NUnit.Framework.Assert]::IsTrue($element.Text -match 'Search')
 
-Write-Output ('Highlighting element: {0} disabled={1}' -f $element.TagName,$element.GetAttribute('disabled'))
+Write-Output ('Highlighting element: {0} text={1}' -f $element.TagName,$element.Text)
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: #CC6600; border: 4px solid #CC3300;')
-Start-Sleep 1
+Start-Sleep 3
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
-Start-Sleep 1
 
-$element.Click()
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+[void]$actions.SendKeys($element,[OpenQA.Selenium.Keys]::Space)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+# $element.Click()
 
 
 Start-Sleep -Seconds 50
