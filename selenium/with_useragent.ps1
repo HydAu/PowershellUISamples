@@ -30,9 +30,9 @@ param(
 function set_timeouts {
   param(
     [System.Management.Automation.PSReference]$selenium_ref,
-    [int]$explicit = 10,
-    [int]$page_load = 60,
-    [int]$script = 30
+    [int]$explicit = 120,
+    [int]$page_load = 600,
+    [int]$script = 3000
   )
 
   [void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
@@ -132,20 +132,34 @@ try {
 
 [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
 [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
-$selected_profile_object.setPreference("general.useragent.override",'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+$selected_profile_object.setPreference('general.useragent.override','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+
+
+$profile_raw64 = $selected_profile_object.ToBase64String()
+$profile_raw64 | Out-File -FilePath 'a.txt'
+$profile_raw = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($profile_raw64))
+$profile_raw | Out-File -FilePath 'a.zip'
+
+# These preferences have no effect, need to find the correct syntax
+# $selected_profile_object.setPreference('browser.window.width',480)
+# $selected_profile_object.setPreference('browser.window.height',600)
+
+
+# $selected_profile_object.UpdateUserPreferences()
+# A lot of methods declared in Webdriver.xml do not work:
+# Method invocation failed because [OpenQA.Selenium.Firefox.FirefoxProfile] does
+# not contain a method named 'UpdateUserPreferences'.
+#
+# $selected_profile_object | get-member
+#
+# [OpenQA.Selenium.Firefox.Preferences] $p = $selected_profile_object.ReadExistingPreferences()
+
 $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
 [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
-# TODO 
+
+# TODO: finish the syntax
 # [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
 [NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
-
-$selected_profile_object = $null
-$profiles | ForEach-Object {
-  $item = $_
-  # TODO - find how to extract information about all profiles
-  $item
-}
-
 
 if ($PSBoundParameters['pause']) {
 
@@ -159,8 +173,9 @@ if ($PSBoundParameters['pause']) {
 }
 $base_url = 'http://www.priceline.com/'
 $selenium.Navigate().GoToUrl($base_url)
-$selenium.Navigate().Refresh()
 set_timeouts ([ref]$selenium)
+[NUnit.Framework.Assert]::IsTrue(($selenium.url -match 'www.priceline.com/smartphone/'))
+
 # Cleanup
 cleanup ([ref]$selenium)
 
