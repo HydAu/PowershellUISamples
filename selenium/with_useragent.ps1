@@ -22,8 +22,9 @@ param(
   [string]$hub_host = '127.0.0.1',
   [string]$browser,
   [string]$version,
-  [string]$profile = 'default'
-  #  [string]$profile = 'Selenium'
+  [string]$profile = 'Selenium',
+  [switch]$pause
+
 )
 
 function set_timeouts {
@@ -93,11 +94,11 @@ $shared_assemblies.Keys | ForEach-Object {
   $assembly_version = [Reflection.AssemblyName]::GetAssemblyName($assembly_path).Version
   $assembly_version_string = ('{0}.{1}' -f $assembly_version.Major,$assembly_version.Minor)
   if ($shared_assemblies[$assembly] -ne $null) {
-
+    # http://stackoverflow.com/questions/26999510/selenium-webdriver-2-44-firefox-33
     if (-not ($shared_assemblies[$assembly] -match $assembly_version_string)) {
       Write-Output ('Need {0} {1}, got {2}' -f $assembly,$shared_assemblies[$assembly],$assembly_path)
       Write-Output $assembly_version
-      throw ('invalid version :{0}' -f $assembly )
+      throw ('invalid version :{0}' -f $assembly)
     }
   }
 
@@ -108,7 +109,8 @@ $shared_assemblies.Keys | ForEach-Object {
   Add-Type -Path $_
 }
 popd
-return
+
+
 $verificationErrors = New-Object System.Text.StringBuilder
 
 # use Default Web Site to host the page. Enable Directory Browsing.
@@ -126,14 +128,35 @@ try {
 
   Start-Sleep -Seconds 3
 }
+[object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
+
+[OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
+[OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
+$selected_profile_object.setPreference("general.useragent.override",'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+$selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
+[OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
+# TODO 
+# [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
+[NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
+
+$selected_profile_object = $null
+$profiles | ForEach-Object {
+  $item = $_
+  # TODO - find how to extract information about all profiles
+  $item
+}
 
 
+if ($PSBoundParameters['pause']) {
 
-$selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
+  try {
 
-# [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
+    [void]$host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+  } catch [exception]{}
 
-# $base_url = 'https://www.priceline.com/smartphone/home.do?plf=PCLN'
+} else {
+  Start-Sleep -Millisecond 100
+}
 $base_url = 'http://www.priceline.com/'
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
