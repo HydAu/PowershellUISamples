@@ -19,7 +19,11 @@
 #THE SOFTWARE.
 
 param(
-  [string]$hub_host = '127.0.0.1'
+  [string]$hub_host = '127.0.0.1',
+  [string]$browser,
+  [string]$version,
+  [string]$profile = 'default'
+  #  [string]$profile = 'Selenium'
 )
 
 function set_timeouts {
@@ -69,9 +73,8 @@ function cleanup
 $shared_assemblies = @(
   "WebDriver.dll",
   "WebDriver.Support.dll",
-  'nunit.core.dll',
-  'nunit.framework.dll'
-
+  'nunit.framework.dll',
+  'nunit.core.dll'
 )
 
 
@@ -110,43 +113,71 @@ try {
   Start-Sleep -Seconds 3
 }
 
+
 $options = New-Object OpenQA.Selenium.Chrome.ChromeOptions
 $options.AddArgument('--user-agent=Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
 $selenium = New-Object OpenQA.Selenium.Chrome.ChromeDriver ($options)
 
-
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-$selenium.Manage().Window.Size = New-Object System.Drawing.Size (600,800)
+
+$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
 $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
 
-# $base_url = 'https://www.priceline.com/smartphone/home.do?plf=PCLN'
-# assert
+
 $base_url = 'http://www.priceline.com/'
 $selenium.Navigate().GoToUrl($base_url)
-
-
+$selenium.Navigate().Refresh()
 set_timeouts ([ref]$selenium)
 
+[NUnit.Framework.Assert]::IsTrue(($selenium.url -match 'https://www.priceline.com/smartphone/'))
 
 try {
 
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
-  $csspath = 'a#btn_hotel'
+  $css_selector = 'div.artwork'
+  Write-Output ('Trying CSS Selector "{0}"' -f $css_selector)
 
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')
+Start-Sleep 3
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
+
+# https://social.msdn.microsoft.com/Forums/vstudio/en-US/e7a6ad85-b965-490a-9f70-bee9eb47bd12/nunit-in-visual-studio-2010?forum=vsunittest
+# older versions of nunit.framerowk.dll do not have stringassert
+# http://nunit.org/?p=download
+[NUnit.Framework.StringAssert]::Contains('artwork',$element.GetAttribute('class'),{})
+
+[NUnit.Framework.Assert]::IsTrue($element.GetAttribute('class') -match 'artwork')
+
+[OpenQA.Selenium.IWebElement]$element2 = $element.FindElement([OpenQA.Selenium.By]::CssSelector('span.image'))
+$element2
+
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $css_selector = 'a#btn_hotel'
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 $element.Text
 [NUnit.Framework.Assert]::AreEqual($element.Text,'Hotels')
 
 
 $element.Click()
 
-# TODO <base href="/smartphone/dist/hotel/" />
 [NUnit.Framework.Assert]::AreEqual($selenium.Title,'Hotels')
 
 # write-output $selenium.PageSource
@@ -156,9 +187,7 @@ try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
-  $csspath = "h2[role~=heading]"
-
-  $xpath = "//h2[@role=heading]"
+  $xpath = "//h2[@role='heading']"
   Write-Output ('Trying XPath "{0}"' -f $xpath)
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
@@ -171,7 +200,9 @@ try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
-  $css_selector = "h2[role=heading]"
+  # $css_selector = "h2[role=heading]"
+  $css_selector = "div#header_bar"
+
   Write-Output ('Trying CSS Selector "{0}"' -f $css_selector)
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
@@ -203,9 +234,9 @@ try {
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
-  $csspath = 'div > span.stay-col'
+  $css_selector = 'div > span.stay-col'
 
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
@@ -278,9 +309,23 @@ if ($element -ne $null) {
   [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
   $element5 = $null
   $elements | ForEach-Object { $element3 = $_
+    <#
+    $element3.Text
+    $scroll_y = 50
+    if ($element3.Size.Height -gt $scroll_y) {
+      $scroll_y = $element3.Size.Height
+    }
+
+    [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
+    Start-Sleep -Millisecond 250
+    [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
+    $scroll_script = ('scroll(0, {0})' -f $scroll_y)
+    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($scroll_script,$null)
+    #>
     if (($element3.Displayed)) {
       if ($element3.Text -match 'Miami') {
-        Write-Output $element3.Text
+        Write-Output ('Selecting "{0}"' -f $element3.Text)
+
         $element5 = $element3
       }
 
@@ -289,7 +334,10 @@ if ($element -ne $null) {
   }
 
   [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
-  Start-Sleep -Seconds 1
+  Start-Sleep -Seconds 3
+
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].scrollIntoView(true);",$element3)
+  Start-Sleep -Seconds 3
 
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
   $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Click().Build().Perform()
@@ -313,14 +361,50 @@ try {
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 if ($element -ne $null) {
+
+
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep 3
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
+
   $element.Text
   $element.GetAttribute('category')
 
   $element.Click()
 }
-Start-Sleep 10
+
+$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
+$element = $null
+try {
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+
+  $css_selector = "div.hotel-listview-item-thumbnail"
+
+  Write-Output ('Trying CSS "{0}"' -f $css_selector)
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+if ($element -ne $null) {
+
+
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep 3
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
+
+  $element.Text
+  $element.Click()
+}
+
+$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
 <#
 # scroll away from tool bar
 [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
