@@ -70,13 +70,13 @@ function cleanup
 }
 
 
-$shared_assemblies = @(
-  "WebDriver.dll",
-  "WebDriver.Support.dll",
-  'nunit.core.dll',
-  'nunit.framework.dll'
+$shared_assemblies = @{
+  'WebDriver.dll' = 2.44;
+  'WebDriver.Support.dll' = '2.44';
+  'nunit.core.dll' = $null;
+  'nunit.framework.dll' = '2.6.3';
 
-)
+}
 
 
 $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
@@ -86,7 +86,20 @@ if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -n
 }
 
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object {
+$shared_assemblies.Keys | ForEach-Object {
+  # http://all-things-pure.blogspot.com/2009/09/assembly-version-file-version-product.html
+  $assembly = $_
+  $assembly_path = [System.IO.Path]::Combine($shared_assemblies_path,$assembly)
+  $assembly_version = [Reflection.AssemblyName]::GetAssemblyName($assembly_path).Version
+  $assembly_version_string = ('{0}.{1}' -f $assembly_version.Major,$assembly_version.Minor)
+  if ($shared_assemblies[$assembly] -ne $null) {
+
+    if (-not ($shared_assemblies[$assembly] -match $assembly_version_string)) {
+      Write-Output ('Need {0} {1}, got {2}' -f $assembly,$shared_assemblies[$assembly],$assembly_path)
+      Write-Output $assembly_version
+      throw ('invalid version :{0}' -f $assembly )
+    }
+  }
 
   if ($host.Version.Major -gt 2) {
     Unblock-File -Path $_;
@@ -95,7 +108,7 @@ $shared_assemblies | ForEach-Object {
   Add-Type -Path $_
 }
 popd
-
+return
 $verificationErrors = New-Object System.Text.StringBuilder
 
 # use Default Web Site to host the page. Enable Directory Browsing.
@@ -116,13 +129,7 @@ try {
 
 
 
-#  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
-
-$options = New-Object OpenQA.Selenium.Chrome.ChromeOptions
-$options.AddArgument('--user-agent=Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
-$selenium = New-Object OpenQA.Selenium.Chrome.ChromeDriver ($options)
-
-# return
+$selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
 
 # [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
 
@@ -131,234 +138,6 @@ $base_url = 'http://www.priceline.com/'
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 set_timeouts ([ref]$selenium)
-
-
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $csspath = 'a#btn_hotel'
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
-$element.Text
-[NUnit.Framework.Assert]::AreEqual($element.Text,'Hotels')
-
-
-$element.Click()
-
-# TODO <base href="/smartphone/dist/hotel/" />
-[NUnit.Framework.Assert]::AreEqual($selenium.Title,'Hotels')
-
-# write-output $selenium.PageSource
-$element = $null
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $csspath = "h2[role~=heading]"
-
-  $xpath = "//h2[@role=heading]"
-  Write-Output ('Trying XPath "{0}"' -f $xpath)
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $css_selector = "h2[role=heading]"
-  Write-Output ('Trying CSS Selector "{0}"' -f $css_selector)
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-if ($element -eq $null) {
-  Write-Output 'Iterate directly...'
-  $xpath = '//h2'
-  [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::XPath($xpath))
-  $element5 = $null
-  $elements | ForEach-Object { $element3 = $_
-    if (($element3.Text -match 'Hotels')) {
-      $element5 = $element3
-    }
-    $cnt++
-  }
-
-  [NUnit.Framework.Assert]::IsTrue(($element5 -ne $null))
-  [NUnit.Framework.Assert]::IsTrue(($element5.Displayed))
-  [NUnit.Framework.Assert]::IsTrue(($element5.GetAttribute('role') -match 'heading'))
-  Write-Output 'Found Hotels title'
-  Write-Output ('role= {0}' -f $element5.GetAttribute('role'))
-}
-$element = $null
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $csspath = 'div > span.stay-col'
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-if ($element -ne $null) {
-  $element
-
-} else {
-  Write-Output 'Iterate directly over buttons...'
-  $csspath = 'div'
-  [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($csspath))
-  $element5 = $null
-  $found = $false
-
-  $elements | ForEach-Object { $element3 = $_
-    if ($element5 -eq $null -and $element3.Displayed -and $element3.Text -match 'choose a location') {
-      # Write-Output $element3
-      $element5 = $element3
-    }
-    $cnt++
-  }
-  [OpenQA.Selenium.IWebElement[]]$elements2 = $element5.FindElements([OpenQA.Selenium.By]::CssSelector('span'))
-  $element6 = $null
-  $elements2 | ForEach-Object { $element2 = $_
-    if ($element6 -eq $null -and $element2.Displayed -and $element2.Text -match 'choose a location') {
-      Write-Output $element3
-      $element6 = $element2
-    }
-  }
-}
-
-[NUnit.Framework.Assert]::IsTrue(($element6.GetAttribute('class') -match 'stay-col'))
-
-$element6.Click()
-Start-Sleep 1
-$element = $null
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $csspath = 'ul#city_search_top50'
-  $csspath = 'ul'
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-
-if ($element -ne $null) {
-  $element5 = $null
-  [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
-  $found = $false
-
-  $elements | ForEach-Object { $element3 = $_
-    if ($false -and $element3.Displayed) {
-      # $element5 -eq $null 
-      #  -and $element3.Text -match 'choose a location'
-      Write-Output $element3.Text
-      $element3
-      $element5 = $element3
-    }
-    $cnt++
-  }
-
-} else {
-
-  Write-Output 'Iterate directly over cities...'
-  [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
-  $element5 = $null
-  $elements | ForEach-Object { $element3 = $_
-    if (($element3.Displayed)) {
-      if ($element3.Text -match 'Miami') {
-        Write-Output $element3.Text
-        $element5 = $element3
-      }
-
-    }
-    $cnt++
-  }
-
-  [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
-  Start-Sleep -Seconds 1
-
-  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-  $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Click().Build().Perform()
-  Start-Sleep 4
-
-}
-
-
-$element = $null
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $csspath = "h2[role~=heading]"
-
-  $xpath = "//input[@category='HotelSearch']"
-  Write-Output ('Trying XPath "{0}"' -f $xpath)
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-if ($element -ne $null) {
-  $element.Text
-  $element.GetAttribute('category')
-
-  $element.Click()
-}
-Start-Sleep 10
-<#
-# scroll away from tool bar
-[void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
-Start-Sleep -Seconds 1
-
-# var hasJQueryLoaded = (bool) js.ExecuteScript("return (window.jQuery != null) && (jQuery.active === 0);");
-
-[int]$timeout = 4000
-# change $timeout to see if the WevDriver is waiting on page  sctript to execute
-
-[string]$script = "window.setTimeout(function(){document.getElementById('searchInput').value = 'test'}, ${timeout});"
-
-$start = (Get-Date -UFormat "%s")
-
-try {
-  [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).executeAsyncScript($script);
-
-} catch [OpenQA.Selenium.WebDriverTimeoutException]{
-  # Ignore
-  # Timed out waiting for async script result  (Firefox)
-  # asynchronous script timeout: result was not received (Chrome)
-  [NUnit.Framework.Assert]::IsTrue($_.Exception.Message -match '(?:Timed out waiting for async script result|asynchronous script timeout)')
-}
-catch [OpenQA.Selenium.NoSuchWindowException]{
-  Write-Host $_.Exception.Message # Unable to get browser
-  $_.Exception | Get-Member
-
-}
-$end = (Get-Date -UFormat "%s")
-$elapsed = New-TimeSpan -Seconds ($end - $start)
-Write-Output ('Elapsed time {0:00}:{1:00}:{2:00} ({3})' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
-#>
-
 # Cleanup
 cleanup ([ref]$selenium)
 
