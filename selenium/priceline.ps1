@@ -23,7 +23,6 @@ param(
   [string]$browser,
   [string]$version,
   [string]$profile = 'default'
-  #  [string]$profile = 'Selenium'
 )
 
 function set_timeouts {
@@ -309,39 +308,33 @@ if ($element -ne $null) {
   [OpenQA.Selenium.IWebElement[]]$elements = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector('li'))
   $element5 = $null
   $elements | ForEach-Object { $element3 = $_
-    <#
-    $element3.Text
-    $scroll_y = 50
-    if ($element3.Size.Height -gt $scroll_y) {
-      $scroll_y = $element3.Size.Height
-    }
 
-    [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
-    Start-Sleep -Millisecond 250
-    [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
-    $scroll_script = ('scroll(0, {0})' -f $scroll_y)
-    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($scroll_script,$null)
-    #>
+    if (($element5 -eq $null)) {
+
+      [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+
+      $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
+    }
     if (($element3.Displayed)) {
       if ($element3.Text -match 'Miami') {
         Write-Output ('Selecting "{0}"' -f $element3.Text)
 
+
         $element5 = $element3
+
       }
 
     }
     $cnt++
   }
 
-  [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript('scroll(0, 500)',$null)
-  Start-Sleep -Seconds 3
 
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].scrollIntoView(true);",$element3)
-  Start-Sleep -Seconds 3
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep -Millisecond 2000
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element5,'')
 
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
   $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element5).Click().Build().Perform()
-  Start-Sleep 4
 
 }
 
@@ -375,7 +368,10 @@ if ($element -ne $null) {
   $element.Click()
 }
 
-$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+#
+# [void]$host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+#
+Start-Sleep 5
 
 $element = $null
 try {
@@ -403,7 +399,10 @@ if ($element -ne $null) {
   $element.Click()
 }
 
-$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+#
+# [void]$host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+#
+Start-Sleep 3
 
 <#
 # scroll away from tool bar
