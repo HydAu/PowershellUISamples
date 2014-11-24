@@ -161,20 +161,57 @@ $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_
 # [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
 [NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
 
+
+$base_url = 'http://www.priceline.com/'
+
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+
+$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
+$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
+
+$selenium.Navigate().GoToUrl($base_url)
+set_timeouts ([ref]$selenium)
+
+[NUnit.Framework.StringAssert]::Contains('www.priceline.com/smartphone/',$selenium.url,{})
+
+
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$css_selector = 'div.artwork'
+Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
+
+try {
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+[OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::CssSelector('span.image'))
+
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'border: 2px solid blue;')
+# [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
+
+Start-Sleep 3
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
+# [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+
+
 if ($PSBoundParameters['pause']) {
 
   try {
 
-    [void]$host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
   } catch [exception]{}
 
 } else {
-  Start-Sleep -Millisecond 100
+  Start-Sleep -Millisecond 10000
 }
-$base_url = 'http://www.priceline.com/'
-$selenium.Navigate().GoToUrl($base_url)
-set_timeouts ([ref]$selenium)
-[NUnit.Framework.Assert]::IsTrue(($selenium.url -match 'www.priceline.com/smartphone/'))
+
+
 
 # Cleanup
 cleanup ([ref]$selenium)
