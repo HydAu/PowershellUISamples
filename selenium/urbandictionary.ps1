@@ -161,8 +161,8 @@ $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_
 # [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
 [NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
 
-
-$base_url = 'http://www.priceline.com/'
+$DebugPreference = 'Continue'
+$base_url = 'http://www.urbandictionary.com/'
 
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 
@@ -172,13 +172,32 @@ $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
 $selenium.Navigate().GoToUrl($base_url)
 set_timeouts ([ref]$selenium)
 
-[NUnit.Framework.StringAssert]::Contains('www.priceline.com/smartphone/',$selenium.url,{})
+[NUnit.Framework.StringAssert]::Contains('www.urbandictionary.com',$selenium.url,{})
 
 
 
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
-$css_selector = 'div.artwork'
+$css_selector = 'a#logo'
+Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
+
+try {
+
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'border: 2px solid red;')
+
+Start-Sleep 3
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
+
+
+$css_selector = 'div#content'
 Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
 
 try {
@@ -190,15 +209,51 @@ try {
 }
 
 [OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-[OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::CssSelector('span.image'))
 
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'border: 2px solid blue;')
-# [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
+$cnt_found = 0
+$cnt_to_find = 17
 
-Start-Sleep 3
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
-# [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+while ($cnt_found -lt $cnt_to_find) {
 
+  $css_selector = 'a.word'
+  Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
+
+  try {
+
+    [OpenQA.Selenium.IWebElement[]]$elements2 = $element1.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector))
+
+  } catch [exception]{
+    Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  }
+  $cnt = 0
+  Write-Output ('inspecting {0} words' -f $elements2.count)
+  $elements2 | ForEach-Object { $element2 = $_
+    if (($element2 -ne $null -and $element2.Displayed)) {
+      if ( $cnt -ge $cnt_found ) {
+         Write-Output ('{0} / {1} => {2}' -f $cnt,$cnt_found,$element2.Text)
+      }
+
+      [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+
+      $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+
+      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'background-color:  blue;')
+
+      Start-Sleep -Milliseconds 100
+      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+      $cnt++
+
+
+    }
+
+  }
+
+  $cnt_found = $elements2.count
+  Write-Output ('inspected {0} words' -f $cnt_found)
+
+}
+
+Write-Output ('Found {0}' -f $cnt_found)
 
 if ($PSBoundParameters['pause']) {
 
@@ -208,7 +263,7 @@ if ($PSBoundParameters['pause']) {
   } catch [exception]{}
 
 } else {
-  Start-Sleep -Millisecond 10000
+  Start-Sleep -Millisecond 1000
 }
 
 
