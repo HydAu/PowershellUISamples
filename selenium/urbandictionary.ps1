@@ -164,8 +164,8 @@ $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_
 $DebugPreference = 'Continue'
 $base_url = 'http://www.urbandictionary.com/'
 
+# http://yizeng.me/2014/02/23/how-to-get-window-size-resize-or-maximize-window-using-selenium-webdriver/
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-
 $selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
 $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
 
