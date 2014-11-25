@@ -165,9 +165,10 @@ $DebugPreference = 'Continue'
 $base_url = 'http://www.urbandictionary.com/'
 
 # http://yizeng.me/2014/02/23/how-to-get-window-size-resize-or-maximize-window-using-selenium-webdriver/
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
-$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
+# we do not need to use System.Drawing.Size / System.Drawing.Point struct here
+# http://msdn.microsoft.com/en-us/library/System.Drawing.Size%28v=vs.110%29.aspx
+$selenium.Manage().Window.Size =  @{'Height' = 600 ; 'Width' = 480 ; }
+$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 } 
 
 $selenium.Navigate().GoToUrl($base_url)
 set_timeouts ([ref]$selenium)
