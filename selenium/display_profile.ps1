@@ -20,9 +20,6 @@
 
 param(
   [string]$hub_host = '127.0.0.1',
-  [string]$browser,
-  [string]$version,
-  [string]$profile = 'Selenium',
   [switch]$pause
 
 )
@@ -128,89 +125,46 @@ try {
 
   Start-Sleep -Seconds 3
 }
-[object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
 
-[OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-[OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
-$selected_profile_object.setPreference('general.useragent.override','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
+$selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
 
+$selenium.Navigate().GoToUrl('about:config')
 
-$profile_raw64 = $selected_profile_object.ToBase64String()
-$profile_raw64 | Out-File -FilePath 'a.txt'
-$profile_raw = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($profile_raw64))
-$profile_raw | Out-File -FilePath 'a.zip'
-
-# These preferences have no effect, need to find the correct syntax
-# $selected_profile_object.setPreference('browser.window.width',480)
-# $selected_profile_object.setPreference('browser.window.height',600)
-
-
-# $selected_profile_object.UpdateUserPreferences()
-# A lot of methods declared in Webdriver.xml do not work:
-# Method invocation failed because [OpenQA.Selenium.Firefox.FirefoxProfile] does
-# not contain a method named 'UpdateUserPreferences'.
-#
-# $selected_profile_object | get-member
-#
-# [OpenQA.Selenium.Firefox.Preferences] $p = $selected_profile_object.ReadExistingPreferences()
-
-$selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
-[OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
-
-# TODO: finish the syntax
-# [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
-[NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
-
-
-$base_url = 'http://www.priceline.com/'
-
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-
-$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
-$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
-
-$selenium.Navigate().GoToUrl($base_url)
-set_timeouts ([ref]$selenium)
-
-[NUnit.Framework.StringAssert]::Contains('www.priceline.com/smartphone/',$selenium.url,{})
-
-
-
+$element = $null
+$css_selector = 'button#warningButton'
+Write-Debug ('Trying CSS "{0}"' -f $css_selector)
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
-$css_selector = 'div.artwork'
-Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
 
 try {
-
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
-
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
 } catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  Write-Debug ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 
-[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-[OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::CssSelector('span.image'))
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'border: 2px solid blue;')
-# [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
-
-Start-Sleep 3
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
-# [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+if ($element -ne $null) {
+  Write-Debug ('Clicking on "{0}" button' -f $element.GetAttribute('label'))
+  try {
+    [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+    $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+  } catch [exception]{
+    Write-Debug ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+    # Utils.getMainDocumentElement(...) is undefined
+  }
+}
 
 
 if ($PSBoundParameters['pause']) {
 
   try {
-
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
   } catch [exception]{}
 
 } else {
-  Start-Sleep -Millisecond 10000
+  Start-Sleep -Millisecond 3000
 }
-
 
 
 # Cleanup
