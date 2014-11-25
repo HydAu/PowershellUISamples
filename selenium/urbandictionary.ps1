@@ -210,22 +210,50 @@ try {
 
 [OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 
+$cnt_found = 0
+$cnt_to_find = 17
 
-$css_selector = 'a.word'
-Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
+while ($cnt_found -lt $cnt_to_find) {
 
-try {
+  $css_selector = 'a.word'
+  Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
 
-[OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+  try {
 
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+    [OpenQA.Selenium.IWebElement[]]$elements2 = $element1.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector))
+
+  } catch [exception]{
+    Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  }
+  $cnt = 0
+  Write-Output ('inspecting {0} words' -f $elements2.count)
+  $elements2 | ForEach-Object { $element2 = $_
+    if (($element2 -ne $null -and $element2.Displayed)) {
+      if ( $cnt -ge $cnt_found ) {
+         Write-Output ('{0} / {1} => {2}' -f $cnt,$cnt_found,$element2.Text)
+      }
+
+      [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+
+      $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+
+      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'background-color:  blue;')
+
+      Start-Sleep -Milliseconds 100
+      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+      $cnt++
+
+
+    }
+
+  }
+
+  $cnt_found = $elements2.count
+  Write-Output ('inspected {0} words' -f $cnt_found)
+
 }
-$element2 
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'background-color:  blue;')
 
-Start-Sleep 10
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+Write-Output ('Found {0}' -f $cnt_found)
 
 if ($PSBoundParameters['pause']) {
 
