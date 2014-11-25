@@ -164,11 +164,8 @@ $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_
 $DebugPreference = 'Continue'
 $base_url = 'http://www.urbandictionary.com/'
 
-# http://yizeng.me/2014/02/23/how-to-get-window-size-resize-or-maximize-window-using-selenium-webdriver/
-# we do not need to use System.Drawing.Size / System.Drawing.Point struct here
-# http://msdn.microsoft.com/en-us/library/System.Drawing.Size%28v=vs.110%29.aspx
-$selenium.Manage().Window.Size =  @{'Height' = 600 ; 'Width' = 480 ; }
-$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 } 
+$selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
+$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 
 $selenium.Navigate().GoToUrl($base_url)
 set_timeouts ([ref]$selenium)
@@ -230,8 +227,8 @@ while ($cnt_found -lt $cnt_to_find) {
   Write-Output ('inspecting {0} words' -f $elements2.count)
   $elements2 | ForEach-Object { $element2 = $_
     if (($element2 -ne $null -and $element2.Displayed)) {
-      if ( $cnt -ge $cnt_found ) {
-         Write-Output ('{0} / {1} => {2}' -f $cnt,$cnt_found,$element2.Text)
+      if ($cnt -ge $cnt_found) {
+        Write-Output ('{0} / {1} => {2}' -f $cnt,$cnt_found,$element2.Text)
       }
 
       [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)

@@ -98,11 +98,8 @@ popd
 
 $verificationErrors = New-Object System.Text.StringBuilder
 
-# use Default Web Site to host the page. Enable Directory Browsing.
-
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
-
 
 try {
   $connection = (New-Object Net.Sockets.TcpClient)
@@ -114,37 +111,25 @@ try {
   Start-Sleep -Seconds 3
 }
 
-#  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
-
 $options = New-Object OpenQA.Selenium.Chrome.ChromeOptions
 $options.AddArgument('--user-agent=Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
 $selenium = New-Object OpenQA.Selenium.Chrome.ChromeDriver ($options)
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+$selenium.Manage().Window.Size = @{ 'Height' = 800; 'Width' = 600; }
+$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 
-$selenium.Manage().Window.Size = New-Object System.Drawing.Size (600,800)
-$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
-
-# broken with FF 33.
-# $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver
-# return
-
-# [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-
-$base_url = 'http://www.expedia.com/MobileHotel'
-# $base_url = 'http://www.expedia.com/'
+$base_url = 'http://www.expedia.com/'
 $selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 set_timeouts ([ref]$selenium)
 
-
-try {
 
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
   $csspath = 'li.hotels'
 
+try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
@@ -157,33 +142,29 @@ Start-Sleep -Seconds 3
 [NUnit.Framework.Assert]::AreEqual('Hotels',$element.Text)
 
 $element.Click()
-
-try {
-
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
   $csspath = 'a.calendar-button'
 
+try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath))
-# $element.Text
 [NUnit.Framework.StringAssert]::Contains('Today',$element.Text,{})
 
 $element.Click()
 
 Start-Sleep -Seconds 4
 
-try {
-
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
   $csspath = 'td#a-calendar-today'
 
+try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
@@ -195,13 +176,14 @@ Write-Output ('Check-in = {0}' -f (($element.Text -split "`n")[0]))
 # Remember cell position 
 $data_id = $element.GetAttribute('data-id')
 
-try {
-
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
   $xpath = ("//td[@class= 'selected'][@data-id != '{0}']" -f $data_id)
   Write-Output ('Trying XPath "{0}"' -f $xpath)
+
+try {
+
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
 } catch [exception]{
@@ -230,23 +212,26 @@ if ($element5 -ne $null) {
 } else {
   throw 'Failed to find check-out date'
 }
-try {
-
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
   $csspath1 = 'div#calendar'
 
+
+try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath1)))
-  [OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath1))
+
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-try {
+  [OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($csspath1))
 
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
   $csspath2 = 'button'
+
+try {
+
   [OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::CssSelector($csspath2))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
@@ -255,12 +240,13 @@ try {
 $element2.Click()
 
 
-try {
-
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
 
   $csspath = 'input#a-city'
+
+try {
+
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{
@@ -306,11 +292,11 @@ catch [exception]{
 
 }
 
-try {
-
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
   $wait.PollingInterval = 100
   $csspath = 'button#a-searchBtn'
+try {
+
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($csspath)))
 
 } catch [exception]{

@@ -101,7 +101,6 @@ $verificationErrors = New-Object System.Text.StringBuilder
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
-
 try {
   $connection = (New-Object Net.Sockets.TcpClient)
   $connection.Connect($hub_host,[int]$hub_port)
@@ -112,16 +111,12 @@ try {
   Start-Sleep -Seconds 3
 }
 
-
 $options = New-Object OpenQA.Selenium.Chrome.ChromeOptions
 $options.AddArgument('--user-agent=Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
 $selenium = New-Object OpenQA.Selenium.Chrome.ChromeDriver ($options)
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-
-$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
-$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
-
+$selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
+$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 
 $base_url = 'http://www.priceline.com/'
 $selenium.Navigate().GoToUrl($base_url)
@@ -194,15 +189,17 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+
+# $css_selector = "h2[role=heading]"
+$css_selector = "div#header_bar"
+
+Write-Output ('Trying CSS Selector "{0}"' -f $css_selector)
+
 try {
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  # $css_selector = "h2[role=heading]"
-  $css_selector = "div#header_bar"
-
-  Write-Output ('Trying CSS Selector "{0}"' -f $css_selector)
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
 } catch [exception]{
@@ -242,7 +239,6 @@ try {
 
 if ($element -ne $null) {
   $element
-
 } else {
   Write-Output 'Iterate directly over buttons...'
   $csspath = 'div'
@@ -261,7 +257,7 @@ if ($element -ne $null) {
   $element6 = $null
   $elements2 | ForEach-Object { $element2 = $_
     if ($element6 -eq $null -and $element2.Displayed -and $element2.Text -match 'choose a location') {
-      Write-Output $element3
+      # Write-Output $element3
       $element6 = $element2
     }
   }
@@ -340,31 +336,27 @@ if ($element -ne $null) {
 
 
 $element = $null
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+
+$csspath = "h2[role~=heading]"
+
+$xpath = "//input[@category='HotelSearch']"
+Write-Output ('Trying XPath "{0}"' -f $xpath)
+
 try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $csspath = "h2[role~=heading]"
-
-  $xpath = "//input[@category='HotelSearch']"
-  Write-Output ('Trying XPath "{0}"' -f $xpath)
-
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 if ($element -ne $null) {
-
-
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')
   Start-Sleep 3
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'')
-
   $element.Text
   $element.GetAttribute('category')
-
   $element.Click()
 }
 
@@ -374,14 +366,14 @@ if ($element -ne $null) {
 Start-Sleep 5
 
 $element = $null
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+
+$css_selector = "div.hotel-listview-item-thumbnail"
+
+Write-Output ('Trying CSS "{0}"' -f $css_selector)
 try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $css_selector = "div.hotel-listview-item-thumbnail"
-
-  Write-Output ('Trying CSS "{0}"' -f $css_selector)
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector)))
 } catch [exception]{
