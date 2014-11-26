@@ -142,7 +142,6 @@ set_timeouts ([ref]$selenium)
 $css_selector = 'span.member-signin'
 Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-
 try {
 
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
@@ -150,7 +149,7 @@ try {
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-Write-Debug  ('Found via CSS Selector "{0}"' -f $css_selector )
+Write-Debug ('Found via CSS Selector "{0}"' -f $css_selector)
 
 # highlight the element
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
@@ -162,7 +161,7 @@ Start-Sleep 3
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
 try {
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+  $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 } catch [OpenQA.Selenium.WebDriverTimeoutException]{
   # Ignore
@@ -173,39 +172,50 @@ $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Pe
 }
 
 $input_name = 'ctl01$MC$MemberLogOn$CurrentEmail'
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-
-  $xpath = ( "//input[@name='{0}']"  -f  $input_name)
-  Write-Debug ('Trying XPath "{0}"' -f $xpath)
-
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$xpath = ("//input[@name='{0}']" -f $input_name)
+Write-Debug ('Trying XPath "{0}"' -f $xpath)
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-  Write-Debug ('Found XPath "{0}"' -f $xpath)
+Write-Debug ('Found XPath "{0}"' -f $xpath)
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 [NUnit.Framework.Assert]::IsTrue($element.GetAttribute('type') -match 'email')
 $email_str = 'kouzmine_serguei@yahoo.com'
 $element.SendKeys($email_str)
 
+# type = 'password'
 
+$input_name = 'ctl01$MC$MemberLogOn$CurrentPassword'
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+Write-Debug ('Trying Name "{0}"' -f $input_name)
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::Name($input_name)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+Write-Debug ('Found Name "{0}"' -f $input_name)
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::Name($input_name))
+[NUnit.Framework.Assert]::IsTrue($element.GetAttribute('type') -match 'password')
+$password_str = 'this is not the password'
+$element.SendKeys($password_str)
 
 # Do not close Browser / Selenium when run from Powershell ISE
-if (-not ($host.name -match 'ISE') ) {
-
-if ($PSBoundParameters['pause']) {
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-
-} else {
-  Start-Sleep -Millisecond 1000
-}
-
-# Cleanup
- cleanup ([ref]$selenium)
+if (-not ($host.Name -match 'ISE')) {
+  if ($PSBoundParameters['pause']) {
+    try {
+      [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    } catch [exception]{}
+  } else {
+    Start-Sleep -Millisecond 1000
+  }
+  # Cleanup
+  cleanup ([ref]$selenium)
 }
 
