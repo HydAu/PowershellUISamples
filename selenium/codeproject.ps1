@@ -25,14 +25,6 @@ param(
   [string]$profile = 'Selenium',
   [switch]$pause = $true
 )
-<#
-
-if ($host.name -ne 'ConsoleHost')  {
-  $pause = Read-Host 'Enter parameter(s) for "Pause"'
-
-  [Parameter(Mandatory=$true)]
-}
-#>
 
 function set_timeouts {
   param(
@@ -47,7 +39,6 @@ function set_timeouts {
   [void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
 
 }
-
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -77,7 +68,6 @@ function cleanup
   }
 }
 
-
 $shared_assemblies = @{
   'WebDriver.dll' = 2.44;
   'WebDriver.Support.dll' = '2.44';
@@ -85,7 +75,6 @@ $shared_assemblies = @{
   'nunit.framework.dll' = '2.6.3';
 
 }
-
 
 $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
@@ -117,14 +106,10 @@ $shared_assemblies.Keys | ForEach-Object {
 }
 popd
 
-
 $verificationErrors = New-Object System.Text.StringBuilder
-
-# use Default Web Site to host the page. Enable Directory Browsing.
 
 $hub_port = '4444'
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
-
 
 try {
   $connection = (New-Object Net.Sockets.TcpClient)
@@ -141,32 +126,9 @@ try {
 [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
 $selected_profile_object.setPreference('general.useragent.override','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
 
-
-$profile_raw64 = $selected_profile_object.ToBase64String()
-$profile_raw64 | Out-File -FilePath 'a.txt'
-$profile_raw = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($profile_raw64))
-$profile_raw | Out-File -FilePath 'a.zip'
-
-# These preferences have no effect, need to find the correct syntax
-# $selected_profile_object.setPreference('browser.window.width',480)
-# $selected_profile_object.setPreference('browser.window.height',600)
-
-
-# $selected_profile_object.UpdateUserPreferences()
-# A lot of methods declared in Webdriver.xml do not work:
-# Method invocation failed because [OpenQA.Selenium.Firefox.FirefoxProfile] does
-# not contain a method named 'UpdateUserPreferences'.
-#
-# $selected_profile_object | get-member
-#
-# [OpenQA.Selenium.Firefox.Preferences] $p = $selected_profile_object.ReadExistingPreferences()
-
 $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
 [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
 
-# TODO: finish the syntax
-# [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
-[NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
 
 $DebugPreference = 'Continue'
 $base_url = 'http://www.codeproject.com/'
@@ -176,9 +138,6 @@ $selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 
 $selenium.Navigate().GoToUrl($base_url)
 set_timeouts ([ref]$selenium)
-
-# [NUnit.Framework.StringAssert]::Contains('www.urbandictionary.com',$selenium.url,{})
-
 
 $css_selector = 'span.member-signin'
 Write-Debug ('Trying CSS Selector "{0}"' -f $css_selector)
@@ -191,7 +150,7 @@ try {
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-Write-Debug ('Found via CSS Selector "{0}"' -f $css_selector)
+Write-Debug  ('Found via CSS Selector "{0}"' -f $css_selector )
 
 # highlight the element
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
@@ -203,48 +162,50 @@ Start-Sleep 3
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
 try {
-  $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 } catch [OpenQA.Selenium.WebDriverTimeoutException]{
   # Ignore
+  # 
   # Timed out waiting for async script result  (Firefox)
   # asynchronous script timeout: result was not received (Chrome)
   [NUnit.Framework.Assert]::IsTrue($_.Exception.Message -match '(?:Timed out waiting for page load.)')
 }
 
-
 $input_name = 'ctl01$MC$MemberLogOn$CurrentEmail'
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
 
-$xpath = ("//input[@name='{0}']" -f $input_name)
-Write-Output ('Trying XPath "{0}"' -f $xpath)
+  $xpath = ( "//input[@name='{0}']"  -f  $input_name)
+  Write-Debug ('Trying XPath "{0}"' -f $xpath)
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
+  Write-Debug ('Found XPath "{0}"' -f $xpath)
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 [NUnit.Framework.Assert]::IsTrue($element.GetAttribute('type') -match 'email')
+$email_str = 'kouzmine_serguei@yahoo.com'
+$element.SendKeys($email_str)
 
-$element.SendKeys('kouzmine_serguei@yahoo.com')
 
 
 # Do not close Browser / Selenium when run from Powershell ISE
-if (-not ($host.name -match 'ISE')) {
+if (-not ($host.name -match 'ISE') ) {
 
-  if ($PSBoundParameters['pause']) {
-    try {
-      [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    } catch [exception]{}
+if ($PSBoundParameters['pause']) {
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
 
-  } else {
-    Start-Sleep -Millisecond 1000
-  }
+} else {
+  Start-Sleep -Millisecond 1000
+}
 
-  # Cleanup
-  cleanup ([ref]$selenium)
+# Cleanup
+ cleanup ([ref]$selenium)
 }
 
