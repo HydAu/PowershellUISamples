@@ -1,0 +1,7 @@
+http://siking.wordpress.com/2011/08/22/groovy-selenium-webdriver-and-soapui-part-3/
+https://weblogs.java.net/blog/johnsmart/archive/2009/05/a_quick_primer.html
+http://forum.soapui.org/viewtopic.php?f=5&t=24064
+https://github.com/jkester/selenium-groovy/tree/master/selenium-groovy-public/src
+http://szimano.org/how-you-can-use-groovy-to-make-automatic-selenium-page-objects/
+http://szimano.org/writing-a-dsl-with-groovy/
+jkester/selenium-groovy
