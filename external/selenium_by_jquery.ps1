@@ -1,6 +1,6 @@
 # http://stackoverflow.com/questions/17555280/selenium-webdriver-jquery
 <#
-
+#
 # TODO : Convert from Java to C# / Powershell 
 # iWebdriver jQuery Extension, This will work across all browsers. Copy and paste to your webdriver extension.
 
@@ -54,6 +54,7 @@
         return Convert.ToInt32(elementCount);
     }
 
-
+# see also http://www.vcskicks.com/selenium-jquery.php
+# https://cssgreut.wordpress.com/2010/12/20/run-selenium-ide-tests-with-jquery-selectors/
 #>
 
