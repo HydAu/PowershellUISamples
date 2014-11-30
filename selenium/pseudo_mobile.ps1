@@ -1,6 +1,29 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 # http://seleniumeasy.com/selenium-tutorials/set-browser-width-and-height-in-selenium-webdriver
 param(
-  [switch]$browser
+  [switch]$browser,  
+  [switch]$pause
+
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -14,6 +37,20 @@ function Get-ScriptDirectory
   } else {
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
+}
+
+function set_timeouts {
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref,
+    [int]$explicit = 120,
+    [int]$page_load = 600,
+    [int]$script = 3000
+  )
+
+  [void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
+  [void]($selenium_ref.Value.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
+  [void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
+
 }
 
 function cleanup
@@ -40,15 +77,17 @@ $env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object { 
+# Unblock-File -Path $_; 
+Add-Type -Path $_ 
+}
 popd
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 $verificationErrors = New-Object System.Text.StringBuilder
-$base_url = 'http://m.carnival.com/'
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
   try {
-    $connection = (New-Object Net.Sockets.TcpClient)
+
     $connection.Connect("127.0.0.1",4444)
     $connection.Close()
   } catch {
@@ -68,20 +107,59 @@ if ($PSBoundParameters["browser"]) {
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
-[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))
+[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(3000))
 
-$selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
-$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
+
+if ($host.Version.Major -le 2) {
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  $selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
+  $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
+} else { 
+  $selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
+  $selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
+}
+
 $window_position = $selenium.manage().Window.Position
 $window_size = $selenium.manage().Window.Size
+
+
+$base_url = 'http://m.carnival.com/'
 $selenium.Navigate().GoToUrl($base_url)
+# set_timeouts ([ref]$selenium)
 $selenium.Navigate().Refresh()
 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $name = "ddlDestinations"
-  $xpath = ('//select[@id="{0}"]' -f $name)
+$css_selector = 'select#ddlDestinations > option.cclMobileOptionColor[value=Placeholder]:nth-child(1)'
+write-output ( 'Locating via CSS SELECTOR: "{0}"' -f $css_selector )
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message )
+  # Exception with : Value cannot be null.
+  # Parameter name: key ...
+  # ???
+}
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+
+[NUnit.Framework.Assert]::AreEqual($element.Text ,  'Select a Destination')
+
+if ($PSBoundParameters['pause']) {
+  write-output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$name = "ddlDestinations"
+$xpath = ('//select[@id="{0}"]' -f $name)
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
