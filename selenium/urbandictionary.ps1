@@ -24,7 +24,6 @@ param(
   [string]$version,
   [string]$profile = 'Selenium',
   [switch]$pause
-
 )
 
 function set_timeouts {
@@ -134,12 +133,12 @@ try {
 [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
 $selected_profile_object.setPreference('general.useragent.override','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
 
-
+<#
 $profile_raw64 = $selected_profile_object.ToBase64String()
 $profile_raw64 | Out-File -FilePath 'a.txt'
 $profile_raw = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($profile_raw64))
 $profile_raw | Out-File -FilePath 'a.zip'
-
+#>
 # These preferences have no effect, need to find the correct syntax
 # $selected_profile_object.setPreference('browser.window.width',480)
 # $selected_profile_object.setPreference('browser.window.height',600)
@@ -164,9 +163,15 @@ $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_
 $DebugPreference = 'Continue'
 $base_url = 'http://www.urbandictionary.com/'
 
+  if ($host.Version.Major -le 2) {
+
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
+$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
+} else {
 $selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
 $selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
-
+}
 $selenium.Navigate().GoToUrl($base_url)
 set_timeouts ([ref]$selenium)
 
