@@ -1,4 +1,4 @@
-﻿# http://www.leeholmes.com/blog/2007/02/28/calling-a-webservice-from-powershell/
+# http://www.leeholmes.com/blog/2007/02/28/calling-a-webservice-from-powershell/
 # http://terraserver-usa.com/TerraService2.asmx?wsdl
 
 
@@ -10,7 +10,7 @@
 ##
 ## Example:
 ##
-##     $wsdl = "http://terraserver.microsoft.com/TerraService2.asmx?WSDL"
+##     $wsdl = "http://terraserver-usa.com/TerraService2.asmx?wsdl"
 ##     $terraServer = Connect-WebService $wsdl
 ##     $place = New-Object Place
 ##     $place.City = "Redmond"
@@ -41,16 +41,46 @@ if ($oldInstance) {
   return
 }
 
+
+$proxyAddr = (get-itemproperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').ProxyServer
+if ($proxyAddr -eq $null ){
+  $proxyAddr = (get-itemproperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').AutoConfigURL
+}
+
+if ($proxyAddr -eq $null){
+  $proxyAddr = 'http://proxy.carnival.com:8080/array.dll?Get.Routing.Script'
+}
+
+write-output ('Using proxy: {0}' -f $proxyAddr )
+
+$proxy = new-object System.Net.WebProxy
+$proxy
+$proxy.Address = $proxyAddr
+write-debug ("Probing {0}" -f $proxy.Address )
+
+$proxy.useDefaultCredentials = $true
+
+$req = [system.Net.WebRequest]::Create($wsdlLocation)
+$req.proxy = $proxy
+$req.useDefaultCredentials = $true
+
 ## Load the required Web Services DLL
 [void][Reflection.Assembly]::LoadWithPartialName("System.Web.Services")
 ## Download the WSDL for the service, and create a service description from
 ## it.
-$wc = New-Object System.Net.WebClient
-if ($requiresAuthentication) {
-  $wc.useDefaultCredentials = $true
+
+
+try {
+    $res = $req.GetResponse()
+} catch [System.Net.WebException] {
+    $res = $_.Exception.Response
 }
 
-$wsdlStream = $wc.OpenRead($wsdlLocation)
+$wsdlStream  = $res.GetResponseStream() 
+       $stream_reader = new-object System.IO.StreamReader $wsdlStream
+       $result_page = $stream_reader.ReadToEnd()
+$result_page
+# $wsdlStream = $wc.OpenRead($wsdlLocation)
 ## Ensure that we were able to fetch the WSDL
 if (-not (Test-Path Variable:\wsdlStream)) {
   return
@@ -124,8 +154,6 @@ else
 
 
 <#
-
-
 <?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://msrmaps.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://msrmaps.com/">
   <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MSR Maps Web Service</wsdl:documentation>
@@ -1031,5 +1059,4 @@ else
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
-
 #>
