@@ -20,6 +20,8 @@
 
 <#
 $DebugPreference = 'Continue' ; . .\soap_basic_test2.ps1  -wsdlLocation "http://terraserver-usa.com/TerraService2.asmx?wsdl"  -no_cache
+
+$DebugPreference = 'Continue' ; . .\soap_basic_test2.ps1  -wsdlLocation "http://scbuqcjzfw.eu1.comindware.net/webService/platform/CoreWebService.svc?wsdl"
 #>
 param(
   [string]$wsdlLocation = $(throw 'Please specify a WSDL location'),
@@ -1217,6 +1219,11 @@ else
   ${GLOBAL:Lee.Holmes.WebServiceCache}[$wsdlLocation] = $instance
   }
 
+  $cmwClient = $instance
+  $cmwClient.ClientCredentials.UserName.UserName = "Administrator";
+  $cmwClient.ClientCredentials.UserName.Password = "e15HlFmH";
+
+<#
   $place = New-Object Place
   $place.City = "Miami"
   $place.State = "FL"
@@ -1224,5 +1231,6 @@ else
   $facts = $instance.GetPlaceFacts($place)
   $facts.Center | Format-List
   return $instance
+#>
 }
 
