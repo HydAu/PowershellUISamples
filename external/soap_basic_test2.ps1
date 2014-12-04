@@ -20,7 +20,6 @@
 
 <#
 $DebugPreference = 'Continue' ; . .\soap_basic_test2.ps1  -wsdlLocation "http://terraserver-usa.com/TerraService2.asmx?wsdl"  -no_cache
-
 $DebugPreference = 'Continue' ; . .\soap_basic_test2.ps1  -wsdlLocation "http://scbuqcjzfw.eu1.comindware.net/webService/platform/CoreWebService.svc?wsdl"
 #>
 param(
