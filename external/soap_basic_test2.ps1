@@ -1,27 +1,5 @@
 # http://www.leeholmes.com/blog/2007/02/28/calling-a-webservice-from-powershell/
 # http://stackoverflow.com/questions/27271744/using-new-webserviceproxy-under-powershell
-##############################################################################
-## Connect-WebService.ps1
-##
-## Connect to a given web service, and create a type that allows you to
-## interact with that web service.
-##
-## Example:
-##
-##     $wsdl = "http://terraserver-usa.com/TerraService2.asmx?wsdl"
-##     $terraServer = Connect-WebService $wsdl
-##     $place = New-Object Place
-##     $place.City = "Redmond"
-##     $place.State = "WA"
-##     $place.Country = "USA"
-##     $facts = $terraserver.GetPlaceFacts($place)
-##     $facts.Center
-##############################################################################
-
-<#
-$DebugPreference = 'Continue' ; . .\soap_basic_test2.ps1  -wsdlLocation "http://terraserver-usa.com/TerraService2.asmx?wsdl"  -no_cache
-$DebugPreference = 'Continue' ; . .\soap_basic_test2.ps1  -wsdlLocation "http://scbuqcjzfw.eu1.comindware.net/webService/platform/CoreWebService.svc?wsdl"
-#>
 param(
   [string]$wsdlLocation = $(throw 'Please specify a WSDL location'),
   [string]$namespace,
@@ -1218,10 +1196,26 @@ else
   ${GLOBAL:Lee.Holmes.WebServiceCache}[$wsdlLocation] = $instance
   }
 
-  $cmwClient = $instance
-  $cmwClient.ClientCredentials.UserName.UserName = "Administrator";
+  $instance.AccountList()
 
-  $cmwClient.ClientCredentials.UserName.Password = "e15HlFmH";
+<#
+$instance | get-member
+
+  $cmwClient = new-object $instance.CoreWebServiceClient.CoreWebServiceClient("WSHttpBinding_ICoreWebService")
+#   $cmwClient = $instance
+$cmwClient.ClientCredentials |  get-member
+  $cmwClient.ClientCredentials.UserName = "Administrator";
+$cmwClient.ClientCredentials |  get-member
+  $cmwClient.ClientCredentials.Password = "e15HlFmH";
+
+$taskData = @{"title" = "Hello, world";
+            "description" = "Ws task";}
+            $cmwClient.TaskCreate($null, $taskData)
+
+
+  return $instance
+#>
+
 
 <#
   $place = New-Object Place
