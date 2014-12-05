@@ -1,5 +1,5 @@
-﻿# http://www.leeholmes.com/blog/2007/02/28/calling-a-webservice-from-powershell/
-
+# http://www.leeholmes.com/blog/2007/02/28/calling-a-webservice-from-powershell/
+# http://stackoverflow.com/questions/27271744/using-new-webserviceproxy-under-powershell
 ##############################################################################
 ## Connect-WebService.ps1
 ##
@@ -1219,7 +1219,8 @@ else
   }
 
   $cmwClient = $instance
-  $cmwClient.ClientCredentials.UserName.UserName = "Administrator";
+  $cmwClient.ClientCredentials.UserName.UserName = "Administrator";
+
   $cmwClient.ClientCredentials.UserName.Password = "e15HlFmH";
 
 <#
