@@ -257,6 +257,134 @@ $show_buttons_arg  = $false
   if ($PSBoundParameters["show_buttons"]) {
 $show_buttons_arg = $true
   }
+
+
+function collect_config_data {
+
+  param(
+    [ValidateNotNull()]
+    [string]$target_domain,
+    [string]$target_unc_path,
+    [scriptblock]$script_block,
+    [bool]$verbose,
+    [bool]$debug
+  )
+
+  $local:result = @()
+  if (($target_domain -eq $null) -or ($target_domain -eq '')) {
+    if ($powerless) {
+      return $local:result
+    } else {
+      throw 'unspecified DOMAIN'
+    }
+  }
+  if (-not ($target_domain -match $env:USERDOMAIN)) {
+    if ($powerless) {
+      return $local:result
+    } else {
+      throw 'Unreachable DOMAIN'
+    }
+  }
+  if ($verbose) {
+    Write-Host ('Probing "{0}"' -f $target_unc_path) 
+  }
+
+  [xml]$xml_config = Get-Content -Path $target_unc_path
+  $object_ref = ([ref]$xml_config)
+  $result_ref = ([ref]$local:result)
+
+  Invoke-Command $script_block -ArgumentList $object_ref,$result_ref,$verbose,$debug
+
+  if ($verbose) {
+    Write-host ("Result:`r`n---`r`n{0}`r`n---`r`n" -f ($local:result -join "`r`n"))
+  }
+
+}
+
+[scriptblock]$Extract_appSetting = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = $null
+  )
+
+  if ($key -eq $null -or $key -eq '') {
+    throw 'Key cannot be null'
+
+  }
+
+  $data = @{}
+  $nodes = $object_ref.Value.Configuration.location.appSettings.add
+  for ($cnt = 0; $cnt -ne $nodes.count; $cnt++) {
+    # FIXME
+    $k = $nodes[$cnt].Getattribute('key')
+    $v = $nodes[$cnt].Getattribute('value')
+
+
+    if ($k -match $key) {
+
+      if ($global:debug) {
+        Write-Host $k
+        Write-Host $key
+        Write-Host $v
+      }
+      $data[$k] += $v
+
+    }
+
+  }
+
+  $result_ref.Value = $data[$key]
+}
+
+
+
+[scriptblock]$Extract_RuleActionurl = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [string]$key = $null
+  )
+
+  if ($key -eq $null -or $key -eq '') {
+    throw 'Key cannot be null'
+
+  }
+
+  $data = @{}
+  $nodes = $object_ref.Value.Configuration.location.'system.webServer'.rewrite.rules.rule
+  if ($global:debug) {
+    Write-Host $nodes.count
+  }
+  for ($cnt = 0; $cnt -ne $nodes.count; $cnt++) {
+
+    $k = $nodes[$cnt].Getattribute('name')
+    $v = $nodes[$cnt].action.Getattribute('url')
+    if ($k -match $key) {
+      $data[$k] += $v
+      if ($global:debug) {
+        # write-output $k; write-output $v
+      }
+    }
+
+  }
+
+  $result_ref.Value = $data[$key]
+}
+
+$configuration_paths = @{
+
+  'Staging' = @{
+    'COMMENT' = 'Staging Web Servers ConnectionStrings.config';
+    'DOMAIN' = 'CARNIVAL';
+    'UNC_PATHS' = @(
+      '\\cclprdecostg1.carnival.com\e$\SitecoreCMS\Carnival\Website\App_Config\ConnectionStrings.config',
+      '\\cclprdecostg1.carnival.com\e$\Projects\prod.carnival.com\Carnival\App_Config\ConnectionStrings.config',
+      $null
+    );
+  };
+}
+
 $DebugPreference = 'Continue'
 GroupedListBox -Title '' -show_buttons $show_buttons_arg | Out-Null
 
