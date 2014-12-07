@@ -125,7 +125,7 @@ function GroupedListBox
   $f = New-Object System.Windows.Forms.Form
 
   $f.Text = $title
-  $width = 500
+  $width = 640
   $f.Size = New-Object System.Drawing.Size ($width,400)
   # http://www.codeproject.com/Articles/451742/Extending-Csharp-ListView-with-Collapsible-Groups
   # http://www.codeproject.com/Articles/451735/Extending-Csharp-ListView-with-Collapsible-Groups
@@ -172,7 +172,7 @@ function GroupedListBox
     $label1.Location = New-Object System.Drawing.Point (12,13)
     $label1.Size = New-Object System.Drawing.Size (230,18)
     $label1.Text = 'Grouped List Control Demo'
-    # $label1.Font = new System.Drawing.Font("Lucida Sans", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)))
+    $label1.Font = New-Object System.Drawing.Font ('Lucida Sans',10.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
     [System.Windows.Forms.Button]$button1 = New-Object -TypeName 'System.Windows.Forms.Button'
 
     $button1.Location = New-Object System.Drawing.Point (303,46)
@@ -180,13 +180,14 @@ function GroupedListBox
     $button1.Size = New-Object System.Drawing.Size (166,23)
     $button1.TabIndex = 3
     $button1.Text = 'Add Data Items (disconnected)'
+    $button1.Enabled = $false
     $button1.UseVisualStyleBackColor = true
     $button1.Add_Click({ Write-Host $glc.GetType()
+
         $x = $glc | Get-Member
         Write-Host ($x -join "`n")
       })
 
-    #        private System.Windows.Forms.Button button2;
     $f.Controls.Add($cb1)
     $f.Controls.Add($button1)
     $f.Controls.Add($label1)
@@ -198,47 +199,41 @@ function GroupedListBox
     $glc.Size = $f.Size
 
   }
-  foreach ($key in $configuration_discovery_results.Keys)  {
-#  $configuration_discovery_results.Keys | foreach-object { 
-    $key = $_
-
-<# Cannot overwrite variable lg because the variable has been optimized. 
-Try using the New-Variable or Set-Variable cmdlet (without any aliases), or 
-dot-source the command that you are using to set the variable. #>
-
+  foreach ($key in $configuration_discovery_results.Keys) {
     $values = $configuration_discovery_results[$key]
-    $configurations = $values['CONFIGURATIONS'] 
-
-#     [GroupedListControl.ListGroup]
-$lg = New-Object -TypeName 'GroupedListControl.ListGroup'
-
-    $lg.Columns.Add(("Config: {0}" -f $key) ,120)
+    $configurations = $values['CONFIGURATIONS']
+    [GroupedListControl.ListGroup]$lg = New-Object -TypeName 'GroupedListControl.ListGroup'
+    $lg.Columns.Add($values['COMMENT'],120)
     $lg.Columns.Add("Key",150)
-    $lg.Columns.Add("Value",150)
-#    $configurations.Keys | foreach-object {  
-   foreach ($k in  $configurations.Keys) {  
-      $k = $_
-      $v =  $configurations[$k]
-      [System.Windows.Forms.ListViewItem]$item = $lg.Items.Add((''))
+    $lg.Columns.Add("Value",300)
+    # TODO - document the error.
+    #    $configurations.Keys | foreach-object {  
+    foreach ($k in $configurations.Keys) {
+      $v = $configurations[$k]
+      [System.Windows.Forms.ListViewItem]$item = $lg.Items.Add($key)
       $item.SubItems.Add($k)
       $item.SubItems.Add($v)
-
     }
-  } 
 
+    $glc.Controls.Add($lg)
 
-  for ($group = 1; $group -le 5; $group++)
+  }
+
+  for ($group = 1; $group -le 2; $group++)
   {
     [GroupedListControl.ListGroup]$lg = New-Object -TypeName 'GroupedListControl.ListGroup'
     $lg.Columns.Add("List Group " + $group.ToString(),120)
     $lg.Columns.Add("Group " + $group + " SubItem 1",150)
     $lg.Columns.Add("Group " + $group + " Subitem 2",150)
+    $lg.Columns.Add("Group " + $group + " Subitem 3",150)
     $lg.Name = ("Group " + $group)
     # add some sample items:
-    for ($j = 1; $j -le 5; $j++) {
+
+    for ($j = 1; $j -le 3; $j++) {
       [System.Windows.Forms.ListViewItem]$item = $lg.Items.Add(("Item " + $j.ToString()))
       $item.SubItems.Add($item.Text + " SubItem 1")
       $item.SubItems.Add($item.Text + " SubItem 2")
+      $item.SubItems.Add($item.Text + " SubItem 3")
     }
 
     # Add handling for the columnRightClick Event. 
@@ -261,28 +256,18 @@ $lg = New-Object -TypeName 'GroupedListControl.ListGroup'
 
   $f.Controls.Add($glc)
   $glc.ResumeLayout($false)
-
   $f.ResumeLayout($false)
-
   $f.StartPosition = 'CenterScreen'
-
   $f.KeyPreview = $True
-
   $f.Topmost = $True
-
   $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
   $f.Add_Shown({ $f.Activate() })
-
   [void]$f.ShowDialog([win32window]($caller))
   $f.Dispose()
   $result = $caller.Message
   $caller = $null
   return $result
 }
-
-
-
 
 function collect_config_data {
 
@@ -411,64 +396,28 @@ if ($PSBoundParameters["show_buttons"]) {
 
 $configuration_discovery_results = @{
   'Web.config' = @{
-    'COMMENT' = 'Staging Web Server';
+    'COMMENT' = 'Web Server';
     'DOMAIN' = '';
     'CONFIGURATIONS' = @{
       'Exit SSL cms targetted offers' = 'http://www.carnival.com/{R:1}';
       'Force Non Https for Home Page' = 'http://www.carnival.com';
       'To new deck plans page' = 'http://www.carnival.com/common/CCLUS/ships/ship/htmldeckplans.aspx';
       'imagesCdnHostToPrepend' = 'http://static.carnivalcloud.com';
-      'SecureLoginUrl' = 'hhttps://secure.carnival.com/SignInTopSSL.aspx';
     };
   };
 
   'ConnectionStrings.config' = @{
-    'COMMENT' = 'Staging Web Server';
+    'COMMENT' = 'Admin Server';
     'DOMAIN' = '';
     'CONFIGURATIONS' = @{
       'SecureLoginUrl' = 'https://secure.carnival.com/SignInTopSSL.aspx';
-      'CarnivalHeaderHtmlUrl' = 'http://www.carnival.com/service/header.aspx';
-      'CarnivalFooterHtmlUrl' = 'http://www.carnival.com/service/footer.aspx';
       'SecureUrl' = 'https://secure.carnival.com/';
-      'DefaultRobotsDomain' = 'www.carnival.com';
-      'DeckPlanServiceDomain' = 'www.carnival.com';
-      'USDomain' = 'www.carnival.com, secure.carnival.com';
-      'UKDomain' = 'www.carnival.co.uk, secure.carnival.co.uk';
-      'UKDomains' = 'www.carnival.co.uk, secure.carnival.co.uk';
       'FullSiteURL' = 'http://www.carnival.com';
       'RESTProxyDomain' = 'http://www.carnival.com';
       'PersonalizationDomain' = 'services.carnival.com';
     };
   };
 }
-
-
-  $configuration_discovery_results.Keys | foreach-object { 
-    $key = $_
-    $values = $configuration_discovery_results[$key]
-    $configurations = $values['CONFIGURATIONS'] 
-    write-output  ("Config: {0}" -f $key) 
-        write-output  "Key"
-        write-output  "Value"
-      $configurations.Keys | foreach-object {  
-      $k = $_
-      $v =  $configurations[$k]
-           write-output   $k
-              write-output  $v
-
-    }
-  } 
-  foreach ($key in $configuration_discovery_results.Keys)  {
-    write-output  ("Config: {0}" -f $key) 
-    $values = $configuration_discovery_results[$key]
-   foreach ($k in  $configurations.Keys) {  
-      $v =  $configurations[$k]
-           write-output   $k
-              write-output  $v
-   }
-}
-return
-
 
 GroupedListBox -Title '' -show_buttons $show_buttons_arg | Out-Null
 
