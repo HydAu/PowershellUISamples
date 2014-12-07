@@ -112,7 +112,7 @@ function GroupedListBox
 {
   param(
     [string]$title,
- [bool]$show_buttons)
+    [bool]$show_buttons)
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic')
@@ -125,7 +125,7 @@ function GroupedListBox
   $f = New-Object System.Windows.Forms.Form
 
   $f.Text = $title
-  $width = 500
+  $width = 640
   $f.Size = New-Object System.Drawing.Size ($width,400)
   # http://www.codeproject.com/Articles/451742/Extending-Csharp-ListView-with-Collapsible-Groups
   # http://www.codeproject.com/Articles/451735/Extending-Csharp-ListView-with-Collapsible-Groups
@@ -150,67 +150,90 @@ function GroupedListBox
   $f.SuspendLayout()
 
   if ($show_buttons) {
-        [System.Windows.Forms.CheckBox]$cb1 = new-object -TypeName 'System.Windows.Forms.CheckBox'
-        $cb1.AutoSize = $true
-        $cb1.Location = new-object System.Drawing.Point(12, 52)
-        $cb1.Name = "chkSingleItemOnlyMode"
-        $cb1.Size = new-object System.Drawing.Size(224, 17)
-        $cb1.Text = 'Single-Group toggle'
-        $cb1.UseVisualStyleBackColor = $true
-        function chkSingleItemOnlyMode_CheckedChanged
-        {
-         param([Object] $sender, [EventArgs] $e)
-            $glc.SingleItemOnlyExpansion = $cb1.Checked
-            if ($glc.SingleItemOnlyExpansion) {
-                $glc.CollapseAll()
-            } else {
-                $glc.ExpandAll()
-            }
-        }
-        $cb1.Add_CheckedChanged({ chkSingleItemOnlyMode_CheckedChanged } )
-        [System.Windows.Forms.Label]$label1 = new-object -TypeName 'System.Windows.Forms.Label' 
-        $label1.Location = new-object System.Drawing.Point(12, 13)
-        $label1.Size = new-object System.Drawing.Size(230, 18) 
-	$label1.Text = 'Grouped List Control Demo'
-        # $label1.Font = new System.Drawing.Font("Lucida Sans", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)))
-        [System.Windows.Forms.Button]$button1 = new-object -TypeName 'System.Windows.Forms.Button' 
+    [System.Windows.Forms.CheckBox]$cb1 = New-Object -TypeName 'System.Windows.Forms.CheckBox'
+    $cb1.AutoSize = $true
+    $cb1.Location = New-Object System.Drawing.Point (12,52)
+    $cb1.Name = "chkSingleItemOnlyMode"
+    $cb1.Size = New-Object System.Drawing.Size (224,17)
+    $cb1.Text = 'Single-Group toggle'
+    $cb1.UseVisualStyleBackColor = $true
+    function chkSingleItemOnlyMode_CheckedChanged
+    {
+      param([object]$sender,[eventargs]$e)
+      $glc.SingleItemOnlyExpansion = $cb1.Checked
+      if ($glc.SingleItemOnlyExpansion) {
+        $glc.CollapseAll()
+      } else {
+        $glc.ExpandAll()
+      }
+    }
+    $cb1.Add_CheckedChanged({ chkSingleItemOnlyMode_CheckedChanged })
+    [System.Windows.Forms.Label]$label1 = New-Object -TypeName 'System.Windows.Forms.Label'
+    $label1.Location = New-Object System.Drawing.Point (12,13)
+    $label1.Size = New-Object System.Drawing.Size (230,18)
+    $label1.Text = 'Grouped List Control Demo'
+    $label1.Font = New-Object System.Drawing.Font ('Lucida Sans',10.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
+    [System.Windows.Forms.Button]$button1 = New-Object -TypeName 'System.Windows.Forms.Button'
 
-            $button1.Location = new-object System.Drawing.Point(303, 46)
-            $button1.Name = "button1"
-            $button1.Size = new-object System.Drawing.Size(166, 23)
-            $button1.TabIndex = 3
-            $button1.Text = 'Add Data Items (disconnected)'
-            $button1.UseVisualStyleBackColor = true
-            $button1.Add_Click( { write-host $glc.GetType() 
-$x =  $glc | get-member
-write-host ($x -join "`n")
-})
-         
-#        private System.Windows.Forms.Button button2;
+    $button1.Location = New-Object System.Drawing.Point (303,46)
+    $button1.Name = "button1"
+    $button1.Size = New-Object System.Drawing.Size (166,23)
+    $button1.TabIndex = 3
+    $button1.Text = 'Add Data Items (disconnected)'
+    $button1.Enabled = $false
+    $button1.UseVisualStyleBackColor = true
+    $button1.Add_Click({ Write-Host $glc.GetType()
+
+        $x = $glc | Get-Member
+        Write-Host ($x -join "`n")
+      })
+
     $f.Controls.Add($cb1)
     $f.Controls.Add($button1)
     $f.Controls.Add($label1)
 
-    $glc.Location =  new-object System.Drawing.Point(0, 75)
-    $glc.Size =  new-object  System.Drawing.Size($f.size.Width, ($f.size.Height - 75))
+    $glc.Location = New-Object System.Drawing.Point (0,75)
+    $glc.Size = New-Object System.Drawing.Size ($f.Size.Width,($f.Size.Height - 75))
 
-  } else { 
-  $glc.Size = $f.Size
+  } else {
+    $glc.Size = $f.Size
 
-}
+  }
+  foreach ($key in $configuration_discovery_results.Keys) {
+    $values = $configuration_discovery_results[$key]
+    $configurations = $values['CONFIGURATIONS']
+    [GroupedListControl.ListGroup]$lg = New-Object -TypeName 'GroupedListControl.ListGroup'
+    $lg.Columns.Add($values['COMMENT'],120)
+    $lg.Columns.Add("Key",150)
+    $lg.Columns.Add("Value",300)
+    # TODO - document the error.
+    #    $configurations.Keys | foreach-object {  
+    foreach ($k in $configurations.Keys) {
+      $v = $configurations[$k]
+      [System.Windows.Forms.ListViewItem]$item = $lg.Items.Add($key)
+      $item.SubItems.Add($k)
+      $item.SubItems.Add($v)
+    }
 
-  for ($group = 1; $group -le 5; $group++)
+    $glc.Controls.Add($lg)
+
+  }
+
+  for ($group = 1; $group -le 2; $group++)
   {
     [GroupedListControl.ListGroup]$lg = New-Object -TypeName 'GroupedListControl.ListGroup'
-    $lg.Columns.Add("List Group " + $group.ToString(), 120 )
-    $lg.Columns.Add("Group " + $group + " SubItem 1", 150 )
-    $lg.Columns.Add("Group " + $group + " Subitem 2", 150 )
+    $lg.Columns.Add("List Group " + $group.ToString(),120)
+    $lg.Columns.Add("Group " + $group + " SubItem 1",150)
+    $lg.Columns.Add("Group " + $group + " Subitem 2",150)
+    $lg.Columns.Add("Group " + $group + " Subitem 3",150)
     $lg.Name = ("Group " + $group)
     # add some sample items:
-    for ($j = 1; $j -le 5; $j++){
+
+    for ($j = 1; $j -le 3; $j++) {
       [System.Windows.Forms.ListViewItem]$item = $lg.Items.Add(("Item " + $j.ToString()))
       $item.SubItems.Add($item.Text + " SubItem 1")
       $item.SubItems.Add($item.Text + " SubItem 2")
+      $item.SubItems.Add($item.Text + " SubItem 3")
     }
 
     # Add handling for the columnRightClick Event. 
@@ -233,31 +256,18 @@ write-host ($x -join "`n")
 
   $f.Controls.Add($glc)
   $glc.ResumeLayout($false)
-
   $f.ResumeLayout($false)
-
   $f.StartPosition = 'CenterScreen'
-
   $f.KeyPreview = $True
-
   $f.Topmost = $True
-
   $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
   $f.Add_Shown({ $f.Activate() })
-
   [void]$f.ShowDialog([win32window]($caller))
   $f.Dispose()
   $result = $caller.Message
   $caller = $null
   return $result
 }
-$show_buttons_arg  = $false
-
-  if ($PSBoundParameters["show_buttons"]) {
-$show_buttons_arg = $true
-  }
-
 
 function collect_config_data {
 
@@ -286,7 +296,7 @@ function collect_config_data {
     }
   }
   if ($verbose) {
-    Write-Host ('Probing "{0}"' -f $target_unc_path) 
+    Write-Host ('Probing "{0}"' -f $target_unc_path)
   }
 
   [xml]$xml_config = Get-Content -Path $target_unc_path
@@ -296,7 +306,7 @@ function collect_config_data {
   Invoke-Command $script_block -ArgumentList $object_ref,$result_ref,$verbose,$debug
 
   if ($verbose) {
-    Write-host ("Result:`r`n---`r`n{0}`r`n---`r`n" -f ($local:result -join "`r`n"))
+    Write-Host ("Result:`r`n---`r`n{0}`r`n---`r`n" -f ($local:result -join "`r`n"))
   }
 
 }
@@ -314,30 +324,22 @@ function collect_config_data {
   }
 
   $data = @{}
-  $nodes = $object_ref.Value.Configuration.location.appSettings.add
+  $nodes = $object_ref.Value.Configuration.Location.appSettings.Add
   for ($cnt = 0; $cnt -ne $nodes.count; $cnt++) {
-    # FIXME
     $k = $nodes[$cnt].Getattribute('key')
     $v = $nodes[$cnt].Getattribute('value')
 
-
     if ($k -match $key) {
-
       if ($global:debug) {
         Write-Host $k
         Write-Host $key
         Write-Host $v
       }
       $data[$k] += $v
-
     }
-
   }
-
   $result_ref.Value = $data[$key]
 }
-
-
 
 [scriptblock]$Extract_RuleActionurl = {
   param(
@@ -348,11 +350,10 @@ function collect_config_data {
 
   if ($key -eq $null -or $key -eq '') {
     throw 'Key cannot be null'
-
   }
 
   $data = @{}
-  $nodes = $object_ref.Value.Configuration.location.'system.webServer'.rewrite.rules.rule
+  $nodes = $object_ref.Value.Configuration.Location.'system.webServer'.rewrite.rules.rule
   if ($global:debug) {
     Write-Host $nodes.count
   }
@@ -363,7 +364,7 @@ function collect_config_data {
     if ($k -match $key) {
       $data[$k] += $v
       if ($global:debug) {
-        # write-output $k; write-output $v
+        Write-Output $k; Write-Output $v
       }
     }
 
@@ -386,5 +387,37 @@ $configuration_paths = @{
 }
 
 $DebugPreference = 'Continue'
+
+$show_buttons_arg = $false
+
+if ($PSBoundParameters["show_buttons"]) {
+  $show_buttons_arg = $true
+}
+
+$configuration_discovery_results = @{
+  'Web.config' = @{
+    'COMMENT' = 'Web Server';
+    'DOMAIN' = '';
+    'CONFIGURATIONS' = @{
+      'Exit SSL cms targetted offers' = 'http://www.carnival.com/{R:1}';
+      'Force Non Https for Home Page' = 'http://www.carnival.com';
+      'To new deck plans page' = 'http://www.carnival.com/common/CCLUS/ships/ship/htmldeckplans.aspx';
+      'imagesCdnHostToPrepend' = 'http://static.carnivalcloud.com';
+    };
+  };
+
+  'ConnectionStrings.config' = @{
+    'COMMENT' = 'Admin Server';
+    'DOMAIN' = '';
+    'CONFIGURATIONS' = @{
+      'SecureLoginUrl' = 'https://secure.carnival.com/SignInTopSSL.aspx';
+      'SecureUrl' = 'https://secure.carnival.com/';
+      'FullSiteURL' = 'http://www.carnival.com';
+      'RESTProxyDomain' = 'http://www.carnival.com';
+      'PersonalizationDomain' = 'services.carnival.com';
+    };
+  };
+}
+
 GroupedListBox -Title '' -show_buttons $show_buttons_arg | Out-Null
 
