@@ -47,9 +47,15 @@ function redirect_workaround {
     $result = (Invoke-WebRequest -MaximumRedirection 0 -Uri "http://${web_host}/${app_virtual_path}" -ErrorAction 'SilentlyContinue')
     if ($result.StatusCode -eq '302' -or $result.StatusCode -eq '301') {
       $location = $result.headers.Location
-      # TODO capture the host
-      $location = $location -replace 'secure.carnival.com',$web_host
+      if ($location -match '^http') {
+        # TODO capture the host
+        $location = $location -replace 'secure.carnival.com',$web_host
+      } else {
+        $location = $location -replace '^/',''
+        $location = ('http://{0}/{1}' -f $web_host,$location)
+      }
       Write-Host ('Following {0} ' -f $location)
+
       $result = (Invoke-WebRequest -Uri $location -ErrorAction 'Stop')
     }
   } catch [exception]{}
