@@ -7,7 +7,9 @@ function redirect_workaround {
 
   param(
     [string]$web_host = '',
+    [string]$app_url = '',
     [string]$app_virtual_path = ''
+
 
   )
 
@@ -16,11 +18,14 @@ function redirect_workaround {
 
   }
 
-  if ($app_virtual_path -eq $null -or $app_virtual_path -eq '') {
-    throw 'Path cannot be null'
-
+  if (($app_virtual_path -ne '') -and ($app_virtual_path -ne '')) {
+    $app_url = "http://${web_host}/${app_virtual_path}"
   }
 
+
+  if ($app_url -eq $null -or $app_url -eq '') {
+    throw 'Url cannot be null'
+  }
 
   # workaround for 
   # The underlying connection was closed: Could not establish
@@ -41,10 +46,14 @@ function redirect_workaround {
 "@
   [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 
+  # $cert=New-Object System.Security.Cryptography.X509Certificates.X509Certificate2("cert.crt")
+  # Invoke-WebRequest -Uri https://IPADDRESS/resource -Credential $cred -certificate $cert -Body $json -ContentType application/json -Method POST
+
+
   $result = $null
 
   try {
-    $result = (Invoke-WebRequest -MaximumRedirection 0 -Uri "http://${web_host}/${app_virtual_path}" -ErrorAction 'SilentlyContinue')
+    $result = (Invoke-WebRequest -MaximumRedirection 0 -Uri $app_url -ErrorAction 'SilentlyContinue')
     if ($result.StatusCode -eq '302' -or $result.StatusCode -eq '301') {
       $location = $result.headers.Location
       if ($location -match '^http') {
