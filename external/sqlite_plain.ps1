@@ -99,3 +99,36 @@ function Add-SqliteAssembly {
     $SQLiteBinPath = "$modPath\$binarch\$SQLiteBinName"
     Add-Type -Path $SQLiteBinPath 
 }
+
+<# to find the location of the installed .net assembly on the system
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{02E43EC2-6B1C-45B5-9E48-941C3E1B204A}_is1]
+"Inno Setup: Setup Version"="5.5.5 (a)"
+"Inno Setup: App Path"="c:\\tools\\sqlite3"
+"InstallLocation"="c:\\tools\\sqlite3\\"
+"Inno Setup: Icon Group"="System.Data.SQLite\\2010"
+"Inno Setup: No Icons"=dword:00000001
+"Inno Setup: User"="sergueik"
+"Inno Setup: Setup Type"="custom"
+"Inno Setup: Selected Components"="application,application\\core,application\\core\\msil,application\\core\\x86,application\\test"
+"Inno Setup: Deselected Components"="application\\linq,application\\ef6,application\\designer,application\\designer\\installer,application\\symbols,application\\documentation"
+"Inno Setup: Selected Tasks"="ngen"
+"Inno Setup: Deselected Tasks"="gac"
+"Inno Setup: Language"="default"
+"DisplayName"="System.Data.SQLite v1.0.94.0 (Release)"
+"UninstallString"="\"c:\\tools\\sqlite3\\uninstall\\unins000.exe\""
+"QuietUninstallString"="\"c:\\tools\\sqlite3\\uninstall\\unins000.exe\" /SILENT"
+"DisplayVersion"="1.0.94.0"
+"Publisher"="System.Data.SQLite Team"
+"URLInfoAbout"="http://system.data.sqlite.org/"
+"HelpLink"="http://system.data.sqlite.org/"
+"URLUpdateInfo"="http://system.data.sqlite.org/"
+"Readme"="c:\\tools\\sqlite3\\readme.htm"
+"Comments"="The ADO.NET adapter for the SQLite database engine."
+"NoModify"=dword:00000001
+"NoRepair"=dword:00000001
+"InstallDate"="20141209"
+"MajorVersion"=dword:00000001
+"MinorVersion"=dword:00000000
+"EstimatedSize"=dword:00000f60
+
+#>
