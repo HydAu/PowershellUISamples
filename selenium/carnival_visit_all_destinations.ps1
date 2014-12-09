@@ -19,7 +19,7 @@
 #THE SOFTWARE.
 param(
   # in the current environment phantomejs is not installed 
-  [string]$browser = 'firefox',
+  [string]$browser='firefox',
   [int]$version
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -200,7 +200,7 @@ if ($browser -ne $null -and $browser -ne '') {
   elseif ($browser -match 'ie') {
     $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
     if ($version -ne $null -and $version -ne 0) {
-      $capability.SetCapability("version",$version.ToString());
+      $capability.SetCapability("version", $version.ToString());
     }
 
   }
@@ -251,127 +251,11 @@ $selenium.Manage().Window.Maximize()
 #>
 
 
-$value1 = 'dest'
-$css_selector1 = ('a[data-param={0}]' -f $value1)
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Sail To'))
-
-Write-Output ('Clicking on ' + $element1.Text)
-$element1.Click()
-Start-Sleep 1
-
-$value2 = 'C'
-$css_selector2 = ('a[data-id={0}]' -f $value2)
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-
-try {
-  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-  ##
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-Write-Output ('Clicking on ' + $element2.Text)
-[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
-$actions2.Click().Build().Perform()
-Start-Sleep 1
-
-
-$value1 = 'port'
-$css_selector1 = ('a[data-param={0}]' -f $value1)
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Sail from'))
-
-Write-Output ('Clicking on ' + $element1.Text)
-$element1.Click()
-Start-Sleep 1
-
-
-$value2 = 'FLL'
-$css_selector2 = ('a[data-id={0}]' -f $value2)
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-try {
-  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-Write-Output ('Clicking on ' + $element2.Text)
-[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
-$actions2.Click().Build().Perform()
-Start-Sleep -Milliseconds 150
-
-$value1 = 'dat'
-$css_selector1 = ('a[data-param={0}]' -f $value1)
-try {
-
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-  ##
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Date'))
-
-Write-Output ('Clicking on ' + $element1.Text)
-$element1.Click()
-Start-Sleep 1
-
-$value2 = '"022015"'
-$css_selector2 = ('a[data-id={0}]' -f $value2)
-try {
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-  $wait.PollingInterval = 150
-  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-  ##
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-Write-Output ('Clicking on ' + $element2.Text)
-[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
-$actions2.Click().Build().Perform()
-Start-Sleep 3
-
 $value1 = 'numGuests'
 $css_selector1 = ('a[data-param={0}]' -f $value1)
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 150
 try {
-
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
@@ -382,14 +266,14 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 
 Write-Output ('Clicking on ' + $element1.Text)
 $element1.Click()
-Start-Sleep 3
+Start-Sleep -milliseconds 300 
+
 
 $value2 = '"2"'
-$value2 = '2'
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 150
 
-$css_selector2 = ('a[data-id={0}]' -f $value2)
+$css_selector2 = ('div[class=option][data-param=numGuests] a[data-id={0}]' -f $value2)
 try {
   [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
 } catch [exception]{
@@ -398,10 +282,117 @@ try {
 $element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
 Write-Output ('Clicking on ' + $element2.Text)
 [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-# $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
-# $actions2.Click().Build().Perform()
 $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Click().Build().Perform()
-Start-Sleep 3
+Start-Sleep -milliseconds 300 
+
+
+$value1 = 'dest'
+$css_selector1 = ('a[data-param={0}]' -f $value1)
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Sail To' ))
+
+Write-Output ('Clicking on ' + $element1.Text)
+$element1.Click()
+Start-Sleep -milliseconds 300 
+
+$value2 =  'C'
+$css_selector2 = ('a[data-id={0}]' -f $value2)
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+
+try {
+  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
+##
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+Write-Output ('Clicking on ' + $element2.Text)
+[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+$actions2.Click().Build().Perform()
+Start-Sleep -milliseconds 300 
+
+
+$value1 = 'port'
+$css_selector1 = ('a[data-param={0}]' -f $value1)
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Sail from' ))
+Write-Output ('Clicking on ' + $element1.Text)
+$element1.Click()
+Start-Sleep -milliseconds 300 
+
+
+$value2 =  'FLL'
+$css_selector2 = ('a[data-id={0}]' -f $value2)
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+try {
+  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+Write-Output ('Clicking on ' + $element2.Text)
+[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+$actions2.Click().Build().Perform()
+Start-Sleep -milliseconds 150
+
+$value1 = 'dat'
+$css_selector1 = ('a[data-param={0}]' -f $value1)
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+
+$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Date'))
+
+Write-Output ('Clicking on ' + $element1.Text)
+$element1.Click()
+Start-Sleep -milliseconds 300 
+
+
+$value2 =  '"022015"'
+$css_selector2 = ('a[data-id={0}]' -f $value2)
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+try {
+  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
+
+} catch [exception]{
+  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+}
+$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+Write-Output ('Clicking on ' + $element2.Text)
+[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+$actions2.Click().Build().Perform()
+Start-Sleep -milliseconds 300 
+
 
 $css_selector1 = 'div.actions > a.search'
 try {
@@ -414,7 +405,7 @@ $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selecto
 [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'SEARCH'))
 Write-Output ('Clicking on ' + $element1.Text)
 $element1.Click()
-$element1 = $null
+$element1 = $null 
 Start-Sleep 1
 
 $css_selector1 = "li[class*=num-found] strong"
@@ -435,26 +426,26 @@ try {
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 $elements1 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
-$elements1 | ForEach-Object {
+$elements1 | ForEach-Object { 
 
-  $element3 = $_
+    $element3 = $_
 
-  if (($element5 -eq $null)) {
-    if (-not ($element3.Text -match 'LEARN MORE')) {
-      Write-Output ('Found: ' + $element3.Text)
+    if (($element5 -eq $null)) {
+       if (-not ($element3.Text -match 'LEARN MORE') ){
+       Write-Output ('Found: ' + $element3.Text)
       [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
       $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
-      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
-      Start-Sleep -Milliseconds 140
-      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
+Start-Sleep -milliseconds 140
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
     }
-  }
+    }
 
 }
 
 try {
-  [OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
+  [OpenQA.Selenium.Screenshot]$screenshot =  $selenium.GetScreenshot()
   $guid = [guid]::NewGuid()
   $image_name = ($guid.ToString())
   [string]$image_path = ('{0}\{1}\{2}.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
@@ -463,15 +454,15 @@ try {
   $screenshot.SaveAsFile($image_path,[System.Drawing.Imaging.ImageFormat]::Jpeg)
 
 
-  $owner = New-Object WindowHelper
-  $owner.count = $iteration
-  $owner.Browser = $browser
-  $owner.SrcImagePath = $image_path
-  $owner.TimeStamp = Get-Date
-  $owner.DstImagePath = $stamped_image_path
-  [boolean]$stamp = $false
+$owner = New-Object WindowHelper
+$owner.count = $iteration
+$owner.Browser = $browser
+$owner.SrcImagePath = $image_path
+$owner.TimeStamp = Get-Date
+$owner.DstImagePath = $stamped_image_path 
+[boolean]$stamp = $false
 
-  $owner.StampScreenshot()
+    $owner.StampScreenshot()
 
 } catch [exception]{
   Write-Output $_.Exception.Message
