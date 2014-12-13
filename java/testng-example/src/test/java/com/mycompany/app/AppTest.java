@@ -48,7 +48,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import org.testng.annotations.*;
-// import org.testng.*;
+import org.testng.*;
 
 public class AppTest // extends BaseTest 
 // 
@@ -103,18 +103,13 @@ public   String seleniumPort = null;
 public   String seleniumBrowser = null; 
 
 @BeforeSuite(alwaysRun = true)
-	public void setupBeforeSuite(/* ITestContext context */) throws InterruptedException {
+	public void setupBeforeSuite( ITestContext context ) throws InterruptedException {
 		DesiredCapabilities capabilities = DesiredCapabilities.firefox();
 
- /* 
-seleniumHost = context.getCurrentXmlTest().getParameter("selenium.host");
+
+  seleniumHost = context.getCurrentXmlTest().getParameter("selenium.host");
   seleniumPort = context.getCurrentXmlTest().getParameter("selenium.port");
   seleniumBrowser = context.getCurrentXmlTest().getParameter("selenium.browser");
-*/
-
-seleniumHost  = "127.0.0.1";
-seleniumPort  = "4444";
-seleniumBrowser  = "firefox";
 
 		capabilities =   new DesiredCapabilities(seleniumBrowser , "", Platform.ANY);
 		FirefoxProfile profile = new ProfilesIni().getProfile("default");
