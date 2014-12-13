@@ -541,14 +541,15 @@ function PromptToolsTrip {
   $n = 1
   $help_image_path = ('{0}\color{1}.gif' -f $script_path,$n)
   $help_image = [System.Drawing.Image]::FromFile($help_image_path)
-  $images =   ${
-'help' = $help_image;
-'ToolStripButton2' = $help_image;
-'pasteToolStripButton2' = $help_image;
-'help' = $help_image;
-'help' = $help_image;
-'help' = $help_image;
-}
+  $images = @{
+    'help' = $help_image;
+    'cutToolStripButton2' = $help_image;
+    'pasteToolStripButton2' = $help_image;
+    'copyToolStripButton2' = $help_image;
+    'newToolStripButton1' = $help_image;
+    'saveToolStripButton1' = $help_image;
+    'printToolStripButton1' = $help_image;
+  }
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
   $toolStripContainer1 = New-Object System.Windows.Forms.ToolStripContainer
@@ -608,7 +609,7 @@ function PromptToolsTrip {
   #  cutToolStripButton2
   # 
   $ToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  $ToolStripButton2.Image = $images['ToolStripButton2'] # cutToolStripButton2.Image
+  $ToolStripButton2.Image = $images['cutToolStripButton2'] # cutToolStripButton2.Image
   $ToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $ToolStripButton2.Name = "cutToolStripButton2"
   $ToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
@@ -618,8 +619,7 @@ function PromptToolsTrip {
   #  copyToolStripButton2
   # 
   $copyToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  # $copyToolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("copyToolStripButton2.Image")))
-  $copyToolStripButton2.Image = $images['pasteToolStripButton2'] # cutToolStripButton2.Image
+  $copyToolStripButton2.Image = $images['copyToolStripButton2'] # cutToolStripButton2.Image
   $copyToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $copyToolStripButton2.Name = "copyToolStripButton2"
   $copyToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
@@ -629,8 +629,7 @@ function PromptToolsTrip {
   #  pasteToolStripButton2
   # 
   $pasteToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  # $pasteToolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("pasteToolStripButton2.Image")));
-  $pasteToolStripButton2.Image = $null
+  $pasteToolStripButton2.Image = $images['pasteToolStripButton2']
   $pasteToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $pasteToolStripButton2.Name = "pasteToolStripButton2"
   $pasteToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
@@ -650,8 +649,7 @@ function PromptToolsTrip {
   #  newToolStripButton1
   # 
   $newToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  # $newToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripButton1.Image")));
-  $newToolStripButton1.Image = $null
+  $newToolStripButton1.Image = $images['newToolStripButton1']
   $newToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $newToolStripButton1.Name = "newToolStripButton1"
   $newToolStripButton1.Size = New-Object System.Drawing.Size (23,22)
@@ -672,8 +670,7 @@ function PromptToolsTrip {
   #  saveToolStripButton1
   # 
   $saveToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  # $saveToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripButton1.Image")));
-  $saveToolStripButton1.Image = $null
+  $saveToolStripButton1.Image = $images['saveToolStripButton1']
   $saveToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $saveToolStripButton1.Name = "saveToolStripButton1";
   $saveToolStripButton1.Size = New-Object System.Drawing.Size (23,22);
@@ -683,8 +680,7 @@ function PromptToolsTrip {
   #  printToolStripButton1
   # 
   $printToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  # $printToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("printToolStripButton1.Image")));
-  $printToolStripButton1.Image = $null
+  $printToolStripButton1.Image = $images['printToolStripButton1']
   $printToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $printToolStripButton1.Name = "printToolStripButton1";
   $printToolStripButton1.Size = New-Object System.Drawing.Size (23,22);
