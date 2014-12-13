@@ -268,7 +268,6 @@ Write-Output ('Clicking on ' + $element1.Text)
 $element1.Click()
 Start-Sleep -Milliseconds 300
 
-
 $value2 = '"2"'
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 150
@@ -284,7 +283,6 @@ Write-Output ('Clicking on ' + $element2.Text)
 [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Click().Build().Perform()
 Start-Sleep -Milliseconds 300
-
 
 $value1 = 'dest'
 $css_selector1 = ('a[data-param={0}]' -f $value1)
@@ -309,9 +307,7 @@ $css_selector2 = ('a[data-id={0}]' -f $value2)
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 150
 
-try {
-  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-  ##
+try { [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
@@ -322,7 +318,7 @@ $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform(
 $actions2.Click().Build().Perform()
 Start-Sleep -Milliseconds 300
 
-
+$has_port_selector = $true
 $value1 = 'port'
 $css_selector1 = ('a[data-param={0}]' -f $value1)
 
@@ -331,31 +327,34 @@ $wait.PollingInterval = 150
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
 } catch [exception]{
+  #  this button is optional 
+  $has_port_selector = $false
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
+if ($has_port_selector) {
+  $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+  [NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Sail from'))
+  Write-Output ('Clicking on ' + $element1.Text)
+  $element1.Click()
+  Start-Sleep -Milliseconds 300
 
-$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match 'Sail from'))
-Write-Output ('Clicking on ' + $element1.Text)
-$element1.Click()
-Start-Sleep -Milliseconds 300
 
-
-$value2 = 'FLL'
-$css_selector2 = ('a[data-id={0}]' -f $value2)
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-try {
-  [OpenQA.Selenium.Remote.RemoteWebElement]$element2 = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  $value2 = 'FLL'
+  $css_selector2 = ('a[data-id={0}]' -f $value2)
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  }
+  $element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+  Write-Output ('Clicking on ' + $element2.Text)
+  [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
+  $actions2.Click().Build().Perform()
+  Start-Sleep -Milliseconds 150
 }
-$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-Write-Output ('Clicking on ' + $element2.Text)
-[OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
-$actions2.Click().Build().Perform()
-Start-Sleep -Milliseconds 150
 
 $value1 = 'dat'
 $css_selector1 = ('a[data-param={0}]' -f $value1)
@@ -434,15 +433,18 @@ Write-Output 'Repeat 5 times.'
     $element3 = $_
 
     if (($element5 -eq $null)) {
-      if (($element3.Text -match '\S') -and (-not ($element3.Text -match 'LEARN MORE'))) {
-        # $element3
-        $cnt = $cnt + 1
-        Write-Output ('Found: {0} {1}' -f $element3.Text,$cnt)
-        [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-        $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
-        Start-Sleep -Milliseconds 140
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
+      if ($element3.Text -match '\S') {
+        if (-not ($element3.Text -match 'LEARN MORE')) {
+          # $element3
+          $cnt = $cnt + 1
+          Write-Output ('Found: {0} {1}' -f $element3.Text,$cnt)
+          [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+          $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
+          [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
+          Start-Sleep -Milliseconds 140
+          [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
+        }
+        # cannot LEAN_MORE in a loop 
       }
     }
 
