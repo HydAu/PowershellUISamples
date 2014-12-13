@@ -19,6 +19,26 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
 param(
   [switch]$pause
 )
@@ -40,9 +60,8 @@ function Get-ScriptDirectory
 
 
 # http://www.codeproject.com/Articles/591826/A-Flyout-Toolbar-in-Csharp
-# http://www.codeproject.com/Articles/591826/A-Flyout-Toolbar-in-Csharp
 
-add-type @"
+Add-Type @"
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -525,3 +544,294 @@ namespace CSFOToolBar
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
+
+
+function PromptToolsTrip {
+
+  param(
+    [string]$title,
+    [string]$message,
+    [object]$caller
+  )
+
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
+  $toolStripContainer1 = New-Object System.Windows.Forms.ToolStripContainer
+  $toolStrip2 = New-Object System.Windows.Forms.ToolStrip
+  $ToolStripButton2 = New-Object System.Windows.Forms.ToolStripButton
+  $copyToolStripButton2 = New-Object System.Windows.Forms.ToolStripButton
+  $pasteToolStripButton2 = New-Object System.Windows.Forms.ToolStripButton
+  $toolStrip1 = New-Object System.Windows.Forms.ToolStrip
+  $newToolStripButton1 = New-Object System.Windows.Forms.ToolStripButton
+  $openToolStripButton1 = New-Object System.Windows.Forms.ToolStripButton
+  $saveToolStripButton1 = New-Object System.Windows.Forms.ToolStripButton
+  $printToolStripButton1 = New-Object System.Windows.Forms.ToolStripButton
+  [System.ComponentModel.IContainer]$components = $null
+  $components = New-Object -TypeName 'System.ComponentModel.Container'
+  $csfoToolBar1 = New-Object CSFOToolBar.CSFOToolBar ($components)
+
+  $newToolStripButton = New-Object System.Windows.Forms.ToolStripButton
+  $toolStripSeparator = New-Object System.Windows.Forms.ToolStripSeparator
+  $cutToolStripButton = New-Object System.Windows.Forms.ToolStripButton
+  $toolStripSeparator1 = New-Object System.Windows.Forms.ToolStripSeparator
+  $helpToolStripButton = New-Object System.Windows.Forms.ToolStripButton
+  $toolStripContainer1.ContentPanel.SuspendLayout()
+  $toolStripContainer1.TopToolStripPanel.SuspendLayout()
+  $toolStripContainer1.SuspendLayout()
+  $toolStrip2.SuspendLayout()
+  $toolStrip1.SuspendLayout()
+  $csfoToolBar1.SuspendLayout()
+  $f.SuspendLayout()
+
+  #  toolStripContainer1
+
+  #  toolStripContainer1.ContentPanel
+  $toolStripContainer1.ContentPanel.Controls.Add($toolStrip2)
+  $toolStripContainer1.ContentPanel.Controls.Add($toolStrip1)
+  $toolStripContainer1.ContentPanel.Size = New-Object System.Drawing.Size (284,237)
+  $toolStripContainer1.Dock = [System.Windows.Forms.DockStyle]::Fill
+  $toolStripContainer1.Location = New-Object System.Drawing.Point (0,0)
+  $toolStripContainer1.Name = "toolStripContainer1"
+  $toolStripContainer1.Size = New-Object System.Drawing.Size (284,262)
+  $toolStripContainer1.TabIndex = 0
+  $toolStripContainer1.Text = "toolStripContainer1"
+  # 
+  #  toolStripContainer1.TopToolStripPanel
+  # 
+  $toolStripContainer1.TopToolStripPanel.Controls.Add($csfoToolBar1)
+  # 
+  #  toolStrip2
+  # 
+  $toolStrip2.Dock = [System.Windows.Forms.DockStyle]::None
+  $toolStrip2.Items.AddRange(@( $ToolStripButton2,$copyToolStripButton2,$pasteToolStripButton2))
+  $toolStrip2.Location = New-Object System.Drawing.Point (36,78)
+  $toolStrip2.Name = "toolStrip2"
+  $toolStrip2.Size = New-Object System.Drawing.Size (81,25)
+  $toolStrip2.TabIndex = 1
+  $toolStrip2.Text = "toolStrip2"
+  # 
+  #  cutToolStripButton2
+  # 
+  $ToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  $ToolStripButton2.Image = $null
+  # TODO 
+  # ((System.Drawing.Image)(resources.GetObject("cutToolStripButton2.Image")))
+  $ToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $ToolStripButton2.Name = "cutToolStripButton2"
+  $ToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
+  $ToolStripButton2.Text = "C&ut"
+  # $ToolStripButton2.Click += new System.EventHandler($ToolStripButton2_Click)
+  # 
+  #  copyToolStripButton2
+  # 
+  $copyToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $copyToolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("copyToolStripButton2.Image")))
+  $copyToolStripButton2.Image = $null
+  $copyToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $copyToolStripButton2.Name = "copyToolStripButton2"
+  $copyToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
+  $copyToolStripButton2.Text = "&Copy"
+  #           $copyToolStripButton2.Click += new System.EventHandler($copyToolStripButton2_Click)
+  # 
+  #  pasteToolStripButton2
+  # 
+  $pasteToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $pasteToolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("pasteToolStripButton2.Image")));
+  $pasteToolStripButton2.Image = $null
+  $pasteToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $pasteToolStripButton2.Name = "pasteToolStripButton2"
+  $pasteToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
+  $pasteToolStripButton2.Text = "&Paste"
+  # $pasteToolStripButton2.Click += new System.EventHandler($pasteToolStripButton2_Click)
+  # 
+  #  toolStrip1
+  # 
+  $toolStrip1.Dock = [System.Windows.Forms.DockStyle]::None
+  $toolStrip1.Items.AddRange(@( $newToolStripButton1,$openToolStripButton1,$saveToolStripButton1,$printToolStripButton1));
+  $toolStrip1.Location = New-Object System.Drawing.Point (25,26)
+  $toolStrip1.Name = "toolStrip1"
+  $toolStrip1.Size = New-Object System.Drawing.Size (104,25)
+  $toolStrip1.TabIndex = 0
+  $toolStrip1.Text = "toolStrip1"
+  # 
+  #  newToolStripButton1
+  # 
+  $newToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $newToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripButton1.Image")));
+  $newToolStripButton1.Image = $null
+  $newToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $newToolStripButton1.Name = "newToolStripButton1"
+  $newToolStripButton1.Size = New-Object System.Drawing.Size (23,22)
+  $newToolStripButton1.Text = "&New"
+  #$newToolStripButton1.Click += new System.EventHandler($newToolStripButton1_Click)
+  # 
+  #  openToolStripButton1
+  # 
+  $openToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $openToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("openToolStripButton1.Image")));
+  $openToolStripButton1.Image = $null
+  $openToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $openToolStripButton1.Name = "openToolStripButton1"
+  $openToolStripButton1.Size = New-Object System.Drawing.Size (23,22)
+  $openToolStripButton1.Text = "&Open"
+  #$openToolStripButton1.Click += new System.EventHandler($openToolStripButton1_Click);
+  # 
+  #  saveToolStripButton1
+  # 
+  $saveToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $saveToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("saveToolStripButton1.Image")));
+  $saveToolStripButton1.Image = $null
+  $saveToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $saveToolStripButton1.Name = "saveToolStripButton1";
+  $saveToolStripButton1.Size = New-Object System.Drawing.Size (23,22);
+  $saveToolStripButton1.Text = "&Save";
+  # $saveToolStripButton1.Click += new System.EventHandler($saveToolStripButton1_Click);
+  # 
+  #  printToolStripButton1
+  # 
+  $printToolStripButton1.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $printToolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("printToolStripButton1.Image")));
+  $printToolStripButton1.Image = $null
+  $printToolStripButton1.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $printToolStripButton1.Name = "printToolStripButton1";
+  $printToolStripButton1.Size = New-Object System.Drawing.Size (23,22);
+  $printToolStripButton1.Text = "&Print";
+  #$printToolStripButton1.Click += new System.EventHandler($printToolStripButton1_Click);
+  # 
+  #  csfoToolBar1
+  # 
+  $csfoToolBar1.CornerColor = [System.Drawing.Color]::Red
+  $csfoToolBar1.CornerSize = 6
+  $csfoToolBar1.Delay = 300
+  $csfoToolBar1.Dock = [System.Windows.Forms.DockStyle]::None
+  $csfoToolBar1.Items.AddRange(@( $newToolStripButton,$toolStripSeparator,$cutToolStripButton,$toolStripSeparator1,$helpToolStripButton))
+  $csfoToolBar1.Location = New-Object System.Drawing.Point (3,0)
+  $csfoToolBar1.Name = "csfoToolBar1"
+  $csfoToolBar1.Restrict = $false
+  $csfoToolBar1.Size = New-Object System.Drawing.Size (124,25)
+  $csfoToolBar1.TabIndex = 0
+  # wrong syntax
+  #          $csfoToolBar1.TOrientation = [CSFOToolBar.CSFOToolBar.orientation_list]::Horizontal
+  # csfoToolBar1.TOrientation = [CSFOToolBar.CSFOToolBar.orientation_list]::Horizontal
+  # 
+  #  newToolStripButton
+  # 
+  $newToolStripButton.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $newToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("newToolStripButton.Image")));
+  $newToolStripButton.Image = $null
+  $newToolStripButton.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $newToolStripButton.Name = "newToolStripButton"
+  $newToolStripButton.Size = New-Object System.Drawing.Size (23,22)
+  $newToolStripButton.Text = "&New"
+  # 
+  #  toolStripSeparator
+  # 
+  $toolStripSeparator.Name = "toolStripSeparator";
+  $toolStripSeparator.Size = New-Object System.Drawing.Size (6,25)
+  # 
+  #  cutToolStripButton
+  # 
+  $cutToolStripButton.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+  # $cutToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("cutToolStripButton.Image")));
+  $cutToolStripButton.Image = $null
+  $cutToolStripButton.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $cutToolStripButton.Name = "cutToolStripButton";
+  $cutToolStripButton.Size = New-Object System.Drawing.Size (23,22)
+  $cutToolStripButton.Text = "C&ut";
+  # 
+  #  toolStripSeparator1
+  # 
+  $toolStripSeparator1.Name = "toolStripSeparator1";
+  $toolStripSeparator1.Size = New-Object System.Drawing.Size (6,25)
+  # 
+  #  helpToolStripButton
+  # 
+  $helpToolStripButton.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
+
+
+  ## TODO $script_path = $caller.ScriptDirectory
+  $script_path = Get-ScriptDirectory
+  $n = 1
+  $help_image_path = ('{0}\color{1}.gif' -f $script_path,$n)
+  $help_image = [System.Drawing.Image]::FromFile($help_image_path)
+  $i.Images.Add($image)
+
+  # $helpToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripButton.Image")));
+  $helpToolStripButton.Image = $help_imag
+  $helpToolStripButton.ImageTransparentColor = [System.Drawing.Color]::Magenta
+  $helpToolStripButton.Name = "helpToolStripButton"
+  $helpToolStripButton.Size = New-Object System.Drawing.Size (23,22)
+  $helpToolStripButton.Text = "He&lp"
+  # $helpToolStripButton.Click += new System.EventHandler($helpToolStripButton_Click)
+  # 
+  #  Form1
+  # 
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
+  $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+  $f.ClientSize = New-Object System.Drawing.Size (284,262)
+  $f.Controls.Add($toolStripContainer1)
+  $f.Name = "Form1"
+  $f.Text = "Form1"
+  # his.Load += new System.EventHandler($f.Form1_Load)
+
+  $toolStripContainer1.ContentPanel.ResumeLayout($false)
+  $toolStripContainer1.ContentPanel.PerformLayout()
+  $toolStripContainer1.TopToolStripPanel.ResumeLayout($false)
+  $toolStripContainer1.TopToolStripPanel.PerformLayout()
+  $toolStripContainer1.ResumeLayout($false)
+  $toolStripContainer1.PerformLayout()
+  $toolStrip2.ResumeLayout($false)
+  $toolStrip2.PerformLayout()
+  $toolStrip1.ResumeLayout($false)
+  $toolStrip1.PerformLayout()
+  $csfoToolBar1.ResumeLayout($false)
+  $csfoToolBar1.PerformLayout()
+  $f.ResumeLayout($false)
+
+
+  $f.Topmost = $True
+
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
+  $f.Dispose()
+}
+
+
+Add-Type -TypeDefinition @"
+
+// "
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private string _data;
+
+    public String Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
+PromptToolsTrip -Title 'Floating Menu Sample Project' -caller $caller
+Write-Output $caller.Data
+
