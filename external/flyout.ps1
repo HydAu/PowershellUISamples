@@ -1,24 +1,3 @@
-
-#Copyright (c) 2014 Serguei Kouzmine
-#
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
-#
-#The above copyright notice and this permission notice shall be included in
-#all copies or substantial portions of the Software.
-#
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#THE SOFTWARE.
-
 #Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -98,8 +77,6 @@ namespace CSFOToolBar
             Same,                                                               // The flyout is always displayed in the same orientation than his parent
             Opposite                                                            // The flyout is always displayed in the opposite orientation than his parent
         }
-
-		
 		
         private Color m_CornerColor = Color.Red;
         [CategoryAttribute("Flyout"),
@@ -557,6 +534,21 @@ function PromptToolsTrip {
 
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+
+  ## TODO $script_path = $caller.ScriptDirectory
+  $script_path = Get-ScriptDirectory
+  $n = 1
+  $help_image_path = ('{0}\color{1}.gif' -f $script_path,$n)
+  $help_image = [System.Drawing.Image]::FromFile($help_image_path)
+  $images =   ${
+'help' = $help_image;
+'ToolStripButton2' = $help_image;
+'pasteToolStripButton2' = $help_image;
+'help' = $help_image;
+'help' = $help_image;
+'help' = $help_image;
+}
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
   $toolStripContainer1 = New-Object System.Windows.Forms.ToolStripContainer
@@ -616,9 +608,7 @@ function PromptToolsTrip {
   #  cutToolStripButton2
   # 
   $ToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
-  $ToolStripButton2.Image = $null
-  # TODO 
-  # ((System.Drawing.Image)(resources.GetObject("cutToolStripButton2.Image")))
+  $ToolStripButton2.Image = $images['ToolStripButton2'] # cutToolStripButton2.Image
   $ToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $ToolStripButton2.Name = "cutToolStripButton2"
   $ToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
@@ -629,7 +619,7 @@ function PromptToolsTrip {
   # 
   $copyToolStripButton2.DisplayStyle = [System.Windows.Forms.ToolStripItemDisplayStyle]::Image
   # $copyToolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("copyToolStripButton2.Image")))
-  $copyToolStripButton2.Image = $null
+  $copyToolStripButton2.Image = $images['pasteToolStripButton2'] # cutToolStripButton2.Image
   $copyToolStripButton2.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $copyToolStripButton2.Name = "copyToolStripButton2"
   $copyToolStripButton2.Size = New-Object System.Drawing.Size (23,22)
@@ -757,10 +747,10 @@ function PromptToolsTrip {
   $n = 1
   $help_image_path = ('{0}\color{1}.gif' -f $script_path,$n)
   $help_image = [System.Drawing.Image]::FromFile($help_image_path)
-  $i.Images.Add($image)
+
 
   # $helpToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("helpToolStripButton.Image")));
-  $helpToolStripButton.Image = $help_imag
+  $helpToolStripButton.Image = $help_image
   $helpToolStripButton.ImageTransparentColor = [System.Drawing.Color]::Magenta
   $helpToolStripButton.Name = "helpToolStripButton"
   $helpToolStripButton.Size = New-Object System.Drawing.Size (23,22)
