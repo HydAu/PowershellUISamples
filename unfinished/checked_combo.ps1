@@ -476,8 +476,6 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
-
-
 function PromptToolsTrip {
 
   param(
@@ -510,38 +508,58 @@ function PromptToolsTrip {
     $ccb.Items.Add($item)
   }
 
-  $ccb.MaxDropDownItems = 5
-  $ccb.DisplayMember = "Name"
-  $ccb.ValueSeparator = ", "
-  $ccb.SetItemChecked(0, $true)
-  $ccb.SetItemChecked(1, $true)
+  $eventMethod_ccbitem = $ccb.add_ItemCheck
+  $eventMethod_ccbitem.Invoke({
+      param(
+        [object]$sender,
+        [System.Windows.Forms.ItemCheckEventArgs]$eventargs
+      )
+      [CheckComboBoxTest.CCBoxItem]$item = $ccb.Items[$eventargs.Index]
+      $to.AppendText([string]::Format("Item '{0}' is about to be {1}\r\n",$item.Name,$eventargs.NewValue.ToString()))
+    })
 
-  # ccb.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ccb_ItemCheck);
-  # 
+
   # txtOut
-  # 
   $to.Location = New-Object System.Drawing.Point (12,162)
   $to.Multiline = $true
-  $to.Name = "txtOut"
+  $to.Name = 'txtOut'
   $to.Size = New-Object System.Drawing.Size (382,132)
   $to.TabIndex = 1
-  # 
+
   # ccb
-  # 
   $ccb.CheckOnClick = $true
   $ccb.DrawMode = [System.Windows.Forms.DrawMode]::OwnerDrawVariable
   $ccb.DropDownHeight = 1
   $ccb.FormattingEnabled = $true
   $ccb.IntegralHeight = $false
   $ccb.Location = New-Object System.Drawing.Point (12,22)
-  $ccb.Name = "ccb"
+  $ccb.Name = 'ccb'
   $ccb.Size = New-Object System.Drawing.Size (382,21)
   $ccb.TabIndex = 0
-  $ccb.ValueSeparator = ", "
-  # $ccb.DropDownClosed += new-object System.EventHandler($ccb_DropDownClosed)
-  # 
+  $ccb.MaxDropDownItems = 5
+  $ccb.DisplayMember = 'Name'
+  $ccb.ValueSeparator = ', '
+  $ccb.SetItemChecked(0,$true)
+  $ccb.SetItemChecked(1,$true)
+
+  $eventMethod_ccb = $ccb.add_DropDownClosed
+  $eventMethod_ccb.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+
+      [System.Text.StringBuilder]$sb = New-Object System.Text.StringBuilder ("Items checked: ")
+      foreach ($item in $ccb.CheckedItems) {
+        $sb.Append($item.Name).Append($ccb.ValueSeparator)
+      }
+      $sb.Remove($sb.Length - $ccb.ValueSeparator.Length,$ccb.ValueSeparator.Length)
+      $caller.Message = $sb.ToString()
+      $to.AppendText($caller.Message)
+
+    })
+
   # Form1
-  # 
   $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.ClientSize = New-Object System.Drawing.Size (413,306)
@@ -549,14 +567,10 @@ function PromptToolsTrip {
   $f.Controls.Add($ccb)
   $f.Name = "Form1"
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::Manual
-  # $f.StartPosition = 'CenterScreen'
 
-  $f.Text = "CheckedComboBox Test"
+  $f.Text = 'CheckedComboBox Test'
   $f.ResumeLayout($false)
   $f.PerformLayout()
-
-
-
 
   $f.Topmost = $True
 
@@ -569,5 +583,5 @@ function PromptToolsTrip {
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 PromptToolsTrip -Title 'Floating Menu Sample Project' -caller $caller
-Write-Output $caller.Data
+Write-Output $caller.Message
 
