@@ -441,40 +441,6 @@ namespace CheckComboBoxTest {
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
-Add-Type -TypeDefinition @"
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private int _data;
-    private string _message;
-
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-    public string Message
-    {
-        get { return _message; }
-        set { _message = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
- }
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
 
 function PromptCheckedCombo {
 
@@ -539,8 +505,6 @@ function PromptCheckedCombo {
         [object]$sender,
         [System.EventArgs]$eventargs
       )
-      # still use $caller temporarily
-      $caller.Message = $ccb.Text
       $data = $data_ref.Value
       $display_items_array  =  @()
       $data.Keys | ForEach-Object { $display_items_array  += $_ } 
@@ -571,7 +535,7 @@ function PromptCheckedCombo {
   $f.Topmost = $True
   $f.Add_Shown({ $f.Activate() })
 
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog()
   $f.Dispose()
 }
 
@@ -589,9 +553,7 @@ $albums = @{
   'The Visitors (1981)' = $false;
 }
 
-$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-PromptCheckedCombo -Title 'Floating Menu Sample Project' -caller $caller -data_ref ([ref]$albums)
-Write-Output ('Result is: {0}' -f $caller.Message)
+PromptCheckedCombo -Title 'Floating Menu Sample Project' -data_ref ([ref]$albums)
+Write-Output 'Result is:'
 $albums
 
