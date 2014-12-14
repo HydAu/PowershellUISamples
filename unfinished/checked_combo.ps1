@@ -542,7 +542,10 @@ function PromptCheckedCombo {
       # still use $caller temporarily
       $caller.Message = $ccb.Text
       $data = $data_ref.Value
-      $data.Keys | ForEach-Object {
+      $display_items_array  =  @()
+      $data.Keys | ForEach-Object { $display_items_array  += $_ } 
+
+      $display_items_array | ForEach-Object {
         $display_item = $_;
         $data_ref.Value[$display_item] = $false
       }
