@@ -481,6 +481,7 @@ function PromptCheckedCombo {
   param(
     [string]$title,
     [string]$message,
+    [System.Management.Automation.PSReference]$data_ref,
     [object]$caller
   )
 
@@ -497,12 +498,17 @@ function PromptCheckedCombo {
   $f.SuspendLayout()
   $ccb.SuspendLayout()
 
-  $colors = @( "Red","Green","Black","White","Orange","Yellow","Blue","Maroon","Pink","Purple")
-  for ($i = 0; $i -ne $colors.count; $i++) {
-    [CheckComboBoxTest.CCBoxItem]$item = New-Object CheckComboBoxTest.CCBoxItem ($colors[$i],$i)
-    $ccb.Items.Add($item) | Out-Null
-  }
+  $data = $data_ref.Value
+  $cnt = 0
+  $data.Keys | ForEach-Object { $display_item = $_;
 
+    [CheckComboBoxTest.CCBoxItem]$item = New-Object CheckComboBoxTest.CCBoxItem ($display_item,$cnt)
+    $ccb.Items.Add($item) | Out-Null
+    if ($data[$display_item]) {
+      $ccb.SetItemChecked($cnt,$true)
+    }
+    $cnt++
+  }
 
   $eventMethod_ccbitem = $ccb.add_ItemCheck
   $eventMethod_ccbitem.Invoke({
@@ -526,8 +532,6 @@ function PromptCheckedCombo {
   $ccb.MaxDropDownItems = 5
   $ccb.DisplayMember = 'Name'
   $ccb.ValueSeparator = ', '
-  $ccb.SetItemChecked(9,$true)
-  $ccb.SetItemChecked(8,$true)
 
   $eventMethod_ccb = $ccb.add_DropDownClosed
   $eventMethod_ccb.Invoke({
@@ -535,14 +539,19 @@ function PromptCheckedCombo {
         [object]$sender,
         [System.EventArgs]$eventargs
       )
-
-      [System.Text.StringBuilder]$sb = New-Object System.Text.StringBuilder ("Items checked: ")
-      foreach ($item in $ccb.CheckedItems) {
-        $sb.Append($item.Name).Append($ccb.ValueSeparator)
+      # still use $caller temporarily
+      $caller.Message = $ccb.Text
+      $data = $data_ref.Value
+      $data.Keys | ForEach-Object {
+        $display_item = $_;
+        $data_ref.Value[$display_item] = $false
       }
-      # remove the trailing valueseparator
-      $sb.Remove($sb.Length - $ccb.ValueSeparator.Length,$ccb.ValueSeparator.Length)
-      $caller.Message = $sb.ToString()
+      foreach ($item in $ccb.CheckedItems) {
+        $data_ref.Value[$item.Name] = $true
+      }
+
+      $data_ref.Value = $data
+
     })
 
   # Form1
@@ -556,17 +565,30 @@ function PromptCheckedCombo {
   $f.Text = 'CheckedComboBox Test'
   $f.ResumeLayout($false)
   $f.PerformLayout()
-
   $f.Topmost = $True
-
   $f.Add_Shown({ $f.Activate() })
 
   [void]$f.ShowDialog([win32window ]($caller))
   $f.Dispose()
 }
 
+
+
+$albums = @{
+
+  'Ring Ring (1973)' = $false;
+  'Waterloo (1974)' = $false;
+  'ABBA (1975)' = $true;
+  'Arrival (1976)' = $false;
+  'The Album (1977)' = $true;
+  'Voulez-Vous (1979)' = $false;
+  'Super Trouper (1980)' = $false;
+  'The Visitors (1981)' = $false;
+}
+
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-PromptCheckedCombo -Title 'Floating Menu Sample Project' -caller $caller
-Write-Output $caller.Message
+PromptCheckedCombo -Title 'Floating Menu Sample Project' -caller $caller -data_ref ([ref]$albums)
+Write-Output ('Result is: {0}' -f $caller.Message)
+$albums
 
