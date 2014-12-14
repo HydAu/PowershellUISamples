@@ -439,7 +439,7 @@ namespace CheckComboBoxTest {
 }
 
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Data.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
 Add-Type -TypeDefinition @"
 using System;
@@ -474,3 +474,100 @@ public class Win32Window : IWin32Window
  }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+
+
+
+function PromptToolsTrip {
+
+  param(
+    [string]$title,
+    [string]$message,
+    [object]$caller
+  )
+
+
+  @( 'System.Drawing','System.ComponentModel','System.Windows.Forms','System.Data') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
+
+  $f.Size = New-Object System.Drawing.Size (470,135)
+  $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
+
+
+  $to = New-Object -TypeName 'System.Windows.Forms.TextBox'
+  $ccb = New-Object -TypeName 'CheckComboBoxTest.CheckedComboBox'
+
+
+  $f.SuspendLayout()
+  $ccb.SuspendLayout()
+
+  $colors = @( "Red","Green","Black","White","Orange","Yellow","Blue","Maroon","Pink","Purple")
+  for ($i = 0; $i -ne $colors.count; $i++) {
+    [CheckComboBoxTest.CCBoxItem]$item = New-Object CheckComboBoxTest.CCBoxItem ($colors[$i],$i)
+    $ccb.Items.Add($item)
+  }
+
+  $ccb.MaxDropDownItems = 5
+  $ccb.DisplayMember = "Name"
+  $ccb.ValueSeparator = ", "
+  $ccb.SetItemChecked(0, $true)
+  $ccb.SetItemChecked(1, $true)
+
+  # ccb.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.ccb_ItemCheck);
+  # 
+  # txtOut
+  # 
+  $to.Location = New-Object System.Drawing.Point (12,162)
+  $to.Multiline = $true
+  $to.Name = "txtOut"
+  $to.Size = New-Object System.Drawing.Size (382,132)
+  $to.TabIndex = 1
+  # 
+  # ccb
+  # 
+  $ccb.CheckOnClick = $true
+  $ccb.DrawMode = [System.Windows.Forms.DrawMode]::OwnerDrawVariable
+  $ccb.DropDownHeight = 1
+  $ccb.FormattingEnabled = $true
+  $ccb.IntegralHeight = $false
+  $ccb.Location = New-Object System.Drawing.Point (12,22)
+  $ccb.Name = "ccb"
+  $ccb.Size = New-Object System.Drawing.Size (382,21)
+  $ccb.TabIndex = 0
+  $ccb.ValueSeparator = ", "
+  # $ccb.DropDownClosed += new-object System.EventHandler($ccb_DropDownClosed)
+  # 
+  # Form1
+  # 
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
+  $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+  $f.ClientSize = New-Object System.Drawing.Size (413,306)
+  $f.Controls.Add($to)
+  $f.Controls.Add($ccb)
+  $f.Name = "Form1"
+  $f.StartPosition = [System.Windows.Forms.FormStartPosition]::Manual
+  # $f.StartPosition = 'CenterScreen'
+
+  $f.Text = "CheckedComboBox Test"
+  $f.ResumeLayout($false)
+  $f.PerformLayout()
+
+
+
+
+  $f.Topmost = $True
+
+  $f.Add_Shown({ $f.Activate() })
+
+  [void]$f.ShowDialog([win32window ]($caller))
+  $f.Dispose()
+}
+
+$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+
+PromptToolsTrip -Title 'Floating Menu Sample Project' -caller $caller
+Write-Output $caller.Data
+
