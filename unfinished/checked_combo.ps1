@@ -1,3 +1,24 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 # http://www.codeproject.com/Articles/31105/A-ComboBox-with-a-CheckedListBox-as-a-Dropdown
 
 Add-Type @"
@@ -441,40 +462,6 @@ namespace CheckComboBoxTest {
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
-Add-Type -TypeDefinition @"
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private int _data;
-    private string _message;
-
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-    public string Message
-    {
-        get { return _message; }
-        set { _message = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
- }
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
 
 function PromptCheckedCombo {
 
@@ -539,10 +526,11 @@ function PromptCheckedCombo {
         [object]$sender,
         [System.EventArgs]$eventargs
       )
-      # still use $caller temporarily
-      $caller.Message = $ccb.Text
       $data = $data_ref.Value
-      $data.Keys | ForEach-Object {
+      $display_items_array  =  @()
+      $data.Keys | ForEach-Object { $display_items_array  += $_ } 
+
+      $display_items_array | ForEach-Object {
         $display_item = $_;
         $data_ref.Value[$display_item] = $false
       }
@@ -568,7 +556,7 @@ function PromptCheckedCombo {
   $f.Topmost = $True
   $f.Add_Shown({ $f.Activate() })
 
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog()
   $f.Dispose()
 }
 
@@ -586,9 +574,7 @@ $albums = @{
   'The Visitors (1981)' = $false;
 }
 
-$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-PromptCheckedCombo -Title 'Floating Menu Sample Project' -caller $caller -data_ref ([ref]$albums)
-Write-Output ('Result is: {0}' -f $caller.Message)
+PromptCheckedCombo -Title 'Floating Menu Sample Project' -data_ref ([ref]$albums)
+Write-Output 'Result is:'
 $albums
 
