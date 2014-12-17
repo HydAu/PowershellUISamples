@@ -467,9 +467,7 @@ function PromptCheckedCombo {
 
   param(
     [string]$title,
-    [string]$message,
-    [System.Management.Automation.PSReference]$data_ref,
-    [object]$caller
+    [System.Management.Automation.PSReference]$data_ref
   )
 
   @( 'System.Drawing','System.ComponentModel','System.Windows.Forms','System.Data') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
