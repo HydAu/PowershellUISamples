@@ -1,3 +1,5 @@
+# http://blogs.msdn.com/b/timid/archive/2013/03/05/converting-pscustomobject-to-from-hashtables.aspx
+
 function ConvertTo-PsCustomObjectFromHashtable {
   param(
     [Parameter(
