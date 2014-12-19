@@ -85,16 +85,14 @@ function UpDownsPrompt
   param(
     [object]$caller
   )
-  $r = @( 'System.Drawing',
+  @( 'System.Drawing',
     'System.Collections.Generic',
     'System.Collections',
     'System.ComponentModel',
     'System.Windows.Forms',
     'System.Text',
     'System.Data'
-  )
-
-  $r | ForEach-Object { $assembly = $_; [void][System.Reflection.Assembly]::LoadWithPartialName($assembly) }
+  ) | ForEach-Object { $assembly = $_; [void][System.Reflection.Assembly]::LoadWithPartialName($assembly) }
 
   $f = New-Object System.Windows.Forms.Form
 
@@ -157,7 +155,7 @@ function UpDownsPrompt
   $s.CustomFormat = 'hh:mm'
   $s.ShowUpDown = $true
   $s.Checked = $false
-  $s.Add_VisibleChanged({ #  += new-object System.EventHandler
+  $s.Add_VisibleChanged({
       param(
         [object]$sender,
         [System.EventArgs]$eventargs)
