@@ -25,8 +25,7 @@ function TabsWithTreeViews (
   [object]$caller
 ) {
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
@@ -87,7 +86,7 @@ function TabsWithTreeViews (
   $panel2.Controls.AddRange(@( $t2))
 
   # http://msdn.microsoft.com/en-us/library/system.windows.forms.tabpage.visiblechanged%28v=vs.110%29.aspx
-  $panel2.add_VisibleChanged({
+  $panel2.Add_VisibleChanged({
       param(
         [object]$sender,
         [System.EventArgs]$eventargs
@@ -122,9 +121,9 @@ function TabsWithTreeViews (
   $t1.ImageList = $i
 
   $t1.Anchor = ((([System.Windows.Forms.AnchorStyles]::Top `
-        -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
-        -bor [System.Windows.Forms.AnchorStyles]::Left) `
-        -bor [System.Windows.Forms.AnchorStyles]::Right)
+           -bor [System.Windows.Forms.AnchorStyles]::Bottom) `
+         -bor [System.Windows.Forms.AnchorStyles]::Left) `
+       -bor [System.Windows.Forms.AnchorStyles]::Right)
   $t1.ImageIndex = -1
   $t1.Location = New-Object System.Drawing.Point (4,5)
   $t1.Name = 'treeFood'
@@ -135,7 +134,7 @@ function TabsWithTreeViews (
   $t1.TabIndex = 1;
   $panel1.Controls.AddRange(@( $t1))
 
-  $panel1.add_VisibleChanged({
+  $panel1.Add_VisibleChanged({
       param(
         [object]$sender,
         [System.EventArgs]$eventargs

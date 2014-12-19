@@ -57,10 +57,7 @@ function Edit_Parameters {
     [object]$caller = $null
   )
 
-  [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null
-  [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | Out-Null
-  [System.Reflection.Assembly]::LoadWithPartialName('System.Data') | Out-Null
-  [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null
+  @( 'System.Drawing','System.ComponentModel','System.Windows.Forms','System.Data') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.SuspendLayout();
