@@ -20,14 +20,14 @@
 
 # http://www.java2s.com/Code/CSharpAPI/System.Windows.Forms/TabControlControlsAdd.htm
 # with sizes adjusted to run the focus demo
+
 function PromptWithTabs (
   [string]$title,
   [object]$caller
 ) {
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
 
+  @('System.Drawing','System.Windows.Forms') |  foreach-object {   [void] [System.Reflection.Assembly]::LoadWithPartialName($_) } 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
 

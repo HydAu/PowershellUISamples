@@ -25,40 +25,40 @@
 # http://www.nunit.org/index.php?p=assertions&r=2.2.7
 # note CodedUI  HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{6077292c-6751-4483-8425-9026bc0187b6}
 
-function read_registry{
-  param ([string] $registry_path,
-         [string] $package_name
+function read_registry {
+  param([string]$registry_path,
+    [string]$package_name
 
-)
+  )
 
-pushd HKLM:
+  pushd HKLM:
 
-cd -path $registry_path
-$settings = get-childitem -Path . | where-object { $_.Property  -ne $null } | where-object {$_.name -match  $package_name } |   select-object -first 1
-$values = $settings.GetValueNames()
+  cd -Path $registry_path
+  $settings = Get-ChildItem -Path . | Where-Object { $_.Property -ne $null } | Where-Object { $_.Name -match $package_name } | Select-Object -First 1
+  $values = $settings.GetValueNames()
 
-if ( -not ($values.GetType().BaseType.Name -match  'Array' ) ) {
-  throw 'Unexpected result type'
+  if (-not ($values.GetType().BaseType.Name -match 'Array')) {
+    throw 'Unexpected result type'
+  }
+  $result = $null
+  $values | Where-Object { $_ -match 'InstallLocation' } | ForEach-Object { $result = $settings.GetValue($_).ToString(); Write-Debug $result }
+
+  popd
+  $result
+
 }
-$result = $null 
-$values | where-object {$_ -match 'InstallLocation'} | foreach-object {$result = $settings.GetValue($_).ToString() ; write-debug $result}
 
-popd
-$result
-
-}
-
-$shared_assemblies =  @(
-    'Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll'
+$shared_assemblies = @(
+  'Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll'
 )
-
-$shared_assemblies_path = (  "{0}\{1}" -f   ( read_registry -registry_path '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall' -package_name '{6088FCFB-2FA4-3C74-A1D1-F687C5F14A0D}' ) , 'Common7\IDE\PublicAssemblies' ) 
-
+# for MSTEST
+$shared_assemblies_path = ("{0}\{1}" -f (read_registry -registry_path '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall' -package_name '{6088FCFB-2FA4-3C74-A1D1-F687C5F14A0D}'),'Common7\IDE\PublicAssemblies')
+Write-Output ("Loading assembly from {0}" -f $shared_assemblies_path)
 pushd $shared_assemblies_path
-$shared_assemblies | foreach-object { Unblock-File -Path $_ ; Add-Type -Path  $_ } 
+$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
-$result =[Microsoft.VisualStudio.TestTools.UnitTesting.Assert]::AreEqual("true", (@('true','false') | select-object -first 1) )
+$result = [Microsoft.VisualStudio.TestTools.UnitTesting.Assert]::AreEqual("true",(@( 'true','false') | Select-Object -First 1))
 
 
 <#

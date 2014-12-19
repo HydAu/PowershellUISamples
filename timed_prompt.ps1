@@ -89,16 +89,16 @@ $Readable = @{
   $RESULT_TIMEOUT = 'TIMEOUT';
 }
 
-function PromptAuto  {
+function PromptAuto {
 
-param(
-  [string]$title,
-  [string]$message,
-  [object]$caller
-)
+  param(
+    [string]$title,
+    [string]$message,
+    [object]$caller
+  )
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
@@ -126,15 +126,15 @@ param(
   $p.Size = $f.Size
 
   $p.Controls.Add($b1)
-  $end = (Get-Date -UFormat "%s")
+  $end = (Get-Date -UFormat '%s')
   $end = ([int]$end + 60)
   $b2 = New-Object System.Windows.Forms.Button
   $b2.Location = New-Object System.Drawing.Size (130,40)
   $b2.Size = New-Object System.Drawing.Size (75,23)
   $b2.Text = 'Cancel'
   $b2.add_click({
-      $caller.Data = $RESULT_CANCEL;
-      $f.Close();
+      $caller.Data = $RESULT_CANCEL
+      $f.Close()
     })
   $p.Controls.Add($b2)
 
@@ -145,7 +145,7 @@ param(
   $p.Controls.Add($l)
 
   $p.Timer.Stop()
-  $p.Timer.Interval = 5000;
+  $p.Timer.Interval = 5000
   $p.Timer.Start()
   $p.Timer.add_Elapsed({
       $start = (Get-Date -UFormat "%s")
@@ -154,7 +154,7 @@ param(
       $l.Text = ('Remaining time {0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
 
       if ($end - $start -lt 0) {
-        $caller.Data = $RESULT_TIMEOUT;
+        $caller.Data = $RESULT_TIMEOUT
         $f.Close()
       }
 
@@ -162,7 +162,7 @@ param(
   $f.Controls.Add($p)
   $f.Topmost = $True
 
-  $caller.Data = $RESULT_TIMEOUT;
+  $caller.Data = $RESULT_TIMEOUT
   $f.Add_Shown({ $f.Activate() })
 
   [void]$f.ShowDialog([win32window ]($caller))
@@ -197,7 +197,6 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
 $DebugPreference = 'Continue'
 $title = 'Prompt w/timeout'
 $message = "Continue ?"

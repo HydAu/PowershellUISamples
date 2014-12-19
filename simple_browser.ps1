@@ -97,6 +97,7 @@ function promptForContinueWithCookies (
   [object]$caller = $null
 )
 {
+  @( 'System.Drawing','System.Collections','System.ComponentModel','System.Windows.Forms','System.Data') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title

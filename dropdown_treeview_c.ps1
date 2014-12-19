@@ -79,20 +79,14 @@ function PromptTreeView
     [object]$caller = $null
   )
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Text')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
+  @( 'System.Drawing','System.Collections.Generic','System.Collections','System.ComponentModel','System.Windows.Forms','System.Text','System.Data') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
   $t = New-Object DropDownTreeView.DropDownTreeView
   $components = New-Object System.ComponentModel.Container
-  $f.SuspendLayout();
-  $t.Font = New-Object System.Drawing.Font ('Tahoma',10.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
+  $f.SuspendLayout()
+  $t.Font = New-Object System.Drawing.Font ('Tahoma',10.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0)
 
   $i = New-Object System.Windows.Forms.ImageList ($components)
   $i.Images.Add([System.Drawing.SystemIcons]::Application)
@@ -135,33 +129,33 @@ function PromptTreeView
         [object]$sender,
         [System.EventArgs]$eventargs
       )
-      [System.Windows.Forms.TreeNode]$tn1 = New-Object System.Windows.Forms.TreeNode ("Node");
+      [System.Windows.Forms.TreeNode]$tn1 = New-Object System.Windows.Forms.TreeNode ("Node")
 
-      [DropDownTreeView.DropDownTreeNode]$dtn1 = New-Object DropDownTreeView.DropDownTreeNode ("Credentials");
-      $dtn1.ComboBox.Items.AddRange(@( "LocalService","LocalSystem ","NetworkService"));
-      $dtn1.ComboBox.SelectedIndex = 0;
+      [DropDownTreeView.DropDownTreeNode]$dtn1 = New-Object DropDownTreeView.DropDownTreeNode ("Credentials")
+      $dtn1.ComboBox.Items.AddRange(@( "LocalService","LocalSystem ","NetworkService"))
+      $dtn1.ComboBox.SelectedIndex = 0
 
-      [DropDownTreeView.DropDownTreeNode]$dtn2 = New-Object DropDownTreeView.DropDownTreeNode ("Install");
-      $installs = @( 'Typical','Compact','Custom');
-      $dtn2.ComboBox.Items.AddRange($installs);
-      $dtn2.ComboBox.SelectedIndex = 0;
+      [DropDownTreeView.DropDownTreeNode]$dtn2 = New-Object DropDownTreeView.DropDownTreeNode ("Install")
+      $installs = @( 'Typical','Compact','Custom')
+      $dtn2.ComboBox.Items.AddRange($installs)
+      $dtn2.ComboBox.SelectedIndex = 0
       $handler_combobox_closed = {
         param(
           [object]$sender,
           [System.EventArgs]$eventargs
         )
         try {
-          [System.Windows.Forms.ComboBox]$cb = $sender;
-          [System.Windows.Forms.MessageBox]::Show($cb.SelectedItem.ToString());
+          [System.Windows.Forms.ComboBox]$cb = $sender
+          [System.Windows.Forms.MessageBox]::Show($cb.SelectedItem.ToString())
           # $caller.Message += ('{0},' -f $cb.SelectedItem.ToString())
         } catch [exception]{
         }
       }
 
 
-      $t.Nodes.Add($tn1);
-      $t.Nodes.Add($dtn2);
-      $t.Nodes.Add($dtn1);
+      $t.Nodes.Add($tn1)
+      $t.Nodes.Add($dtn2)
+      $t.Nodes.Add($dtn1)
 
       $combobox1_DropDownClosed = $dtn1.ComboBox.add_DropDownClosed
       $combobox1_DropDownClosed.Invoke($handler_combobox_closed)
