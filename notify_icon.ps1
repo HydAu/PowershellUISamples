@@ -50,8 +50,6 @@ $so = [hashtable]::Synchronized(@{
     # Show System.Windows.Forms.Control System.Drawing.Point
     # MergeMenu System.Windows.Forms.MenuItem
     'ContextMenu' = [System.Windows.Forms.ContextMenu]$null;
-    'NeedData' = [bool]$false;
-    'HaveData' = [bool]$false;
 
   })
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -68,8 +66,8 @@ $run_script = [powershell]::Create().AddScript({
 
     $f = New-Object System.Windows.Forms.Form
     $so.Form = $f
-    $notify_icon = New-Object System.Windows.Forms.NotifyIcon
-    $so.NotifyIcon = $notify_icon
+    $ni = New-Object System.Windows.Forms.NotifyIcon
+    $so.NotifyIcon = $ni
     $context_menu = New-Object System.Windows.Forms.ContextMenu
     $exit_menu_item = New-Object System.Windows.Forms.MenuItem
     $AddContentMenuItem = New-Object System.Windows.Forms.MenuItem
@@ -97,9 +95,9 @@ $run_script = [powershell]::Create().AddScript({
       # Create an Exit Menu Item
       $exit_menu_item.Index = $i + 1
       $exit_menu_item.Text = 'E&xit'
-      $exit_menu_item.add_Click({
+      $exit_menu_item.add_click({
           $f.Close()
-          $notify_icon.visible = $false
+          $ni.Visible = $false
         })
 
       # Add the Exit Menu Item to the Context Menu
@@ -133,23 +131,22 @@ $run_script = [powershell]::Create().AddScript({
         # Create the Menu Item$menu_item.Index = $index
         $menu_item.Text = $Text
         $scriptAction = $(new-scriptblock "Invoke-Item $Action")
-        $menu_item.add_Click($scriptAction)
+        $menu_item.add_click($scriptAction)
         $ContextMenu.MenuItems.Add($menu_item) | Out-Null
       }
     }
     # http://bytecookie.wordpress.com/2011/12/28/gui-creation-with-powershell-part-2-the-notify-icon-or-how-to-make-your-own-hdd-health-monitor/
 
-    $notify_icon.Icon = ('{0}\{1}' -f $so.ScriptDirectory,'sample.ico')
+    $ni.Icon = ('{0}\{1}' -f $so.ScriptDirectory,'sample.ico')
     # 
-    $notify_icon.Text = 'Context Menu Test'
+    $ni.Text = 'Context Menu Test'
     # Assign the Context Menu
-    $notify_icon.ContextMenu = $context_menu
+    $ni.ContextMenu = $context_menu
     $f.ContextMenu = $context_menu
 
-    # Control Visibilaty and state of things
-    $notify_icon.visible = $true
-    $f.visible = $false
-    $f.WindowState = 'minimized'
+    $ni.Visible = $true
+    $f.Visible = $false
+    $f.WindowState = [System.Windows.Forms.FormWindowState]::Minimized
     $f.ShowInTaskbar = $false
     $f.add_Closing({ $f.ShowInTaskbar = $False })
     $context_menu.Add_Popup({ Read-Config })
@@ -169,9 +166,8 @@ function send_text {
 }
 
 
-
-# -- main program -- 
 Clear-Host
+$build_log = [System.IO.Path]::Combine((Get-ScriptDirectory),'build.log')
 Write-Output ('Truncate {0}' -f $build_log)
 Write-Output '' | Out-File -FilePath $build_log -Encoding ascii
 
@@ -184,7 +180,7 @@ $handle = $run_script.BeginInvoke()
 Start-Sleep 1
 
 send_text -Title 'script' -Message 'Starting...' -Timeout 10
-$so.ConfigFile = $build_log = ('{0}\{1}' -f $so.ScriptDirectory,'build.log')
+$so.ConfigFile = $build_log
 Set-Content -Path $build_log -Value ''
 
 while (-not $handle.IsCompleted -and $cnt -lt $total) {

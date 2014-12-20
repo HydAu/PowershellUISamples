@@ -62,7 +62,7 @@ $s.Location = New-Object System.Drawing.Point (10,12)
 $s.Size = New-Object System.Drawing.Size (100,22)
 
 $s.add_Click({ toggle_console_display ($SW_SHOWNOACTIVATE) })
-$f.add_Closing({ toggle_console_display ($SW_SHOW) })
+$f.add_Closing({ toggle_console_display ($SW_SHOWNORMAL) })
 $h = New-Object System.Windows.Forms.Button
 $h.Text = 'HideConsole'
 $h.Size = $s.Size

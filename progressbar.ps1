@@ -223,9 +223,6 @@ $so = [hashtable]::Synchronized(@{
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
     'Progress' = [ProgressBarHost.Progress]$null;
-    'NeedData' = [bool]$false;
-    'HaveData' = [bool]$false;
-
   })
 
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -237,62 +234,58 @@ $rs.Open()
 $rs.SessionStateProxy.SetVariable('so',$so)
 
 
-
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 
 $run_script = [powershell]::Create().AddScript({
 
+    function Progressbar {
+      param(
+        [string]$title,
+        [string]$message,
+        [object]$caller
+      )
 
+      @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
-    function Progressbar (
-      [string]$title,
-      [string]$message,
-      [object]$caller
-    ) {
-
-      [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-      [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-
-
-      $f = New-Object System.Windows.Forms.Form
+      $f = New-Object -TypeName 'System.Windows.Forms.Form'
       $f.Text = $title
 
-
       $f.Size = New-Object System.Drawing.Size (650,120)
-      $f.StartPosition = 'CenterScreen'
-      $components = New-Object System.ComponentModel.Container
-      $progress_status = New-Object ProgressBarHost.Progress
-      $so.Progress = $progress_status
-      $progress_status.Location = New-Object System.Drawing.Point (12,8)
-      $progress_status.Name = "status"
-      $progress_status.Size = New-Object System.Drawing.Size (272,88)
-      $progress_status.TabIndex = 0
+      $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+      $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,14)
+      $f.ClientSize = New-Object System.Drawing.Size (292,104)
 
-      $b1 = New-Object System.Windows.Forms.Button
-      $b1.Location = New-Object System.Drawing.Size (140,152)
-      $b1.Size = New-Object System.Drawing.Size (92,24)
-      $b1.Text = 'forward'
-      $b1.add_click({ $progress_status.PerformStep()
-          if ($progress_status.Maximum -eq $progress_status.Value)
+
+      $components = New-Object -TypeName 'System.ComponentModel.Container'
+      $u = New-Object -TypeName 'ProgressBarHost.Progress'
+      $so.Progress = $u
+      $u.Location = New-Object System.Drawing.Point (12,8)
+      $u.Name = 'status'
+      $u.Size = New-Object System.Drawing.Size (272,88)
+      $u.TabIndex = 0
+
+      $b = New-Object System.Windows.Forms.Button
+      $b.Location = New-Object System.Drawing.Point (140,72)
+      $b.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+      $b.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+      $b.Text = 'forward'
+      $b.add_click({ $u.PerformStep()
+          if ($u.Maximum -eq $u.Value)
           {
-            $b1.Enabled = false;
+            $b.Enabled = false
           }
 
         })
 
-      $f.Controls.Add($b1)
-      $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,14)
-      $f.ClientSize = New-Object System.Drawing.Size (292,194)
-      $f.Controls.Add($progress_status)
+
+      $f.Controls.AddRange(@( $b,$u))
       $f.Topmost = $True
 
-
-      $caller.Visible = $true;
-      $so.Visible = $caller.Visible
+      $so.Visible = $caller.Visible = $true
       $f.Add_Shown({ $f.Activate() })
 
-      [void]$f.ShowDialog([win32window ]($caller))
+      [void]$f.ShowDialog([win32window]($caller))
 
       $f.Dispose()
     }
@@ -302,7 +295,6 @@ $run_script = [powershell]::Create().AddScript({
   })
 
 
-# -- main program -- 
 Clear-Host
 $run_script.Runspace = $rs
 
