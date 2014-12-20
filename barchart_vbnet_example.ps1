@@ -382,9 +382,10 @@ Public Class BarChart
     ' Friend WithEvents RecLabel As System.Windows.Forms.Label
     '' need to draw System.Windows.Forms.Control
 End Class
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll', 'System.Drawing.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Drawing.dll'
+
 # http://www.outlookcode.com/codedetail.aspx?id=1428
-Add-Type -Language 'VisualBasic' -TypeDefinition  @"
+Add-Type -Language 'VisualBasic' -TypeDefinition @"
 
 ' http://msdn.microsoft.com/en-us/library/system.windows.forms.iwin32window%28v=vs.110%29.aspx
 
@@ -412,34 +413,52 @@ End Class
 $caller = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $object = New-Object -TypeName 'BarChart'
 
-# TODO  $obj_data = New-Object PSObject 
-# conversion
-$data1 = New-Object System.Collections.Hashtable(10)
-$data1.Add("Product1", 25)
-$data1.Add("Product2", 15)
-$data1.Add("Product3", 35)
-$object.LoadData([System.Collections.Hashtable] $data1)
+$data1 = New-Object System.Collections.Hashtable (10)
+$data1_json = @"
+{
+    "Product1":  26,
+    "Product2":  15,
+    "Product3":  35
+}
+"@
+# http://stackoverflow.com/questions/3740128/pscustomobject-to-hashtable
+($data1_json -join '' | ConvertFrom-Json).psobject.properties | ForEach-Object {
+  $data1.Add($_.Name,$_.Value)
+}
+
+
+$object.LoadData([System.Collections.Hashtable]$data1)
 
 # not necessary for the example at hand but may be necessary 
 # [void]$object.ShowDialog([System.Windows.Forms.IWin32Window] ($caller) )
+
 [void]$object.Show()
-start-sleep -seconds 5
+Start-Sleep -Seconds 5
 
-$data2 =  New-Object System.Collections.Hashtable(100)
-$data2.Add("Item1", 50)
-$data2.Add("Item2", 150)
-$data2.Add("Item3", 250)
-$data2.Add("Item4", 20)
-$data2.Add("Item5", 100)
-$data2.Add("Item6", 125)
-$data2.Add("Item7", 148)
-$data2.Add("Item8", 199)
-$data2.Add("Item9", 267)
+$data2 = New-Object System.Collections.Hashtable (100)
 
-$object.LoadData([System.Collections.Hashtable] $data2)
+$data2_json = @"
+{
+    "Item9":  267,
+    "Item8":  199,
+    "Item3":  250,
+    "Item2":  150,
+    "Item1":  50,
+    "Item7":  148,
+    "Item6":  125,
+    "Item5":  100,
+    "Item4":  20
+}
+"@
+
+($data2_json -join '' | ConvertFrom-Json).psobject.properties | ForEach-Object {
+  $data2.Add($_.Name,$_.Value)
+}
+
+$object.LoadData([System.Collections.Hashtable]$data2)
 
 $object.RenderData()
-start-sleep -seconds 5
+Start-Sleep -Seconds 5
 
 $object.Close()
 $object.Dispose()
