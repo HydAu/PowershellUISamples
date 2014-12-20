@@ -53,6 +53,19 @@ function set_timeouts {
 
 }
 
+function netstat_check 
+{
+  param(
+    [string]$selenium_http_port = 4444
+  )
+
+   $results = invoke-expression -command "netsh interface ipv4 show tcpconnections"  
+
+   $t = $results -split "`r`n" | where-object {($_ -match "\s$selenium_http_port\s") }
+  (($t -ne '' ) -and $t -ne $null)
+
+}
+
 function cleanup
 {
   param(
@@ -82,15 +95,13 @@ $shared_assemblies | ForEach-Object {
   Add-Type -Path $_
 }
 popd
+
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 $verificationErrors = New-Object System.Text.StringBuilder
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
-  try {
 
-    $connection.Connect("127.0.0.1",4444)
-    $connection.Close()
-  } catch {
+ if (-not (netstat_check )){
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
     Start-Sleep -Seconds 4
   }
@@ -214,7 +225,7 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement($element).Click().Build().Perform()
 
-$css_selector = 'select[data-param=port] option[value=FLL]'
+$css_selector = 'select[data-param=port] option[value=MIA]'
 
 Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
 
@@ -228,7 +239,8 @@ try {
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 
-[NUnit.Framework.Assert]::AreEqual('Fort Lauderdale, FL',$element.Text)
+# [NUnit.Framework.Assert]::AreEqual('Fort Lauderdale, FL',$element.Text)
+[NUnit.Framework.Assert]::AreEqual('Miami, FL',$element.Text)
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement($element).Click().Build().Perform()
 
@@ -359,7 +371,7 @@ try {
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 
-  Start-Sleep -Millisecond 1000
+  Start-Sleep -Millisecond 10000
 
 
 $css_selector = 'span.c-summary__value'
@@ -401,41 +413,34 @@ Start-Sleep -millisecond 50
 
 
 $cnt_found = 0
-$cnt_to_find = 3
+$cnt_to_find = 9
 
 while ($cnt_found -lt $cnt_to_find) {
 
-  $xpath2 = "following-sibling::article[1]"
+  $xpath2 = "following-sibling::article[contains(@class, 'c-cruise-list-item')][1]"
+
 
   [OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::XPath($xpath2))
 
-  ( $element2.Text -split "`n" )[1]
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
+  Start-Sleep -millisecond 50
 
-  if ($PSBoundParameters['pause']) {
-
-    try {
-
-      [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    } catch [exception]{}
-
-  } else {
-    Start-Sleep -Millisecond 100
-  }
-
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
-
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
 
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+
+
   $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
-Start-Sleep -millisecond 50
 
   if ($element2.LocationOnScreenOnceScrolledIntoView.Y -gt 0) {
     [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $element2.LocationOnScreenOnceScrolledIntoView.Y),$null)
     Start-Sleep -Millisecond 100
   }
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
 
   $cnt_found = $cnt_found + 1
+  ( $element2.Text -split "`n" )[0]
+  ( $element2.Text -split "`n" )[1]
+
   $element1 = $element2
 }
 
