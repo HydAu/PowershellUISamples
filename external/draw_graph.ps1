@@ -1,3 +1,24 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 # http://www.codeproject.com/Articles/23938/Graph-Library
 Add-Type @"
 
@@ -609,34 +630,14 @@ function DrawGraph {
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
   $f.SuspendLayout()
-<#
-  $o = new-object -typename 'System.Anoop.Graph.DrawGraph' -ArgumentList @([string[]]@(
-            "USA",
-            "UK",
-            "Japan",
-            "China",
-            "Bhutan",
-            "India"),
-            [float[]]@( 
-             10,
-             30,
-             60,
-             40,
-             5 ,
-             60),
-             $null,
-             $null,
-             'Arial', 
-             200
-            )
-#>
-  $o = new-object -typename 'System.Anoop.Graph.DrawGraph' -ArgumentList @([string[]]$data_ref.Value.Keys,
-            [float[]]$data_ref.Value.Values,
-             $null,
-             $null,
-             'Arial', 
-             200
-            )
+
+  $o = New-Object -TypeName 'System.Anoop.Graph.DrawGraph' -ArgumentList @( [string[]]$data_ref.Value.Keys,
+    [float[]]$data_ref.Value.Values,
+    $null,
+    $null,
+    'Arial',
+    200
+  )
   [System.Windows.Forms.PictureBox]$b = New-Object -TypeName 'System.Windows.Forms.PictureBox'
   $b.Location = New-Object System.Drawing.Point (40,20)
   $b.Name = 'p5'
@@ -644,22 +645,22 @@ function DrawGraph {
   $b.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::AutoSize
   $b.TabIndex = 1
   $b.TabStop = $false
-  
-  $m0 = New-Object -TypeName 'System.Windows.Forms.MenuStrip'
+
+  $m = New-Object -TypeName 'System.Windows.Forms.MenuStrip'
   $file_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
   $shape_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
   $shape_m2 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
   $shape_m3 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
   $exit_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
-  $m0.SuspendLayout()
+  $m.SuspendLayout()
 
   #  m0
-  $m0.Items.AddRange(@( $file_m1, $exit_m1))
-  $m0.Location = New-Object System.Drawing.Point (0,0)
-  $m0.Name = "m0"
-  $m0.Size = New-Object System.Drawing.Size (($f.Size.Width),24)
-  $m0.TabIndex = 0
-  $m0.Text = "m0"
+  $m.Items.AddRange(@( $file_m1,$exit_m1))
+  $m.Location = New-Object System.Drawing.Point (0,0)
+  $m.Name = "m0"
+  $m.Size = New-Object System.Drawing.Size (($f.Size.Width),24)
+  $m.TabIndex = 0
+  $m.Text = "m0"
 
 
   #  ShapeToolStripMenuItem
@@ -675,7 +676,7 @@ function DrawGraph {
       $who = $sender.Text
       # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
       $b.Image = $o.DrawLineGraph()
-      $caller.Data= $sender.Text
+      $caller.Data = $sender.Text
     })
 
   $shape_m2.Name = "BarGraphToolStripMenuItem"
@@ -690,7 +691,7 @@ function DrawGraph {
       $who = $sender.Text
       # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
       $b.Image = $o.DrawBarGraph()
-      $caller.Data= $sender.Text
+      $caller.Data = $sender.Text
     })
 
   $shape_m3.Name = "3dPieChartToolStripMenuItem"
@@ -705,11 +706,11 @@ function DrawGraph {
       $who = $sender.Text
       # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
       $b.Image = $o.Draw3DPieGraph()
-      $caller.Data= $sender.Text
+      $caller.Data = $sender.Text
     })
 
   # Separator 
-  $dash = new-object -typename System.Windows.Forms.ToolStripSeparator
+  $dash = New-Object -TypeName System.Windows.Forms.ToolStripSeparator
 
   #  exitToolStripMenuItem
   $exit_m1.Name = "exitToolStripMenuItem"
@@ -723,20 +724,20 @@ function DrawGraph {
       )
       $who = $sender.Text
       # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-      $caller.Data= $sender.Text
+      $caller.Data = $sender.Text
       $f.Close()
     })
 
   #  fileToolStripMenuItem1
-  $file_m1.DropDownItems.AddRange(@( $shape_m1, $dash, $shape_m2, $dash, $shape_m3))
-  $file_m1.Name = "fileToolStripMenuItem1"
+  $file_m1.DropDownItems.AddRange(@( $shape_m1, $shape_m2, $dash, $shape_m3))
+  $file_m1.Name = "DrawToolStripMenuItem1"
   $file_m1.Text = "Draw"
 
-  $m0.ResumeLayout($false)
+  $m.ResumeLayout($false)
 
   #  MenuTest
   $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (1,1)
-  $f.Controls.AddRange(@($m0, $b))
+  $f.Controls.AddRange(@( $m,$b))
   $f.Topmost = $True
 
   $f.Add_Shown({ $f.Activate() })
@@ -748,15 +749,15 @@ function DrawGraph {
 
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$data = @{ 
-
-       "USA" = 10;
-            "UK" = 30;
-            "Japan" = 60;
-            "China" = 40;
-            "Bhutan" = 5;
-            "India" = 60 ;}
-[void] (DrawGraph -Title $title -caller $caller -data_ref ([ref]$data))
+$data = @{
+  "USA" = 10;
+  "UK" = 30;
+  "Japan" = 60;
+  "China" = 40;
+  "Bhutan" = 5;
+  "India" = 60; 
+}
+[void](DrawGraph -Title $title -caller $caller -data_ref ([ref]$data))
 
 
 
