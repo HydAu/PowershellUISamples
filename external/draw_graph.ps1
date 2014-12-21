@@ -595,7 +595,7 @@ function DrawGraph {
 
   param(
     [string]$title,
-    [string]$message,
+    [System.Management.Automation.PSReference]$data_ref,
     [object]$caller
   )
 
@@ -604,12 +604,12 @@ function DrawGraph {
   $f.Text = $title
 
 
-  $f.Size = New-Object System.Drawing.Size (470,335)
+  $f.Size = New-Object System.Drawing.Size (470,385)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
   $f.SuspendLayout()
-
+<#
   $o = new-object -typename 'System.Anoop.Graph.DrawGraph' -ArgumentList @([string[]]@(
             "USA",
             "UK",
@@ -627,45 +627,84 @@ function DrawGraph {
              $null,
              $null,
              'Arial', 
-             255
+             200
+            )
+#>
+  $o = new-object -typename 'System.Anoop.Graph.DrawGraph' -ArgumentList @([string[]]$data_ref.Value.Keys,
+            [float[]]$data_ref.Value.Values,
+             $null,
+             $null,
+             'Arial', 
+             200
             )
   [System.Windows.Forms.PictureBox]$b = New-Object -TypeName 'System.Windows.Forms.PictureBox'
-  $b.Location = New-Object System.Drawing.Point (20,20)
+  $b.Location = New-Object System.Drawing.Point (40,20)
   $b.Name = 'p5'
-  $b.Size = New-Object System.Drawing.Size (($f.Size.Width - 40),($f.Size.Height - 40))
+  $b.Size = New-Object System.Drawing.Size (($f.Size.Width - 20),($f.Size.Height - 100))
   $b.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::AutoSize
   $b.TabIndex = 1
   $b.TabStop = $false
   
-
-  $menustrip1 = New-Object -TypeName 'System.Windows.Forms.MenuStrip'
+  $m0 = New-Object -TypeName 'System.Windows.Forms.MenuStrip'
   $file_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
-  $about_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
+  $shape_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
+  $shape_m2 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
+  $shape_m3 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
   $exit_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
-  $menustrip1.SuspendLayout()
+  $m0.SuspendLayout()
 
-  #  menuStrip1
-  $menustrip1.Items.AddRange(@( $file_m1))
-  $menustrip1.Location = New-Object System.Drawing.Point (0,0)
-  $menustrip1.Name = "menuStrip1"
-  $menustrip1.Size = New-Object System.Drawing.Size (($f.Size.Width),24)
-  $menustrip1.TabIndex = 0
-  $menustrip1.Text = "menuStrip1"
+  #  m0
+  $m0.Items.AddRange(@( $file_m1, $exit_m1))
+  $m0.Location = New-Object System.Drawing.Point (0,0)
+  $m0.Name = "m0"
+  $m0.Size = New-Object System.Drawing.Size (($f.Size.Width),24)
+  $m0.TabIndex = 0
+  $m0.Text = "m0"
 
 
-  #  aboutToolStripMenuItem
-  $about_m1.Name = "aboutToolStripMenuItem"
-  $about_m1.Text = "About"
+  #  ShapeToolStripMenuItem
+  $shape_m1.Name = "LineGraphToolStripMenuItem"
+  $shape_m1.Text = "Line Graph"
 
-  $eventMethod_about_m1 = $about_m1.add_click
-  $eventMethod_about_m1.Invoke({
+  $eventMethod_shape_m1 = $shape_m1.add_click
+  $eventMethod_shape_m1.Invoke({
       param(
         [object]$sender,
         [System.EventArgs]$eventargs
       )
       $who = $sender.Text
       # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-      $b.Image = $o.DrawPieGraph()
+      $b.Image = $o.DrawLineGraph()
+      $caller.Data= $sender.Text
+    })
+
+  $shape_m2.Name = "BarGraphToolStripMenuItem"
+  $shape_m2.Text = "Bar Graph"
+
+  $eventMethod_shape_m2 = $shape_m2.add_click
+  $eventMethod_shape_m2.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+      $b.Image = $o.DrawBarGraph()
+      $caller.Data= $sender.Text
+    })
+
+  $shape_m3.Name = "3dPieChartToolStripMenuItem"
+  $shape_m3.Text = "3d Pie Chart"
+
+  $eventMethod_shape_m3 = $shape_m3.add_click
+  $eventMethod_shape_m3.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+      $b.Image = $o.Draw3DPieGraph()
       $caller.Data= $sender.Text
     })
 
@@ -688,25 +727,16 @@ function DrawGraph {
       $f.Close()
     })
 
-
-
   #  fileToolStripMenuItem1
-  $file_m1.DropDownItems.AddRange(@( $about_m1, $dash, $exit_m1))
+  $file_m1.DropDownItems.AddRange(@( $shape_m1, $dash, $shape_m2, $dash, $shape_m3))
   $file_m1.Name = "fileToolStripMenuItem1"
-  $file_m1.Text = "File"
+  $file_m1.Text = "Draw"
 
-  $menustrip1.ResumeLayout($false)
+  $m0.ResumeLayout($false)
 
   #  MenuTest
-  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
-  $f.Controls.Add($menustrip1)
-
-#---
-
-
-#---
-
-  $f.Controls.AddRange(@($b))
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (1,1)
+  $f.Controls.AddRange(@($m0, $b))
   $f.Topmost = $True
 
   $f.Add_Shown({ $f.Activate() })
@@ -718,8 +748,15 @@ function DrawGraph {
 
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+$data = @{ 
 
-[void] (DrawGraph -Title $title -caller $caller)
+       "USA" = 10;
+            "UK" = 30;
+            "Japan" = 60;
+            "China" = 40;
+            "Bhutan" = 5;
+            "India" = 60 ;}
+[void] (DrawGraph -Title $title -caller $caller -data_ref ([ref]$data))
 
 
 
