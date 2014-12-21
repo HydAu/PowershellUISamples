@@ -600,33 +600,114 @@ function DrawGraph {
   )
 
   @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
-
-  # $o = new-object -typename 'System.Anoop.Graph.DrawGraph' -valueLabels @() -values @() -xLabel $null -yLabel $null -fontFormat $null -alpha 0
-  $o = New-Object System.Anoop.Graph.DrawGraph ([string[]]@( '5','10','6','3','9','7'),[float[]]@( 5,10,6,3,9,7),$null,$null,$null,0)
-  [System.Windows.Forms.PictureBox]$b = New-Object -TypeName 'System.Windows.Forms.PictureBox'
-  $b.Location = New-Object System.Drawing.Point (25,27)
-  $b.Name = "p5"
-  $b.Size = New-Object System.Drawing.Size (301,214)
-  $b.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::AutoSize
-  $b.TabIndex = 11
-  $b.TabStop = $false
-  $b.Image = $o.DrawBarGraph()
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
+
 
   $f.Size = New-Object System.Drawing.Size (470,335)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
-
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+  $f.SuspendLayout()
 
-  # TODO:
-  # Remove-TypeData -TypeData 'System.Anoop.Graph.DrawGraph'
+  $o = new-object -typename 'System.Anoop.Graph.DrawGraph' -ArgumentList @([string[]]@(
+            "USA",
+            "UK",
+            "Japan",
+            "China",
+            "Bhutan",
+            "India"),
+            [float[]]@( 
+             10,
+             30,
+             60,
+             40,
+             5 ,
+             60),
+             $null,
+             $null,
+             'Arial', 
+             255
+            )
+  [System.Windows.Forms.PictureBox]$b = New-Object -TypeName 'System.Windows.Forms.PictureBox'
+  $b.Location = New-Object System.Drawing.Point (20,20)
+  $b.Name = 'p5'
+  $b.Size = New-Object System.Drawing.Size (($f.Size.Width - 40),($f.Size.Height - 40))
+  $b.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::AutoSize
+  $b.TabIndex = 1
+  $b.TabStop = $false
+  
+
+  $menustrip1 = New-Object -TypeName 'System.Windows.Forms.MenuStrip'
+  $file_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
+  $about_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
+  $exit_m1 = New-Object -TypeName 'System.Windows.Forms.ToolStripMenuItem'
+  $menustrip1.SuspendLayout()
+
+  #  menuStrip1
+  $menustrip1.Items.AddRange(@( $file_m1))
+  $menustrip1.Location = New-Object System.Drawing.Point (0,0)
+  $menustrip1.Name = "menuStrip1"
+  $menustrip1.Size = New-Object System.Drawing.Size (($f.Size.Width),24)
+  $menustrip1.TabIndex = 0
+  $menustrip1.Text = "menuStrip1"
 
 
-  $f.Controls.AddRange(@( $b))
+  #  aboutToolStripMenuItem
+  $about_m1.Name = "aboutToolStripMenuItem"
+  $about_m1.Text = "About"
+
+  $eventMethod_about_m1 = $about_m1.add_click
+  $eventMethod_about_m1.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+      $b.Image = $o.DrawPieGraph()
+      $caller.Data= $sender.Text
+    })
+
+  # Separator 
+  $dash = new-object -typename System.Windows.Forms.ToolStripSeparator
+
+  #  exitToolStripMenuItem
+  $exit_m1.Name = "exitToolStripMenuItem"
+  $exit_m1.Text = "Exit"
+
+  $eventMethod_exit_m1 = $exit_m1.add_click
+  $eventMethod_exit_m1.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+      $caller.Data= $sender.Text
+      $f.Close()
+    })
+
+
+
+  #  fileToolStripMenuItem1
+  $file_m1.DropDownItems.AddRange(@( $about_m1, $dash, $exit_m1))
+  $file_m1.Name = "fileToolStripMenuItem1"
+  $file_m1.Text = "File"
+
+  $menustrip1.ResumeLayout($false)
+
+  #  MenuTest
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
+  $f.Controls.Add($menustrip1)
+
+#---
+
+
+#---
+
+  $f.Controls.AddRange(@($b))
   $f.Topmost = $True
-
 
   $f.Add_Shown({ $f.Activate() })
 
@@ -638,7 +719,7 @@ function DrawGraph {
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-DrawGraph -Title $title -caller $caller
+[void] (DrawGraph -Title $title -caller $caller)
 
 
 
