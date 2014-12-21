@@ -23,14 +23,14 @@
 $RESULT_OK = 0
 $RESULT_CANCEL = 2
 
-function PromptPassword (
-  [string]$title,
-  [string]$user,
-  [object]$caller
-) {
+function PromptPassword {
+  param(
+    [string]$title,
+    [string]$user,
+    [object]$caller
+  )
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.MaximizeBox = $false
@@ -76,7 +76,7 @@ function PromptPassword (
   $btnCancel = New-Object System.Windows.Forms.Button
   $x1 = (($f.Size.Width - $btnCancel.Size.Width) - 20)
 
-  $btnCancel.Location = New-Object System.Drawing.Point($x1,$y1)
+  $btnCancel.Location = New-Object System.Drawing.Point ($x1,$y1)
   $btnCancel.Text = 'Cancel'
   $btnCancel.Name = 'btnCancel'
   $f.Controls.Add($btnCancel)
@@ -87,8 +87,17 @@ function PromptPassword (
   $f.Size = New-Object System.Drawing.Size ($f.Size.Width,(($btnCancel.Location.Y +
         $btnCancel.Size.Height + 40)))
 
-  $btnCancel.add_click({ $caller.txtPassword = $null; $caller.txtUser = $null; $f.Close() })
-  $btnOK.add_click({ $caller.Data = $RESULT_OK; $caller.txtPassword = $t2.Text; $caller.txtUser = $t1.Text; $f.Close() })
+  $btnCancel.add_click({
+      $caller.txtPassword = $null
+      $caller.txtUser = $null
+      $f.Close()
+    })
+  $btnOK.add_click({
+      $caller.Data = $RESULT_OK
+      $caller.txtPassword = $t2.Text
+      $caller.txtUser = $t1.Text
+      $f.Close()
+    })
 
   $f.Controls.Add($l)
   $f.Topmost = $true
@@ -157,5 +166,5 @@ $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::Ge
 
 PromptPassword -Title $title -user $user -caller $caller
 if ($caller.Data -ne $RESULT_CANCEL) {
-  Write-Debug ("Result is : {0} / {1}  " -f $caller.txtUser,$caller.txtPassword)
+  Write-Debug ('Result is : {0} / {1}' -f $caller.txtUser,$caller.txtPassword)
 }

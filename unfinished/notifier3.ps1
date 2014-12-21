@@ -1,4 +1,3 @@
-
 #Copyright (c) 2014 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,20 +18,9 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-function try_pop_up (
-  [string]$title,
-  [string]$message,
-  [object]$caller
-) {
-
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-
-
-
   $shared_assemblies = @(
-    "NotificationWindow.dll",
-    "nunit.framework.dll"
+    'NotificationWindow.dll',
+    'nunit.framework.dll'
   )
 
   Add-Type -AssemblyName PresentationFramework
@@ -62,7 +50,21 @@ function try_pop_up (
   popd
 
 
+function try_pop_up (
+  [string]$title,
+  [string]$message,
+  [object]$caller
+) {
+
+
+
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+
   $helper = New-Object -TypeName 'NotificationWindow.PopupNotifier'
+
+
 
   $helper.AnimationDuration = 150
   $helper.AnimationInterval = 1

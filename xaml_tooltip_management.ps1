@@ -22,7 +22,7 @@ function Get-ScriptDirectory
   $Invocation = (Get-Variable MyInvocation -Scope 1).Value
   if ($Invocation.PSScriptRoot)
   {
-    $Invocation.PSScriptRoot;
+    $Invocation.PSScriptRoot
   }
   elseif ($Invocation.MyCommand.Path)
   {
@@ -37,7 +37,6 @@ function Get-ScriptDirectory
 $so = [hashtable]::Synchronized(@{
     'Result' = [string]'';
     'ScriptDirectory' = [string]'';
-
     'Window' = [System.Windows.Window]$null;
     'Control' = [System.Windows.Controls.ToolTip]$null;
     'Contents' = [System.Windows.Controls.TextBox]$null;

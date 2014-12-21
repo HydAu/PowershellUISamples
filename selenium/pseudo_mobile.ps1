@@ -21,7 +21,7 @@
 
 # http://seleniumeasy.com/selenium-tutorials/set-browser-width-and-height-in-selenium-webdriver
 param(
-  [switch]$browser,  
+  [switch]$browser,
   [switch]$pause
 
 )
@@ -77,9 +77,9 @@ $env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { 
-# Unblock-File -Path $_; 
-Add-Type -Path $_ 
+$shared_assemblies | ForEach-Object {
+  # Unblock-File -Path $_; 
+  Add-Type -Path $_
 }
 popd
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
@@ -107,20 +107,20 @@ if ($PSBoundParameters["browser"]) {
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
-[void]$selenium.manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(3000))
+[void]$selenium.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(3000))
 
 
 if ($host.Version.Major -le 2) {
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
   $selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
   $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
-} else { 
+} else {
   $selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
   $selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 }
 
-$window_position = $selenium.manage().Window.Position
-$window_size = $selenium.manage().Window.Size
+$window_position = $selenium.Manage().Window.Position
+$window_size = $selenium.Manage().Window.Size
 
 
 $base_url = 'http://m.carnival.com/'
@@ -130,14 +130,14 @@ $selenium.Navigate().Refresh()
 
 
 $css_selector = 'select#ddlDestinations > option.cclMobileOptionColor[value=Placeholder]:nth-child(1)'
-write-output ( 'Locating via CSS SELECTOR: "{0}"' -f $css_selector )
+Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
 
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
 } catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message )
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
   # Exception with : Value cannot be null.
   # Parameter name: key ...
   # ???
@@ -145,10 +145,10 @@ try {
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 
-[NUnit.Framework.Assert]::AreEqual($element.Text ,  'Select a Destination')
+[NUnit.Framework.Assert]::AreEqual($element.Text,'Select a Destination')
 
 if ($PSBoundParameters['pause']) {
-  write-output 'pause'
+  Write-Output 'pause'
   try {
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
   } catch [exception]{}
@@ -170,9 +170,9 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $csspath = 'select#ddlDestinations > option.cclMobileOptionColor'
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$csspath = 'select#ddlDestinations > option.cclMobileOptionColor'
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
@@ -228,10 +228,10 @@ foreach ($item in $elements)
 
 Start-Sleep -Milliseconds 1000
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $name = "ddlDates"
-  $xpath = ('//select[@id="{0}"]' -f $name)
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$name = "ddlDates"
+$xpath = ('//select[@id="{0}"]' -f $name)
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
@@ -245,10 +245,10 @@ $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Pe
 
 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
 
-  $csspath = 'select#ddlDates > option.cclMobileOptionColor'
+$csspath = 'select#ddlDates > option.cclMobileOptionColor'
 
 try {
 
@@ -300,10 +300,10 @@ foreach ($item in $elements)
 
 #--- 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $name = "ddlDestinations"
-  $xpath = ('//select[@id="{0}"]' -f $name)
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$name = "ddlDestinations"
+$xpath = ('//select[@id="{0}"]' -f $name)
 
 try {
 
@@ -319,10 +319,10 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
 
-  $csspath = 'select#ddlDestinations > option.cclMobileOptionColor'
+$csspath = 'select#ddlDestinations > option.cclMobileOptionColor'
 
 
 try {
@@ -382,10 +382,10 @@ foreach ($item in $elements)
 
 
 #--- 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
 
-  $csspath = 'div.traveler-counter > a.more'
+$csspath = 'div.traveler-counter > a.more'
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
@@ -399,10 +399,10 @@ $more_cnt = 3
 for ($cnt = 0; $cnt -ne $more_cnt; $cnt++) {
   $element.Click()
 }
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
 
-  $csspath = 'div.traveler-counter > a.less'
+$csspath = 'div.traveler-counter > a.less'
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
@@ -419,9 +419,9 @@ for ($cnt = 0; $cnt -ne $more_cnt; $cnt++) {
 }
 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $csspath = 'div.find-cruise-submit > a'
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$csspath = 'div.find-cruise-submit > a'
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
@@ -433,9 +433,9 @@ $element.Click()
 
 Start-Sleep -Milliseconds 1000
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $csspath = 'a.refineResultsButton'
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$csspath = 'a.refineResultsButton'
 
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
@@ -448,9 +448,9 @@ $element.Click()
 Start-Sleep -Milliseconds 1000
 # 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $csspath = "span.ui-btn-text"
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$csspath = "span.ui-btn-text"
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{
@@ -491,9 +491,9 @@ Start-Sleep -Seconds 1
 
 
 
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-  $wait.PollingInterval = 100
-  $csspath = "div#shipCode > label.ships"
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$csspath = "div#shipCode > label.ships"
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($csspath)))
 } catch [exception]{

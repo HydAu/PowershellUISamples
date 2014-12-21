@@ -11,9 +11,7 @@ function PromptToolsTrip {
     [object]$caller
   )
 
-
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
@@ -21,7 +19,6 @@ function PromptToolsTrip {
   $f.Size = New-Object System.Drawing.Size (470,135)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
-
 
   $f.StartPosition = 'CenterScreen'
 
@@ -88,7 +85,7 @@ function PromptToolsTrip {
 
   [int]$FontSize = 14
   $dl.Font  = New-Object System.Drawing.Font("Microsoft Sans Serif",$FontSize,1,3,1)
-  # $dl.Font = new-Object System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)))
+
   $dl.Location = New-Object System.Drawing.Point (12,39)
   $dl.Name = "displayLabel"
   $dl.Size = New-Object System.Drawing.Size (293,89)
