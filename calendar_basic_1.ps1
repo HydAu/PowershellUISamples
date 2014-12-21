@@ -25,19 +25,16 @@ function PromptCalendar (
   [object]$caller
   ) {
 
+@('System.Data', 'System.Drawing','System.Windows.Forms') |  foreach-object {   [void] [System.Reflection.Assembly]::LoadWithPartialName($_) } 
+
 [string]$result = ''
-
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
-
 
 $f = New-Object System.Windows.Forms.Form
 $f.Text = $title
 
 
 $f.Size = New-Object System.Drawing.Size(650,120)
-$f.StartPosition = 'CenterScreen'
+$f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 
 $m = New-Object System.Windows.Forms.MonthCalendar
 $b = New-Object System.Windows.Forms.Button
@@ -59,7 +56,7 @@ $b.Text = 'Selection Range'
 $f.AutoScaleBaseSize = New-Object System.Drawing.Size(5, 13)
 $f.ClientSize = New-Object System.Drawing.Size(232, 213)
 $f.Controls.AddRange(@( $b, $m))
-$f.Name = 'Calendar';
+$f.Name = 'Calendar'
 $f.Text = 'Calendar Control'
 $f.ResumeLayout($false)
 
@@ -86,7 +83,7 @@ $b_Click_Handler = {
 	[SelectionRange]$sr = $m.SelectionRange
 	[SelectionRange]$st = $sr.Start
 	[SelectionRange]$se = $sr.End  
-	$caller.Data =  ( "RANGE START = {0}\nRANGE END = {1}" -f $st.ToString() , $se.ToString() );
+	$caller.Data =  ( "RANGE START = {0}`nRANGE END = {1}" -f $st.ToString() , $se.ToString() );
 }
 
 $b_Click.Invoke($b_Click_Handler )

@@ -36,23 +36,25 @@ function PromptAuto (
   [object]$caller
 ) {
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
-
-
   $f.Size = New-Object System.Drawing.Size (650,120)
   $f.StartPosition = 'CenterScreen'
 
   $f.KeyPreview = $True
   $f.Add_KeyDown({
 
-      if ($_.KeyCode -eq 'M') { $caller.Data = $RESULT_POSITIVE }
-      elseif ($_.KeyCode -eq 'A') { $caller.Data = $RESULT_NEGATIVE }
-      elseif ($_.KeyCode -eq 'Escape') { $caller.Data = $RESULT_CANCEL }
+      if ($_.KeyCode -eq 'M') {
+        $caller.Data = $RESULT_POSITIVE
+      }
+      elseif ($_.KeyCode -eq 'A') {
+        $caller.Data = $RESULT_NEGATIVE
+      }
+      elseif ($_.KeyCode -eq 'Escape') {
+        $caller.Data = $RESULT_CANCEL
+      }
       else { return }
       $f.Close()
 
@@ -62,21 +64,29 @@ function PromptAuto (
   $b1.Location = New-Object System.Drawing.Size (50,40)
   $b1.Size = New-Object System.Drawing.Size (75,23)
   $b1.Text = 'Yes!'
-  $b1.add_click({ $caller.Data = $RESULT_POSITIVE; $f.Close(); })
+  $b1.add_click({
+      $caller.Data = $RESULT_POSITIVE
+      $f.Close()
+    })
   $f.Controls.Add($b1)
 
   $b2 = New-Object System.Windows.Forms.Button
   $b2.Location = New-Object System.Drawing.Size (125,40)
   $b2.Size = New-Object System.Drawing.Size (75,23)
   $b2.Text = 'No!'
-  $b2.add_click({ $caller.Data = $RESULT_NEGATIVE; $f.Close(); })
+  $b2.add_click({
+      $caller.Data = $RESULT_NEGATIVE
+      $f.Close()
+    })
   $f.Controls.Add($b2)
 
   $b3 = New-Object System.Windows.Forms.Button
   $b3.Location = New-Object System.Drawing.Size (200,40)
   $b3.Size = New-Object System.Drawing.Size (75,23)
   $b3.Text = 'Maybe'
-  $b3.add_click({ $caller.Data = $RESULT_CANCEL; $f.Close() })
+  $b3.add_click({
+      $caller.Data = $RESULT_CANCEL
+      $f.Close() })
   $f.Controls.Add($b3)
 
   $l = New-Object System.Windows.Forms.Label
@@ -87,8 +97,10 @@ function PromptAuto (
   $f.Topmost = $True
 
 
-  $caller.Data = $RESULT_CANCEL;
-  $f.Add_Shown({ $f.Activate() })
+  $caller.Data = $RESULT_CANCEL
+  $f.Add_Shown({
+      $f.Activate()
+    })
 
   [void]$f.ShowDialog([win32window ]($caller))
 

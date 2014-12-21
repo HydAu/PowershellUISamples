@@ -96,13 +96,15 @@ $run_script = [powershell]::Create().AddScript({
     $helper.ShowCloseButton = $false
     $helper.ShowOptionsButton = $false
     $helper.ShowGrip = $false
-    $helper.Delay = 1000
-    $helper.AnimationInterval = 1000
-    $helper.AnimationDuration = 1000
+    $helper.Delay = 500 # 2000
+    $helper.AnimationInterval = 400
+    $helper.AnimationDuration = 400
     #$helper.TitlePadding = new Padding(10)
     #$helper.ContentPadding = new Padding(int.Parse(txtPaddingContent.Text));
     #$helper.ImagePadding = new Padding(int.Parse(txtPaddingIcon.Text));
     $helper.Scroll = $false
+
+    # BUG ? need two calls 
     $helper.Popup()
     Start-Sleep 10
     $helper.Popup()
@@ -122,9 +124,6 @@ function send_text {
     [int]$timeout = 10,
     [switch]$append
   )
-  Write-Host 'xxx'
-
-  Write-Output $so.Notifier.GetType()
   $so.Notifier.TitleText = ('Test Title: ' + ('{0}:{1}' -f $title,$message))
   $so.Notifier.Popup()
   Write-Output -InputObject ('{0}:{1}' -f $title,$message)
@@ -137,7 +136,7 @@ function send_text {
 $run_script.Runspace = $rs
 
 $cnt = 0
-$total = 4
+$total = 6
 $handle = $run_script.BeginInvoke()
 
 Start-Sleep 1
@@ -146,6 +145,7 @@ send_text -Title 'script' -Message 'Starting...' -Timeout 10
 
 while (-not $handle.IsCompleted -and $cnt -lt $total) {
   Start-Sleep -Milliseconds 10000
+#  Start-Sleep -Milliseconds 20000
   $cnt++
   send_text -Title 'script' -Message ("Finished {0} of {1} items..." -f $cnt,$total) -Timeout 10
 }

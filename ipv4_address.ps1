@@ -45,14 +45,14 @@ return $result.IPAddressToString
 
 
 function dialogForContinueAuto ($title,$message,$owner) {
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
   $f.Size = New-Object System.Drawing.Size (400,130)
   $f.Owner = $owner
-  $f.StartPosition = 'CenterScreen'
+  $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
   $f.Topmost = $True
   $p = New-Object System.Windows.Forms.Panel
   $ip1 = New-Object System.Windows.Forms.TextBox

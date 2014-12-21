@@ -253,9 +253,7 @@ function PromptRibbon {
   )
 
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-
+@('System.Drawing','System.Windows.Forms') |  foreach-object {   [void] [System.Reflection.Assembly]::LoadWithPartialName($_) } 
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
 

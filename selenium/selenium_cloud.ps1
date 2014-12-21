@@ -26,7 +26,7 @@
 
 param (
 [string] $filename = 'screenshot',
-[string] $hub_host = '',
+[string] $hub_host = '127.0.0.1',
 [string] $hub_port = '4444'
 
 )

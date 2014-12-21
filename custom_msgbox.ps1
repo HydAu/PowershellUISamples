@@ -104,7 +104,7 @@ function Return_Response
   [string ]$button_text = ([System.Windows.Forms.Button]$sender[0]).Text
 
   switch ($button_text) {
-    ('Yes') 
+    ('Yes')
     {
       $caller.Result = $MSGRESPONSE.Yes
     }
@@ -151,7 +151,7 @@ function AddButton {
       $btnOK.Text = 'OK'
       $formpanel.Controls.Add($btnOK)
 
-      $btnOK_response = $btnOK.add_Click
+      $btnOK_response = $btnOK.add_click
       $btnOK_Response.Invoke({
           param(
             [object]$sender,
@@ -167,7 +167,7 @@ function AddButton {
       $btnOK.Location = New-Object System.Drawing.Point (391,114)
       $btnOK.Text = 'OK'
       $formpanel.Controls.Add($btnOK)
-      $btnOK_response = $btnOK.add_Click
+      $btnOK_response = $btnOK.add_click
       $btnOK_Response.Invoke({
           param(
             [object]$sender,
@@ -183,7 +183,7 @@ function AddButton {
       $btnNo.Location = New-Object System.Drawing.Point (391,114)
       $btnNo.Text = 'No'
       $formpanel.Controls.Add($btnNo)
-      $btnNo_response = $btnNo.add_Click
+      $btnNo_response = $btnNo.add_click
       $btnNo_Response.Invoke({
           param(
             [object]$sender,
@@ -197,7 +197,7 @@ function AddButton {
       $btnYes.Location = New-Object System.Drawing.Point (($btnNo.Location.X - $btnNo.Width - 2),114)
       $btnYes.Text = 'Yes'
       $formpanel.Controls.Add($btnYes)
-      $btnYes_response = $btnYes.add_Click
+      $btnYes_response = $btnYes.add_click
       $btnYes_Response.Invoke({
           param(
             [object]$sender,
@@ -213,7 +213,7 @@ function AddButton {
       $btnCancel.Location = New-Object System.Drawing.Point (391,114)
       $btnCancel.Text = 'Cancel'
       $formpanel.Controls.Add($btnCancel)
-      $btnCancel_response = $btnCancel.add_Click
+      $btnCancel_response = $btnCancel.add_click
       $btnCancel_Response.Invoke({
           param(
             [object]$sender,
@@ -227,7 +227,7 @@ function AddButton {
       $btnNo.Location = New-Object System.Drawing.Point (($btnCancel.Location.X - $btnCancel.Width - 2),114)
       $btnNo.Text = 'No'
       $formpanel.Controls.Add($btnNo)
-      $btnNo_response = $btnNo.add_Click
+      $btnNo_response = $btnNo.add_click
       $btnNo_Response.Invoke({
           param(
             [object]$sender,
@@ -256,7 +256,7 @@ function AddButton {
       $btnCancel.Location = New-Object System.Drawing.Point (391,114)
       $btnCancel.Text = 'Cancel'
       $formpanel.Controls.Add($btnCancel)
-      $btnCancel_response = $btnCancel.add_Click
+      $btnCancel_response = $btnCancel.add_click
       $btnCancel_Response.Invoke({
           param(
             [object]$sender,
@@ -270,7 +270,7 @@ function AddButton {
       $btnRetry.Location = New-Object System.Drawing.Point (($btnCancel.Location.X - $btnCancel.Width - 2),114)
       $btnRetry.Text = 'Retry'
       $formpanel.Controls.Add($btnRetry)
-      $btnRetry_response = $btnRetry.add_Click
+      $btnRetry_response = $btnRetry.add_click
       $btnRetry_Response.Invoke({
           param(
             [object]$sender,
@@ -287,7 +287,7 @@ function AddButton {
       $btnIgnore.Location = New-Object System.Drawing.Point (391,114)
       $btnIgnore.Text = 'Ignore'
       $formpanel.Controls.Add($btnIgnore)
-      $btnIgnore_response = $btnIgnore.add_Click
+      $btnIgnore_response = $btnIgnore.add_click
       $btnIgnore_Response.Invoke({
           param(
             [object]$sender,
@@ -301,7 +301,7 @@ function AddButton {
       $btnRetry.Location = New-Object System.Drawing.Point (($btnIgnore.Location.X - $btnIgnore.Width - 2),114)
       $btnRetry.Text = 'Retry'
       $formpanel.Controls.Add($btnRetry)
-      $btnRetry_response = $btnRetry.add_Click
+      $btnRetry_response = $btnRetry.add_click
       $btnRetry_Response.Invoke({
           param(
             [object]$sender,
@@ -315,7 +315,7 @@ function AddButton {
       $btnAbort.Location = New-Object System.Drawing.Point (($btnRetry.Location.X - $btnRetry.Width - 2),114)
       $btnAbort.Text = 'Abort'
       $formpanel.Controls.Add($btnAbort)
-      $btnAbort_response = $btnAbort.add_Click
+      $btnAbort_response = $btnAbort.add_click
       $btnAbort_Response.Invoke({
           param(
             [object]$sender,
@@ -480,9 +480,7 @@ function Show3
 
   $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $f = New-Object System.Windows.Forms.Form
   $btnDetails = New-Object System.Windows.Forms.Button
   $btnOK = New-Object System.Windows.Forms.Button
@@ -565,7 +563,7 @@ function DrawBox
   $btnDetails.Tag = "exp"
   $btnDetails.Text = "Show Details"
   $formpanel.Controls.Add($btnDetails)
-  $btnDetails_response = $btnDetails.add_Click
+  $btnDetails_response = $btnDetails.add_click
   $btnDetails_Response.Invoke({
       param(
         [object]$sender,
@@ -657,8 +655,8 @@ $description = "This is is a long established fact that a reader will be distrac
 # Show2 -messageText "test" -messageTitle "title" -Description "description"
 
 # Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Information -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
-# Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
-test_assert
+Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
+# test_assert
 return
 
 try {

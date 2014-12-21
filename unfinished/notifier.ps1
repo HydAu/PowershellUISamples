@@ -25,11 +25,11 @@ param(
 
 # http://www.codeproject.com/Tips/836101/Sliding-Up-Notification-Like-Skype
 $shared_assemblies = @(
-  "NotificationWindow.dll",
-  "nunit.framework.dll"
+  'NotificationWindow.dll',
+  'nunit.framework.dll'
 )
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$env:SHARED_ASSEMBLIES_PATH = 'c:\developer\sergueik\csharp\SharedAssemblies'
 $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 pushd $shared_assemblies_path
 $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_; Write-Debug ("Loaded {0} " -f $_) }
