@@ -623,7 +623,7 @@ function DrawGraph {
   @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
-
+  # http://www.vistax64.com/powershell/179830-stupid-array-tricks-initializing-array-certain-size.html
 
   $f.Size = New-Object System.Drawing.Size (470,385)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
@@ -636,7 +636,7 @@ function DrawGraph {
     $null,
     $null,
     'Arial',
-    200
+    ( ($data_ref.Value.Keys).Count +1  )
   )
   [System.Windows.Forms.PictureBox]$b = New-Object -TypeName 'System.Windows.Forms.PictureBox'
   $b.Location = New-Object System.Drawing.Point (40,20)
@@ -750,14 +750,47 @@ function DrawGraph {
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $data = @{
-  "USA" = 10;
-  "UK" = 30;
-  "Japan" = 60;
-  "China" = 40;
-  "Bhutan" = 5;
-  "India" = 60; 
-}
-[void](DrawGraph -Title $title -caller $caller -data_ref ([ref]$data))
+"China" = 1367220000 ; 
+"India" = 1264210000 ; 
+"United States" = 319294000 ; 
+"Indonesia" = 255461700 ; 
+"Brazil" = 203615000 ; 
+"Pakistan" = 188465000 ; 
+"Nigeria" = 183523432;
+"Bangladesh" = 157519000 ; 
+"Russia" = 146300000 ; 
+"Japan" = 127080000 ; 
+"Mexico" = 121005815;
+"Philippines" = 100727100 ; 
+"Vietnam" = 90493352;
+"Ethiopia" = 90076012;
+"Egypt" = 87701800 ; 
+"Germany" = 80783000 ;
+"Iran" = 77981200 ;
+"Turkey" = 76667864 ; 
+"Democratic Republic of Congo" = 71246355;
+"Thailand" = 64871000 ; 
+"United Kingdom" = 64105654;
+"Italy" = 60769102;
+<# "South Africa" = 54002000;
+"Burma" = 51419420 ; 
 
+"Colombia" = 47916500 ; 
+"Tanzania" = 47421786 ; 
+"Spain" = 46507760 ; 
+"Argentina" = 43131966 ; 
+"Ukraine" = 42965105 ;
+"Kenya" = 41800000;
+"Algeria" = 39500000;
+"Poland" = 38496000;
+"Sudan" = 38435252;
+"Iraq" = 36004552;
+"Canada" = 35675834; #>
+}
+
+Write-debug "Plotting:"  
+$data  
+
+[void](DrawGraph -Title $title -caller $caller -data_ref ([ref]$data))
 
 
