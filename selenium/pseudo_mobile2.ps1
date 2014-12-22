@@ -143,7 +143,6 @@ if ($host.Version.Major -le 2) {
 $window_position = $selenium.Manage().Window.Position
 $window_size = $selenium.Manage().Window.Size
 
-
 $base_url = 'http://www.carnival.com/'
 $selenium.Navigate().GoToUrl($base_url)
 # set_timeouts ([ref]$selenium)
@@ -162,9 +161,21 @@ try {
 
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 [NUnit.Framework.Assert]::IsTrue($element.Text -match 'Sail to')
+
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 # [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
 $actions.MoveToElement($element).Click().Build().Perform()
+write-output ('Processing : "{0}"' -f $element.Text)
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 
 
 $css_selector = 'select[data-param=dest] option[value=C]'
@@ -200,6 +211,7 @@ try {
 [OpenQA.Selenium.IWebElement]$element_header = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector_header))
 [NUnit.Framework.Assert]::AreEqual('FIND A CRUISE',$element_header.Text)
 # TODO - debug
+
 [OpenQA.Selenium.Interactions.Actions]$header_actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $header_actions.MoveToElement($element_header).Build().Perform()
 try {
@@ -224,6 +236,18 @@ try {
 [NUnit.Framework.Assert]::IsTrue($element.Text -match 'Sail from')
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement($element).Click().Build().Perform()
+
+write-output ('Processing : "{0}"' -f $element.Text)
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 
 $css_selector = 'select[data-param=port] option[value=MIA]'
 
@@ -271,6 +295,16 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 # [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
 $header_actions.MoveToElement($element_header).Build().Perform()
+write-output ('Processing : "{0}"' -f $element.Text)
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
 
 
 $css_selector = 'select[data-param=numGuests] option[value="2"]'
@@ -319,8 +353,17 @@ try {
 [void]$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 start-sleep -milliseconds 200
 $header_actions.MoveToElement($element_header).Build().Perform()
+write-output ('Processing : "{0}"' -f $element.Text)
 
-# $actions.MoveToElement($element_header).Build().Perform()
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector_header)))
 } catch [exception]{
@@ -368,10 +411,20 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+write-output ('Processing : "{0}"' -f $element.Text)
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
-
-  Start-Sleep -Millisecond 10000
+Start-Sleep -Millisecond 10000
 
 
 $css_selector = 'span.c-summary__value'
