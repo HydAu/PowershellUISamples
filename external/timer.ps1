@@ -42,7 +42,7 @@ $so = [hashtable]::Synchronized(@{
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
-    'Timer' = [System.Windows.Forms.Timer]$null;
+    'Progress' = [System.Windows.Forms.ProgressBar]$null;
   })
 
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -80,23 +80,20 @@ $run_script = [powershell]::Create().AddScript({
 
       $f.SuspendLayout()
 
-      $r = New-Object System.Windows.Forms.Button
-      $l = New-Object System.Windows.Forms.Label
       $t = New-Object System.Windows.Forms.Timer
-      $so.Timer = $t
+
       $p = New-Object System.Windows.Forms.ProgressBar
       $p.DataBindings.DefaultDataSourceUpdateMode = 0
       $p.Maximum = $timeout_sec
-      $p.Size = New-Object System.Drawing.Size (($f.ClientSize.Width-10),($f.ClientSize.Height-14))
+      $p.Size = New-Object System.Drawing.Size (($f.ClientSize.Width - 10),($f.ClientSize.Height - 20))
       $p.Step = 1
       $p.TabIndex = 0
       $p.Location = New-Object System.Drawing.Point (5,5)
       $p.Style = 1
       $p.Name = 'progressBar1'
+      $so.Progress = $p
 
       $InitialFormWindowState = New-Object System.Windows.Forms.FormWindowState
-
-      $s = New-Object System.Windows.Forms.Button
 
       function start_timer {
 
@@ -105,50 +102,13 @@ $run_script = [powershell]::Create().AddScript({
 
       }
 
-      $s_response = $s.add_click
-      $s_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          $s.Text = 'Countdown Started.'
-          start_timer ($sender,$eventargs)
-        })
-
-      function reset_timer {
-
-        $t.Enabled = $false
-        $p.Value = 0
-
-      }
-
-      $r_response = $r.add_click
-      $r_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          reset_timer
-          $s.Text = 'Start'
-          $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
-          $f.Text = $l.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-
-        })
-
       $t_OnTick = {
         $p.PerformStep()
-
-        $time = $p.Maximum - $p.Value
-        [char[]]$mins = "{0}" -f ($time / 60)
-        $secs = "{0:00}" -f ($time % 60)
-
         $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
-        $f.Text = $l.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-
+        $f.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
 
         if ($p.Value -eq $p.Maximum) {
           $t.Enabled = $false
-          $s.Text = 'FINISHED!'
           $f.Close()
         }
       }
@@ -156,53 +116,15 @@ $run_script = [powershell]::Create().AddScript({
       $OnLoadForm_StateCorrection = {
         # Correct the initial state of the form to prevent the .Net maximized form issue
         $f.WindowState = $InitialFormWindowState
-        $t.Start()
-
+        start_timer
       }
 
-
-      $r.TabIndex = 4
-      $r.Name = 'button2'
-      $r.Size = New-Object System.Drawing.Size (209,69)
-      $r.UseVisualStyleBackColor = $True
-
-      $r.Text = 'Reset'
-      $r.Font = New-Object System.Drawing.Font ('Verdana',12,0,3,0)
-
-      $r.Location = New-Object System.Drawing.Point (362,13)
-      $r.DataBindings.DefaultDataSourceUpdateMode = 0
-      $r.add_click($r_OnClick)
-
-      # $f.Controls.Add($r)
 
       $l.TabIndex = 3
       $l.TextAlign = 32
       $l.Size = New-Object System.Drawing.Size (526,54)
       $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
-      $f.Text = $l.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-      # $l.Font = New-Object System.Drawing.Font ("Courier New",20.25,1,3,0)
-      $l.Font = New-Object System.Drawing.Font ('Arial',9.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0);
-      $l.Location = New-Object System.Drawing.Point (45,89)
-      # http://www.codeproject.com/Articles/31406/Add-the-Percent-or-Any-Text-into-a-Standard-Progre
-      $l.Location = New-Object System.Drawing.Point (45,146)
-      $l.DataBindings.DefaultDataSourceUpdateMode = 0
-      $l.Name = 'label1'
-
-      $f.Controls.Add($l)
-
-      $s.TabIndex = 2
-      $s.Name = 'button1'
-      $s.Size = New-Object System.Drawing.Size (310,70)
-      $s.UseVisualStyleBackColor = $True
-
-      $s.Text = 'Start'
-      $s.Font = New-Object System.Drawing.Font ("Verdana",12,0,3,0)
-
-      $s.Location = New-Object System.Drawing.Point (45,12)
-      $s.DataBindings.DefaultDataSourceUpdateMode = 0
-      $s.add_click($s_OnClick)
-
-      # $f.Controls.Add($s) 
+      $f.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
 
       $f.Controls.Add($p)
 
@@ -225,14 +147,23 @@ Clear-Host
 $run_script.Runspace = $rs
 
 $handle = $run_script.BeginInvoke()
-foreach ($cnt in @( 1,2,3,5,6,8,9,10)) {
-  Write-Output ('Doing lengthy work step {0}' -f $cnt )
+foreach ($work_step_cnt in @( 1,2,3,5,6,7)) {
+  Write-Output ('Doing lengthy work step {0}' -f $work_step_cnt)
   Start-Sleep -Millisecond 1000
 }
-Write-Output 'Work done'
+Write-Output 'All Work done'
+$wait_timer_step = 0
+$wait_timer_max = 2
+
 while (-not $handle.IsCompleted) {
   Write-Output 'waiting on timer to finish'
+  $wait_timer_step++
   Start-Sleep -Milliseconds 1000
+  if ($wait_timer_step -ge $wait_timer_max) {
+    $so.Progress.Value = $so.Progress.Maximum
+    Write-Output 'Stopping timer'
+    break
+  }
 }
 $run_script.EndInvoke($handle)
 $rs.Close()
