@@ -25,19 +25,6 @@ param(
   [switch]$pause
 
 )
-# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory
-{
-  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
-  if ($Invocation.PSScriptRoot) {
-    $Invocation.PSScriptRoot
-  }
-  elseif ($Invocation.MyCommand.Path) {
-    Split-Path $Invocation.MyCommand.Path
-  } else {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
-  }
-}
 
 function set_timeouts {
   param(
@@ -53,16 +40,16 @@ function set_timeouts {
 
 }
 
-function netstat_check 
+function netstat_check
 {
   param(
     [string]$selenium_http_port = 4444
   )
 
-   $results = invoke-expression -command "netsh interface ipv4 show tcpconnections"  
+  $results = Invoke-Expression -Command "netsh interface ipv4 show tcpconnections"
 
-   $t = $results -split "`r`n" | where-object {($_ -match "\s$selenium_http_port\s") }
-  (($t -ne '' ) -and $t -ne $null)
+  $t = $results -split "`r`n" | Where-Object { ($_ -match "\s$selenium_http_port\s") }
+  (($t -ne '') -and $t -ne $null)
 
 }
 
@@ -101,7 +88,7 @@ $verificationErrors = New-Object System.Text.StringBuilder
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
 
- if (-not (netstat_check )){
+  if (-not (netstat_check)) {
     Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
     Start-Sleep -Seconds 4
   }
@@ -165,7 +152,7 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 # [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
 $actions.MoveToElement($element).Click().Build().Perform()
-write-output ('Processing : "{0}"' -f $element.Text)
+Write-Output ('Processing : "{0}"' -f $element.Text)
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
@@ -196,7 +183,7 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement($element).Click().Build().Perform()
 
-start-sleep -millisecond 200
+Start-Sleep -Millisecond 200
 
 $css_selector_header = 'h2.c-cruise-search__header'
 Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector_header)
@@ -207,6 +194,84 @@ try {
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
 }
+
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+
+
+##-
+# re-select via http://stackoverflow.com/questions/15535069/select-each-option-in-a-dropdown-using-selenium
+$text1 = 'Caribbean'
+$css_selector = 'select[data-param=dest]'
+Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
+}
+
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+$element
+[OpenQA.Selenium.Support.UI.SelectElement]$select_element = New-Object OpenQA.Selenium.Support.UI.SelectElement ($element)
+$select_element
+$availableOptions = $select_element.Options
+$availableOptions
+$index = 0
+$max_count = 10
+[bool]$found = $false
+foreach ($item in $availableOptions)
+{
+  if ($index -gt $max_count) {
+    continue
+  }
+  if ($found) {
+    continue
+  } else {
+
+    [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+    $actions.MoveToElement($element).Build().Perform()
+  }
+  # $item
+  if ($item.Text -eq $text1) {
+
+    $found = $true
+
+    $select_element.SelectByText($item.Text)
+    $select_element.SelectByIndex($index)
+    $select_element.SelectByValue($item.GetAttribute('value'))
+
+    $result = $select_element.SelectedOption
+    Write-Output $result.Text
+    Write-Output $index
+
+    [NUnit.Framework.Assert]::AreEqual($result.Text,$item.Text)
+
+    $result.Click()
+    Start-Sleep -Milliseconds 1000
+
+    # NOTE: The [OpenQA.Selenium.Keys]::Enter,Space,Return do not work
+    [void]$actions.SendKeys($item,[OpenQA.Selenium.Keys]::Enter)
+    # Start-Sleep -Milliseconds 1000
+    [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
+    Start-Sleep -Milliseconds 1000
+  }
+  $index++
+}
+
+
+##-
+
 
 [OpenQA.Selenium.IWebElement]$element_header = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector_header))
 [NUnit.Framework.Assert]::AreEqual('FIND A CRUISE',$element_header.Text)
@@ -237,7 +302,7 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement($element).Click().Build().Perform()
 
-write-output ('Processing : "{0}"' -f $element.Text)
+Write-Output ('Processing : "{0}"' -f $element.Text)
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
@@ -295,7 +360,7 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 # [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
 $header_actions.MoveToElement($element_header).Build().Perform()
-write-output ('Processing : "{0}"' -f $element.Text)
+Write-Output ('Processing : "{0}"' -f $element.Text)
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
@@ -325,7 +390,7 @@ try {
 # TODO - debug
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-start-sleep -millisecond 200
+Start-Sleep -Millisecond 200
 [OpenQA.Selenium.Interactions.Actions]$header_actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $header_actions.MoveToElement($element_header).Build().Perform()
 
@@ -351,9 +416,9 @@ try {
 [NUnit.Framework.Assert]::IsTrue($element.Text -match 'Date')
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 [void]$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-start-sleep -milliseconds 200
+Start-Sleep -Milliseconds 200
 $header_actions.MoveToElement($element_header).Build().Perform()
-write-output ('Processing : "{0}"' -f $element.Text)
+Write-Output ('Processing : "{0}"' -f $element.Text)
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
@@ -387,7 +452,7 @@ try {
 [NUnit.Framework.Assert]::AreEqual('May 2015',$element.Text)
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-start-sleep -milliseconds 200
+Start-Sleep -Milliseconds 200
 
 $header_actions.MoveToElement($element_header).Build().Perform()
 
@@ -396,8 +461,6 @@ try {
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
 }
-
-
 
 
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
@@ -411,7 +474,7 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-write-output ('Processing : "{0}"' -f $element.Text)
+Write-Output ('Processing : "{0}"' -f $element.Text)
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
@@ -443,7 +506,6 @@ try {
 [NUnit.Framework.Assert]::IsTrue($element.Text -match 'itineraries found')
 
 
-
 $css_selector1 = 'section#results_container article[class *="c-cruise-list-item"]'
 
 Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector1)
@@ -461,7 +523,7 @@ try {
 # highlight the element
 [OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'border: 2px solid red;')
-Start-Sleep -millisecond 50
+Start-Sleep -Millisecond 50
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element1,'')
 
 
@@ -476,23 +538,20 @@ while ($cnt_found -lt $cnt_to_find) {
   [OpenQA.Selenium.IWebElement]$element2 = $element1.FindElement([OpenQA.Selenium.By]::XPath($xpath2))
 
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
-  Start-Sleep -millisecond 50
-
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'border: 2px solid red;')
+  Start-Sleep -Millisecond 50
 
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-
-
   $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
 
   if ($element2.LocationOnScreenOnceScrolledIntoView.Y -gt 0) {
     [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $element2.LocationOnScreenOnceScrolledIntoView.Y),$null)
     Start-Sleep -Millisecond 100
   }
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
 
   $cnt_found = $cnt_found + 1
-  ( $element2.Text -split "`n" )[0]
-  ( $element2.Text -split "`n" )[1]
+  ($element2.Text -split "`n")[0]
+  ($element2.Text -split "`n")[1]
 
   $element1 = $element2
 }
