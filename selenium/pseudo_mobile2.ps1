@@ -230,6 +230,7 @@ $availableOptions
 $index = 0
 $max_count = 10
 [bool]$found = $false
+# http://stackoverflow.com/questions/15535069/select-each-option-in-a-dropdown-using-selenium
 foreach ($item in $availableOptions)
 {
   if ($index -gt $max_count) {
