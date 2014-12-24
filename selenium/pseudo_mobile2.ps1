@@ -529,7 +529,7 @@ Start-Sleep -Millisecond 50
 
 
 $cnt_found = 0
-$cnt_to_find = 9
+$cnt_to_find = 5 # TODO compute
 
 while ($cnt_found -lt $cnt_to_find) {
 
@@ -544,12 +544,12 @@ while ($cnt_found -lt $cnt_to_find) {
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
   $scroll_window = $element2.LocationOnScreenOnceScrolledIntoView.Y
-  if ($scroll_window -eq 1) { 
+  if ($scroll_window -eq 1) {
     $scroll_window = 10
   }
   if ($scroll_window -gt 0) {
-    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $scroll_window), $null)
-    write-output ('Scroll {0} px' -f $scroll_window)
+    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $scroll_window),$null)
+    Write-Output ('Scroll {0} px' -f $scroll_window)
     Start-Sleep -Millisecond 500
     # TODO ladder 
   }
@@ -559,7 +559,7 @@ while ($cnt_found -lt $cnt_to_find) {
   $cnt_found = $cnt_found + 1
   $dest = ($element2.Text -split "`n")[0]
   $port_ship = ($element2.Text -split "`n")[1]
-  write-output ( 'Saling to {0} {1}' -f  $dest , $port_ship )
+  Write-Output ('Saling to {0} {1}' -f $dest,$port_ship)
 
   $element1 = $element2
 }
@@ -575,6 +575,60 @@ if ($PSBoundParameters['pause']) {
 } else {
   Start-Sleep -Millisecond 1000
 }
+
+$name = 'Show Dates'
+$xpath = ("//span[contains(text(), '{0}')]" -f $name)
+[OpenQA.Selenium.IWebElement]$element3 = $element1.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+Write-Output ('Processing : "{0}"' -f $element3.Text)
+
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Click().Build().Perform()
+
+$css_selector1 = 'div.c-price-table ul[class ="c-price-table__row"]'
+
+Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector1)
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait1 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait1.PollingInterval = 100
+
+[OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+Write-Output ('Processing : "{0}"' -f $element4.Text)
+
+# highlight the element
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'border: 2px solid red;')
+Start-Sleep -Millisecond 50
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
+
+
+
+$name = 'Book Now'
+
+$css_selector1 = ''
+# $xpath = ("//a [class*="c-button"][contains(text(), '{0}')]" -f $name)
+$xpath = ("//a[contains(@class, '{0}')][contains(text(), '{1}')]" -f 'c-button',$name)
+Write-Output ('Locating via XPATH: "{0}"' -f $xpath)
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait1 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait1.PollingInterval = 100
+
+[OpenQA.Selenium.IWebElement]$element6 = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+Write-Output ('Processing : "{0}"' -f $element6.Text)
+
+# highlight the element
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element6,'border: 2px solid red;')
+Start-Sleep -Millisecond 50
+[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element6,'')
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element6).Click().Build().Perform()
+Start-Sleep -Millisecond 10000
 
 # Cleanup
 cleanup ([ref]$selenium)
