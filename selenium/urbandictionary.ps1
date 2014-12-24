@@ -163,14 +163,14 @@ $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_
 $DebugPreference = 'Continue'
 $base_url = 'http://www.urbandictionary.com/'
 
-  if ($host.Version.Major -le 2) {
+if ($host.Version.Major -le 2) {
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-$selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
-$selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
+  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+  $selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
+  $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
 } else {
-$selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
-$selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
+  $selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
+  $selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 }
 $selenium.Navigate().GoToUrl($base_url)
 set_timeouts ([ref]$selenium)
