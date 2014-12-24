@@ -542,17 +542,24 @@ while ($cnt_found -lt $cnt_to_find) {
   Start-Sleep -Millisecond 50
 
   [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
+  $scroll_window = $element2.LocationOnScreenOnceScrolledIntoView.Y
+  if ($scroll_window -eq 1) { 
+    $scroll_window = 10
+  }
+  if ($scroll_window -gt 0) {
+    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $scroll_window), $null)
+    write-output ('Scroll {0} px' -f $scroll_window)
+    Start-Sleep -Millisecond 500
+    # TODO ladder 
+  }
+
   $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element2).Build().Perform()
 
-  if ($element2.LocationOnScreenOnceScrolledIntoView.Y -gt 0) {
-    [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $element2.LocationOnScreenOnceScrolledIntoView.Y),$null)
-    Start-Sleep -Millisecond 100
-  }
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element2,'')
-
   $cnt_found = $cnt_found + 1
-  ($element2.Text -split "`n")[0]
-  ($element2.Text -split "`n")[1]
+  $dest = ($element2.Text -split "`n")[0]
+  $port_ship = ($element2.Text -split "`n")[1]
+  write-output ( 'Saling to {0} {1}' -f  $dest , $port_ship )
 
   $element1 = $element2
 }
