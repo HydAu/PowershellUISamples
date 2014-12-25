@@ -106,7 +106,11 @@ $run_script = [powershell]::Create().AddScript({
         $p.PerformStep()
         $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
         $f.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-
+# http://www.dreamincode.net/forums/topic/62979-add-the-percent-into-a-progress-bar/
+<#
+int percent = (int)(((double)progressBar1.Value / (double)progressBar1.Maximum) * 100);
+progressBar1.CreateGraphics().DrawString(percent.ToString() + "%", new Font("Arial", (float)8.25, FontStyle.Regular), Brushes.Black, new PointF(progressBar1.Width / 2 - 10, progressBar1.Height / 2 - 7));
+#>
         if ($p.Value -eq $p.Maximum) {
           $t.Enabled = $false
           $f.Close()
