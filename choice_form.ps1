@@ -29,14 +29,11 @@ function promptForContinueAuto ($title,$message)
 }
 
 
+function dialogForContinueAuto {
+param ([String]$title,[String]$message,[Win32Window]$owner)
 
 
-function dialogForContinueAuto ($title,$message,$owner) {
-
-
-  [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-  [void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
-
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $objForm = New-Object System.Windows.Forms.Form
   $objForm.Text = $title
   $objForm.Size = New-Object System.Drawing.Size (400,130)
@@ -92,7 +89,38 @@ function dialogForContinueAuto ($title,$message,$owner) {
 
 }
 
+Add-Type -TypeDefinition @"
+using System;
+using System.Windows.Forms;
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
+    private int _data;
+    private string _script_directory;
 
+    public int Data
+    {
+        get { return _data; }
+        set { _data = value; }
+    }
+    public string ScriptDirectory
+    {
+        get { return _script_directory; }
+        set { _script_directory = value; }
+    }
+
+    public Win32Window(IntPtr handle)
+    {
+        _hWnd = handle;
+    }
+
+    public IntPtr Handle
+    {
+        get { return _hWnd; }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 $sitecorehostnames = "ccluatecocms1"
 
