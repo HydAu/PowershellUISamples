@@ -38,27 +38,27 @@
 $ENVIRONMENTS_CUSTOM = @{
   'UAT1' = @{
     'SCRIPT' = $EXAMPLE;
-    'EXPRESSION' = 'n1\.';
+    'EXPRESSION' = '^ccluat.*n1\.';
     'DOMAIN' = 'CARNIVAL';
   };
   'UAT2' = @{
     'SCRIPT' = $EXAMPLE;
-    'EXPRESSION' = 'n2\.';
+    'EXPRESSION' = '^ccluat.*n2\.';
     'DOMAIN' = 'CARNIVAL';
   };
   'UAT3' = @{
     'SCRIPT' = $EXAMPLE;
-    'EXPRESSION' = 'n3\.';
+    'EXPRESSION' = '^ccluat.*n3\.';
     'DOMAIN' = 'CARNIVAL';
   };
   'UAT4' = @{
     'SCRIPT' = $EXAMPLE;
-    'EXPRESSION' = 'n4\.';
+    'EXPRESSION' = '^ccluat.*n4\.';
     'DOMAIN' = 'CARNIVAL';
   };
   'UAT5' = @{
     'SCRIPT' = $EXAMPLE;
-    'EXPRESSION' = 'n5\.';
+    'EXPRESSION' = '^ccluat.*n5\.';
     'DOMAIN' = 'CARNIVAL';
   };
 
@@ -221,6 +221,37 @@ $ENVIRONMENTS_STRUCTURED = @{
       'ccltstecoweb1n6.carnival.com'
       #   , 
       #    'ccltstecoweb2n6.carnival.com'
+    );
+  };
+
+  'UAT INSIDE' = @{
+    'COMMENT' = 'UAT Servers';
+    'DOMAIN' = 'CARNIVAL';
+    'SERVERS' =
+    @(
+      # 1dbd91d1d66b6eaa67b387c2ffb0dc910c45dde4      #   , 
+
+      'ccluatecoadm1n1.carnival.com',
+      'ccluatecoadm2n1.carnival.com',
+      'ccluatecostg1n1.carnival.com',
+      'ccluatecoadm1n2.carnival.com',
+      'ccluatecoadm2n2.carnival.com',
+      'ccluatecostg1n2.carnival.com',
+      'ccluatecoadm1n3.carnival.com',
+      'ccluatecoadm2n3.carnival.com',
+      'ccluatecostg1n3.carnival.com'
+      'ccluatecoadm1n4.carnival.com',
+      'ccluatecoadm2n4.carnival.com',
+      'ccluatecoapc1n4.carnival.com',
+      'ccluatecoadm1n5.carnival.com',
+      'ccluatecoadm2n5.carnival.com',
+      'ccluatecocms1n5.carnival.com',
+      'ccluatecopv1n5.carnival.com',
+      'ccluatecostg1n5.carnival.com'
+      'ccluatecocms1.carnival.com',
+      'ccluatecocms2.carnival.com'
+
+
     );
   };
 
