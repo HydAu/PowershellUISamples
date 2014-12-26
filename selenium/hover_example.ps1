@@ -22,9 +22,8 @@
 
 param(
   [string]$hub_host = '127.0.0.1',
-  [string]$browser,
-  [string]$version,
-  [string]$profile = 'Selenium',
+  [string]$browser ,
+  [switch]$grid,
   [switch]$pause
 )
 
@@ -76,7 +75,7 @@ $shared_assemblies = @{
   'WebDriver.dll' = 2.44;
   'WebDriver.Support.dll' = '2.44';
   'nunit.core.dll' = $null;
-  'nunit.framework.dll' = '2.6.3';
+  'nunit.framework.dll' = $null;
 
 }
 
@@ -125,43 +124,44 @@ try {
   $connection.Connect($hub_host,[int]$hub_port)
   $connection.Close()
 } catch {
-  Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
 
-  Start-Sleep -Seconds 3
+if ($PSBoundParameters['grid']) {
+
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+
+} else {
+   Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
 }
-[object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
-
-[OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-[OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
-# only works with desktop browsers
-# $selected_profile_object.setPreference('general.useragent.override','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
-
-<#
-$profile_raw64 = $selected_profile_object.ToBase64String()
-$profile_raw64 | Out-File -FilePath 'a.txt'
-$profile_raw = [System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($profile_raw64))
-$profile_raw | Out-File -FilePath 'a.zip'
-#>
-# These preferences have no effect, need to find the correct syntax
-# $selected_profile_object.setPreference('browser.window.width',480)
-# $selected_profile_object.setPreference('browser.window.height',600)
+  Start-Sleep -Seconds 3
 
 
-# $selected_profile_object.UpdateUserPreferences()
-# A lot of methods declared in Webdriver.xml do not work:
-# Method invocation failed because [OpenQA.Selenium.Firefox.FirefoxProfile] does
-# not contain a method named 'UpdateUserPreferences'.
-#
-# $selected_profile_object | get-member
-#
-# [OpenQA.Selenium.Firefox.Preferences] $p = $selected_profile_object.ReadExistingPreferences()
+}
 
-$selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
-[OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
 
-# TODO: finish the syntax
-# [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
-[NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
+  Write-Debug "Running on ${browser}"
+  if ($browser -match 'firefox') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
+
+  }
+  elseif ($browser -match 'chrome') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  }
+  elseif ($browser -match 'ie') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+    if ($version -ne $null -and $version -ne 0) {
+      $capability.SetCapability("version",$version.ToString());
+    }
+
+  }
+  elseif ($browser -match 'safari') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
+  }
+  else {
+    throw "unknown browser choice:${browser}"
+  }
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
+
 
 $DebugPreference = 'Continue'
 $base_url = 'http://www.myntra.com/'
@@ -175,6 +175,20 @@ set_timeouts ([ref]$selenium)
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
 
+
+$xpath = "//a[@href='/shop/women?src=tn&nav_id=34']"
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+$text_url = $element.getAttribute('href')
+Write-Output ('Hovering on : "{0}"' -f $text_url  )
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement($element).Build().Perform()
+Start-Sleep -Millisecond 1000
+
 $xpath = "//a[@href='/shop/men?src=tn&nav_id=5']"
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
@@ -182,7 +196,10 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-Write-Output ('Processing : "{0}"' -f $element.Text)
+$text_url = $element.getAttribute('href')
+Write-Output ('Hovering on : "{0}"' -f $text_url  )
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement($element).Build().Perform()
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
@@ -192,11 +209,9 @@ if ($PSBoundParameters['pause']) {
 } else {
   Start-Sleep -Millisecond 1000
 }
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Build().Perform()
 
-Start-Sleep -Millisecond 10000
+Start-Sleep -Millisecond 1000
 # Click on " bags & backpacks " link
 $xpath = "#a[@href='/men-bags-backpacks?src=tn&nav_id=25']"
 Write-Output ('Locating via XPATH: "{0}"' -f $xpath)
@@ -286,7 +301,6 @@ driver.findElement(By.xpath("#a[@data-hint='Remove item']")).click();
 
 # Cleanup
 cleanup ([ref]$selenium)
-
 
 
 
