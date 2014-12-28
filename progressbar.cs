@@ -276,6 +276,18 @@ this.cmdStep,
             lblProgress.Text = (Math.Round((decimal)(Bar.Value * 100) /
                 Bar.Maximum)).ToString();
             lblProgress.Text += "% Done";
+
+            using (Graphics gr = Bar.CreateGraphics())
+            {
+                string sString = "Progress Bar Visible";
+                Brush b = new SolidBrush(Color.Red);
+                StringFormat sf = new StringFormat(StringFormatFlags.NoWrap);
+                sf.Alignment = StringAlignment.Center;
+                gr.DrawString(sString, new Font("Arial", 12.0f, FontStyle.Bold), b, Bar.ClientRectangle, sf);
+                gr.Dispose();
+                b.Dispose();
+                sf.Dispose();
+            }
         }
     }
 }
