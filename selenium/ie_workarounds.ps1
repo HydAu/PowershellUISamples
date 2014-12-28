@@ -174,6 +174,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
   # For IE 11 also need to switch to Enterprise Mode and use a site list
   # http://msdn.microsoft.com/en-us/library/dn640699.aspx
+  # http://msdn.microsoft.com/en-us/library/dn640687.aspx
+  # Enterprise Mode Site List Manager tool 
   # https://www.linkedin.com/groups/Hi-All-I-am-observing-961927.S.5954303177544257537?view=&item=5954303177544257537&type=member&gid=961927&trk=eml-b2_anet_digest-hero-4-hero-disc-disc-0&midToken=AQGpqMsZZNuraw&fromEmail=fromEmail&ut=2Wrj0MXnSR3mA1
   }
   elseif ($browser -match 'safari') {
