@@ -153,6 +153,7 @@ $run_script = [powershell]::Create().AddScript({
     $f.ShowDialog()
   })
 
+# http://www.c-sharpcorner.com/UploadFile/6897bc/implementing-system-tray-using-C-Sharp-control/
 function send_text {
   param(
     [string]$title = 'script',
