@@ -43,6 +43,7 @@ $so = [hashtable]::Synchronized(@{
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
     'Progress' = [System.Windows.Forms.ProgressBar]$null;
+    'Data' = [string]$null;
   })
 
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -61,7 +62,7 @@ $run_script = [powershell]::Create().AddScript({
         [int]$timeout_sec
       )
 
-      @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+      @( 'PresentationCore.dll','System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
       $f = New-Object System.Windows.Forms.Form
       $f.MaximumSize = $f.MinimumSize = New-Object System.Drawing.Size (220,65)
@@ -93,6 +94,19 @@ $run_script = [powershell]::Create().AddScript({
       $p.Name = 'progressBar1'
       $so.Progress = $p
 
+      $p.add_Paint({
+          param(
+            [object]$sender,
+            [painteventargs]$e
+          )
+          $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
+          $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
+          $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
+          $so.Data = 'xxx'
+
+        })
+
+
       $InitialFormWindowState = New-Object System.Windows.Forms.FormWindowState
 
       function start_timer {
@@ -103,16 +117,22 @@ $run_script = [powershell]::Create().AddScript({
       }
 
       $t_OnTick = {
-        $p.PerformStep()
+
         $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
         $f.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-# http://www.dreamincode.net/forums/topic/62979-add-the-percent-into-a-progress-bar/
-# http://www.dreamincode.net/forums/topic/94631-add-the-percent-into-a-progress-bar-updated/
-# http://support2.microsoft.com/?scid=kb;en-us;323116&x=13&y=13
-<#
-int percent = (int)(((double)progressBar1.Value / (double)progressBar1.Maximum) * 100);
-progressBar1.CreateGraphics().DrawString(percent.ToString() + "%", new Font("Arial", (float)8.25, FontStyle.Regular), Brushes.Black, new PointF(progressBar1.Width / 2 - 10, progressBar1.Height / 2 - 7));
-#>
+        # http://www.dreamincode.net/forums/topic/62979-add-the-percent-into-a-progress-bar/
+        # http://www.dreamincode.net/forums/topic/94631-add-the-percent-into-a-progress-bar-updated/
+        # http://support2.microsoft.com/?scid=kb;en-us;323116&x=13&y=13
+        # progressBar1.Width / 2 - (gr.MeasureString($f.Text, SystemFonts.DefaultFont).Width / 2.0F)
+        $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
+        $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
+        $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
+        Start-Sleep -Millisecond 100
+        # $so.Data = ($loc.X,$loc.Y) -join ' '
+        # the following has no effect
+        throw new Exception
+
+        $p.PerformStep()
         if ($p.Value -eq $p.Maximum) {
           $t.Enabled = $false
           $f.Close()
@@ -171,6 +191,8 @@ while (-not $handle.IsCompleted) {
     break
   }
 }
+Write-Output $so.Data
 $run_script.EndInvoke($handle)
 $rs.Close()
+
 return
