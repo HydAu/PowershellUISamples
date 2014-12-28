@@ -99,10 +99,9 @@ $run_script = [powershell]::Create().AddScript({
             [object]$sender,
             [painteventargs]$e
           )
-          $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
-          $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
-          $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
-          $so.Data = 'xxx'
+          # $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
+          # $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
+          # $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
 
         })
 
@@ -127,14 +126,19 @@ $run_script = [powershell]::Create().AddScript({
         
         # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
         $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
+
         $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
         $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
-        Start-Sleep -Millisecond 100
-        # $so.Data = ($loc.X,$loc.Y) -join ' '
+
+
         # the following has no effect
-        throw new Exception
+        # throw new Exception
 
         $p.PerformStep()
+
+        # the following has no effect
+        $p.Invalidate()
+
         if ($p.Value -eq $p.Maximum) {
           $t.Enabled = $false
           $f.Close()
