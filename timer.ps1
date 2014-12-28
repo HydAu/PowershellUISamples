@@ -120,10 +120,12 @@ $run_script = [powershell]::Create().AddScript({
 
         $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
         $f.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-        # http://www.dreamincode.net/forums/topic/62979-add-the-percent-into-a-progress-bar/
-        # http://www.dreamincode.net/forums/topic/94631-add-the-percent-into-a-progress-bar-updated/
+        # http://www.codeproject.com/Articles/31406/Add-the-Percent-or-Any-Text-into-a-Standard-Progre
+        # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
         # http://support2.microsoft.com/?scid=kb;en-us;323116&x=13&y=13
         # progressBar1.Width / 2 - (gr.MeasureString($f.Text, SystemFonts.DefaultFont).Width / 2.0F)
+        
+        # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
         $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
         $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
         $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
