@@ -7,6 +7,7 @@
 
 
 # http://blogs.technet.com/b/heyscriptingguy/archive/2011/11/26/use-powershell-to-find-out-who-has-permissions-to-a-share.aspx
+# http://technet.microsoft.com/en-us/magazine/2008.02.powershell.aspx
 $share = 'Projects'
 $query = "Associators of {win32_LogicalShareSecuritySetting='$share'}  Where resultclass = win32_sid"
 
