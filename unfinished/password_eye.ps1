@@ -25,40 +25,40 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
 
-    public class PasswordEyePropertiesChangedEventArgs
-        {
-        public Color   backcolor;
-        public Button  button;
-        public Control control;
-        public Color   forecolor;
-        public int     maximum_width;
-        public Panel   panel;
-        public TextBox textbox;
+public class PasswordEyePropertiesChangedEventArgs
+{
+    public Color backcolor;
+    public Button button;
+    public Control control;
+    public Color forecolor;
+    public int maximum_width;
+    public Panel panel;
+    public TextBox textbox;
 
-        // ********************* PasswordEyePropertiesChangedEventArgs
+    // ********************* PasswordEyePropertiesChangedEventArgs
 
-        public PasswordEyePropertiesChangedEventArgs ( 
-                                                Color   backcolor,
-                                                Button  button,
-                                                Control control,
-                                                Color   forecolor,
-                                                int     maximum_width,
-                                                Panel   panel,
-                                                TextBox textbox )
-            {
+    public PasswordEyePropertiesChangedEventArgs(
+                                            Color backcolor,
+                                            Button button,
+                                            Control control,
+                                            Color forecolor,
+                                            int maximum_width,
+                                            Panel panel,
+                                            TextBox textbox)
+    {
 
-            this.backcolor = backcolor;
-            this.button = button;
-            this.control = control;
-            this.forecolor = forecolor;
-            this.maximum_width = maximum_width;
-            this.panel = panel;
-            this.textbox = textbox;
-            }
+        this.backcolor = backcolor;
+        this.button = button;
+        this.control = control;
+        this.forecolor = forecolor;
+        this.maximum_width = maximum_width;
+        this.panel = panel;
+        this.textbox = textbox;
+    }
 
-        } // class PasswordEyePropertiesChangedEventArgs
-        
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
+} // class PasswordEyePropertiesChangedEventArgs
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
 
 Add-Type -TypeDefinition @"
@@ -102,17 +102,33 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-#  http://www.codeplex.com/Articles/660751/PasswordEye-Control
-function PromptPasswordEye (
-  [object]$caller
-) {
 
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
+}
 
+#  http://www.codeproject.com/Articles/660751/PasswordEye-Control
+function PromptPasswordEye {
+  param(
+    [object]$caller
+  )
+
+  # 'PasswordEyePropertiesChangedEventArgs'
   $f = New-Object System.Windows.Forms.Form
   $f.MaximizeBox = $false
   $f.MinimizeBox = $false
 
-( 'System.Drawing','System.ComponentModel','System.Text','System.Data','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+  ('System.Drawing','System.ComponentModel','System.Text','System.Data','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $panel = New-Object System.Windows.Forms.Panel
   $button = New-Object System.Windows.Forms.Button
@@ -127,7 +143,9 @@ function PromptPasswordEye (
   $panel.Name = 'panel'
   $panel.Size = New-Object System.Drawing.Size (250,27)
   $panel.TabIndex = 3
-  $image_path = 'C:\developer\sergueik\powershell_ui_samples\unfinished\PasswordEyeImage.png'
+  $filename = 'EyeImage'
+  $image_path = [System.IO.Path]::Combine((Get-ScriptDirectory),('{0}.{1}' -f $filename,'png'))
+
   [System.Drawing.Bitmap]$bitmap = New-Object System.Drawing.Bitmap ($image_path)
   $button.BackgroundImage = $bitmap
   $button.BackgroundImageLayout = [System.Windows.Forms.ImageLayout]::Zoom
@@ -139,6 +157,18 @@ function PromptPasswordEye (
   $button.Size = New-Object System.Drawing.Size (21,21)
   $button.TabIndex = 1
   $button.UseVisualStyleBackColor = $false
+
+  $trigger_passwordeye_properties_changed_event = $button.add_click
+  $trigger_passwordeye_properties_changed_event.Invoke({
+      param(
+        [object]$sender,
+        [passwordeyepropertieschangedeventargs]$e
+      )
+      $who = $sender.Text
+      # [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+      $caller.Data = $sender.Text
+      $f.Close()
+    })
 
   $textbox.BackColor = [System.Drawing.Color]::White
   $textbox.BorderStyle = [System.Windows.Forms.BorderStyle]::None
@@ -161,8 +191,7 @@ function PromptPasswordEye (
   $panel.ResumeLayout($false)
   $panel.PerformLayout()
   $f.ResumeLayout($false)
-  #  [void]$f.ShowDialog([win32window ]($caller))
-  [void]$f.ShowDialog()
+  [void]$f.ShowDialog([win32window ]($caller))
   $f.Dispose()
 }
 
@@ -171,9 +200,8 @@ function PromptPasswordEye (
 $DebugPreference = 'Continue'
 $title = 'Enter credentials'
 $user = 'admin'
-# $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-PromptPasswordEye
-# PromptPasswordEye -caller $caller
+$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+PromptPasswordEye -caller $caller
 #if ($caller.Data -ne $RESULT_CANCEL) {
 #  Write-Debug ("Result is : {0} / {1}  " -f $caller.txtUser,$caller.txtPassword)
 #}
