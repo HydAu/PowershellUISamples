@@ -388,7 +388,7 @@ $alert = $selenium.switchTo().alert()
 Write-Output ('Clicking on {0}' -f $alert.Text)
 $alert.accept()
 Start-Sleep 1
-
+# http://stackoverflow.com/questions/11961178/finding-an-element-by-partial-id-with-selenium-in-c-sharp
 # Cleanup
 cleanup ([ref]$selenium)
 
