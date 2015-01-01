@@ -151,7 +151,8 @@ namespace ProgressBarHost
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll', 'System.Data.dll'
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -218,7 +219,7 @@ $run_script = [powershell]::Create().AddScript({
       $t = New-Object System.Windows.Forms.Timer
 
       # $p = New-Object System.Windows.Forms.ProgressBar
-      $p = New-Object -TypeName 'ProgressBarHost.Progress'
+      $p = new-object -typename 'ProgressBarHost.Progress'
       $p.DataBindings.DefaultDataSourceUpdateMode = 0
       $p.Maximum = $timeout_sec
       $p.Size = New-Object System.Drawing.Size (($f.ClientSize.Width - 10),($f.ClientSize.Height - 20))
@@ -228,7 +229,7 @@ $run_script = [powershell]::Create().AddScript({
       $p.Style = 1
       $p.Name = 'progressBar1'
       $so.Progress = $p
-      <#     
+<#     
       $p.add_Paint({
           param(
             [object]$sender,
@@ -258,7 +259,7 @@ $run_script = [powershell]::Create().AddScript({
         # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
         # http://support2.microsoft.com/?scid=kb;en-us;323116&x=13&y=13
         # progressBar1.Width / 2 - (gr.MeasureString($f.Text, SystemFonts.DefaultFont).Width / 2.0F)
-
+        
         # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
         $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
 
