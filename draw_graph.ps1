@@ -636,7 +636,7 @@ function DrawGraph {
     $null,
     $null,
     'Arial',
-    ( ($data_ref.Value.Keys).Count +1  )
+    (($data_ref.Value.Keys).Count + 1)
   )
   [System.Windows.Forms.PictureBox]$b = New-Object -TypeName 'System.Windows.Forms.PictureBox'
   $b.Location = New-Object System.Drawing.Point (40,20)
@@ -729,7 +729,7 @@ function DrawGraph {
     })
 
   #  fileToolStripMenuItem1
-  $file_m1.DropDownItems.AddRange(@( $shape_m1, $shape_m2, $dash, $shape_m3))
+  $file_m1.DropDownItems.AddRange(@( $shape_m1,$shape_m2,$dash,$shape_m3))
   $file_m1.Name = "DrawToolStripMenuItem1"
   $file_m1.Text = "Draw"
 
@@ -750,31 +750,33 @@ function DrawGraph {
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $data = @{
-"China" = 1367220000 ; 
-"India" = 1264210000 ; 
-"United States" = 319294000 ; 
-"Indonesia" = 255461700 ; 
-"Brazil" = 203615000 ; 
-"Pakistan" = 188465000 ; 
-"Nigeria" = 183523432;
-"Bangladesh" = 157519000 ; 
-"Russia" = 146300000 ; 
-"Japan" = 127080000 ; 
-"Mexico" = 121005815;
-"Philippines" = 100727100 ; 
-"Vietnam" = 90493352;
-"Ethiopia" = 90076012;
-"Egypt" = 87701800 ; 
-"Germany" = 80783000 ;
-"Iran" = 77981200 ;
-"Turkey" = 76667864 ; 
-"Democratic Republic of Congo" = 71246355;
-"Thailand" = 64871000 ; 
-"United Kingdom" = 64105654;
-"Italy" = 60769102;
-<# "South Africa" = 54002000;
+  "China" = 1367220000;
+  "India" = 1264210000;
+  "United States" = 319294000;
+  "Indonesia" = 255461700;
+  "Brazil" = 203615000;
+  "Pakistan" = 188465000;
+  "Nigeria" = 183523432;
+  "Bangladesh" = 157519000;
+  "Russia" = 146300000;
+  "Japan" = 127080000;
+  "Mexico" = 121005815;
+  "Philippines" = 100727100;
+  "Vietnam" = 90493352;
+  "Ethiopia" = 90076012;
+  "Egypt" = 87701800;
+  "Germany" = 80783000;
+  "Iran" = 77981200;
+  "Turkey" = 76667864;
+  "Democratic Republic of Congo" = 71246355;
+  "Thailand" = 64871000;
+  "United Kingdom" = 64105654;
+  "Italy" = 60769102;
+}
+<# 
+# more data will not work
+"South Africa" = 54002000;
 "Burma" = 51419420 ; 
-
 "Colombia" = 47916500 ; 
 "Tanzania" = 47421786 ; 
 "Spain" = 46507760 ; 
@@ -785,11 +787,11 @@ $data = @{
 "Poland" = 38496000;
 "Sudan" = 38435252;
 "Iraq" = 36004552;
-"Canada" = 35675834; #>
-}
+"Canada" = 35675834; 
+#>
 
-Write-debug "Plotting:"  
-$data  
+Write-Debug "Plotting:"
+$data
 
 [void](DrawGraph -Title $title -caller $caller -data_ref ([ref]$data))
 
