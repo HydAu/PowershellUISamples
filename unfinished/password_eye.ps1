@@ -112,8 +112,7 @@ function PromptPasswordEye (
   $f.MaximizeBox = $false
   $f.MinimizeBox = $false
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
+( 'System.Drawing','System.ComponentModel','System.Text','System.Data','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
   $panel = New-Object System.Windows.Forms.Panel
   $button = New-Object System.Windows.Forms.Button
