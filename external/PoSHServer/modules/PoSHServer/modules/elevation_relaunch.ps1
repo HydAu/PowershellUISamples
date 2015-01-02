@@ -29,12 +29,29 @@ else
    # Exit from the current, unelevated, process
    exit
    }
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory {
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
+}
+
+
+
 # Run your code that needs to be elevated here
 Write-Host -NoNewLine "Press any key to continue..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-pushd C:\ccc
+$root =  [System.IO.Path]::Combine( (Get-ScriptDirectory), "..\..\..")
+pushd  $root
 
-import-module C:\ccc\PoSHServer.psd1
+import-module ./PoSHServer.psd1
 dir
 Write-Host -NoNewLine "Press any key to continue..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
