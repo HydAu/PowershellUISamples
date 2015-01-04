@@ -5,8 +5,8 @@
 
 # PoSH Server Logging Module
 # Fields: date time s-sitename s-computername s-ip cs-method cs-uri-stem s-port c-ip cs-version cs(User-Agent) cs(Cookie) cs(Referer) cs-host sc-status
-$LogDate = Get-Date -format yyyy-MM-dd
-$LogTime = Get-Date -format HH:mm:ss
+$LogDate = Get-Date -Format yyyy-MM-dd
+$LogTime = Get-Date -Format HH:mm:ss
 $LogSiteName = $Hostname
 if ($LogSiteName -eq "+") { $LogSiteName = "localhost" }
 $LogComputerName = Get-Content env:computername
@@ -31,34 +31,34 @@ $LogOutput = "$LogDate $LogTime $LogSiteName $LogComputerName $LogServerIP $LogM
 # Logging to Log File
 if ($LogSchedule -eq "Hourly")
 {
-	$LogNameFormat = Get-Date -format yyMMddHH
-	$LogFileName = "u_ex" + $LogNameFormat + ".log"
-	$LogFilePath = $LogDirectory + "\" + $LogFileName
+  $LogNameFormat = Get-Date -Format yyMMddHH
+  $LogFileName = "u_ex" + $LogNameFormat + ".log"
+  $LogFilePath = $LogDirectory + "\" + $LogFileName
 }
 else
 {
-	$LogNameFormat = Get-Date -format yyMMdd
-	$LogFileName = "u_ex" + $LogNameFormat + ".log"
-	$LogFilePath = $LogDirectory + "\" + $LogFileName
+  $LogNameFormat = Get-Date -Format yyMMdd
+  $LogFileName = "u_ex" + $LogNameFormat + ".log"
+  $LogFilePath = $LogDirectory + "\" + $LogFileName
 }
 
 if ($LastCheckDate -ne $LogNameFormat)
 {
-	if (![System.IO.File]::Exists($LogFilePath))  
-	{
-		$LogHeader = "#Fields: date time s-sitename s-computername s-ip cs-method cs-uri-stem s-port c-ip cs-version cs(User-Agent) cs(Cookie) cs(Referer) cs-host sc-status"
-		Add-Content -Path $LogFilePath -Value $LogHeader -EA SilentlyContinue
-	}
-	
-	# Set Last Check Date
-	$LastCheckDate = $LogNameFormat
+  if (![System.IO.File]::Exists($LogFilePath))
+  {
+    $LogHeader = "#Fields: date time s-sitename s-computername s-ip cs-method cs-uri-stem s-port c-ip cs-version cs(User-Agent) cs(Cookie) cs(Referer) cs-host sc-status"
+    Add-Content -Path $LogFilePath -Value $LogHeader -EA SilentlyContinue
+  }
+
+  # Set Last Check Date
+  $LastCheckDate = $LogNameFormat
 }
 
 try
 {
-	Add-Content -Path $LogFilePath -Value $LogOutput -EA SilentlyContinue
+  Add-Content -Path $LogFilePath -Value $LogOutput -EA SilentlyContinue
 }
 catch
 {
-	Add-Content -Value $_ -Path "$LogDirectory\debug.txt"
+  Add-Content -Value $_ -Path "$LogDirectory\debug.txt"
 }
