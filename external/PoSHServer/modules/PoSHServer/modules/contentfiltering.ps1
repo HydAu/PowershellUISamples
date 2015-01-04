@@ -6,17 +6,17 @@
 # PoSH Server Content Filtering Module
 if ($ContentFiltering -eq "On")
 {
-	if ($ContentFilterBlackList -match $MimeType)
-	{
-		Write-Debug "$MimeType is not allowed, dropping.."
-		$ContentSessionDrop = "1";
-	}
-	else
-	{
-		$ContentSessionDrop = "0";
-	}
+  if ($ContentFilterBlackList -match $MimeType)
+  {
+    Write-Debug "$MimeType is not allowed, dropping.."
+    $ContentSessionDrop = "1";
+  }
+  else
+  {
+    $ContentSessionDrop = "0";
+  }
 }
 else
 {
-	$ContentSessionDrop = "0";
+  $ContentSessionDrop = "0";
 }
