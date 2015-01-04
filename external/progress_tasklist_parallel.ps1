@@ -72,10 +72,12 @@ $so = [hashtable]::Synchronized(@{
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
+    'Message' = '';
     'Current' = 0;
+    'Previous' = 0;
     'Last' = 0;
-    'Steps' = [System.Management.Automation.PSReference];
-    'Progress' = [scriptblock]{};
+    'Tasks' = [System.Management.Automation.PSReference];
+    'Progress' = [Ibenza.UI.Winforms.ProgressTaskList]$null;
   })
 
 $so.ScriptDirectory = Get-ScriptDirectory
@@ -90,7 +92,7 @@ $run_script = [powershell]::Create().AddScript({
     function ProgressbarTasklist {
       param(
         [string]$title,
-        [System.Management.Automation.PSReference]$data_ref,
+        [System.Management.Automation.PSReference]$tasks_ref,
         [object]$caller
       )
 
@@ -99,6 +101,35 @@ $run_script = [powershell]::Create().AddScript({
       $f = New-Object -TypeName 'System.Windows.Forms.Form'
       $so.Form = $f
       $f.Text = $title
+      $t = New-Object System.Windows.Forms.Timer
+      $so.Message = '"in form"'
+      function start_timer {
+
+        $t.Enabled = $true
+        $t.Start()
+
+      }
+
+      $t_OnTick = {
+        # TODO 
+        # $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
+        # $text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
+        if ($so.Current -eq $so.Last) {
+          $t.Enabled = $false
+          $so.Message = '"Complete"'
+          $f.Close()
+        } else {
+          $so.Message = '"in timer"'
+          if ($so.Current -gt $so.Previous) {
+            $o.NextTask()
+            $so.Message = '"in timer"'
+            $so.Previous = $so.Current
+          }
+
+        }
+      }
+      $t.Interval = 300
+      $t.add_tick($t_OnTick)
 
       $f.Size = New-Object System.Drawing.Size (650,150)
       $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
@@ -116,31 +147,39 @@ $run_script = [powershell]::Create().AddScript({
       $b.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
 
       $b.Text = 'forward'
-      $progress = { 
-      } 
-      $b.add_click({
+      [scriptblock]$progress = {
 
+        if (-not $o.Visible) {
+          # set the first task to 'in progress'
+          $o.Visible = $true
+          $so.Current = 1
+          $o.Start()
+
+        } else {
+          # set the following task to 'in progress'
+          $o.NextTask()
+          $so.Current = $so.Current + 1
+          Write-Debug $so.Current
+        }
+
+      }
+
+      $progress_click = $b.add_click
+      $progress_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
           if ($so.Current -eq $so.Last)
           {
             $b.Enabled = $false
-            start-sleep -millisecond 300
+            Start-Sleep -Millisecond 300
             $so.Current = $so.Current + 1
             $so.Visible = $false
           } else {
-
-            if (-not $o.Visible) {
-              # set the first task to 'in progress'
-              $o.Visible = $true
-              $caller.Current = 1
-              $o.Start()
-
-
-            } else {
-              # set the following task to 'in progress'
-              $o.NextTask()
-              $so.Current = $so.Current + 1
-            }
+            Invoke-Command $progress -ArgumentList @()
           }
+
         })
 
       $o = New-Object -TypeName 'Ibenza.UI.Winforms.ProgressTaskList' -ArgumentList @()
@@ -151,10 +190,10 @@ $run_script = [powershell]::Create().AddScript({
       $o.Name = "progressTaskList1"
       $o.Size = New-Object System.Drawing.Size (288,159)
       $o.TabIndex = 2
+      $so.Progress = $o
+      $o.TaskItems.AddRange(@( [string[]]$tasks_ref.Value))
 
-      $o.TaskItems.AddRange(@( [string[]]$data_ref.Value.Keys))
-
-      $so.Last = $data_ref.Value.Keys.Count # will use 1-based index 
+      $so.Last = $tasks_ref.Value.Count + 1 # will use 1-based index 
       $o.Visible = $false
       $panel.SuspendLayout()
       $panel.ForeColor = [System.Drawing.Color]::Black
@@ -166,44 +205,74 @@ $run_script = [powershell]::Create().AddScript({
       $panel.Controls.Add($o)
       $panel.ResumeLayout($false)
       $panel.PerformLayout()
-
+      $InitialFormWindowState = New-Object System.Windows.Forms.FormWindowState
 
       $f.Controls.AddRange(@( $b,$panel))
       $f.Topmost = $True
 
       $so.Visible = $true
-      $f.Add_Shown({ $f.Activate() })
+      $f.Add_Shown({
+          $f.WindowState = $InitialFormWindowState
 
+          $f.Activate()
+          Invoke-Command $progress -ArgumentList @()
+          start_timer
+
+        })
+      #       $f.add_Load($OnLoadForm_StateCorrection)
       [void]$f.ShowDialog()
 
       $f.Dispose()
     }
-    $data_ref = $so.Steps
-    ProgressbarTasklist -data_ref $data_ref -title $so.Title
-    write-Output ("Processed:`n{0}" -f ($data_ref.value.Keys -join "`n"))
+    $tasks_ref = $so.Tasks
+    ProgressbarTasklist -tasks_ref $tasks_ref -Title $so.Title
+    Write-Output ("Processed:`n{0}" -f ($tasks_ref.Value -join "`n"))
 
   })
 
-$data = @{
-  'Verifying cabinet integrity' = $null;
-  'Checking necessary disk space' = $null;
-  'Extracting files' = $null;
-  'Modifying registry' = $null;
-  'Installing files' = $null;
-  'Removing temporary files' = $null; }
 
-$so.Steps = ([ref]$data)
+$tasks = @(
+  'Verifying cabinet integrity',
+  'Checking necessary disk space',
+  'Extracting files',
+  'Modifying registry',
+  'Installing files',
+  'Removing temporary files')
+
+
+$task_status = @{}
+
+$tasks | ForEach-Object { $task_status[$_] = $null }
+
+$so.Tasks = ([ref]$tasks)
 $so.Title = 'Task List'
 
 $run_script.Runspace = $rs
 
 $handle = $run_script.BeginInvoke()
 
-Start-Sleep -millisecond 300 
-while ($so.Current -lt $so.Last +  1) {
-  Start-Sleep -Milliseconds 100
+function PerformStep {
+
+  param(
+    [int]$step,
+    [switch]$skip
+  )
+  $task_status[$step] = $true
+
+  $so.Current = $step
+  Write-Output $so.Current
 }
 
+Start-Sleep -Millisecond 100
+while ($so.Visible) {
+  for ($cnt = 0; $cnt -ne $tasks.Count; $cnt++) {
+    $step_name = $tasks[$cnt]
+    Start-Sleep -Milliseconds 1200
+    PerformStep -Step $cnt
+  }
+  $so.Visible = $false
+}
+Write-Output $so.Message
 # Close the progress form
 $so.Form.Close()
 
