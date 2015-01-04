@@ -67,13 +67,20 @@ using System.Windows.Forms;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _data;
+    private int _current;
+    private int _last;
+
     private string _script_directory;
 
-    public int Data
+    public int Current
     {
-        get { return _data; }
-        set { _data = value; }
+        get { return _current; }
+        set { _current = value; }
+    }
+    public int Last
+    {
+        get { return _last; }
+        set { _last = value; }
     }
     public string ScriptDirectory
     {
@@ -95,10 +102,10 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
-function Progressbar {
+function ProgressbarTasklist {
   param(
     [string]$title,
-    [string]$message,
+    [System.Management.Automation.PSReference]$data_ref,
     [object]$caller
   )
 
@@ -107,10 +114,10 @@ function Progressbar {
   $f = New-Object -TypeName 'System.Windows.Forms.Form'
   $f.Text = $title
 
-  $f.Size = New-Object System.Drawing.Size (650,120)
+  $f.Size = New-Object System.Drawing.Size (650,150)
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,14)
-  $f.ClientSize = New-Object System.Drawing.Size (292,104)
+  $f.ClientSize = New-Object System.Drawing.Size (292,144)
 
 
   $panel = New-Object System.Windows.Forms.Panel
@@ -118,16 +125,33 @@ function Progressbar {
   $panel.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 
   $b = New-Object System.Windows.Forms.Button
-  $b.Location = New-Object System.Drawing.Point (140,72)
-  $b.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+  $b.Location = New-Object System.Drawing.Point (210,114)
+  # $b.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $b.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
-  $b.Text = 'forward'
-  $b.add_click({ $u.PerformStep()
-      if ($u.Maximum -eq $u.Value)
-      {
-        $b.Enabled = false
-      }
 
+  $b.Text = 'forward'
+
+  $b.add_click({
+
+      if ($caller.Current -eq $caller.Last)
+      {
+
+        $b.Enabled = false
+      } else {
+
+        if (-not $o.Visible) {
+          # set the first task to 'in progress'
+          $o.Visible = $true
+          $caller.Current = 1
+          $o.Start()
+
+
+        } else {
+          # set the following task to 'in progress'
+          $o.NextTask()
+          $caller.Current = $caller.Current + 1
+        }
+      }
     })
 
   $o = New-Object -TypeName 'Ibenza.UI.Winforms.ProgressTaskList' -ArgumentList @()
@@ -138,13 +162,10 @@ function Progressbar {
   $o.Name = "progressTaskList1"
   $o.Size = New-Object System.Drawing.Size (288,159)
   $o.TabIndex = 2
-  $o.TaskItems.AddRange(@(
-      "Verifying cabinet integrity",
-      "Checking necessary disk space",
-      "Extracting files",
-      "Modifying registry",
-      "Installing files",
-      "Removing temporary files"))
+
+  $o.TaskItems.AddRange(@( [string[]]$data_ref.Value.Keys))
+
+  $caller.Last = $data_ref.Value.Keys.Count + 1 # will use 1-based index 
   $o.Visible = $false
   $panel.SuspendLayout()
   $panel.ForeColor = [System.Drawing.Color]::Black
@@ -161,17 +182,24 @@ function Progressbar {
   $f.Controls.AddRange(@( $b,$panel))
   $f.Topmost = $True
 
-  $so.Visible = $caller.Visible = $true
+  # $so.Visible = $caller.Visible = $true
   $f.Add_Shown({ $f.Activate() })
 
   [void]$f.ShowDialog([win32window]($caller))
 
   $f.Dispose()
 }
+$data = @{
+  'Verifying cabinet integrity' = $null;
+  'Checking necessary disk space' = $null;
+  'Extracting files' = $null;
+  'Modifying registry' = $null;
+  'Installing files' = $null;
+  'Removing temporary files' = $null; }
 
 $title = 'test'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-[void](ProgressbarTasklist -Title $title -caller $caller)
+[void](ProgressbarTasklist -Title $title -caller $caller -data_ref ([ref]$data))
 
 
 
