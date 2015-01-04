@@ -68,7 +68,7 @@ function Get-ScriptDirectory
 }
 
 $so = [hashtable]::Synchronized(@{
-    'Result' = [string]'';
+    'Title' = [string]'';
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
@@ -116,13 +116,16 @@ $run_script = [powershell]::Create().AddScript({
       $b.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
 
       $b.Text = 'forward'
-
+      $progress = { 
+      } 
       $b.add_click({
 
           if ($so.Current -eq $so.Last)
           {
-
-            $b.Enabled = false
+            $b.Enabled = $false
+            start-sleep -millisecond 300
+            $so.Current = $so.Current + 1
+            $so.Visible = $false
           } else {
 
             if (-not $o.Visible) {
@@ -168,7 +171,7 @@ $run_script = [powershell]::Create().AddScript({
       $f.Controls.AddRange(@( $b,$panel))
       $f.Topmost = $True
 
-      # $so.Visible = $caller.Visible = $true
+      $so.Visible = $true
       $f.Add_Shown({ $f.Activate() })
 
       [void]$f.ShowDialog()
@@ -176,8 +179,8 @@ $run_script = [powershell]::Create().AddScript({
       $f.Dispose()
     }
     $data_ref = $so.Steps
-    write-Output ("Processing:`n{0}" -f ($data_ref.value.Keys -join "`n"))
-    ProgressbarTasklist -data_ref $data_ref -title 'test'
+    ProgressbarTasklist -data_ref $data_ref -title $so.Title
+    write-Output ("Processed:`n{0}" -f ($data_ref.value.Keys -join "`n"))
 
   })
 
@@ -190,27 +193,20 @@ $data = @{
   'Removing temporary files' = $null; }
 
 $so.Steps = ([ref]$data)
-$so.Last = $data.Keys.Count
-$title = 'test'
-# $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-# [void](ProgressbarTasklist -Title $title -caller $caller -data_ref ([ref]$data))
-
+$so.Title = 'Task List'
 
 $run_script.Runspace = $rs
 
 $handle = $run_script.BeginInvoke()
 
-# Start-Sleep -millisecond 300 
-while ($so.Current -lt $so.Last) {
+Start-Sleep -millisecond 300 
+while ($so.Current -lt $so.Last +  1) {
   Start-Sleep -Milliseconds 100
-  # $so.Progress.PerformStep()
 }
 
-# close_form
-# TODO - collapse, close,  displose 
-Write-Output $so.Form
-# $so.Form.Close()
+# Close the progress form
+$so.Form.Close()
 
 
-# $run_script.EndInvoke($handle)
-# $rs.Close()
+$run_script.EndInvoke($handle)
+$rs.Close()
