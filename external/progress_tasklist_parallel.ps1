@@ -72,7 +72,7 @@ $so = [hashtable]::Synchronized(@{
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
-    'Message' = '';
+    'DebugMessage' = '';
     'Current' = 0;
     'Previous' = 0;
     'Last' = 0;
@@ -102,7 +102,7 @@ $run_script = [powershell]::Create().AddScript({
       $so.Form = $f
       $f.Text = $title
       $t = New-Object System.Windows.Forms.Timer
-      $so.Message = '"in form"'
+      $so.DebugMessage = '"in form"'
       function start_timer {
 
         $t.Enabled = $true
@@ -116,16 +116,15 @@ $run_script = [powershell]::Create().AddScript({
         # $text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
         if ($so.Current -eq $so.Last) {
           $t.Enabled = $false
-          $so.Message = '"Complete"'
+          $so.DebugMessage = '"Complete"'
           $f.Close()
         } else {
-          $so.Message = '"in timer"'
+          $so.DebugMessage = '"in timer"'
           if ($so.Current -gt $so.Previous) {
             $o.NextTask()
-            $so.Message = '"in timer"'
             $so.Previous = $so.Current
+            $so.DebugMessage = ('Finished "{0}"' -f $so.Previous )
           }
-
         }
       }
       $t.Interval = 300
@@ -146,7 +145,7 @@ $run_script = [powershell]::Create().AddScript({
       $b.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
       $b.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
 
-      $b.Text = 'forward'
+      $b.Text = 'Skip forward'
       [scriptblock]$progress = {
 
         if (-not $o.Visible) {
@@ -156,12 +155,11 @@ $run_script = [powershell]::Create().AddScript({
           $o.Start()
 
         } else {
-          # set the following task to 'in progress'
-          $o.NextTask()
+          # TODO: set the following task to 'skipped'
           $so.Current = $so.Current + 1
-          Write-Debug $so.Current
+          $so.DebugMessage = ('Skipped "{0}"' -f $so.Current )
+          $o.NextTask()
         }
-
       }
 
       $progress_click = $b.add_click
@@ -181,7 +179,7 @@ $run_script = [powershell]::Create().AddScript({
           }
 
         })
-
+      $b.Enabled = $false
       $o = New-Object -TypeName 'Ibenza.UI.Winforms.ProgressTaskList' -ArgumentList @()
       $o.BackColor = [System.Drawing.Color]::Transparent
       $o.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
@@ -213,13 +211,10 @@ $run_script = [powershell]::Create().AddScript({
       $so.Visible = $true
       $f.Add_Shown({
           $f.WindowState = $InitialFormWindowState
-
           $f.Activate()
           Invoke-Command $progress -ArgumentList @()
           start_timer
-
         })
-      #       $f.add_Load($OnLoadForm_StateCorrection)
       [void]$f.ShowDialog()
 
       $f.Dispose()
@@ -227,9 +222,7 @@ $run_script = [powershell]::Create().AddScript({
     $tasks_ref = $so.Tasks
     ProgressbarTasklist -tasks_ref $tasks_ref -Title $so.Title
     Write-Output ("Processed:`n{0}" -f ($tasks_ref.Value -join "`n"))
-
   })
-
 
 $tasks = @(
   'Verifying cabinet integrity',
@@ -272,7 +265,7 @@ while ($so.Visible) {
   }
   $so.Visible = $false
 }
-Write-Output $so.Message
+Write-Output $so.DebugMessage
 # Close the progress form
 $so.Form.Close()
 
