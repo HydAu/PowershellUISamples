@@ -18,7 +18,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-$DebugPreference = 'Continue'
+# $DebugPreference = 'Continue'
 
 $shared_assemblies = @(
   # http://www.codeproject.com/Articles/11588/Progress-Task-List-Control
@@ -40,11 +40,12 @@ pushd $shared_assmblies_path
 
 $shared_assemblies | ForEach-Object {
   $assembly = $_
-  Write-Debug $assembly
+
   if ($host.Version.Major -gt 2) {
     Unblock-File -Path $assembly
   }
   Add-Type -Path $assembly
+  Write-Debug $assembly
 }
 popd
 
@@ -72,7 +73,6 @@ $so = [hashtable]::Synchronized(@{
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$null;
-    'DebugMessage' = '';
     'Current' = 0;
     'Previous' = 0;
     'Last' = 0;
@@ -102,7 +102,6 @@ $run_script = [powershell]::Create().AddScript({
       $so.Form = $f
       $f.Text = $title
       $t = New-Object System.Windows.Forms.Timer
-      $so.DebugMessage = '"in form"'
       function start_timer {
 
         $t.Enabled = $true
@@ -116,14 +115,11 @@ $run_script = [powershell]::Create().AddScript({
         # $text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
         if ($so.Current -eq $so.Last) {
           $t.Enabled = $false
-          $so.DebugMessage = '"Complete"'
           $f.Close()
         } else {
-          $so.DebugMessage = '"in timer"'
           if ($so.Current -gt $so.Previous) {
             $o.NextTask()
             $so.Previous = $so.Current
-            $so.DebugMessage = ('Finished "{0}"' -f $so.Previous )
           }
         }
       }
@@ -157,7 +153,6 @@ $run_script = [powershell]::Create().AddScript({
         } else {
           # TODO: set the following task to 'skipped'
           $so.Current = $so.Current + 1
-          $so.DebugMessage = ('Skipped "{0}"' -f $so.Current )
           $o.NextTask()
         }
       }
@@ -221,7 +216,7 @@ $run_script = [powershell]::Create().AddScript({
     }
     $tasks_ref = $so.Tasks
     ProgressbarTasklist -tasks_ref $tasks_ref -Title $so.Title
-    Write-Output ("Processed:`n{0}" -f ($tasks_ref.Value -join "`n"))
+    Write-Debug ("Processed:`n{0}" -f ($tasks_ref.Value -join "`n"))
   })
 
 $tasks = @(
@@ -253,22 +248,25 @@ function PerformStep {
   $task_status[$step] = $true
 
   $so.Current = $step
-  Write-Output $so.Current
+  # can call Progress class methods across Runspaces 
+  # $so.Progress.NextTask() 
+
 }
 
 Start-Sleep -Millisecond 100
 while ($so.Visible) {
   for ($cnt = 0; $cnt -ne $tasks.Count; $cnt++) {
     $step_name = $tasks[$cnt]
-    Start-Sleep -Milliseconds 1200
+    Start-Sleep -Milliseconds (Get-Random -Maximum 5000)
     PerformStep -Step $cnt
+    Write-Host ('Completes step [{0}] "{1}"' -f $cnt,$step_name)
   }
   $so.Visible = $false
 }
-Write-Output $so.DebugMessage
+
 # Close the progress form
 $so.Form.Close()
 
-
+# Close the runspace
 $run_script.EndInvoke($handle)
 $rs.Close()
