@@ -18,9 +18,226 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
+# http://www.codeproject.com/Articles/11588/Progress-Task-List-Control
+Add-Type -TypeDefinition @"
+// "
+using System;
+using System.Collections;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Drawing;
+using System.Data;
+using System.Windows.Forms;
+
+namespace WIP
+{
+    public class ProgressTaskList : System.Windows.Forms.Panel
+    {
+        private System.ComponentModel.IContainer components;
+        private Label[] labels;
+        private StringCollection2 tasks;
+        private System.Windows.Forms.ImageList imageList1;
+        private int currentTask = 0;
+
+        private string[] iconPaths = new string[] {
+          @"C:\developer\sergueik\powershell_ui_samples\1420429962_216151.ico",        
+          @"C:\developer\sergueik\powershell_ui_samples\1420429337_5880.ico",
+          @"C:\developer\sergueik\powershell_ui_samples\1420429523_62690.ico",        	
+          @"C:\developer\sergueik\powershell_ui_samples\1420429596_9866.ico"        
+        } ;
+
+        public ProgressTaskList()
+        {
+            InitializeComponent();
+            tasks = new StringCollection2(this);
+        }
+
+        public void InitLabels()
+        {
+            this.Controls.Clear();
+            if (tasks != null && tasks.Count > 0)
+            {
+                labels = new Label[tasks.Count];
+                int leftIndent = 3;
+                int topPos = 3;
+                for (int i = 0; i < tasks.Count; i++)
+                {
+                    Label l = new Label();
+                    l.AutoSize = true;
+                    l.Height = 23;
+                    l.Location = new Point(leftIndent, topPos);
+                    l.Text = "      " + tasks[i];		// preceeding spaces to leave room for image
+                    l.ImageAlign = ContentAlignment.MiddleLeft;
+                    l.TextAlign = ContentAlignment.MiddleLeft;
+                    l.ImageList = this.imageList1;
+                    topPos += 23;
+                    this.labels[i] = l;
+                    this.Controls.Add(l);
+                }
+            }
+        }
+
+        public StringCollection2 TaskItems
+        {
+            get
+            {
+                return tasks;
+            }
+            set
+            {
+                tasks = value;
+                this.InitLabels();
+            }
+        }
+
+        delegate void StartDelegate();
+        public void Start()
+        {
+            if (this.InvokeRequired)
+            {
+                StartDelegate del = new StartDelegate(this.Start);
+                BeginInvoke(del, null);
+            }
+            else
+            {
+                currentTask = 0;
+                InitLabels();
+                if (labels != null && labels.Length > 0)
+                    this.labels[0].ImageIndex = 0;
+            }
+        }
+
+        delegate void NextTaskDelegate();
+        public void NextTask()
+        {
+            if (this.InvokeRequired)
+            {
+                NextTaskDelegate del = new NextTaskDelegate(this.NextTask);
+                BeginInvoke(del, null);
+            }
+            else
+            {
+                if (currentTask < this.labels.Length)
+                    this.labels[currentTask].ImageIndex = 1;
+                currentTask++;
+                if (currentTask < labels.Length)
+                {
+                    this.ScrollControlIntoView(this.labels[currentTask]);	// make sure the label is visible. this is necessary in the case where the panel is scrolling vertically. it is nice for the user to see the current task scrolling into view automatically.
+                    this.labels[currentTask].ImageIndex = 0;
+                }
+            }
+        }
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
+
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(ProgressTaskList));
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
+            foreach (string iconPath in this.iconPaths)
+            {
+                this.imageList1.Images.Add(new Icon(iconPath));
+            }
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.AutoScroll = true;
+            this.Size = new System.Drawing.Size(175, 50);
+        }
+    }
+
+    public class StringCollection2 : CollectionBase
+    {
+        private ProgressTaskList parent;
+        public StringCollection2(ProgressTaskList parent)
+            : base()
+        {
+            this.parent = parent;
+        }
+
+        public string this[int index]
+        {
+            get
+            {
+                return ((string)List[index]);
+            }
+            set
+            {
+                List[index] = value;
+            }
+        }
+
+        public ProgressTaskList Parent
+        {
+            get
+            {
+                return this.parent;
+            }
+        }
+
+        public int Add(string value)
+        {
+            int result = List.Add(value);
+            return result;
+        }
+
+        public void AddRange(string[] strings)
+        {
+            // Use external to validate and add each entry
+            foreach (string s in strings)
+            {
+                this.Add(s);
+            }
+        }
+
+        public int IndexOf(string value)
+        {
+            return (List.IndexOf(value));
+        }
+
+        public void Insert(int index, string value)
+        {
+            List.Insert(index, value);
+        }
+
+        public void Remove(string value)
+        {
+            List.Remove(value);
+        }
+
+        public bool Contains(string value)
+        {
+            return (List.Contains(value));
+        }
+
+        protected override void OnInsertComplete(int index, object value)
+        {
+            base.OnInsertComplete(index, value);
+            parent.InitLabels();
+        }
+
+        protected override void OnRemoveComplete(int index, object value)
+        {
+            base.OnRemoveComplete(index, value);
+            parent.InitLabels();
+        }
+    }
+}
 
 
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
 $shared_assemblies = @{
+  # http://www.codeproject.com/Articles/11588/Progress-Task-List-Control
   'ProgressTaskList.dll' = $null;
   'nunit.core.dll' = $null;
   'nunit.framework.dll' = $null;
@@ -28,36 +245,24 @@ $shared_assemblies = @{
 }
 
 
-$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
+$shared_assmblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+
+  Write-Debug ('Using environment: {0}' -f $env:SHARED_ASSEMBLIES_PATH)
   $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 }
 
-pushd $shared_assemblies_path
+pushd $shared_assmblies_path
 
-
-$shared_assemblies.Keys | ForEach-Object {
-  # http://all-things-pure.blogspot.com/2009/09/assembly-version-file-version-product.html
+$shared_assemblies | ForEach-Object {
   $assembly = $_
-  $assembly_path = [System.IO.Path]::Combine($shared_assemblies_path,$assembly)
-  Write-Debug $assembly_path
-  $assembly_version = [Reflection.AssemblyName]::GetAssemblyName($assembly_path).Version
-  $assembly_version_string = ('{0}.{1}' -f $assembly_version.Major,$assembly_version.Minor)
-  if ($shared_assemblies[$assembly] -ne $null) {
-    # http://stackoverflow.com/questions/26999510/selenium-webdriver-2-44-firefox-33
-    if (-not ($shared_assemblies[$assembly] -match $assembly_version_string)) {
-      Write-Output ('Need {0} {1}, got {2}' -f $assembly,$shared_assemblies[$assembly],$assembly_path)
-      Write-Output $assembly_version
-      throw ('invalid version :{0}' -f $assembly)
-    }
-  }
 
   if ($host.Version.Major -gt 2) {
-    Unblock-File -Path $_
+    Unblock-File -Path $assembly
   }
-  Write-Debug $_
-  Add-Type -Path $_
+  Add-Type -Path $assembly
+  Write-Debug $assembly
 }
 popd
 
@@ -154,7 +359,10 @@ function ProgressbarTasklist {
       }
     })
 
-  $o = New-Object -TypeName 'Ibenza.UI.Winforms.ProgressTaskList' -ArgumentList @()
+  $i = New-Object -TypeName 'Ibenza.UI.Winforms.ProgressTaskList' -ArgumentList @()
+  $o = New-Object -TypeName 'WIP.ProgressTaskList' -ArgumentList @()
+
+
   $o.BackColor = [System.Drawing.Color]::Transparent
   $o.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
   $o.Dock = [System.Windows.Forms.DockStyle]::Fill
