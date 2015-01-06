@@ -36,7 +36,19 @@ if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -n
   $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 }
 
-pushd $shared_assemblies_path
+try {
+  pushd $shared_assemblies_path -erroraction  'Stop' 
+} catch [System.Management.Automation.ItemNotFoundException] {
+
+# no shared assemblies 
+throw
+return
+
+} catch [Exception]  {
+# possibly System.Management.Automation.ItemNotFoundException
+write-output ("Unexpected exception {0}`n{1}" -f  ( $_.Exception.GetType() ) , ( $_.Exception.Message) ) 
+
+}
 
 $shared_assemblies | ForEach-Object {
   $assembly = $_
