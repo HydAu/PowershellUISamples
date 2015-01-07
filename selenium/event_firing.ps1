@@ -154,13 +154,11 @@ $navigate_log.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
     )
-
-    Write-Output 'xxx'
-    [NUnit.Framework.Assert]::IsTrue(($false))
+    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
 
   })
 
-$selenium.Navigate().GoToUrl($base_url)
-set_timeouts ([ref]$selenium)
+$event.Navigate().GoToUrl($base_url)
+set_timeouts ([ref]$event)
 # Cleanup
-cleanup ([ref]$selenium)
+cleanup ([ref]$event)
