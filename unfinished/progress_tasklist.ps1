@@ -245,7 +245,7 @@ $shared_assemblies = @{
 }
 
 
-$shared_assmblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
 if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
 
@@ -253,7 +253,7 @@ if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -n
   $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 }
 
-pushd $shared_assmblies_path
+pushd $shared_assemblies_path
 
 $shared_assemblies | ForEach-Object {
   $assembly = $_
