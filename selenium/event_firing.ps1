@@ -132,10 +132,8 @@ if ($host.Version.Major -le 2) {
 $window_position = $selenium.Manage().Window.Position
 $window_size = $selenium.Manage().Window.Size
 
-$base_url = 'http://www.carnival.com/'
-$selenium.Navigate().GoToUrl($base_url)
-# set_timeouts ([ref]$selenium)
-
+$base_url = 'http://www.wikipedia.org/'
+#
 
 # TODO 
 # invoke NLog assembly for proper logging triggered by the events
@@ -143,19 +141,19 @@ $selenium.Navigate().GoToUrl($base_url)
 
 $event = New-Object -Type 'OpenQA.Selenium.Support.Events.EventFiringWebDriver' -ArgumentList @( $selenium)
 
-$event | Get-Member
-Start-Sleep -Millisecond 1000
+# $event | get-member 
+# Start-Sleep -Millisecond 1000
 
 
 $navigate_log = $event.add_Navigating
 $navigate_log.Invoke(
 
   {
-    <#
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          ) #>
+
+    param(
+      [object]$sender,
+      [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
+    )
 
     Write-Output 'xxx'
     [NUnit.Framework.Assert]::IsTrue(($false))
@@ -163,6 +161,6 @@ $navigate_log.Invoke(
   })
 
 $selenium.Navigate().GoToUrl($base_url)
-
+set_timeouts ([ref]$selenium)
 # Cleanup
 cleanup ([ref]$selenium)
