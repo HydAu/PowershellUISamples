@@ -85,3 +85,6 @@ emit Ret
 #
 
 $dynMethod.CreateDelegate($type, $scriptBlock)
+# http://stackoverflow.com/questions/5530522/provide-a-net-method-as-a-delegate-callback
+
+
