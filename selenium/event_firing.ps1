@@ -132,7 +132,7 @@ if ($host.Version.Major -le 2) {
 $window_position = $selenium.Manage().Window.Position
 $window_size = $selenium.Manage().Window.Size
 
-$base_url = 'http://www.wikipedia.org/'
+$base_url = 'http://www.carnival.com/'
 #
 
 # TODO 
@@ -143,10 +143,11 @@ $event = New-Object -Type 'OpenQA.Selenium.Support.Events.EventFiringWebDriver' 
 
 # $event | get-member 
 # Start-Sleep -Millisecond 1000
+# Write-Output ($event | Get-Member -MemberType Event) #
+#
 
-
-$navigate_log = $event.add_Navigating
-$navigate_log.Invoke(
+$navigating_handler = $event.add_Navigating
+$navigating_handler.Invoke(
 
   {
 
@@ -154,11 +155,120 @@ $navigate_log.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
     )
+    Write-Host ($eventargs | Get-Member -MemberType Property) # 
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
+    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null))
 
   })
 
+
+$clicking_handler = $event.add_ElementClicking
+$clicking_handler.Invoke(
+
+  {
+
+    param(
+      [object]$sender,
+      [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
+    )
+    Write-Host ($eventargs | Get-Member -MemberType Property) # 
+    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
+    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
+
+  })
+
+
+$navigating_back_handler = $event.add_NavigatingBack
+$navigating_back_handler.Invoke(
+
+  {
+
+    param(
+      [object]$sender,
+      [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
+    )
+    Write-Host ($eventargs | Get-Member -MemberType Property) # 
+    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
+    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
+
+  })
+
+$element_value_changing_handler = $event.add_ElementValueChanging
+$element_value_changing_handler.Invoke(
+
+  {
+
+    param(
+      [object]$sender,
+      [OpenQA.Selenium.Support.Events.WebElementEventArgs]$eventargs
+    )
+    Write-Host ($eventargs | Get-Member -MemberType Property) # 
+    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
+    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
+
+  })
+
+$script_executing_handler = $event.add_ScriptExecuting
+$script_executing_handler.Invoke(
+
+  {
+
+    param(
+      [object]$sender,
+      [OpenQA.Selenium.Support.Events.WebDriverScriptEventArgs]$eventargs
+
+    )
+    Write-Host ($eventargs | Get-Member -MemberType Property) # 
+    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
+    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
+
+  })
+
+$finding_element_handler = $event.add_FindingElement
+$finding_element_handler.Invoke(
+
+  {
+
+    param(
+      [object]$sender,
+      [OpenQA.Selenium.Support.Events.FindElementEventArgs]$eventargs
+    )
+    Write-Host ($eventargs | Get-Member -MemberType Property) # 
+    # [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
+    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
+
+  })
+
+
+
 $event.Navigate().GoToUrl($base_url)
+
+
+# -- fragment of pseudo_mobile2.ps1
+
+$css_selector = 'select[data-param=dest] option[disabled][selected]'
+Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
+}
+
+[OpenQA.Selenium.IWebElement]$element = $event.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+##[NUnit.Framework.Assert]::IsTrue($event.Text -match 'Sail to')##
+##
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+# [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
+$actions.MoveToElement($element).Click().Build().Perform()
+Write-Output ('Processing : "{0}"' -f $element.Text)
+
+
 set_timeouts ([ref]$event)
 # Cleanup
 cleanup ([ref]$event)
+
+
+
