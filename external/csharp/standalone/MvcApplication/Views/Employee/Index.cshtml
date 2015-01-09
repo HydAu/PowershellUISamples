@@ -1,0 +1,64 @@
+﻿@model IEnumerable<TestApplication.Models.Employee>
+
+@{
+    ViewBag.Title = "EmployeeList";
+}
+
+<h2>Available employees</h2> <br /><br />
+
+@Html.ActionLink("Add", "AddEmployee")
+<button id="Delete">Delete</button>
+<table>
+    <thead>
+        <tr>
+            <td style="font-weight:bold">Select</td>
+            <td style="font-weight:bold">Employee Id</td>
+            <td style="font-weight:bold">Name</td>
+            <td style="font-weight:bold">Salary</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td><input type="checkbox" id="@emp.EmpId" /></td>
+                <td>@Html.ActionLink(emp.EmpId.ToString(), "GetEmployee", new { Id = emp.EmpId })</td>
+                <td>@emp.Name</td>
+                <td>@emp.Salary</td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Delete').attr('disabled', 'disabled');
+        //Handle delete functionality
+        $('#Delete').on('click', function () {
+            var idList = []
+            $('input:checkbox:checked').each(function () {
+                idList.push(this.id);
+            });
+            console.log(idList);
+            $.ajax({
+                url: "/Employee/DeleteEmployee",
+                type: "post",
+                data: { empIds: idList },
+                traditional: true
+            }).then(function () {
+                location.href = "/Employee/GetEmployees";
+            });
+        });
+        //Enable or disable the delete button
+        $('input:checkbox').on('change', function () {
+            if ($('input:checkbox:checked').length > 0) {
+                $('#Delete').attr('disabled', false);
+            } else {
+                $('#Delete').attr('disabled', true);
+            }
+
+        });
+    });
+
+</script>

@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "AddEmployee";
+}
+
+<h2>AddEmployee</h2>
+
+<div id="AddEmployeeDetailDiv">
+    <label for="Name">
+        Name:
+    </label>
+    <input id="Name" type="text" /><br />
+    <label for="Sal">
+        Salary:
+    </label>
+    <input id="Sal" type="text" /><span id="errmsg" style="color:red; display:none">Digits Only</span><br />
+
+    <input type="button" value="Submit" id="Submit" />
+    <button>@Html.ActionLink("Cancel", "GetEmployees")</button>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Sal").keypress(function (e) {
+            if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+                $("#errmsg").show().fadeOut("slow");
+                return false;
+            }
+        });
+        $('#Submit').on('click', function () {
+            $.ajax({
+                url: "/Employee/AddEmployee",
+                type: "post",
+                data: {
+                    EmpId: 0,
+                    Name: $('#Name').val(),
+                    Salary: $('#Sal').val()
+                }
+            }).then(function () {
+                alert('Employee saved successfully');
+                location.href = "/Employee/GetEmployees";
+            });
+        });
+    });
+
+</script>
