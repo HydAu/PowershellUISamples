@@ -26,7 +26,8 @@ write-debug $delegate
 
  
 # And display the number of replacements that were done...
-"`nNumber of replacements: $PatternCount"
+
+write-output ("Number of replacements:{0}" -f $PatternCount )
 #>
 param(
   [type]$type,# TODO Type Assertions 
@@ -55,32 +56,23 @@ function emit ($opcode)
   }
 }
 
-# Get the method info for this delegate invoke...
-Write-Debug $type.GetTYpe()
-$delegateInvoke = $type.GetMethod("Invoke")
+# Get the method info for this type
 
+$delegateInvoke = $type.GetMethod('Invoke')
 
-Write-Debug $delegateInvoke
 # Get the argument type signature for the delegate invoke
 $parameters = @( $delegateInvoke.GetParameters())
 $returnType = $delegateInvoke.ReturnParameter.ParameterType
 
-Write-Debug $returnType
-
-$argList = New-Object Collections.ArrayList
+$argList = New-Object -TypeName 'System.Collections.ArrayList'
 [void]$argList.Add([scriptblock])
 foreach ($p in $parameters) { [void]$argList.Add($p.ParameterType) }
 
-$dynMethod = New-Object -TypeName 'System.Reflection.Emit.DynamicMethod' -ArgumentList @( "",$returnType,$argList.ToArray(),[object],$false)
-
-Write-Debug $dynMethod
-
+$dynMethod = New-Object -TypeName 'System.Reflection.Emit.DynamicMethod' -ArgumentList @( '', $returnType, $argList.ToArray(), [object], $false)
 $ilg = $dynMethod.GetILGenerator()
 
 # Place the scriptblock on the stack for the method call
-# 
 emit -opcode 'Ldarg_0'
-
 emit -opcode 'Ldc_I4' ($argList.Count - 1) # Create the parameter array
 emit -opcode 'Newarr' ([object])
 
@@ -97,38 +89,24 @@ for ($opCount = 1; $opCount -lt $argList.Count; $opCount++)
   emit -opcode 'Stelem' ([object]) # Store it in the array
 }
 
-# Now emit the call to the ScriptBlock invoke method
 
-Write-Debug '1'
-
-
-# http://msdn.microsoft.com/en-us/library/system.	management.automation.scriptblock.invokereturnasis(v=vs.85).aspx
-# 
-emit -opcode 'Call' ([System.Management.Automation.ScriptBlock].GetMethod("InvokeReturnAsIs"))
+# Emit the call to the ScriptBlock invoke method
+# http://msdn.microsoft.com/en-us/library/system.management.automation.scriptblock.invokereturnasis(v=vs.85).aspx
+emit -opcode 'Call' ([System.Management.Automation.ScriptBlock].GetMethod('InvokeReturnAsIs'))
 
 
-if ($returnType -eq [void])
-{
-  # If the return type is void, pop the returned object
-  emit -opcode 'Pop'
-}
-
-else
-{
-  # http://msdn.microsoft.com/en-us/library/System.Reflection.Emit.TypeBuilder.GetMethod(v=vs.100).aspx
-  # Otherwise emit code to convert the result type which looks
-  # like LanguagePrimitives.ConvertTo(value, type)
+# If the return type is void, pop the returned object
+if ($returnType -eq [void]) {
+   emit -opcode 'Pop'
+} else {
+  # Otherwise emit code to convert the result type
   # http://msdn.microsoft.com/en-us/library/system.management.automation.languageprimitives.convertto(v=vs.85).aspx
-  $signature = [object],[type]
-  # $convertMethod = [Management.Automation.LanguagePrimitives].GetMethod("ConvertTo",$signature) 
-  $convertMethod = [Management.Automation.LanguagePrimitives].GetMethod("ConvertTo",[type[]]@( [object],[type]))
-  $GetTypeFromHandle = [type].GetMethod("GetTypeFromHandle");
+  $convertMethod = [Management.Automation.LanguagePrimitives].GetMethod('ConvertTo', [type[]]@([object],[type]))
+  $GetTypeFromHandle = [type].GetMethod('GetTypeFromHandle');
   emit -opcode 'Ldtoken' $returnType # And the return type token...
   emit -opcode 'Call' $GetTypeFromHandle
   emit -opcode 'Call' $convertMethod
 }
-
-
 emit -opcode 'Ret'
 
 #
@@ -136,6 +114,7 @@ emit -opcode 'Ret'
 #
 
 $dynMethod.CreateDelegate($type,$scriptBlock)
+# Alternatives 
 # http://stackoverflow.com/questions/5530522/provide-a-net-method-as-a-delegate-callback
 # https://social.technet.microsoft.com/Forums/windowsserver/en-US/399493e0-76c1-41a0-8e2c-320d98c2fdd1/powershell-how-to-create-a-delegate?forum=winserverpowershell
 
