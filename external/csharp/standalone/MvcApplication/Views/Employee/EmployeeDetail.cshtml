@@ -1,0 +1,48 @@
+﻿@model TestApplication.Models.Employee
+<h2>Edit Employee Details</h2>
+
+<div id="EmployeeDetailDiv">
+    <label for="EmpId">
+        Employee Id:
+    </label>
+    <input id="EmpId" type="text" value="@Model.EmpId" readonly="readonly" /> <br />
+    <label for="Name">
+        Name:
+    </label>
+    <input id="Name" type="text" value="@Model.Name" /><br />
+    <label for="Sal">
+        Salary:
+    </label>
+    <input id="Sal" type="text" value="@Model.Salary" /><span id="errmsg" style="color:red; display:none">Digits Only</span><br />
+
+    <input type="button" value="Submit" id="Submit" />
+
+    <button>@Html.ActionLink("Cancel", "GetEmployees")</button>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#Sal").keypress(function (e) {
+            if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+                $("#errmsg").show().fadeOut("slow");
+                return false;
+            }
+        });
+        $('#Submit').on('click', function () {
+            $.ajax({
+                url: "/Employee/SetEmployee",
+                type: "post",
+                data: {
+                    EmpId: $('#EmpId').val(),
+                    Name: $('#Name').val(),
+                    Salary: $('#Sal').val()
+                }
+            }).then(function () {
+                alert('Employee saved successfully');
+                location.href = "/Employee/GetEmployees";
+            });
+        });
+    });
+
+</script>
