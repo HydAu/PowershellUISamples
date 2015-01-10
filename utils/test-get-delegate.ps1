@@ -14,7 +14,7 @@ if ($host.Version.Major -gt 2) {
 }
 
 $DebugPreference = 'Continue'
-
+# http://msdn.microsoft.com/en-us/library/system.text.regularexpressions.matchevaluator%28v=vs.110%29.aspx
 $delegate = ./get-delegate `
    System.Text.RegularExpressions.MatchEvaluator ([System.Management.Automation.ScriptBlock]{
     # Return a replacement for the matching string...
@@ -28,3 +28,6 @@ $re = New-Object System.Text.RegularExpressions.Regex ('s[a-z]')
 'Lorem ipsum dolor sit amet, consectetur adipisicing elit' | ForEach-Object { $re.Replace($_,$delegate) }
 
 Write-Output ("Number of replacements:{0}" -f $PatternCount)
+
+# http://seleniumdotnet.blogspot.com/2012/01/wait-for-element-to-load-in-selenium.html
+# http://relevantcodes.com/selenium-findelementex-and-iselementpresent/

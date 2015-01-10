@@ -1,7 +1,4 @@
 # http://blogs.msdn.com/b/powershell/archive/2006/07/25/678259.aspx
-# Alternatives 
-# http://stackoverflow.com/questions/5530522/provide-a-net-method-as-a-delegate-callback
-# https://social.technet.microsoft.com/Forums/windowsserver/en-US/399493e0-76c1-41a0-8e2c-320d98c2fdd1/powershell-how-to-create-a-delegate?forum=winserverpowershell
 
 param(
   [type]$for_type,# TODO Type Assertions 
