@@ -34,7 +34,7 @@ namespace ProgressBarHost
     public class Progress : System.Windows.Forms.UserControl
     {
         internal System.Windows.Forms.Label lblProgress;
-        internal System.Windows.Forms.ProgressBar Bar;
+        internal System.Windows.Forms.ProgressBar _bar;
         private System.ComponentModel.Container components = null;
 
         public Progress()
@@ -57,7 +57,7 @@ namespace ProgressBarHost
         private void InitializeComponent()
         {
             this.lblProgress = new System.Windows.Forms.Label();
-            this.Bar = new System.Windows.Forms.ProgressBar();
+            this._bar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
 
             this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
@@ -69,16 +69,16 @@ namespace ProgressBarHost
             this.lblProgress.Text = "0% Done";
             this.lblProgress.TextAlign = System.Drawing.ContentAlignment.TopCenter;
 
-            this.Bar.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this._bar.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right);
-            this.Bar.Location = new System.Drawing.Point(5, 6);
-            this.Bar.Name = "Bar";
-            this.Bar.Size = new System.Drawing.Size(154, 32);
-            this.Bar.TabIndex = 2;
+            this._bar.Location = new System.Drawing.Point(5, 6);
+            this._bar.Name = "Bar";
+            this._bar.Size = new System.Drawing.Size(154, 32);
+            this._bar.TabIndex = 2;
 
             this.Controls.AddRange(new System.Windows.Forms.Control[] {
                                                                           this.lblProgress,
-                                                                          this.Bar});
+                                                                          this._bar});
             this.Name = "Progress";
             this.Size = new System.Drawing.Size(164, 68);
             this.ResumeLayout(false);
@@ -91,11 +91,11 @@ namespace ProgressBarHost
         {
             get
             {
-                return Bar.Value;
+                return _bar.Value;
             }
             set
             {
-                Bar.Value = value;
+                _bar.Value = value;
                 UpdateLabel();
             }
         }
@@ -104,11 +104,11 @@ namespace ProgressBarHost
         {
             get
             {
-                return Bar.Maximum;
+                return _bar.Maximum;
             }
             set
             {
-                Bar.Maximum = value;
+                _bar.Maximum = value;
             }
         }
 
@@ -116,33 +116,33 @@ namespace ProgressBarHost
         {
             get
             {
-                return Bar.Step;
+                return _bar.Step;
             }
             set
             {
-                Bar.Step = value;
+                _bar.Step = value;
             }
         }
 
         public void PerformStep()
         {
-            Bar.PerformStep();
+            _bar.PerformStep();
             UpdateLabel();
         }
 
         private void UpdateLabel()
         {
-            lblProgress.Text = (Math.Round((decimal)(Bar.Value * 100) /
-                Bar.Maximum)).ToString();
+            lblProgress.Text = (Math.Round((decimal)(_bar.Value * 100) /
+                _bar.Maximum)).ToString();
             lblProgress.Text += "% Done";
-
-            using (Graphics gr = Bar.CreateGraphics())
+            _bar.Refresh(); 
+            using (Graphics gr = _bar.CreateGraphics())
             {
                 string sString = lblProgress.Text;
-                Brush b = new SolidBrush(Color.Red);
+                Brush b = new SolidBrush(Color.Black);
                 StringFormat sf = new StringFormat(StringFormatFlags.NoWrap);
                 sf.Alignment = StringAlignment.Center;
-                gr.DrawString(sString, new Font("Arial", 9.0f, FontStyle.Bold), b, Bar.ClientRectangle, sf);
+                gr.DrawString(sString, new Font("Arial", 9.0f, FontStyle.Regular), b, _bar.ClientRectangle, sf);
                 gr.Dispose();
                 b.Dispose();
                 sf.Dispose();
@@ -207,11 +207,11 @@ $run_script = [powershell]::Create().AddScript({
       $f.ShowIcon = $False
       $f.StartPosition = 1
       $f.DataBindings.DefaultDataSourceUpdateMode = 0
-      $f.ClientSize = New-Object System.Drawing.Size (($f.MinimumSize.Width - 10),($f.MinimumSize.Height - 10))
+      $f.ClientSize = New-Object System.Drawing.Size (($f.MinimumSize.Width),($f.MinimumSize.Height))
 
       $components = New-Object System.ComponentModel.Container
       $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
-      $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
+      $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None
       $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 
       $f.SuspendLayout()
@@ -222,10 +222,10 @@ $run_script = [powershell]::Create().AddScript({
       $p = new-object -typename 'ProgressBarHost.Progress'
       $p.DataBindings.DefaultDataSourceUpdateMode = 0
       $p.Maximum = $timeout_sec
-      $p.Size = New-Object System.Drawing.Size (($f.ClientSize.Width - 10),($f.ClientSize.Height - 20))
+      $p.Size = New-Object System.Drawing.Size (($f.ClientSize.Width),($f.ClientSize.Height))
       $p.Step = 1
       $p.TabIndex = 0
-      $p.Location = New-Object System.Drawing.Point (5,5)
+      $p.Location = New-Object System.Drawing.Point (0,0)
       $p.Style = 1
       $p.Name = 'progressBar1'
       $so.Progress = $p
@@ -255,26 +255,7 @@ $run_script = [powershell]::Create().AddScript({
 
         $elapsed = New-TimeSpan -Seconds ($p.Maximum - $p.Value)
         $f.Text = ('{0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds)
-        # http://www.codeproject.com/Articles/31406/Add-the-Percent-or-Any-Text-into-a-Standard-Progre
-        # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
-        # http://support2.microsoft.com/?scid=kb;en-us;323116&x=13&y=13
-        # progressBar1.Width / 2 - (gr.MeasureString($f.Text, SystemFonts.DefaultFont).Width / 2.0F)
-        
-        # http://stackoverflow.com/questions/8259157/text-on-progressbar-in-c-sharp
-        $loc = New-Object System.Drawing.PointF (($p.Width / 2 - 10),($p.Height / 2 - 7))
-
-        $font = New-Object System.Drawing.Font ('Microsoft Sans Serif',8.25,[System.Drawing.FontStyle]::Regular)
-        $p.CreateGraphics().DrawString($f.Text,$font,[System.Drawing.Brush]::Black,$loc)
-
-
-        # the following has no effect
-        # throw new Exception
-
         $p.PerformStep()
-
-        # the following has no effect
-        $p.Invalidate()
-
         if ($p.Value -eq $p.Maximum) {
           $t.Enabled = $false
           $f.Close()
