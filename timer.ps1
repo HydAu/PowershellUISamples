@@ -59,7 +59,7 @@ namespace ProgressBarHost
             this.lblProgress = new System.Windows.Forms.Label();
             this._bar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
-
+/*
             this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right);
             this.lblProgress.Location = new System.Drawing.Point(5, 46);
@@ -68,7 +68,7 @@ namespace ProgressBarHost
             this.lblProgress.TabIndex = 3;
             this.lblProgress.Text = "0% Done";
             this.lblProgress.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-
+*/
             this._bar.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                 | System.Windows.Forms.AnchorStyles.Right);
             this._bar.Location = new System.Drawing.Point(5, 6);
@@ -77,7 +77,7 @@ namespace ProgressBarHost
             this._bar.TabIndex = 2;
 
             this.Controls.AddRange(new System.Windows.Forms.Control[] {
-                                                                          this.lblProgress,
+                                                                          // this.lblProgress,
                                                                           this._bar});
             this.Name = "Progress";
             this.Size = new System.Drawing.Size(164, 68);
@@ -87,6 +87,7 @@ namespace ProgressBarHost
 
         [Description("The current value (between 0 and Maximum) which sets the position of the progress bar"),
         Category("Behavior"), DefaultValue(0)]
+
         public int Value
         {
             get
@@ -100,6 +101,20 @@ namespace ProgressBarHost
             }
         }
 
+/*
+        public System.Drawing.Size Size
+        {
+            get
+            {
+                return _bar.Size;
+            }
+            set
+            {
+                _bar.Size = value;
+                UpdateLabel();
+            }
+        }
+*/
         public int Maximum
         {
             get
@@ -130,7 +145,7 @@ namespace ProgressBarHost
             UpdateLabel();
         }
 
-        private void UpdateLabel()
+        public void UpdateLabel()
         {
             lblProgress.Text = (Math.Round((decimal)(_bar.Value * 100) /
                 _bar.Maximum)).ToString();
@@ -200,7 +215,8 @@ $run_script = [powershell]::Create().AddScript({
       @( 'PresentationCore.dll','System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
       $f = New-Object System.Windows.Forms.Form
-      $f.MaximumSize = $f.MinimumSize = New-Object System.Drawing.Size (220,65)
+      # $f.MaximumSize = $f.MinimumSize = New-Object System.Drawing.Size (220,65)
+      $f.MaximumSize = $f.MinimumSize = New-Object System.Drawing.Size (220,42)
       $so.Form = $f
       $f.Text = 'Timer'
       $f.Name = 'form_main'
@@ -223,9 +239,9 @@ $run_script = [powershell]::Create().AddScript({
       $p.DataBindings.DefaultDataSourceUpdateMode = 0
       $p.Maximum = $timeout_sec
       $p.Size = New-Object System.Drawing.Size (($f.ClientSize.Width),($f.ClientSize.Height))
+      $p.Location = New-Object System.Drawing.Point (0,0)
       $p.Step = 1
       $p.TabIndex = 0
-      $p.Location = New-Object System.Drawing.Point (0,0)
       $p.Style = 1
       $p.Name = 'progressBar1'
       $so.Progress = $p
