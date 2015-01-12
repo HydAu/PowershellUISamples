@@ -260,7 +260,7 @@ $progress_click.Invoke({
       [System.EventArgs]$eventargs
     )
     $b1.Enabled = $false
-    $c1.Value = 0
+    $p.Value = 0
     $c1.PCElapsedTime = 0
     for ([int]$i = 0; $i -ne 100; $i++)
     {
@@ -272,8 +272,14 @@ $progress_click.Invoke({
   })
 
 
-# $b1.Click += new-object System.EventHandler($b1_Click)
-#  
+$progress_complete = $c1.add_PCCompleted
+$progress_complete.Invoke({
+
+    param([object]$sender,[string]$message)
+
+    [System.Windows.Forms.MessageBox]::Show('Task completed!')
+  })
+
 #  progressBar1
 #  
 $p.Location = New-Object System.Drawing.Point (12,112)
@@ -315,27 +321,3 @@ $f.Add_Shown({ $f.Activate() })
 $f.Dispose()
 
 
-<#
-
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            button1.Enabled = false;
-            progressBar1.Value = 0;
-            progressCircle1.PCElapsedTime = 0;
-            for (int i = 0; i < 100; i++)
-            {
-                progressBar1.Increment(1);
-                progressCircle1.Increment(1);
-                System.Threading.Thread.Sleep(100);
-            }
-            button1.Enabled = true;
-        }
-
-        void progressCircle1_PCCompleted(object sender, string message)
-        {
-            MessageBox.Show("Task completed!");
-        }
-
-
-#>
