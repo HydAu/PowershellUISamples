@@ -233,6 +233,87 @@ $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.
 # PromptToolsTrip -Title 'Floating Menu Sample Project' -caller $caller
 # Write-Output $caller.Data
 
+@( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+
+$f = New-Object -TypeName 'System.Windows.Forms.Form'
+$f.Text = $title
+
+
+$b1 = New-Object System.Windows.Forms.Button
+$p = New-Object System.Windows.Forms.ProgressBar
+$c1 = New-Object -TypeName 'ProgressCircle.ProgressCircle'
+$f.SuspendLayout()
+#  
+#  button1
+#  
+$b1.Location = New-Object System.Drawing.Point (12,44)
+$b1.Name = "button1"
+$b1.Size = New-Object System.Drawing.Size (75,23)
+$b1.TabIndex = 0
+$b1.Text = "Start"
+$b1.UseVisualStyleBackColor = $true
+
+$progress_click = $b1.add_click
+$progress_click.Invoke({
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $b1.Enabled = $false
+    $c1.Value = 0
+    $c1.PCElapsedTime = 0
+    for ([int]$i = 0; $i -ne 100; $i++)
+    {
+      $p.Increment(1)
+      $c1.Increment(1)
+      [System.Threading.Thread]::Sleep(100)
+    }
+    $b1.Enabled = $true
+  })
+
+
+# $b1.Click += new-object System.EventHandler($b1_Click)
+#  
+#  progressBar1
+#  
+$p.Location = New-Object System.Drawing.Point (12,112)
+$p.Name = "progressBar1"
+$p.Size = New-Object System.Drawing.Size (187,16)
+$p.TabIndex = 2;
+#  
+#  progressCircle1
+#  
+$c1.Location = New-Object System.Drawing.Point (105,12)
+$c1.Name = "progressCircle1"
+$c1.PCElapsedTimeColor1 = [System.Drawing.Color]::Chartreuse
+$c1.PCElapsedTimeColor2 = [System.Drawing.Color]::Yellow
+$c1.PCLinearGradientMode = [System.Drawing.Drawing2D.LinearGradientMode]::Vertical
+$c1.PCRemainingTimeColor1 = [System.Drawing.Color]::Navy
+$c1.PCRemainingTimeColor2 = [System.Drawing.Color]::LightBlue
+$c1.PCTotalTime = 100
+$c1.Size = New-Object System.Drawing.Size (94,89)
+$c1.TabIndex = 3
+#  
+#  Form1
+#  
+$f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
+$f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+$f.ClientSize = New-Object System.Drawing.Size (210,140)
+$f.Controls.Add($c1)
+$f.Controls.Add($p)
+$f.Controls.Add($b1)
+$f.Name = "Form1"
+$f.Text = "ProgressCircle"
+$f.ResumeLayout($false)
+
+$f.Topmost = $True
+
+$f.Add_Shown({ $f.Activate() })
+
+[void]$f.ShowDialog([win32window]($caller))
+
+$f.Dispose()
+
 
 <#
 
@@ -256,60 +337,5 @@ $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.
             MessageBox.Show("Task completed!");
         }
 
-
-            this.button1 = new System.Windows.Forms.Button();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.progressCircle1 = new ProgressCircle();
-            this.SuspendLayout();
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(12, 44);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Start";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 112);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(187, 16);
-            this.progressBar1.TabIndex = 2;
-            // 
-            // progressCircle1
-            // 
-            this.progressCircle1.Location = new System.Drawing.Point(105, 12);
-            this.progressCircle1.Name = "progressCircle1";
-            this.progressCircle1.PCElapsedTimeColor1 = System.Drawing.Color.Chartreuse;
-            this.progressCircle1.PCElapsedTimeColor2 = System.Drawing.Color.Yellow;
-            this.progressCircle1.PCLinearGradientMode = System.Drawing.Drawing2D.LinearGradientMode.Vertical;
-            this.progressCircle1.PCRemainingTimeColor1 = System.Drawing.Color.Navy;
-            this.progressCircle1.PCRemainingTimeColor2 = System.Drawing.Color.LightBlue;
-            this.progressCircle1.PCTotalTime = 100;
-            this.progressCircle1.Size = new System.Drawing.Size(94, 89);
-            this.progressCircle1.TabIndex = 3;
-            // 
-            // Form1
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(210, 140);
-            this.Controls.Add(this.progressCircle1);
-            this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.button1);
-            this.Name = "Form1";
-            this.Text = "ProgressCircle";
-            this.ResumeLayout(false);
-
-        }
-
-        #endregion
-
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ProgressBar progressBar1;
-        private ProgressCircle progressCircle1;
 
 #>
