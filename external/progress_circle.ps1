@@ -78,7 +78,7 @@ Add-Type -TypeDefinition @"
 using System;
 using System.Collections.Generic;
 
-using System.ComponentModel;
+// using System.ComponentModel;
 
 using System.Data;
 using System.Diagnostics;
@@ -94,18 +94,18 @@ namespace ProgressCircle
     public partial class ProgressCircle : UserControl
     {
 
-        private System.ComponentModel.IContainer components = null;
+  //      private System.ComponentModel.IContainer components = null;
 
         public delegate void EventHandler(object sender, string message);
         public event EventHandler m_EventIncremented;
-        [Category("ProgressCircle"), Description("Event raised everytime the component is incremented. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Event raised everytime the component is incremented. Author: Sergio Augusto Bitencourt Petrovcic")]
         public event EventHandler PCIncremented
         {
             add { m_EventIncremented += new EventHandler(value); }
             remove { m_EventIncremented -= new EventHandler(value); }
         }
         public event EventHandler m_EventCompleted;
-        [Category("ProgressCircle"), Description("Event raised when the component get completed. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Event raised when the component get completed. Author: Sergio Augusto Bitencourt Petrovcic")]
         public event EventHandler PCCompleted
         {
             add { m_EventCompleted += new EventHandler(value); }
@@ -113,49 +113,49 @@ namespace ProgressCircle
         }
 
         private LinearGradientMode m_eLinearGradientMode = LinearGradientMode.Vertical;
-        [Category("ProgressCircle"), Description("Gradient orientation. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Gradient orientation. Author: Sergio Augusto Bitencourt Petrovcic")]
         public LinearGradientMode PCLinearGradientMode
         {
             get { return m_eLinearGradientMode; }
             set { m_eLinearGradientMode = value; }
         }
         private Color m_oColor1RemainingTime = Color.Navy;
-        [Category("ProgressCircle"), Description("Color 1 of remaining time. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Color 1 of remaining time. Author: Sergio Augusto Bitencourt Petrovcic")]
         public Color PCRemainingTimeColor1
         {
             get { return m_oColor1RemainingTime; }
             set { m_oColor1RemainingTime = value; }
         }
         private Color m_oColor2RemainingTime = Color.LightSlateGray;
-        [Category("ProgressCircle"), Description("Color 2 of remaining time. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Color 2 of remaining time. Author: Sergio Augusto Bitencourt Petrovcic")]
         public Color PCRemainingTimeColor2
         {
             get { return m_oColor2RemainingTime; }
             set { m_oColor2RemainingTime = value; }
         }
         private Color m_oColor1ElapsedTime = Color.IndianRed;
-        [Category("ProgressCircle"), Description("Color 1 of elapsed time. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Color 1 of elapsed time. Author: Sergio Augusto Bitencourt Petrovcic")]
         public Color PCElapsedTimeColor1
         {
             get { return m_oColor1ElapsedTime; }
             set { m_oColor1ElapsedTime = value; }
         }
         private Color m_oColor2ElapsedTime = Color.Gainsboro;
-        [Category("ProgressCircle"), Description("Color 2 of elapsed time. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Color 2 of elapsed time. Author: Sergio Augusto Bitencourt Petrovcic")]
         public Color PCElapsedTimeColor2
         {
             get { return m_oColor2ElapsedTime; }
             set { m_oColor2ElapsedTime = value; }
         }
         private int m_iTotalTime = 100;
-        [Category("ProgressCircle"), Description("Total time. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Total time. Author: Sergio Augusto Bitencourt Petrovcic")]
         public int PCTotalTime
         {
             get { return m_iTotalTime; }
             set { m_iTotalTime = value; }
         }
         private int m_iElapsedTime = 0;
-        [Category("ProgressCircle"), Description("Elapsed time. Author: Sergio Augusto Bitencourt Petrovcic")]
+        // [Category("ProgressCircle"), Description("Elapsed time. Author: Sergio Augusto Bitencourt Petrovcic")]
         public int PCElapsedTime
         {
             get { return m_iElapsedTime; }
@@ -200,10 +200,13 @@ namespace ProgressCircle
 
         protected override void Dispose(bool disposing)
         {
+
+/*
             if (disposing && (components != null))
             {
                 components.Dispose();
-            }
+
+            }*/
             base.Dispose(disposing);
         }
 
@@ -226,8 +229,15 @@ namespace ProgressCircle
 }
 
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
-
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
+# ,'System.ComponentModel.dll'
+# Add-Type : (0) : Metadata file 'System.ComponentModel.dll' could not be found
+# Without installing  Microsoft .NET Framework 4 Multi-Targeting Pack 
+# NET Framework 4 Platform Update 1 – Design-time Update for Visual Studio 2010 SP1 (KB2495593) 
+# the System.ComponentModel.dll is missing from only the folowing two assemblies are available:
+# c:\Windows\Microsoft.NET\Framework\v4.0.30319\System.ComponentModel.Composition.dll
+# c:\Windows\Microsoft.NET\Framework\v4.0.30319\System.ComponentModel.DataAnnotations.dll
+# http://www.microsoft.com/en-us/download/confirmation.aspx?id=3556
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 # PromptToolsTrip -Title 'Floating Menu Sample Project' -caller $caller
@@ -319,5 +329,4 @@ $f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog([win32window]($caller))
 
 $f.Dispose()
-
 
