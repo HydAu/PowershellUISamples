@@ -25,7 +25,6 @@ Add-Type -TypeDefinition @"
 using System;
 using System.Drawing;
 using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
 
@@ -37,48 +36,19 @@ namespace ProgressBarHost
     {
         internal System.Windows.Forms.Label lblProgress;
         internal System.Windows.Forms.ProgressBar Bar;
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.Container components = null;
+
 
         public Progress()
         {
-            // This call is required by the Windows.Forms Form Designer.
             InitializeComponent();
-
-            // TODO: Add any initialization after the InitForm call
-
         }
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        protected override void Dispose( bool disposing )
-        {
-            if( disposing )
-            {
-                if(components != null)
-                {
-                    components.Dispose();
-                }
-            }
-            base.Dispose( disposing );
-        }
-
-        #region Component Designer generated code
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.lblProgress = new System.Windows.Forms.Label();
             this.Bar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
-            // 
             // lblProgress
-            // 
             this.lblProgress.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
                 | System.Windows.Forms.AnchorStyles.Right);
             this.lblProgress.Location = new System.Drawing.Point(5, 46);
@@ -87,18 +57,14 @@ namespace ProgressBarHost
             this.lblProgress.TabIndex = 3;
             this.lblProgress.Text = "0% Done";
             this.lblProgress.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
             // Bar
-            // 
             this.Bar.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
                 | System.Windows.Forms.AnchorStyles.Right);
             this.Bar.Location = new System.Drawing.Point(5, 6);
             this.Bar.Name = "Bar";
             this.Bar.Size = new System.Drawing.Size(154, 32);
             this.Bar.TabIndex = 2;
-            // 
             // Progress
-            // 
             this.Controls.AddRange(new System.Windows.Forms.Control[] {
                                                                           this.lblProgress,
                                                                           this.Bar});
@@ -107,10 +73,7 @@ namespace ProgressBarHost
             this.ResumeLayout(false);
 
         }
-        #endregion
         
-        [Description("The current value (between 0 and Maximum) which sets the position of the progress bar"), 
-        Category("Behavior"), DefaultValue(0)]
         public int Value
         {
             get
@@ -195,8 +158,7 @@ public class Win32Window : IWin32Window
     }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.ComponentModel.dll'
-
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
