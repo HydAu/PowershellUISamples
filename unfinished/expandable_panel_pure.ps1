@@ -1,3 +1,4 @@
+$global:button_panel_height = 25 
 Add-Type -TypeDefinition @"
 
 // "
@@ -138,6 +139,38 @@ $g_3.Text = "Menu Group 3"
 $g_3.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $g_3.UseVisualStyleBackColor = $false
 # $g_3.Click += new-Object  System.EventHandler($g_3_Click)
+
+$g_3_click = $g_3.add_click
+$g_3_click.Invoke({
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+
+
+  $ref_panel_menu_group =   ([ref]$p_3)
+  $ref_button_menu_group =  ([ref]$g_3)
+  $num_buttons  = 3
+             # use the current height of the element as indicator of its state.
+            if ($ref_panel_menu_group.Value.Height -eq  $global:button_panel_height)
+            {
+                $ref_panel_menu_group.Value.Height = ($global:button_panel_height * $num_buttons ) + 2 
+                $ref_button_menu_group.Value.Image =  new-object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\up.png") 
+            }
+            else
+            {
+                $ref_panel_menu_group.Value.Height = $global:button_panel_height
+                $ref_button_menu_group.Value.Image = new-object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\down.png")
+            }
+
+
+  })
+
+
+
+
+
+
 #  
 #  pnlMenuGroup2
 #  
@@ -343,6 +376,9 @@ $f.Dispose()
             System.Windows.Forms.Button sender2 =  (System.Windows.Forms.Button ) sender ;
         }
 
+
+
+
         private void btnMenuGroup2_Click(object sender, EventArgs e)
         {
             if (pnlMenuGroup2.Height == 25)
@@ -370,6 +406,34 @@ $f.Dispose()
                 btnMenuGroup3.Image = new Bitmap(@"C:\developer\sergueik\powershell_ui_samples\unfinished\down.png");
             }
         }
+
+
+$progress_click = $b1.add_click
+$progress_click.Invoke({
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+
+
+   # $ref_panel_menu_group =   ([ref]...)
+# $ref_button_menu_group =  ([ref]...)
+             # use the current height of the element as indicator of its state.
+            if ($ref_panel_menu_group.Value.Height -eq  $global:button_panel_height)
+            {
+                $ref_panel_menu_group.Value.Height = ($global:button_panel_height * $num_buttons ) + 2 
+                $ref_button_menu_group.Value.Image =  new-object System.Drawing.Bitmap (@"C:\developer\sergueik\powershell_ui_samples\unfinished\up.png") 
+            }
+            else
+            {
+                $ref_panel_menu_group.Value.Height = $global:button_panel_height
+                $ref_button_menu_group.Value.Image = new-object System.Drawing.Bitmap (@"C:\developer\sergueik\powershell_ui_samples\unfinished\down.png")
+            }
+
+
+  })
+
+
 
     }
 
