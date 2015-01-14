@@ -154,7 +154,7 @@ namespace ExpandablePanelSample
             this.button8.BackColor = System.Drawing.Color.Silver;
             this.button8.Dock = System.Windows.Forms.DockStyle.Top;
             this.button8.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button8.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button8.Location = new System.Drawing.Point(0, 75);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(200, 25);
@@ -168,7 +168,7 @@ namespace ExpandablePanelSample
             this.button9.BackColor = System.Drawing.Color.Silver;
             this.button9.Dock = System.Windows.Forms.DockStyle.Top;
             this.button9.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button9.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button9.Location = new System.Drawing.Point(0, 50);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(200, 25);
@@ -182,7 +182,7 @@ namespace ExpandablePanelSample
             this.button10.BackColor = System.Drawing.Color.Silver;
             this.button10.Dock = System.Windows.Forms.DockStyle.Top;
             this.button10.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button10.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button10.Location = new System.Drawing.Point(0, 25);
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(200, 25);
@@ -196,7 +196,7 @@ namespace ExpandablePanelSample
             this.btnMenuGroup3.BackColor = System.Drawing.Color.Gray;
             this.btnMenuGroup3.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnMenuGroup3.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.btnMenuGroup3.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.btnMenuGroup3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMenuGroup3.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnMenuGroup3.Location = new System.Drawing.Point(0, 0);
             this.btnMenuGroup3.Name = "btnMenuGroup3";
@@ -224,7 +224,7 @@ namespace ExpandablePanelSample
             this.button4.BackColor = System.Drawing.Color.Silver;
             this.button4.Dock = System.Windows.Forms.DockStyle.Top;
             this.button4.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button4.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button4.Location = new System.Drawing.Point(0, 75);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(200, 25);
@@ -238,7 +238,7 @@ namespace ExpandablePanelSample
             this.button5.BackColor = System.Drawing.Color.Silver;
             this.button5.Dock = System.Windows.Forms.DockStyle.Top;
             this.button5.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button5.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button5.Location = new System.Drawing.Point(0, 50);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(200, 25);
@@ -252,7 +252,7 @@ namespace ExpandablePanelSample
             this.button6.BackColor = System.Drawing.Color.Silver;
             this.button6.Dock = System.Windows.Forms.DockStyle.Top;
             this.button6.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button6.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button6.Location = new System.Drawing.Point(0, 25);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(200, 25);
@@ -266,7 +266,7 @@ namespace ExpandablePanelSample
             this.btnMenuGroup2.BackColor = System.Drawing.Color.Gray;
             this.btnMenuGroup2.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnMenuGroup2.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.btnMenuGroup2.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.btnMenuGroup2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMenuGroup2.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnMenuGroup2.Location = new System.Drawing.Point(0, 0);
             this.btnMenuGroup2.Name = "btnMenuGroup2";
@@ -293,7 +293,7 @@ namespace ExpandablePanelSample
             this.button3.BackColor = System.Drawing.Color.Silver;
             this.button3.Dock = System.Windows.Forms.DockStyle.Top;
             this.button3.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button3.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button3.Location = new System.Drawing.Point(0, 75);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(200, 25);
@@ -307,7 +307,7 @@ namespace ExpandablePanelSample
             this.button2.BackColor = System.Drawing.Color.Silver;
             this.button2.Dock = System.Windows.Forms.DockStyle.Top;
             this.button2.FlatAppearance.BorderColor = System.Drawing.Color.DarkGray;
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button2.Location = new System.Drawing.Point(0, 50);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(200, 25);
@@ -321,7 +321,7 @@ namespace ExpandablePanelSample
             this.btnMenuGroup1.BackColor = System.Drawing.Color.Gray;
             this.btnMenuGroup1.Dock = System.Windows.Forms.DockStyle.Top;
             this.btnMenuGroup1.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.btnMenuGroup1.FlatStyle = System.Windows.Forms.FlatStyle]::Flat;
+            this.btnMenuGroup1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMenuGroup1.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnMenuGroup1.Location = new System.Drawing.Point(0, 0);
             this.btnMenuGroup1.Name = "btnMenuGroup1";
