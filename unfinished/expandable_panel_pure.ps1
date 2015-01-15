@@ -53,8 +53,9 @@ public class Win32Window : IWin32Window
   }
   $data = $object_ref.Value
 
-
-  $local:b = New-Object System.Windows.Forms.Button
+  # need to assert ?
+  # $local:b = New-Object System.Windows.Forms.Button
+  $local:b = $result_ref.Value 
   $local:b.BackColor = [System.Drawing.Color]::Silver
   $local:b.Dock = [System.Windows.Forms.DockStyle]::Top
   $local:b.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
@@ -283,7 +284,7 @@ $p_2.TabIndex = 2
 [scriptblock]$c = {}
 $data = @{ 'cnt' = 4; 'text' = "Menu 2 Sub Menu 4 -  refactored"; 'name' = 'b_2_4'; 'call' = $c; }
 $object_ref = ([ref]$data)
-[scriptblock]$s = $add_button
+[scriptblock]$s = $add_button_with_ref
 if ($s -ne $null) {
   $local:result = $null
   $local:button = New-Object System.Windows.Forms.Button
