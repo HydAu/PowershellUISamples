@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Events><Event xmlns='http://schemas.microsoft.com/win/2004/08/events/event'><System><Provider Name='Microsoft-Windows-Security-SPP' Guid='{E23B33B0-C8C9-472C-A5F9-F2BDFEA0F156}' EventSourceName='Software Protection Platform Service'/><EventID Qualifiers='16384'>1003</EventID><Version>0</Version><Level>4</Level><Task>0</Task><Opcode>0</Opcode><Keywords>0x80000000000000</Keywords><TimeCreated SystemTime='2014-09-04T02:15:12.000000000Z'/><EventRecordID>17798</EventRecordID><Correlation/><Execution ProcessID='0' ThreadID='0'/><Channel>Application</Channel><Computer>sergueik42</Computer><Security/></System><EventData><Data>55c92734-d682-4d71-983e-d6ec3f16059f</Data><Data>
+1: 01f5fc37-a99e-45c5-b65e-d762f3518ead, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+2: 2e7d060d-4714-40f2-9896-1e4f15b612ad, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+3: 3b965dfc-31d9-4903-886f-873a0382776c, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+4: 586bc076-c93d-429a-afe5-a69fbc644e88, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+5: 5e017a8a-f3f9-4167-b1bd-ba3e236a4d8f, 1, 1 [(0 )(1 [0xC004E003, 0, 0], [( 1 0xC004F00F 3 0 msft:rm/algorithm/phone/1.0 0x00000000 0)(?)( 1 0xC004F00F 3 0 msft:rm/algorithm/phone/1.0 0x00000000 0)(?)(?)(?)])(2 [0x00000000, 0, 0], [( 5 0xC004F009 30 0)( 5 0xC004F009 30 0)( 1 0x00000000 0 0 msft:rm/algorithm/flags/1.0 0x00000000 0)(?)(?)( 9 0x00000000 0xC004F00F)])]
+6: 5e35dc43-389b-47c5-b889-2088b06738cb, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+7: 6a7d5d8a-92af-4e6a-af4b-8fddaec800e5, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+8: 9ab82e0c-ffc9-4107-baa1-c65a8bd3ccc3, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+9: 9f83d90f-a151-4665-ae69-30b3f63ec659, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+10: a63275f4-530c-48a7-b0d3-4f00d688d151, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+11: b8a4bb91-69b1-460d-93f8-40e0670af04a, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+12: d2c04e90-c3dd-4260-b0f3-f845f5d27d64, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+13: e68b141f-4dfa-4387-b3b7-e65c4889216e, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+14: ee4e1629-bcdc-4b42-a68f-b92e135f78d7, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+15: 4a8149bb-7d61-49f4-8822-82c7bf88d64b, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+16: afd5f68f-b70f-4000-a21d-28dbc8be8b07, 1, 0 [(0 [0xC004F014, 0, 0], [(?)(?)(?)(?)(?)(?)])(1 )(2 )]
+
+</Data></EventData></Event></Events>

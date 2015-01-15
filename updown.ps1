@@ -18,7 +18,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
@@ -52,12 +51,9 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
-
 # http://stackoverflow.com/questions/16789399/looking-for-time-picker-control-with-half-hourly-up-down
+
 Add-Type -TypeDefinition @"
-
-
 public class CustomTimePicker : System.Windows.Forms.DomainUpDown
 {
     public CustomTimePicker()
@@ -78,8 +74,6 @@ public class CustomTimePicker : System.Windows.Forms.DomainUpDown
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
-
-
 function UpDownsPrompt
 {
   param(
@@ -193,5 +187,3 @@ UpDownsPrompt -caller $caller
 Write-Debug ('Time Selection is : {0}' -f $caller.TimeStr)
 Write-Debug ('Numeric Value is : {0}' -f $caller.Numeric)
 $caller = $null
-
-
