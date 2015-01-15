@@ -1,0 +1,6 @@
+http://dmitrysotnikov.wordpress.com/2014/03/10/website-scraping-to-powershell-module/
+http://uiautomation.codeplex.com/SourceControl/latest#UIA/UIAutomationTestForms40/UIAutomationTestForms40.csproj
+http://gallery.technet.microsoft.com/scriptcenter/Create-a-ShutdownRestartLog-37c8111d
+http://gallery.technet.microsoft.com/scriptcenter/1abd77a5-9c0b-4a2b-acef-90dbb2b84e85
+http://gallery.technet.microsoft.com/scriptcenter/Enable-PSRemoting-Remotely-6cedfcb0
+http://gallery.technet.microsoft.com/scriptcenter/PowerShell-function-to-3e9766e3
