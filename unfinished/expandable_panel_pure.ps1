@@ -1,5 +1,6 @@
 $global:button_panel_height = 25
 $global:button_panel_width = 200
+
 Add-Type -TypeDefinition @"
 
 // "
@@ -28,6 +29,93 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+
+[scriptblock]$add_button_with_ref = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [int]$cnt # unused 
+  )
+  $data = @{}
+
+
+  $debug = $false
+  if ($DebugPreference -eq 'Continue') {
+    $debug = $true
+  }
+
+  if ($debug) {
+    Write-Host 'Object keys'
+    Write-Host $object_ref.Value.Keys
+    Write-Host 'Caller  keys'
+    Write-Host $object_ref.Value.Values
+  }
+  $data = $object_ref.Value
+
+
+  $local:b = New-Object System.Windows.Forms.Button
+  $local:b.BackColor = [System.Drawing.Color]::Silver
+  $local:b.Dock = [System.Windows.Forms.DockStyle]::Top
+  $local:b.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
+  $local:b.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+  $local:b.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * $data['cnt']))
+
+  Write-Host ($global:button_panel_height * $data['cnt'])
+  $local:b.Name = $data['name']
+  $local:b.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
+  $local:b.TabIndex = 3
+  $local:b.Text = $data['text']
+  $local:b.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+  $local:b.UseVisualStyleBackColor = $false
+
+
+  $result_ref.Value = $local:b
+}
+
+
+[scriptblock]$add_button = {
+  param(
+    [System.Management.Automation.PSReference]$object_ref,
+    [System.Management.Automation.PSReference]$result_ref,
+    [int]$cnt # unused 
+  )
+  $data = @{}
+
+
+  $debug = $false
+  if ($DebugPreference -eq 'Continue') {
+    $debug = $true
+  }
+
+  if ($debug) {
+    Write-Host 'Object keys'
+    Write-Host $object_ref.Value.Keys
+    Write-Host 'Caller  keys'
+    Write-Host $object_ref.Value.Values
+  }
+  $button = $result_ref.Value
+  $data = $object_ref.Value
+
+
+  $button.BackColor = [System.Drawing.Color]::Silver
+  $button.Dock = [System.Windows.Forms.DockStyle]::Top
+  $button.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
+  $button.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+  $button.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * $data['cnt']))
+
+  Write-Host ($global:button_panel_height * $data['cnt'])
+  $button.Name = $data['name']
+  $button.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
+  $button.TabIndex = 3
+  $button.Text = $data['text']
+  $button.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+  $button.UseVisualStyleBackColor = $false
+
+
+  # $result_ref.Value = $local:b
+}
+
 
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
@@ -72,7 +160,7 @@ $m.Size = New-Object System.Drawing.Size ($global:button_panel_width,449)
 $m.TabIndex = 1
 
 #  Menu 3 Panel
-$p_3.Controls.AddRange(@($b_3_3, $b_3_2, $b_3_1,  $g_3))
+$p_3.Controls.AddRange(@( $b_3_3,$b_3_2,$b_3_1,$g_3))
 $p_3.Dock = [System.Windows.Forms.DockStyle]::Top
 $p_3.Location = New-Object System.Drawing.Point (0,231)
 $p_3.Name = "p_3"
@@ -97,7 +185,7 @@ $b_3_3_click.Invoke({
 
     param([object]$sender,[string]$message)
     $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text) )
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
   })
 
 
@@ -118,7 +206,7 @@ $b_3_2_click.Invoke({
 
     param([object]$sender,[string]$message)
     $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text) )
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
   })
 
 
@@ -139,7 +227,7 @@ $b_3_1_click.Invoke({
 
     param([object]$sender,[string]$message)
     $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text) )
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
   })
 
 
@@ -157,7 +245,7 @@ $g_3.Text = "Menu Group 3"
 $g_3.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $g_3.UseVisualStyleBackColor = $false
 
-$g_3_click = $g_3.add_click
+$g_3_click = $g_3.add_Click
 $g_3_click.Invoke({
     param(
       [object]$sender,
@@ -184,7 +272,7 @@ $g_3_click.Invoke({
   })
 
 #  Menu 2 Panel
-$p_2.Controls.AddRange(@( $b_2_4, $b_2_3, $b_2_2, $b_2_1, $g_2))
+$p_2.Controls.AddRange(@( $b_2_4,$b_2_3,$b_2_2,$b_2_1,$g_2))
 $p_2.Dock = [System.Windows.Forms.DockStyle]::Top
 $p_2.Location = New-Object System.Drawing.Point (0,127)
 $p_2.Name = "p_2"
@@ -192,6 +280,28 @@ $p_2.Name = "p_2"
 $p_2.TabIndex = 2
 
 
+[scriptblock]$c = {}
+$data = @{ 'cnt' = 4; 'text' = "Menu 2 Sub Menu 4 -  refactored"; 'name' = 'b_2_4'; 'call' = $c; }
+$object_ref = ([ref]$data)
+[scriptblock]$s = $add_button
+if ($s -ne $null) {
+  $local:result = $null
+  $local:button = New-Object System.Windows.Forms.Button
+  $result_ref = ([ref]$b_2_4)
+  Invoke-Command $s -ArgumentList $object_ref,$result_ref
+
+  $b_2_4_click = $b_2_4.add_Click
+  $b_2_4_click.Invoke({
+
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
+
+}
+
+
+<#
 #  Menu 3 button 4
 $b_2_4.BackColor = [System.Drawing.Color]::Silver
 $b_2_4.Dock = [System.Windows.Forms.DockStyle]::Top
@@ -205,7 +315,7 @@ $b_2_4.TabIndex = 4
 $b_2_4.Text = "Menu 2 Sub Menu 4"
 $b_2_4.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $b_2_4.UseVisualStyleBackColor = $false
-
+#>
 
 #  Menu 3 button 3
 $b_2_3.BackColor = [System.Drawing.Color]::Silver
@@ -262,7 +372,7 @@ $g_2.Text = "Menu Group 2"
 $g_2.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $g_2.UseVisualStyleBackColor = $false
 
-$g_2_click = $g_2.add_click
+$g_2_click = $g_2.add_Click
 $g_2_click.Invoke({
     param(
       [object]$sender,
@@ -288,7 +398,7 @@ $g_2_click.Invoke({
   })
 
 #  Panel Menu 1
-$p_1.Controls.AddRange(@($b_1_2, $b_1_1,  $g_1) )
+$p_1.Controls.AddRange(@( $b_1_2,$b_1_1,$g_1))
 $p_1.Dock = [System.Windows.Forms.DockStyle]::Top
 $p_1.Location = New-Object System.Drawing.Point (0,23)
 $p_1.Name = "p_1"
@@ -313,7 +423,7 @@ $b_1_1_click.Invoke({
 
     param([object]$sender,[string]$message)
     $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text) )
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
   })
 
 #  Menu 1 button 2
@@ -343,7 +453,7 @@ $g_1.TabIndex = 0
 $g_1.Text = "Menu Group 1"
 $g_1.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $g_1.UseVisualStyleBackColor = $false
-$g_1_click = $g_1.add_click
+$g_1_click = $g_1.add_Click
 $g_1_click.Invoke({
     param(
       [object]$sender,
@@ -418,5 +528,4 @@ $f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog([win32window]($caller))
 
 $f.Dispose()
-
 
