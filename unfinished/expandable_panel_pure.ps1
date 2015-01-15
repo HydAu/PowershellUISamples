@@ -37,15 +37,9 @@ public class Win32Window : IWin32Window
     [System.Management.Automation.PSReference]$result_ref,
     [int]$cnt # unused 
   )
-  $data = @{}
-
 
   $debug = $false
   if ($DebugPreference -eq 'Continue') {
-    $debug = $true
-  }
-
-  if ($debug) {
     Write-Host 'Object keys'
     Write-Host $object_ref.Value.Keys
     Write-Host 'Caller  keys'
@@ -53,69 +47,23 @@ public class Win32Window : IWin32Window
   }
   $data = $object_ref.Value
 
-  # need to assert ?
-  # $local:b = New-Object System.Windows.Forms.Button
+  #  TODO: assert ?
+
   $local:b = $result_ref.Value 
   $local:b.BackColor = [System.Drawing.Color]::Silver
   $local:b.Dock = [System.Windows.Forms.DockStyle]::Top
   $local:b.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
   $local:b.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
   $local:b.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * $data['cnt']))
-
-  Write-Host ($global:button_panel_height * $data['cnt'])
-  $local:b.Name = $data['name']
   $local:b.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
   $local:b.TabIndex = 3
+  $local:b.Name = $data['name']
   $local:b.Text = $data['text']
   $local:b.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $local:b.UseVisualStyleBackColor = $false
-
-
   $result_ref.Value = $local:b
 }
 
-
-[scriptblock]$add_button = {
-  param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [int]$cnt # unused 
-  )
-  $data = @{}
-
-
-  $debug = $false
-  if ($DebugPreference -eq 'Continue') {
-    $debug = $true
-  }
-
-  if ($debug) {
-    Write-Host 'Object keys'
-    Write-Host $object_ref.Value.Keys
-    Write-Host 'Caller  keys'
-    Write-Host $object_ref.Value.Values
-  }
-  $button = $result_ref.Value
-  $data = $object_ref.Value
-
-
-  $button.BackColor = [System.Drawing.Color]::Silver
-  $button.Dock = [System.Windows.Forms.DockStyle]::Top
-  $button.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-  $button.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-  $button.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * $data['cnt']))
-
-  Write-Host ($global:button_panel_height * $data['cnt'])
-  $button.Name = $data['name']
-  $button.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-  $button.TabIndex = 3
-  $button.Text = $data['text']
-  $button.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-  $button.UseVisualStyleBackColor = $false
-
-
-  # $result_ref.Value = $local:b
-}
 
 
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
@@ -168,68 +116,41 @@ $p_3.Name = "p_3"
 # $p_3.Size = New-Object System.Drawing.Size ($global:button_panel_width,109)
 $p_3.TabIndex = 3
 
-#  Menu 3 button 3
 $global:menu3_buttons = 3
-$b_3_3.BackColor = [System.Drawing.Color]::Silver
-$b_3_3.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_3_3.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_3_3.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_3_3.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 3))
-$b_3_3.Name = "b_3_3"
-$b_3_3.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_3_3.TabIndex = 3
-$b_3_3.Text = "Menu 3 Sub Menu 3"
-$b_3_3.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_3_3.UseVisualStyleBackColor = $false
-$b_3_3_click = $b_3_3.add_Click
-$b_3_3_click.Invoke({
+#  Menu 3 button 3
+$b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_3_3_data),([ref]$b_3_3)
+  $b_3_3_click = $b_3_3.add_Click
+  $b_3_3_click.Invoke({
 
-    param([object]$sender,[string]$message)
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
 
 #  Menu 3 button 2
-$b_3_2.BackColor = [System.Drawing.Color]::Silver
-$b_3_2.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_3_2.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_3_2.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_3_2.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 2))
-$b_3_2.Name = "b_3_2"
-$b_3_2.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_3_2.TabIndex = 2
-$b_3_2.Text = "Menu 3 Sub Menu 2"
-$b_3_2.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_3_2.UseVisualStyleBackColor = $false
-$b_3_2_click = $b_3_2.add_Click
-$b_3_2_click.Invoke({
+$b_3_2_data = @{ 'cnt' = 2; 'text' = 'Menu 3 Sub Menu 2'; 'name' = 'b_3_2'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_3_2_data),([ref]$b_3_2)
+  $b_3_2_click = $b_3_2.add_Click
+  $b_3_2_click.Invoke({
 
-    param([object]$sender,[string]$message)
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
 
 #  Menu 3 button 1
-$b_3_1.BackColor = [System.Drawing.Color]::Silver
-$b_3_1.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_3_1.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_3_1.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_3_1.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 1))
-$b_3_1.Name = "b_3_1"
-$b_3_1.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_3_1.TabIndex = 1
-$b_3_1.Text = "Menu 3 Sub Menu 1"
-$b_3_1.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_3_1.UseVisualStyleBackColor = $false
-$b_3_1_click = $b_3_1.add_Click
-$b_3_1_click.Invoke({
+$b_3_1_data = @{ 'cnt' = 1; 'text' = 'Menu 3 Sub Menu 1'; 'name' = 'b_3_1'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_3_1_data),([ref]$b_3_1)
+  $b_3_1_click = $b_3_1.add_Click
+  $b_3_1_click.Invoke({
 
-    param([object]$sender,[string]$message)
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
 
 #  Menu 3 button group
@@ -272,7 +193,7 @@ $g_3_click.Invoke({
 
   })
 
-#  Menu 2 Panel
+# Menu 2 Panel
 $p_2.Controls.AddRange(@( $b_2_4,$b_2_3,$b_2_2,$b_2_1,$g_2))
 $p_2.Dock = [System.Windows.Forms.DockStyle]::Top
 $p_2.Location = New-Object System.Drawing.Point (0,127)
@@ -280,17 +201,9 @@ $p_2.Name = "p_2"
 # $p_2.Size = New-Object System.Drawing.Size ($global:button_panel_widt,129)
 $p_2.TabIndex = 2
 
-
-[scriptblock]$c = {}
-$data = @{ 'cnt' = 4; 'text' = "Menu 2 Sub Menu 4 -  refactored"; 'name' = 'b_2_4'; 'call' = $c; }
-$object_ref = ([ref]$data)
-[scriptblock]$s = $add_button_with_ref
-if ($s -ne $null) {
-  $local:result = $null
-  $local:button = New-Object System.Windows.Forms.Button
-  $result_ref = ([ref]$b_2_4)
-  Invoke-Command $s -ArgumentList $object_ref,$result_ref
-
+# Menu 2 button 4
+$b_2_4_data = @{ 'cnt' = 4; 'text' = 'Menu 2 Sub Menu 4'; 'name' = 'b_2_4'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_2_4_data),([ref]$b_2_4)
   $b_2_4_click = $b_2_4.add_Click
   $b_2_4_click.Invoke({
 
@@ -299,65 +212,38 @@ if ($s -ne $null) {
       [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
     })
 
-}
+# Menu 2 button 3
+$b_2_3_data = @{ 'cnt' = 3; 'text' = 'Menu 2 Sub Menu 3'; 'name' = 'b_2_3'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_2_3_data),([ref]$b_2_3)
+  $b_2_3_click = $b_2_3.add_Click
+  $b_2_3_click.Invoke({
 
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
-<#
-#  Menu 3 button 4
-$b_2_4.BackColor = [System.Drawing.Color]::Silver
-$b_2_4.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_2_4.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_2_4.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_2_4.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 4))
+# Menu 2 button 2
+$b_2_2_data = @{ 'cnt' = 2; 'text' = 'Menu 2 Sub Menu 2'; 'name' = 'b_2_2'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_2_2_data),([ref]$b_2_2)
+  $b_2_3_click = $b_2_2.add_Click
+  $b_2_3_click.Invoke({
 
-$b_2_4.Name = "b_2_4"
-$b_2_4.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_2_4.TabIndex = 4
-$b_2_4.Text = "Menu 2 Sub Menu 4"
-$b_2_4.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_2_4.UseVisualStyleBackColor = $false
-#>
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
-#  Menu 3 button 3
-$b_2_3.BackColor = [System.Drawing.Color]::Silver
-$b_2_3.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_2_3.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_2_3.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_2_3.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 3))
+# Menu 2 button 1
+$b_2_1_data = @{ 'cnt' = 1; 'text' = 'Menu 2 Sub Menu 1'; 'name' = 'b_2_1'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_2_1_data),([ref]$b_2_1)
+  $b_2_1_click = $b_2_1.add_Click
+  $b_2_1_click.Invoke({
 
-$b_2_3.Name = "b_2_3"
-$b_2_3.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_2_3.TabIndex = 3
-$b_2_3.Text = "Menu 2 Sub Menu 3"
-$b_2_3.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_2_3.UseVisualStyleBackColor = $false
-
-#  Menu 3 button 2
-$b_2_2.BackColor = [System.Drawing.Color]::Silver
-$b_2_2.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_2_2.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_2_2.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_2_2.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 2))
-
-$b_2_2.Name = "b_2_2"
-$b_2_2.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_2_2.TabIndex = 2
-$b_2_2.Text = "Menu 2 Sub Menu 2"
-$b_2_2.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_2_2.UseVisualStyleBackColor = $false
-
-#  Menu 3 button 1
-$b_2_1.BackColor = [System.Drawing.Color]::Silver
-$b_2_1.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_2_1.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_2_1.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_2_1.Location = New-Object System.Drawing.Point (0,$global:button_panel_height)
-$b_2_1.Name = "b_2_1"
-$b_2_1.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_2_1.TabIndex = 1
-$b_2_1.Text = "Menu 2 Sub Menu 1"
-$b_2_1.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_2_1.UseVisualStyleBackColor = $false
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
 #  Menu 2 button group
 $g_2.BackColor = [System.Drawing.Color]::Gray
@@ -403,43 +289,30 @@ $p_1.Controls.AddRange(@( $b_1_2,$b_1_1,$g_1))
 $p_1.Dock = [System.Windows.Forms.DockStyle]::Top
 $p_1.Location = New-Object System.Drawing.Point (0,23)
 $p_1.Name = "p_1"
-# $p_1.Size = New-Object System.Drawing.Size ($global:button_panel_width,104)
 $p_1.TabIndex = 1
 
-#  Menu 1 button 1
-$b_1_1.BackColor = [System.Drawing.Color]::Silver
-$b_1_1.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_1_1.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_1_1.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_1_1.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 2))
+# Menu 1 button 1
+$b_1_1_data = @{ 'cnt' = 1; 'text' = 'Menu 1 Sub Menu 1'; 'name' = 'b_1_1'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_1_1_data),([ref]$b_1_1)
+  $b_1_1_click = $b_1_1.add_Click
+  $b_1_1_click.Invoke({
 
-$b_1_1.Name = "b_1_1"
-$b_1_1.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_1_1.TabIndex = 2
-$b_1_1.Text = "Group 1 Sub Menu 1"
-$b_1_1.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_1_1.UseVisualStyleBackColor = $false
-$b_1_1_click = $b_1_1.add_Click
-$b_1_1_click.Invoke({
-
-    param([object]$sender,[string]$message)
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
 
 #  Menu 1 button 2
-$b_1_2.BackColor = [System.Drawing.Color]::Silver
-$b_1_2.Dock = [System.Windows.Forms.DockStyle]::Top
-$b_1_2.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
-$b_1_2.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$b_1_2.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * 3))
+$b_1_2_data = @{ 'cnt' = 2; 'text' = 'Menu 1 Sub Menu 2'; 'name' = 'b_1_2'; }
+  Invoke-Command $s -ArgumentList ([ref]$b_1_2_data),([ref]$b_1_2)
+  $b_1_2_click = $b_1_2.add_Click
+  $b_1_2_click.Invoke({
 
-$b_1_2.Name = "$b_1_2"
-$b_1_2.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$b_1_2.TabIndex = 3
-$b_1_2.Text = "Group 1 Sub Menu 2"
-$b_1_2.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$b_1_2.UseVisualStyleBackColor = $false
+      param([object]$sender,[string]$message)
+      $caller.Data = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+    })
+
 
 #  Menu 1 button group 
 $g_1.BackColor = [System.Drawing.Color]::Gray
