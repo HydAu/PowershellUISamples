@@ -69,8 +69,12 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
+function add_button_group {
 
-[scriptblock]$add_button_with_ref = {
+}
+
+function add_button {
+  # [scriptblock]$add_button_with_ref = {
   param(
     [System.Management.Automation.PSReference]$button_data_ref,
     [System.Management.Automation.PSReference]$button_ref,
@@ -99,7 +103,7 @@ public class Win32Window : IWin32Window
     $local:click_handler.Invoke($button_data['callback'])
   }
 
- else {
+  else {
     # provide default click handler
 
     $local:click_handler.Invoke({
@@ -129,7 +133,7 @@ $f.SuspendLayout()
 $p = New-Object System.Windows.Forms.Panel
 $m = New-Object System.Windows.Forms.Panel
 $p_3 = New-Object System.Windows.Forms.Panel
- $b_3_3 = New-Object System.Windows.Forms.Button
+$b_3_3 = New-Object System.Windows.Forms.Button
 $b_3_2 = New-Object System.Windows.Forms.Button
 $b_3_1 = New-Object System.Windows.Forms.Button
 $g_3 = New-Object System.Windows.Forms.Button
@@ -180,17 +184,28 @@ $global:menu3_buttons = 3
   [System.Windows.Forms.MessageBox]::Show(('This is custom callback for {0} click!' -f $sender.Text))
 }
 # $b_3_3 = $null
-$b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; 'callback' = $b_3_3_callback_ref; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_3_data),([ref]$b_3_3)
+$b_3_3_data = @{
+  'cnt' = 3;
+  'text' = 'Menu 3 Sub Menu 3';
+  'name' = 'b_3_3';
+  'callback' = $b_3_3_callback_ref;
+}
+add_button -button_data_ref ([ref]$b_3_3_data) -button_ref ([ref]$b_3_3)
 
 #  Menu 3 button 2
-$b_3_2_data = @{ 'cnt' = 2; 'text' = 'Menu 3 Sub Menu 2'; 'name' = 'b_3_2'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_2_data),([ref]$b_3_2)
+$b_3_2_data = @{
+  'cnt' = 2;
+  'text' = 'Menu 3 Sub Menu 2';
+  'name' = 'b_3_2'; }
+add_button -button_data_ref ([ref]$b_3_2_data) -button_ref ([ref]$b_3_2)
 
 #  Menu 3 button 1
-$b_3_1_data = @{ 'cnt' = 1; 'text' = 'Menu 3 Sub Menu 1'; 'name' = 'b_3_1'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_1_data),([ref]$b_3_1)
-
+$b_3_1_data = @{
+  'cnt' = 1;
+  'text' = 'Menu 3 Sub Menu 1';
+  'name' = 'b_3_1';
+}
+add_button -button_data_ref ([ref]$b_3_1_data) -button_ref ([ref]$b_3_1)
 
 #  Menu 3 button group
 $g_3.BackColor = [System.Drawing.Color]::Gray
@@ -221,12 +236,12 @@ $g_3_click.Invoke({
     if ($ref_panel.Value.Height -eq $global:button_panel_height)
     {
       $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory), "up.png"))  
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
     }
     else
     {
       $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
     }
 
 
@@ -237,24 +252,42 @@ $p_2.Controls.AddRange(@( $b_2_4,$b_2_3,$b_2_2,$b_2_1,$g_2))
 $p_2.Dock = [System.Windows.Forms.DockStyle]::Top
 $p_2.Location = New-Object System.Drawing.Point (0,127)
 $p_2.Name = "p_2"
-# $p_2.Size = New-Object System.Drawing.Size ($global:button_panel_widt,129)
 $p_2.TabIndex = 2
 
 # Menu 2 button 4
-$b_2_4_data = @{ 'cnt' = 4; 'text' = 'Menu 2 Sub Menu 4'; 'name' = 'b_2_4'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_4_data),([ref]$b_2_4)
+$b_2_4_data = @{
+  'cnt' = 4;
+  'text' = 'Menu 2 Sub Menu 4';
+  'name' = 'b_2_4';
+}
+add_button -button_data_ref ([ref]$b_2_4_data) -button_ref ([ref]$b_2_4)
 
 # Menu 2 button 3
-$b_2_3_data = @{ 'cnt' = 3; 'text' = 'Menu 2 Sub Menu 3'; 'name' = 'b_2_3'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_3_data),([ref]$b_2_3)
+$b_2_3_data = @{
+  'cnt' = 3;
+  'text' = 'Menu 2 Sub Menu 3';
+  'name' = 'b_2_3';
+}
+add_button -button_data_ref ([ref]$b_2_3_data) -button_ref ([ref]$b_2_3)
+
 
 # Menu 2 button 2
-$b_2_2_data = @{ 'cnt' = 2; 'text' = 'Menu 2 Sub Menu 2'; 'name' = 'b_2_2'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_2_data),([ref]$b_2_2)
+$b_2_2_data = @{
+  'cnt' = 2;
+  'text' = 'Menu 2 Sub Menu 2';
+  'name' = 'b_2_2';
+}
+
+add_button -button_data_ref ([ref]$b_2_2_data) -button_ref ([ref]$b_2_2)
 
 # Menu 2 button 1
-$b_2_1_data = @{ 'cnt' = 1; 'text' = 'Menu 2 Sub Menu 1'; 'name' = 'b_2_1'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_1_data),([ref]$b_2_1)
+$b_2_1_data = @{
+  'cnt' = 1;
+  'text' = 'Menu 2 Sub Menu 1';
+  'name' = 'b_2_1';
+}
+
+add_button -button_data_ref ([ref]$b_2_2_data) -button_ref ([ref]$b_2_1)
 
 #  Menu 2 button group
 $g_2.BackColor = [System.Drawing.Color]::Gray
@@ -284,12 +317,12 @@ $g_2_click.Invoke({
     if ($ref_panel.Value.Height -eq $global:button_panel_height)
     {
       $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory), "up.png"))  
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
     }
     else
     {
       $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
     }
 
 
@@ -303,12 +336,15 @@ $p_1.Name = "p_1"
 $p_1.TabIndex = 1
 
 # Menu 1 button 1
-$b_1_1_data = @{ 'cnt' = 1; 'text' = 'Menu 1 Sub Menu 1'; 'name' = 'b_1_1'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_1_1_data),([ref]$b_1_1)
+add_button -button_data_ref ([ref]@{
+    'cnt' = 1;
+    'text' = 'Menu 1 Sub Menu 1';
+    'name' = 'b_1_1';
+  }
+) -button_ref ([ref]$b_1_1)
 
 #  Menu 1 button 2
-$b_1_2_data = @{ 'cnt' = 2; 'text' = 'Menu 1 Sub Menu 2'; 'name' = 'b_1_2'; }
-Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_1_2_data),([ref]$b_1_2)
+add_button -button_data_ref ([ref]@{ 'cnt' = 2; 'text' = 'Menu 1 Sub Menu 2'; 'name' = 'b_1_2'; }) -button_ref ([ref]$b_1_2)
 
 #  Menu 1 button group 
 $g_1.BackColor = [System.Drawing.Color]::Gray
@@ -337,12 +373,12 @@ $g_1_click.Invoke({
     if ($ref_panel.Value.Height -eq $global:button_panel_height)
     {
       $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory), "up.png"))  
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
     }
     else
     {
       $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
     }
   })
 
@@ -370,7 +406,7 @@ $p_3.Height = $global:button_panel_height
 
 $g_1.Image =
 $g_2.Image =
-$g_3.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
+$g_3.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
 
 $m.ResumeLayout($false)
 $p_3.ResumeLayout($false)
@@ -399,4 +435,4 @@ $f.Add_Shown({ $f.Activate() })
 
 $f.Dispose()
 
-write-output $caller.Data
+Write-Output $caller.Data
