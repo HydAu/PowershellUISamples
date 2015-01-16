@@ -1,5 +1,44 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+param(
+  [switch]$debug
+)
+
 $global:button_panel_height = 25
 $global:button_panel_width = 200
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
+}
+
 
 Add-Type -TypeDefinition @"
 
@@ -49,7 +88,7 @@ public class Win32Window : IWin32Window
 
   #  TODO: assert ?
 
-  $local:b = $result_ref.Value 
+  $local:b = $result_ref.Value
   $local:b.BackColor = [System.Drawing.Color]::Silver
   $local:b.Dock = [System.Windows.Forms.DockStyle]::Top
   $local:b.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
@@ -61,6 +100,24 @@ public class Win32Window : IWin32Window
   $local:b.Text = $data['text']
   $local:b.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $local:b.UseVisualStyleBackColor = $false
+
+  $local:click_handler = $local:b.add_Click
+  if ($data.ContainsKey('callback')) {
+    $local:click_handler.Invoke($data['callback'])
+  } else {
+    # provide default click handler
+
+    $local:click_handler.Invoke({
+
+        param(
+          [object]$sender,
+          [System.EventArgs]$eventargs
+        )
+        $caller.Data = $sender.Text
+        [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+      })
+
+  }
   $result_ref.Value = $local:b
 }
 
@@ -118,39 +175,55 @@ $p_3.TabIndex = 3
 
 $global:menu3_buttons = 3
 #  Menu 3 button 3
-$b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_3_3_data),([ref]$b_3_3)
-  $b_3_3_click = $b_3_3.add_Click
-  $b_3_3_click.Invoke({
+# Try to provide a callback with  System.Windows.Forms.Button.OnClick Method argument signature
+[scriptblock]$callback_ref = {
+  param(
+    [object]$sender,
+    [System.EventArgs]$eventargs
+  )
+  $caller.Data = $sender.Text
+  [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+}
+$b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; 'callback' = $callback_ref; }
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_3_data),([ref]$b_3_3)
+$b_3_3_click = $b_3_3.add_Click
+$b_3_3_click.Invoke({
 
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 
 #  Menu 3 button 2
 $b_3_2_data = @{ 'cnt' = 2; 'text' = 'Menu 3 Sub Menu 2'; 'name' = 'b_3_2'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_3_2_data),([ref]$b_3_2)
-  $b_3_2_click = $b_3_2.add_Click
-  $b_3_2_click.Invoke({
-
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_2_data),([ref]$b_3_2)
+$b_3_2_click = $b_3_2.add_Click
+$b_3_2_click.Invoke({
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 
 #  Menu 3 button 1
 $b_3_1_data = @{ 'cnt' = 1; 'text' = 'Menu 3 Sub Menu 1'; 'name' = 'b_3_1'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_3_1_data),([ref]$b_3_1)
-  $b_3_1_click = $b_3_1.add_Click
-  $b_3_1_click.Invoke({
-
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_1_data),([ref]$b_3_1)
+$b_3_1_click = $b_3_1.add_Click
+$b_3_1_click.Invoke({
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 
 #  Menu 3 button group
@@ -203,47 +276,55 @@ $p_2.TabIndex = 2
 
 # Menu 2 button 4
 $b_2_4_data = @{ 'cnt' = 4; 'text' = 'Menu 2 Sub Menu 4'; 'name' = 'b_2_4'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_2_4_data),([ref]$b_2_4)
-  $b_2_4_click = $b_2_4.add_Click
-  $b_2_4_click.Invoke({
-
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_4_data),([ref]$b_2_4)
+$b_2_4_click = $b_2_4.add_Click
+$b_2_4_click.Invoke({
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 # Menu 2 button 3
 $b_2_3_data = @{ 'cnt' = 3; 'text' = 'Menu 2 Sub Menu 3'; 'name' = 'b_2_3'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_2_3_data),([ref]$b_2_3)
-  $b_2_3_click = $b_2_3.add_Click
-  $b_2_3_click.Invoke({
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_3_data),([ref]$b_2_3)
+$b_2_3_click = $b_2_3.add_Click
+$b_2_3_click.Invoke({
 
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+    param([object]$sender,[string]$message)
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 # Menu 2 button 2
 $b_2_2_data = @{ 'cnt' = 2; 'text' = 'Menu 2 Sub Menu 2'; 'name' = 'b_2_2'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_2_2_data),([ref]$b_2_2)
-  $b_2_3_click = $b_2_2.add_Click
-  $b_2_3_click.Invoke({
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_2_data),([ref]$b_2_2)
+$b_2_3_click = $b_2_2.add_Click
+$b_2_3_click.Invoke({
 
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 # Menu 2 button 1
 $b_2_1_data = @{ 'cnt' = 1; 'text' = 'Menu 2 Sub Menu 1'; 'name' = 'b_2_1'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_2_1_data),([ref]$b_2_1)
-  $b_2_1_click = $b_2_1.add_Click
-  $b_2_1_click.Invoke({
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_1_data),([ref]$b_2_1)
+$b_2_1_click = $b_2_1.add_Click
+$b_2_1_click.Invoke({
 
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 #  Menu 2 button group
 $g_2.BackColor = [System.Drawing.Color]::Gray
@@ -293,25 +374,31 @@ $p_1.TabIndex = 1
 
 # Menu 1 button 1
 $b_1_1_data = @{ 'cnt' = 1; 'text' = 'Menu 1 Sub Menu 1'; 'name' = 'b_1_1'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_1_1_data),([ref]$b_1_1)
-  $b_1_1_click = $b_1_1.add_Click
-  $b_1_1_click.Invoke({
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_1_1_data),([ref]$b_1_1)
+$b_1_1_click = $b_1_1.add_Click
+$b_1_1_click.Invoke({
 
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 #  Menu 1 button 2
 $b_1_2_data = @{ 'cnt' = 2; 'text' = 'Menu 1 Sub Menu 2'; 'name' = 'b_1_2'; }
-  Invoke-Command $s -ArgumentList ([ref]$b_1_2_data),([ref]$b_1_2)
-  $b_1_2_click = $b_1_2.add_Click
-  $b_1_2_click.Invoke({
+Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_1_2_data),([ref]$b_1_2)
+$b_1_2_click = $b_1_2.add_Click
+$b_1_2_click.Invoke({
 
-      param([object]$sender,[string]$message)
-      $caller.Data = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-    })
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $caller.Data = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  })
 
 
 #  Menu 1 button group 
@@ -355,15 +442,15 @@ $g_1_click.Invoke({
 #  
 #  lblMenu
 #  
-$lblMenu.BackColor = [System.Drawing.Color]::DarkGray
-$lblMenu.Dock = [System.Windows.Forms.DockStyle]::Top
-$lblMenu.ForeColor = [System.Drawing.Color]::White
-$lblMenu.Location = New-Object System.Drawing.Point (0,0)
-$lblMenu.Name = "lblMenu"
-$lblMenu.Size = New-Object System.Drawing.Size (200,23)
-$lblMenu.TabIndex = 0
-$lblMenu.Text = "Main Menu"
-$lblMenu.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$lBackColor = [System.Drawing.Color]::DarkGray
+$lDock = [System.Windows.Forms.DockStyle]::Top
+$lForeColor = [System.Drawing.Color]::White
+$lLocation = New-Object System.Drawing.Point (0,0)
+$lName = "lblMenu"
+$lSize = New-Object System.Drawing.Size (200,23)
+$lTabIndex = 0
+$lText = "Main Menu"
+$lTextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 
 
 $p.ClientSize = New-Object System.Drawing.Size (200,449)
