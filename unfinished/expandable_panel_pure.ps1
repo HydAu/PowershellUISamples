@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2014,2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -70,11 +70,73 @@ public class Win32Window : IWin32Window
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 function add_button_group {
+  param(
+    [System.Management.Automation.PSReference]$button_group_data_ref,
+    [System.Management.Automation.PSReference]$button_group_ref,
+    [System.Management.Automation.PSReference]$panel_ref,
+    [int]$cnt # TODO: remove from data
+  )
+
+  $button_group_data = $button_group_data_ref.Value
+
+  $g = $button_group_ref.Value
+  $g.BackColor = [System.Drawing.Color]::Gray
+  $g.Dock = [System.Windows.Forms.DockStyle]::Top
+  $g.FlatAppearance.BorderColor = [System.Drawing.Color]::Gray
+  $g.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+  $g.ImageAlign = [System.Drawing.ContentAlignment]::MiddleRight
+  $g.Location = New-Object System.Drawing.Point ($button_group_data['x'],$button_group_data['y'])
+  $g.Name = $button_group_data['name']
+  $g.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
+  $g.TabIndex = 0
+  $g.Text = $button_group_data['text']
+  $g.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+  $g.UseVisualStyleBackColor = $false
+
+  $g_click = $g.add_Click
+
+  $local:click_handler = $g.add_Click
+  if ($button_group_data.ContainsKey('callback')) {
+    $local:click_handler.Invoke($button_group_data['callback'])
+  }
+
+  else {
+<# default click handler will not work.
+
+    $local:click_handler.Invoke({
+        param(
+          [object]$sender,
+          [System.EventArgs]$eventargs
+        )
+
+
+        $ref_panel = ($panel_ref)
+        $ref_panel.Value
+        $ref_button_menu_group = ($button_group_ref)
+        #    $num_buttons = $button_group_data['buttons'] + 1
+        $num_buttons = 3
+        # use the current height of the element as indicator of its state.
+        if ($ref_panel.Value.Height -eq $global:button_panel_height)
+        {
+          $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
+          $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+        }
+        else
+        {
+          $ref_panel.Value.Height = $global:button_panel_height
+          $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+        }
+
+
+      })
+#>
+  }
+  $button_group_ref.Value = $g
 
 }
 
+
 function add_button {
-  # [scriptblock]$add_button_with_ref = {
   param(
     [System.Management.Automation.PSReference]$button_data_ref,
     [System.Management.Automation.PSReference]$button_ref,
@@ -207,45 +269,42 @@ $b_3_1_data = @{
 }
 add_button -button_data_ref ([ref]$b_3_1_data) -button_ref ([ref]$b_3_1)
 
+[scriptblock]$g3_callback_ref = {
+  param(
+    [object]$sender,
+    [System.EventArgs]$eventargs
+  )
+
+
+  $ref_panel = ([ref]$p_3)
+  $ref_button_menu_group = ([ref]$g_3)
+  $num_buttons = $global:menu3_buttons + 1
+  # use the current height of the element as indicator of its state.
+  if ($ref_panel.Value.Height -eq $global:button_panel_height)
+  {
+    $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
+    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+  }
+  else
+  {
+    $ref_panel.Value.Height = $global:button_panel_height
+    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+  }
+
+
+}
+
 #  Menu 3 button group
-$g_3.BackColor = [System.Drawing.Color]::Gray
-$g_3.Dock = [System.Windows.Forms.DockStyle]::Top
-$g_3.FlatAppearance.BorderColor = [System.Drawing.Color]::Gray
-$g_3.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$g_3.ImageAlign = [System.Drawing.ContentAlignment]::MiddleRight
-$g_3.Location = New-Object System.Drawing.Point (0,0)
-$g_3.Name = "g_3"
-$g_3.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$g_3.TabIndex = 0
-$g_3.Text = "Menu Group 3"
-$g_3.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$g_3.UseVisualStyleBackColor = $false
+$g_3_data = @{
+  'buttons' = 3;
+  'x' = 0;
+  'y' = 0;
+  'text' = 'Menu Group 3';
+  'name' = 'b_3_1';
+  'callback' = $g3_callback_ref;
+}
+add_button_group -button_group_data_ref ([ref]$g_3_data) -button_group_ref ([ref]$g_3) -panel_ref ([ref]$p_3)
 
-$g_3_click = $g_3.add_Click
-$g_3_click.Invoke({
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-
-
-    $ref_panel = ([ref]$p_3)
-    $ref_button_menu_group = ([ref]$g_3)
-    $num_buttons = $global:menu3_buttons + 1
-    # use the current height of the element as indicator of its state.
-    if ($ref_panel.Value.Height -eq $global:button_panel_height)
-    {
-      $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
-    }
-    else
-    {
-      $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
-    }
-
-
-  })
 
 # Menu 2 Panel
 $p_2.Controls.AddRange(@( $b_2_4,$b_2_3,$b_2_2,$b_2_1,$g_2))
