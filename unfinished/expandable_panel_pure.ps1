@@ -72,32 +72,34 @@ public class Win32Window : IWin32Window
 
 [scriptblock]$add_button_with_ref = {
   param(
-    [System.Management.Automation.PSReference]$object_ref,
-    [System.Management.Automation.PSReference]$result_ref,
-    [int]$cnt # unused 
+    [System.Management.Automation.PSReference]$button_data_ref,
+    [System.Management.Automation.PSReference]$button_ref,
+    [int]$cnt # TODO: remove from data
   )
 
-  $data = $object_ref.Value
+  $button_data = $button_data_ref.Value
 
   #  TODO: assert ?
 
-  $local:b = $result_ref.Value
+  $local:b = $button_ref.Value
   $local:b.BackColor = [System.Drawing.Color]::Silver
   $local:b.Dock = [System.Windows.Forms.DockStyle]::Top
   $local:b.FlatAppearance.BorderColor = [System.Drawing.Color]::DarkGray
   $local:b.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-  $local:b.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * $data['cnt']))
+  $local:b.Location = New-Object System.Drawing.Point (0,($global:button_panel_height * $button_data['cnt']))
   $local:b.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
   $local:b.TabIndex = 3
-  $local:b.Name = $data['name']
-  $local:b.Text = $data['text']
+  $local:b.Name = $button_data['name']
+  $local:b.Text = $button_data['text']
   $local:b.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $local:b.UseVisualStyleBackColor = $false
 
   $local:click_handler = $local:b.add_Click
-  if ($data.ContainsKey('callback')) {
-    $local:click_handler.Invoke($data['callback'])
-  } else {
+  if ($button_data.ContainsKey('callback')) {
+    $local:click_handler.Invoke($button_data['callback'])
+  }
+
+ else {
     # provide default click handler
 
     $local:click_handler.Invoke({
@@ -107,11 +109,11 @@ public class Win32Window : IWin32Window
           [System.EventArgs]$eventargs
         )
         $caller.Data = $sender.Text
-        [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+        [System.Windows.Forms.MessageBox]::Show(('{0} default click handler!' -f $sender.Text))
       })
 
   }
-  $result_ref.Value = $local:b
+  $button_ref.Value = $local:b
 }
 
 
@@ -127,7 +129,7 @@ $f.SuspendLayout()
 $p = New-Object System.Windows.Forms.Panel
 $m = New-Object System.Windows.Forms.Panel
 $p_3 = New-Object System.Windows.Forms.Panel
-$b_3_3 = New-Object System.Windows.Forms.Button
+ $b_3_3 = New-Object System.Windows.Forms.Button
 $b_3_2 = New-Object System.Windows.Forms.Button
 $b_3_1 = New-Object System.Windows.Forms.Button
 $g_3 = New-Object System.Windows.Forms.Button
@@ -168,8 +170,8 @@ $p_3.TabIndex = 3
 
 $global:menu3_buttons = 3
 #  Menu 3 button 3
-# Try to provide a callback with  System.Windows.Forms.Button.OnClick Method argument signature
-[scriptblock]$callback_ref = {
+# Provide a callback with  System.Windows.Forms.Button.OnClick Method argument signature
+[scriptblock]$b_3_3_callback_ref = {
   param(
     [object]$sender,
     [System.EventArgs]$eventargs
@@ -177,7 +179,8 @@ $global:menu3_buttons = 3
   $caller.Data = 'something'
   [System.Windows.Forms.MessageBox]::Show(('This is custom callback for {0} click!' -f $sender.Text))
 }
-$b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; 'callback' = $callback_ref; }
+# $b_3_3 = $null
+$b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; 'callback' = $b_3_3_callback_ref; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_3_data),([ref]$b_3_3)
 
 #  Menu 3 button 2
@@ -218,12 +221,12 @@ $g_3_click.Invoke({
     if ($ref_panel.Value.Height -eq $global:button_panel_height)
     {
       $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\up.png")
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory), "up.png"))  
     }
     else
     {
       $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\down.png")
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
     }
 
 
@@ -281,12 +284,12 @@ $g_2_click.Invoke({
     if ($ref_panel.Value.Height -eq $global:button_panel_height)
     {
       $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\up.png")
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory), "up.png"))  
     }
     else
     {
       $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\down.png")
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
     }
 
 
@@ -334,12 +337,12 @@ $g_1_click.Invoke({
     if ($ref_panel.Value.Height -eq $global:button_panel_height)
     {
       $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\up.png")
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory), "up.png"))  
     }
     else
     {
       $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\down.png")
+      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
     }
   })
 
@@ -367,7 +370,7 @@ $p_3.Height = $global:button_panel_height
 
 $g_1.Image =
 $g_2.Image =
-$g_3.Image = New-Object System.Drawing.Bitmap ("C:\developer\sergueik\powershell_ui_samples\unfinished\down.png")
+$g_3.Image = New-Object System.Drawing.Bitmap ( [System.IO.Path]::Combine( (Get-ScriptDirectory),"down.png"))
 
 $m.ResumeLayout($false)
 $p_3.ResumeLayout($false)
