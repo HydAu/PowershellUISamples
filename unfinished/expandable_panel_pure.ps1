@@ -77,13 +77,6 @@ public class Win32Window : IWin32Window
     [int]$cnt # unused 
   )
 
-  $debug = $false
-  if ($DebugPreference -eq 'Continue') {
-    Write-Host 'Object keys'
-    Write-Host $object_ref.Value.Keys
-    Write-Host 'Caller  keys'
-    Write-Host $object_ref.Value.Values
-  }
   $data = $object_ref.Value
 
   #  TODO: assert ?
@@ -181,49 +174,19 @@ $global:menu3_buttons = 3
     [object]$sender,
     [System.EventArgs]$eventargs
   )
-  $caller.Data = $sender.Text
-  [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
+  $caller.Data = 'something'
+  [System.Windows.Forms.MessageBox]::Show(('This is custom callback for {0} click!' -f $sender.Text))
 }
 $b_3_3_data = @{ 'cnt' = 3; 'text' = 'Menu 3 Sub Menu 3'; 'name' = 'b_3_3'; 'callback' = $callback_ref; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_3_data),([ref]$b_3_3)
-$b_3_3_click = $b_3_3.add_Click
-$b_3_3_click.Invoke({
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
-
 
 #  Menu 3 button 2
 $b_3_2_data = @{ 'cnt' = 2; 'text' = 'Menu 3 Sub Menu 2'; 'name' = 'b_3_2'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_2_data),([ref]$b_3_2)
-$b_3_2_click = $b_3_2.add_Click
-$b_3_2_click.Invoke({
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
-
 
 #  Menu 3 button 1
 $b_3_1_data = @{ 'cnt' = 1; 'text' = 'Menu 3 Sub Menu 1'; 'name' = 'b_3_1'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_3_1_data),([ref]$b_3_1)
-$b_3_1_click = $b_3_1.add_Click
-$b_3_1_click.Invoke({
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
 
 
 #  Menu 3 button group
@@ -277,54 +240,18 @@ $p_2.TabIndex = 2
 # Menu 2 button 4
 $b_2_4_data = @{ 'cnt' = 4; 'text' = 'Menu 2 Sub Menu 4'; 'name' = 'b_2_4'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_4_data),([ref]$b_2_4)
-$b_2_4_click = $b_2_4.add_Click
-$b_2_4_click.Invoke({
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
 
 # Menu 2 button 3
 $b_2_3_data = @{ 'cnt' = 3; 'text' = 'Menu 2 Sub Menu 3'; 'name' = 'b_2_3'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_3_data),([ref]$b_2_3)
-$b_2_3_click = $b_2_3.add_Click
-$b_2_3_click.Invoke({
-
-    param([object]$sender,[string]$message)
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
 
 # Menu 2 button 2
 $b_2_2_data = @{ 'cnt' = 2; 'text' = 'Menu 2 Sub Menu 2'; 'name' = 'b_2_2'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_2_data),([ref]$b_2_2)
-$b_2_3_click = $b_2_2.add_Click
-$b_2_3_click.Invoke({
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
 
 # Menu 2 button 1
 $b_2_1_data = @{ 'cnt' = 1; 'text' = 'Menu 2 Sub Menu 1'; 'name' = 'b_2_1'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_2_1_data),([ref]$b_2_1)
-$b_2_1_click = $b_2_1.add_Click
-$b_2_1_click.Invoke({
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
 
 #  Menu 2 button group
 $g_2.BackColor = [System.Drawing.Color]::Gray
@@ -375,31 +302,10 @@ $p_1.TabIndex = 1
 # Menu 1 button 1
 $b_1_1_data = @{ 'cnt' = 1; 'text' = 'Menu 1 Sub Menu 1'; 'name' = 'b_1_1'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_1_1_data),([ref]$b_1_1)
-$b_1_1_click = $b_1_1.add_Click
-$b_1_1_click.Invoke({
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
 
 #  Menu 1 button 2
 $b_1_2_data = @{ 'cnt' = 2; 'text' = 'Menu 1 Sub Menu 2'; 'name' = 'b_1_2'; }
 Invoke-Command $add_button_with_ref -ArgumentList ([ref]$b_1_2_data),([ref]$b_1_2)
-$b_1_2_click = $b_1_2.add_Click
-$b_1_2_click.Invoke({
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $caller.Data = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(('{0} clicked!' -f $sender.Text))
-  })
-
 
 #  Menu 1 button group 
 $g_1.BackColor = [System.Drawing.Color]::Gray
@@ -490,3 +396,4 @@ $f.Add_Shown({ $f.Activate() })
 
 $f.Dispose()
 
+write-output $caller.Data
