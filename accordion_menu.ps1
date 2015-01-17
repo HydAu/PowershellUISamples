@@ -24,7 +24,8 @@ param(
 
 $global:button_panel_height = 25
 $global:button_panel_width = 200
-
+$global:up_arrow = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),'up.png'))
+$global:down_arrow = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),'down.png'))
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -117,12 +118,12 @@ function add_button_group {
         if ($ref_panel.Value.Height -eq $global:button_panel_height)
         {
           $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-          $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+          $ref_button_menu_group.Value.Image = $global:up_arrow
         }
         else
         {
           $ref_panel.Value.Height = $global:button_panel_height
-          $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+          $ref_button_menu_group.Value.Image = $global:down_arrow
         }
 
 
@@ -283,7 +284,7 @@ add_button -button_ref ([ref]$b3_1) `
 
 # Menu 3 button group
 $global:g3_buttons = 3
-$g3.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+$g3.Image = $global:down_arrow
 
 [scriptblock]$g3_callback_ref = {
   param(
@@ -298,12 +299,12 @@ $g3.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-Scr
   if ($ref_panel.Value.Height -eq $global:button_panel_height)
   {
     $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+    $ref_button_menu_group.Value.Image = $global:up_arrow
   }
   else
   {
     $ref_panel.Value.Height = $global:button_panel_height
-    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+    $ref_button_menu_group.Value.Image = $global:down_arrow
   }
 }
 
@@ -360,7 +361,7 @@ add_button -button_ref ([ref]$b2_1) `
 
 # Menu 2 button group
 $global:g2_buttons = 4
-$g2.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+$g2.Image = $global:down_arrow
 
 [scriptblock]$g2_callback_ref = {
   param(
@@ -375,12 +376,12 @@ $g2.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-Scr
   if ($ref_panel.Value.Height -eq $global:button_panel_height)
   {
     $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+    $ref_button_menu_group.Value.Image = $global:up_arrow
   }
   else
   {
     $ref_panel.Value.Height = $global:button_panel_height
-    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+    $ref_button_menu_group.Value.Image = $global:down_arrow
   }
 }
 
@@ -420,7 +421,7 @@ add_button  -button_ref ([ref]$b1_2)`
 
 #  Menu 1 button group 
 $global:g1_buttons = 2
-$g1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+$g1.Image = $global:down_arrow
 
 [scriptblock]$g1_callback_ref = {
   param(
@@ -435,12 +436,12 @@ $g1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-Scr
   if ($ref_panel.Value.Height -eq $global:button_panel_height)
   {
     $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+    $ref_button_menu_group.Value.Image = $global:up_arrow
   }
   else
   {
     $ref_panel.Value.Height = $global:button_panel_height
-    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+    $ref_button_menu_group.Value.Image = $global:down_arrow
   }
 }
 
