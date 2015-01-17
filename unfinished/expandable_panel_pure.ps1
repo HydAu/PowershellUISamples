@@ -73,19 +73,17 @@ function add_button_group {
   param(
     [System.Management.Automation.PSReference]$button_group_data_ref,
     [System.Management.Automation.PSReference]$button_group_ref,
-    [System.Management.Automation.PSReference]$panel_ref,
-    [int]$cnt # TODO: remove from data
+    [System.Management.Automation.PSReference]$panel_ref # unused 
   )
 
   $button_group_data = $button_group_data_ref.Value
-
   $g = $button_group_ref.Value
   $g.BackColor = [System.Drawing.Color]::Gray
   $g.Dock = [System.Windows.Forms.DockStyle]::Top
   $g.FlatAppearance.BorderColor = [System.Drawing.Color]::Gray
   $g.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
   $g.ImageAlign = [System.Drawing.ContentAlignment]::MiddleRight
-  $g.Location = New-Object System.Drawing.Point ($button_group_data['x'],$button_group_data['y'])
+  $g.Location = New-Object System.Drawing.Point (0,0)
   $g.Name = $button_group_data['name']
   $g.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
   $g.TabIndex = 0
@@ -101,7 +99,7 @@ function add_button_group {
   }
 
   else {
-<# default click handler will not work.
+    <# default click handler will not work.
 
     $local:click_handler.Invoke({
         param(
@@ -139,8 +137,7 @@ function add_button_group {
 function add_button {
   param(
     [System.Management.Automation.PSReference]$button_data_ref,
-    [System.Management.Automation.PSReference]$button_ref,
-    [int]$cnt # TODO: remove from data
+    [System.Management.Automation.PSReference]$button_ref
   )
 
   $button_data = $button_data_ref.Value
@@ -194,50 +191,65 @@ $f.SuspendLayout()
 
 $p = New-Object System.Windows.Forms.Panel
 $m = New-Object System.Windows.Forms.Panel
-$p_3 = New-Object System.Windows.Forms.Panel
-$b_3_3 = New-Object System.Windows.Forms.Button
-$b_3_2 = New-Object System.Windows.Forms.Button
-$b_3_1 = New-Object System.Windows.Forms.Button
-$g_3 = New-Object System.Windows.Forms.Button
-$p_2 = New-Object System.Windows.Forms.Panel
 
-$b_2_4 = New-Object System.Windows.Forms.Button
-$b_2_3 = New-Object System.Windows.Forms.Button
-$b_2_2 = New-Object System.Windows.Forms.Button
-$b_2_1 = New-Object System.Windows.Forms.Button
-$g_2 = New-Object System.Windows.Forms.Button
-$p_1 = New-Object System.Windows.Forms.Panel
-$b_1_2 = New-Object System.Windows.Forms.Button
-$b_1_1 = New-Object System.Windows.Forms.Button
-$g_1 = New-Object System.Windows.Forms.Button
-$lblMenu = New-Object System.Windows.Forms.Label
+$p3 = New-Object System.Windows.Forms.Panel
+$g3 = New-Object System.Windows.Forms.Button
+$b3_1 = New-Object System.Windows.Forms.Button
+$b3_2 = New-Object System.Windows.Forms.Button
+$b3_3 = New-Object System.Windows.Forms.Button
+
+$p2 = New-Object System.Windows.Forms.Panel
+$g2 = New-Object System.Windows.Forms.Button
+$b2_1 = New-Object System.Windows.Forms.Button
+$b2_2 = New-Object System.Windows.Forms.Button
+$b2_3 = New-Object System.Windows.Forms.Button
+$b2_4 = New-Object System.Windows.Forms.Button
+
+$p1 = New-Object System.Windows.Forms.Panel
+$g1 = New-Object System.Windows.Forms.Button
+$b1_1 = New-Object System.Windows.Forms.Button
+$b1_2 = New-Object System.Windows.Forms.Button
+
+$l = New-Object System.Windows.Forms.Label
 $m.SuspendLayout()
-$p_3.SuspendLayout()
-$p_2.SuspendLayout()
-$p_1.SuspendLayout()
+$p3.SuspendLayout()
+$p2.SuspendLayout()
+$p1.SuspendLayout()
 $p.SuspendLayout()
 
+#  
+#  Menu Label
+#  
+$l.BackColor = [System.Drawing.Color]::DarkGray
+$l.Dock = [System.Windows.Forms.DockStyle]::Top
+$l.ForeColor = [System.Drawing.Color]::White
+$l.Location = New-Object System.Drawing.Point (0,0)
+$l.Name = 'l'
+$l.Size = New-Object System.Drawing.Size (200,23)
+$l.TabIndex = 0
+$l.Text = 'Main Menu Label'
+$l.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+
 #  Menu Panel
-$m.Controls.AddRange(@( $p_3,$p_2,$p_1))
-$m.Controls.Add($lblMenu)
+$m.Controls.AddRange(@( $p3,$p2,$p1))
+$m.Controls.Add($l)
 $m.Dock = [System.Windows.Forms.DockStyle]::Left
 $m.Location = New-Object System.Drawing.Point (0,0)
-$m.Name = "pnlMenu"
+$m.Name = 'm'
 $m.Size = New-Object System.Drawing.Size ($global:button_panel_width,449)
 $m.TabIndex = 1
 
 #  Menu 3 Panel
-$p_3.Controls.AddRange(@( $b_3_3,$b_3_2,$b_3_1,$g_3))
-$p_3.Dock = [System.Windows.Forms.DockStyle]::Top
-$p_3.Location = New-Object System.Drawing.Point (0,231)
-$p_3.Name = "p_3"
-# $p_3.Size = New-Object System.Drawing.Size ($global:button_panel_width,109)
-$p_3.TabIndex = 3
+$p3.Controls.AddRange(@( $b3_3,$b3_2,$b3_1,$g3))
+$p3.Dock = [System.Windows.Forms.DockStyle]::Top
+$p3.Location = New-Object System.Drawing.Point (0,231)
+$p3.Name = 'p3'
+$p3.TabIndex = 3
 
-$global:menu3_buttons = 3
+
 #  Menu 3 button 3
 # Provide a callback with  System.Windows.Forms.Button.OnClick Method argument signature
-[scriptblock]$b_3_3_callback_ref = {
+[scriptblock]$b3_3_callback_ref = {
   param(
     [object]$sender,
     [System.EventArgs]$eventargs
@@ -245,29 +257,33 @@ $global:menu3_buttons = 3
   $caller.Data = 'something'
   [System.Windows.Forms.MessageBox]::Show(('This is custom callback for {0} click!' -f $sender.Text))
 }
-# $b_3_3 = $null
-$b_3_3_data = @{
-  'cnt' = 3;
-  'text' = 'Menu 3 Sub Menu 3';
-  'name' = 'b_3_3';
-  'callback' = $b_3_3_callback_ref;
-}
-add_button -button_data_ref ([ref]$b_3_3_data) -button_ref ([ref]$b_3_3)
+
+add_button -button_ref ([ref]$b3_3) `
+   -button_data_ref ([ref]@{
+    'cnt' = 3;
+    'text' = 'Menu 3 Sub Menu 3';
+    'name' = 'b3_3';
+    'callback' = $b3_3_callback_ref;
+  })
 
 #  Menu 3 button 2
-$b_3_2_data = @{
-  'cnt' = 2;
-  'text' = 'Menu 3 Sub Menu 2';
-  'name' = 'b_3_2'; }
-add_button -button_data_ref ([ref]$b_3_2_data) -button_ref ([ref]$b_3_2)
+add_button -button_ref ([ref]$b3_2) `
+   -button_data_ref ([ref]@{
+    'cnt' = 2;
+    'text' = 'Menu 3 Sub Menu 2';
+    'name' = 'b3_2'; })
 
 #  Menu 3 button 1
-$b_3_1_data = @{
-  'cnt' = 1;
-  'text' = 'Menu 3 Sub Menu 1';
-  'name' = 'b_3_1';
-}
-add_button -button_data_ref ([ref]$b_3_1_data) -button_ref ([ref]$b_3_1)
+add_button -button_ref ([ref]$b3_1) `
+   -button_data_ref ([ref]@{
+    'cnt' = 1;
+    'text' = 'Menu 3 Sub Menu 1';
+    'name' = 'b3_1';
+  })
+
+# Menu 3 button group
+$global:g3_buttons = 3
+$g3.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
 
 [scriptblock]$g3_callback_ref = {
   param(
@@ -275,10 +291,9 @@ add_button -button_data_ref ([ref]$b_3_1_data) -button_ref ([ref]$b_3_1)
     [System.EventArgs]$eventargs
   )
 
-
-  $ref_panel = ([ref]$p_3)
-  $ref_button_menu_group = ([ref]$g_3)
-  $num_buttons = $global:menu3_buttons + 1
+  $ref_panel = ([ref]$p3)
+  $ref_button_menu_group = ([ref]$g3)
+  $num_buttons = $global:g3_buttons + 1
   # use the current height of the element as indicator of its state.
   if ($ref_panel.Value.Height -eq $global:button_panel_height)
   {
@@ -290,187 +305,167 @@ add_button -button_data_ref ([ref]$b_3_1_data) -button_ref ([ref]$b_3_1)
     $ref_panel.Value.Height = $global:button_panel_height
     $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
   }
-
-
 }
 
-#  Menu 3 button group
-$g_3_data = @{
-  'buttons' = 3;
-  'x' = 0;
-  'y' = 0;
-  'text' = 'Menu Group 3';
-  'name' = 'b_3_1';
-  'callback' = $g3_callback_ref;
-}
-add_button_group -button_group_data_ref ([ref]$g_3_data) -button_group_ref ([ref]$g_3) -panel_ref ([ref]$p_3)
+add_button_group -button_group_ref ([ref]$g3) `
+   -panel_ref ([ref]$p3) `
+   -button_group_data_ref ([ref]@{
+    'buttons' = 3;
+    'text' = 'Menu Group 3';
+    'name' = 'g3';
+    'callback' = $g3_callback_ref;
+  })
 
 
 # Menu 2 Panel
-$p_2.Controls.AddRange(@( $b_2_4,$b_2_3,$b_2_2,$b_2_1,$g_2))
-$p_2.Dock = [System.Windows.Forms.DockStyle]::Top
-$p_2.Location = New-Object System.Drawing.Point (0,127)
-$p_2.Name = "p_2"
-$p_2.TabIndex = 2
+$p2.Controls.AddRange(@( $b2_4,$b2_3,$b2_2,$b2_1,$g2))
+$p2.Dock = [System.Windows.Forms.DockStyle]::Top
+$p2.Location = New-Object System.Drawing.Point (0,127)
+$p2.Name = 'p2'
+$p2.TabIndex = 2
 
 # Menu 2 button 4
-$b_2_4_data = @{
-  'cnt' = 4;
-  'text' = 'Menu 2 Sub Menu 4';
-  'name' = 'b_2_4';
-}
-add_button -button_data_ref ([ref]$b_2_4_data) -button_ref ([ref]$b_2_4)
+add_button -button_ref ([ref]$b2_4) `
+   -button_data_ref ([ref]@{
+    'cnt' = 4;
+    'text' = 'Menu 2 Sub Menu 4';
+    'name' = 'b2_4';
+  })
 
 # Menu 2 button 3
-$b_2_3_data = @{
-  'cnt' = 3;
-  'text' = 'Menu 2 Sub Menu 3';
-  'name' = 'b_2_3';
-}
-add_button -button_data_ref ([ref]$b_2_3_data) -button_ref ([ref]$b_2_3)
+add_button -button_ref ([ref]$b2_3) `
+   -button_data_ref ([ref]@{
+    'cnt' = 3;
+    'text' = 'Menu 2 Sub Menu 3';
+    'name' = 'b2_3';
+  })
 
 
 # Menu 2 button 2
-$b_2_2_data = @{
-  'cnt' = 2;
-  'text' = 'Menu 2 Sub Menu 2';
-  'name' = 'b_2_2';
-}
-
-add_button -button_data_ref ([ref]$b_2_2_data) -button_ref ([ref]$b_2_2)
+add_button -button_ref ([ref]$b2_2) `
+   -button_data_ref ([ref]@{
+    'cnt' = 2;
+    'text' = 'Menu 2 Sub Menu 2';
+    'name' = 'b2_2';
+  })
 
 # Menu 2 button 1
-$b_2_1_data = @{
-  'cnt' = 1;
-  'text' = 'Menu 2 Sub Menu 1';
-  'name' = 'b_2_1';
+add_button -button_ref ([ref]$b2_1) `
+   -button_data_ref ([ref]@{
+    'cnt' = 1;
+    'text' = 'Menu 2 Sub Menu 1';
+    'name' = 'b2_1';
+  })
+
+
+# Menu 2 button group
+$global:g2_buttons = 4
+$g2.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+
+[scriptblock]$g2_callback_ref = {
+  param(
+    [object]$sender,
+    [System.EventArgs]$eventargs
+  )
+
+  $ref_panel = ([ref]$p2)
+  $ref_button_menu_group = ([ref]$g2)
+  $num_buttons = $global:g2_buttons + 1
+  # use the current height of the element as indicator of its state.
+  if ($ref_panel.Value.Height -eq $global:button_panel_height)
+  {
+    $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
+    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+  }
+  else
+  {
+    $ref_panel.Value.Height = $global:button_panel_height
+    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+  }
 }
 
-add_button -button_data_ref ([ref]$b_2_2_data) -button_ref ([ref]$b_2_1)
-
-#  Menu 2 button group
-$g_2.BackColor = [System.Drawing.Color]::Gray
-$g_2.Dock = [System.Windows.Forms.DockStyle]::Top
-$g_2.FlatAppearance.BorderColor = [System.Drawing.Color]::Gray
-$g_2.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$g_2.ImageAlign = [System.Drawing.ContentAlignment]::MiddleRight
-$g_2.Location = New-Object System.Drawing.Point (0,0)
-$g_2.Name = "g_2"
-$g_2.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$g_2.TabIndex = 0
-$g_2.Text = "Menu Group 2"
-$g_2.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$g_2.UseVisualStyleBackColor = $false
-
-$g_2_click = $g_2.add_Click
-$g_2_click.Invoke({
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-
-    $ref_panel = ([ref]$p_2)
-    $ref_button_menu_group = ([ref]$g_2)
-    $num_buttons = 5
-    # use the current height of the element as indicator of its state.
-    if ($ref_panel.Value.Height -eq $global:button_panel_height)
-    {
-      $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
-    }
-    else
-    {
-      $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
-    }
-
-
+add_button_group -button_group_ref ([ref]$g2) `
+   -panel_ref ([ref]$p2) `
+   -button_group_data_ref ([ref]@{
+    'buttons' = $global:g2_buttons;
+    'text' = 'Menu Group 2';
+    'name' = 'g_2';
+    'callback' = $g2_callback_ref;
   })
 
 #  Panel Menu 1
-$p_1.Controls.AddRange(@( $b_1_2,$b_1_1,$g_1))
-$p_1.Dock = [System.Windows.Forms.DockStyle]::Top
-$p_1.Location = New-Object System.Drawing.Point (0,23)
-$p_1.Name = "p_1"
-$p_1.TabIndex = 1
+$p1.Controls.AddRange(@( $b1_2,$b1_1,$g1))
+$p1.Dock = [System.Windows.Forms.DockStyle]::Top
+$p1.Location = New-Object System.Drawing.Point (0,23)
+$p1.Name = 'p1'
+$p1.TabIndex = 1
 
 # Menu 1 button 1
-add_button -button_data_ref ([ref]@{
+
+
+add_button -button_ref ([ref]$b1_1) `
+   -button_data_ref ([ref]@{
     'cnt' = 1;
     'text' = 'Menu 1 Sub Menu 1';
-    'name' = 'b_1_1';
-  }
-) -button_ref ([ref]$b_1_1)
+    'name' = 'b1_1';
+  })
 
 #  Menu 1 button 2
-add_button -button_data_ref ([ref]@{ 'cnt' = 2; 'text' = 'Menu 1 Sub Menu 2'; 'name' = 'b_1_2'; }) -button_ref ([ref]$b_1_2)
+add_button  -button_ref ([ref]$b1_2)`
+   -button_data_ref ([ref]@{ 
+    'cnt' = 2; 
+    'text' = 'Menu 1 Sub Menu 2'; 
+    'name' = 'b1_2'; 
+  })
 
 #  Menu 1 button group 
-$g_1.BackColor = [System.Drawing.Color]::Gray
-$g_1.Dock = [System.Windows.Forms.DockStyle]::Top
-$g_1.FlatAppearance.BorderColor = [System.Drawing.Color]::Gray
-$g_1.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
-$g_1.ImageAlign = [System.Drawing.ContentAlignment]::MiddleRight
-$g_1.Location = New-Object System.Drawing.Point (0,0)
-$g_1.Name = "g_1"
-$g_1.Size = New-Object System.Drawing.Size ($global:button_panel_width,$global:button_panel_height)
-$g_1.TabIndex = 0
-$g_1.Text = "Menu Group 1"
-$g_1.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$g_1.UseVisualStyleBackColor = $false
-$g_1_click = $g_1.add_Click
-$g_1_click.Invoke({
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
+$global:g1_buttons = 2
+$g1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
 
-    $ref_panel = ([ref]$p_1)
-    $ref_button_menu_group = ([ref]$g_1)
-    $num_buttons = 3
-    # use the current height of the element as indicator of its state.
-    if ($ref_panel.Value.Height -eq $global:button_panel_height)
-    {
-      $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
-    }
-    else
-    {
-      $ref_panel.Value.Height = $global:button_panel_height
-      $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
-    }
+[scriptblock]$g1_callback_ref = {
+  param(
+    [object]$sender,
+    [System.EventArgs]$eventargs
+  )
+
+  $ref_panel = ([ref]$p1)
+  $ref_button_menu_group = ([ref]$g1)
+  $num_buttons = $global:g1_buttons + 1
+  # use the current height of the element as indicator of its state.
+  if ($ref_panel.Value.Height -eq $global:button_panel_height)
+  {
+    $ref_panel.Value.Height = ($global:button_panel_height * $num_buttons) + 2
+    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"up.png"))
+  }
+  else
+  {
+    $ref_panel.Value.Height = $global:button_panel_height
+    $ref_button_menu_group.Value.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+  }
+}
+
+add_button_group -button_group_ref ([ref]$g1) `
+   -panel_ref ([ref]$p1) `
+   -button_group_data_ref ([ref]@{
+    'buttons' = $global:g1_buttons;
+    'text' = 'Menu Group 1';
+    'name' = 'g1';
+    'callback' = $g1_callback_ref;
   })
 
 
-
-#  
-#  lblMenu
-#  
-$lBackColor = [System.Drawing.Color]::DarkGray
-$lDock = [System.Windows.Forms.DockStyle]::Top
-$lForeColor = [System.Drawing.Color]::White
-$lLocation = New-Object System.Drawing.Point (0,0)
-$lName = "lblMenu"
-$lSize = New-Object System.Drawing.Size (200,23)
-$lTabIndex = 0
-$lText = "Main Menu"
-$lTextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 
 
 $p.ClientSize = New-Object System.Drawing.Size (200,449)
 $p.Controls.Add($m)
-$p_1.Height = $global:button_panel_height
-$p_2.Height = $global:button_panel_height
-$p_3.Height = $global:button_panel_height
-
-$g_1.Image =
-$g_2.Image =
-$g_3.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"down.png"))
+$p1.Height = $global:button_panel_height
+$p2.Height = $global:button_panel_height
+$p3.Height = $global:button_panel_height
 
 $m.ResumeLayout($false)
-$p_3.ResumeLayout($false)
-$p_2.ResumeLayout($false)
-$p_1.ResumeLayout($false)
+$p3.ResumeLayout($false)
+$p2.ResumeLayout($false)
+$p1.ResumeLayout($false)
 $p.ResumeLayout($false)
 
 
@@ -478,12 +473,12 @@ $f.Controls.Add($p)
 #  Form1
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
-$f.ClientSize = New-Object System.Drawing.Size (210,280)
+$f.ClientSize = New-Object System.Drawing.Size (201,280)
 $f.Controls.Add($c1)
 $f.Controls.Add($p)
 $f.Controls.Add($b1)
-$f.Name = "Form1"
-$f.Text = "ProgressCircle"
+$f.Name = 'Form1'
+$f.Text = 'Accordion Menu'
 $f.ResumeLayout($false)
 
 $f.Topmost = $True
