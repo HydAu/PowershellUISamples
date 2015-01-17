@@ -74,6 +74,8 @@ function Get-ScriptDirectory {
 $shared_assemblies = @{
   'nunit.core.dll' = $null;
   'nunit.framework.dll' = $null;
+  # http://www.codeproject.com/Articles/451742/Extending-Csharp-ListView-with-Collapsible-Groups
+  # http://www.codeproject.com/Articles/451735/Extending-Csharp-ListView-with-Collapsible-Groups
   'GroupedListControl.dll' = $null;
 }
 
@@ -114,19 +116,20 @@ function GroupedListBox
     [string]$title,
     [bool]$show_buttons)
 
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections.Generic')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Collections')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Text')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Data')
+  @( 'System.Drawing',
+    'System.Collections.Generic',
+    'System.Collections',
+    'System.ComponentModel',
+    'System.Windows.Forms',
+    'System.Text',
+    'System.Data'
+  ) | ForEach-Object { $assembly = $_; [void][System.Reflection.Assembly]::LoadWithPartialName($assembly) }
+
 
   $f = New-Object System.Windows.Forms.Form
 
   $f.Text = $title
-  $width = 640
-  $f.Size = New-Object System.Drawing.Size ($width,400)
+  $f.Size = New-Object System.Drawing.Size (640,400)
   # http://www.codeproject.com/Articles/451742/Extending-Csharp-ListView-with-Collapsible-Groups
   # http://www.codeproject.com/Articles/451735/Extending-Csharp-ListView-with-Collapsible-Groups
   $glc = New-Object -TypeName 'GroupedListControl.GroupListControl'
