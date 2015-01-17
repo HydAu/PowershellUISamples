@@ -95,8 +95,7 @@ namespace C2C.FileSystem
             get { return this._data; }
             set { this._data = value; }
         }
-
-        private string _iconPath = @"C:\developer\sergueik\powershell_ui_samples\unfinished\folder.ico";
+        private string _iconPath = Path.Combine( Directory.GetCurrentDirectory(), "folder.ico" );
         public String IconPath
         {
             get { return this._iconPath; }
