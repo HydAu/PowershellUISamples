@@ -1,5 +1,25 @@
-# http://poshcode.org/5520
-# Asynchronous GUI by Peter Kriegel
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+# $DebugPreference = 'Continue'
+
 
 param(
   [switch]$pause
@@ -185,7 +205,6 @@ $l1.Location = New-Object System.Drawing.Point (70,34)
 $l1.Size = New-Object System.Drawing.Size (140,23)
 $l1.Text = 'Start'
 
-
 #  progressCircle1
 $c1 = New-Object -TypeName 'ProgressCircle.ProgressCircle'
 $c1.Location = New-Object System.Drawing.Point (20,20)
@@ -246,8 +265,6 @@ function Get-ScriptDirectory
   }
 }
 
-
-
 $so = [hashtable]::Synchronized(@{
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
@@ -281,17 +298,8 @@ if ($PSBoundParameters['pause']) {
   Start-Sleep -Millisecond 1000
 }
 
-
-<#
-
-# Executing a Scriptblock (which represents a specified delegate), on the GUI thread that
-# owns the control's underlying window handle, with the specified list of arguments.
-
-$TextBox.Invoke( [System.Action[string]] { param($Message) $TextBox.Text = $Message },
-    $MyMessage )
-
-#>
-
+# http://poshcode.org/5520
+# Asynchronous GUI by Peter Kriegel
 
 # subclass
 $eventargs = New-Object -TypeName 'System.EventArgs'
@@ -320,37 +328,35 @@ $handler = [System.EventHandler]{
 1..($total_steps ) | ForEach-Object {
 
   $current_step = $_
-  $eventargs.Text =( 'Processed {0} / {1}' -f $current_step , $total_steps )
-  $message = ('Round: {0}' -f $total)
+  $message = $eventargs.Text =( 'Processed {0} / {1}' -f $current_step , $total_steps )
 
   $eventargs.Increment = 1
   [void]$c1.BeginInvoke($handler,($c1,([System.EventArgs]$eventargs)))
-if ($host.Version.Major -eq 2) {
-$c1.Invoke(
-    [System.Action[int, string]] { 
-        param([int]$increment, [string]$message) 
+  if ($host.Version.Major -eq 2) {
+    $c1.Invoke(
+        [System.Action[int, string]] { 
+            param(
+              [int]$increment, 
+              [string]$message
+            )
+            $sender.Increment($increment) 
+            try {
+              $elems = $sender.Parent.Controls.Find('progress_label',$false)
+            } catch [exception]{
+            }
+            if ($elems -ne $null) {
+              $elems[0].Text = $message
+            }
 
-$sender.Increment($increment) 
-  try {
-    $elems = $sender.Parent.Controls.Find('progress_label',$false)
-  } catch [exception]{
+        },
+        # Argument for the System.Action delegate scriptblock
+        @(1, $message)
+    )
   }
-  if ($elems -ne $null) {
-    $elems[0].Text = $message
-  }
-
-    },
-    # Argument for the System.Action delegate scriptblock
-    @(1, $message)
-)
-
-}
   Start-Sleep -Milliseconds (Get-Random -Maximum 1000)
-
 }
 
 if ($PSBoundParameters['pause']) {
-  # block PowerShell Main-Thread to leave it alive until user enter something
   Write-Output 'Pause'
   try {
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
@@ -364,5 +370,3 @@ if ($PSBoundParameters['pause']) {
 $po.EndInvoke($res)
 $rs.Close()
 $po.Dispose()
-
-
