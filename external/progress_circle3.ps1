@@ -20,14 +20,12 @@
 
 # $DebugPreference = 'Continue'
 
-
 param(
   [switch]$pause
 )
 
 #  http://www.codeproject.com/Articles/25575/ProgressCircle-An-Alternative-to-ProgressBar
 Add-Type -TypeDefinition @"
-
 
 /////////////////////////////////////////////////////////////////////////////
 // ProgressCircle.cs - progress control
@@ -114,11 +112,11 @@ public Color PCElapsedTimeColor2
     get { return m_oColor2ElapsedTime; }
     set { m_oColor2ElapsedTime = value; }
 }
-private int m_iTextTime = 100;
-public int PCTextTime
+private int m_iTotalTime = 100;
+public int PCTotalTime
 {
-    get { return m_iTextTime; }
-    set { m_iTextTime = value; }
+    get { return m_iTotalTime; }
+    set { m_iTotalTime = value; }
 }
 private int m_iElapsedTime = 0;
 public int PCElapsedTime
@@ -134,11 +132,11 @@ public ProgressCircle()
 
 public void Increment (int a_iValue)
 {
-    if (m_iElapsedTime > m_iTextTime)
+    if (m_iElapsedTime > m_iTotalTime)
         return;
 
-    if (m_iElapsedTime + a_iValue >= m_iTextTime) {
-        m_iElapsedTime = m_iTextTime;
+    if (m_iElapsedTime + a_iValue >= m_iTotalTime) {
+        m_iElapsedTime = m_iTotalTime;
         this.Refresh ();
         if (m_EventIncremented != null)
             m_EventIncremented (this, null);
@@ -159,7 +157,7 @@ private void ProgressCircle_Paint (object sender, PaintEventArgs e)
     Brush t_oBrushElapsedTime = new LinearGradientBrush (t_oRectangle, m_oColor1ElapsedTime, m_oColor2ElapsedTime, m_eLinearGradientMode);
 
     e.Graphics.FillEllipse (t_oBrushRemainingTime, t_oRectangle);
-    e.Graphics.FillPie (t_oBrushElapsedTime, t_oRectangle, -90f, (float)(360 * m_iElapsedTime / m_iTextTime));
+    e.Graphics.FillPie (t_oBrushElapsedTime, t_oRectangle, -90f, (float)(360 * m_iElapsedTime / m_iTotalTime));
 }
 
 private void InitializeComponent ()
@@ -214,7 +212,7 @@ $c1.PCElapsedTimeColor2 = [System.Drawing.Color]::Yellow
 $c1.PCLinearGradientMode = [System.Drawing.Drawing2D.LinearGradientMode]::Vertical
 $c1.PCRemainingTimeColor1 = [System.Drawing.Color]::Navy
 $c1.PCRemainingTimeColor2 = [System.Drawing.Color]::LightBlue
-$c1.PCTextTime = $total_steps
+$c1.PCTotalTime = $total_steps
 $c1.Size = New-Object System.Drawing.Size (47,45)
 $c1.TabIndex = 3
 $progress_complete = $c1.add_PCCompleted
