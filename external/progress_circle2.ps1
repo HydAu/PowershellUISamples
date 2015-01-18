@@ -158,51 +158,36 @@ private void InitializeComponent ()
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
-
+
+
 # http://poshcode.org/5520
 # Asynchronous GUI by Peter Kriegel
-# Simon Mourier See: http://stackoverflow.com/questions/14401704/update-winforms-not-wpf-ui-from-another-thread
+# Simon Mourier See: http://stackoverflow.com/questions/14401704/update-winforms-not-wpf-ui-from-another-thread
 
-
-Add-Type -AssemblyName 'System.Windows.Forms'
-Add-Type -AssemblyName 'System.Drawing'
-# VisualStyles are only needed for a very few Windows Forms controls like ProgessBar
-[Void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms.VisualStyles')
-
-
-# Generated Form Objects
-$Form = New-Object System.Windows.Forms.Form
-$OkButton = New-Object System.Windows.Forms.Button
-$TextBox = New-Object System.Windows.Forms.TextBox
-$Label = New-Object System.Windows.Forms.Label
-$InitialFormWindowState = New-Object System.Windows.Forms.FormWindowState
-
-# initializes Form
-$Form.Text = 'Demo Form'
-$Form.Name = 'Form'
-$Form.DataBindings.DefaultDataSourceUpdateMode = 0
-$Form.ClientSize =  '216,121'
-
-# initializes Textbox
-$TextBox.Size = '100,20'
-$TextBox.DataBindings.DefaultDataSourceUpdateMode = 0
-$TextBox.Name = 'TextBox'
-$TextBox.Location = '27,13'
-
-# add Textbox to Form
-$Form.Controls.Add($TextBox)
-
-# initializes Label
-$Label.Location = '27,50'
-$Label.Size = '100,23'
-$Label.Text = 'Round:'
-
-# add Label to Form
+Add-Type -AssemblyName 'System.Windows.Forms'
+Add-Type -AssemblyName 'System.Drawing'
+# VisualStyles are only needed for a very few Windows Forms controls like ProgessBar
+[void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms.VisualStyles')
+
+
+$Form = New-Object System.Windows.Forms.Form
+$l1 = New-Object System.Windows.Forms.Label
+$is= New-Object System.Windows.Forms.FormWindowState
+$Form.Text = 'Demo Form'
+$Form.Name = 'Form'
+$Form.DataBindings.DefaultDataSourceUpdateMode = 0
+$Form.ClientSize = New-Object System.Drawing.Size (216,121)
+# Label 
+$l1.Name = 'progress_label'
+$l1.Location = New-Object System.Drawing.Point (70,34)
+$l1.Size = New-Object System.Drawing.Size (100,23)
+$l1.Text = 'Round:'
+
 
 #  progressCircle1
 $c1 = New-Object -TypeName 'ProgressCircle.ProgressCircle'
-$c1.Location = New-Object System.Drawing.Point (145,12)
-$c1.Name = "progressCircle1"
+$c1.Location = New-Object System.Drawing.Point (20,20)
+$c1.Name = "progress_circle"
 $c1.PCElapsedTimeColor1 = [System.Drawing.Color]::Chartreuse
 $c1.PCElapsedTimeColor2 = [System.Drawing.Color]::Yellow
 $c1.PCLinearGradientMode = [System.Drawing.Drawing2D.LinearGradientMode]::Vertical
@@ -213,46 +198,37 @@ $c1.Size = New-Object System.Drawing.Size (47,45)
 $c1.TabIndex = 3
 $progress_complete = $c1.add_PCCompleted
 $progress_complete.Invoke({
-
     param([object]$sender,[string]$message)
-
-    [System.Windows.Forms.MessageBox]::Show('Task completed!')
+    # [System.Windows.Forms.MessageBox]::Show('Task completed!')
+    $l1.Text = ('Task completed!')
   })
-
-$Form.Controls.Add($Label)
 
-$Form.Controls.Add($c1)
-
-#Save the initial state of the form
-$InitialFormWindowState = $Form.WindowState
-
-# initializes the OnLoad event to correct the initial state of the form
-$Form.add_Load({
-  #Correct the initial state of the form to prevent the .Net maximized form issue
-	$Form.WindowState = $InitialFormWindowState
-})
-
-$Runspace = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace($Host)
-
-$Runspace.ApartmentState = 'STA'
-$Runspace.ThreadOptions = 'ReuseThread'
-$Runspace.Open()
-
-$Runspace.SessionStateProxy.SetVariable('Form', $Form)
-
-$PowerShellRunspace = [System.Management.Automation.PowerShell]::Create()
-
-$PowerShellRunspace.Runspace = $Runspace
-
-$PowerShellRunspace.AddScript(
-     {
-     [System.Windows.Forms.Application]::EnableVisualStyles()
-     [System.Windows.Forms.Application]::Run($Form)
-     })
-
-$AsyncResult = $PowerShellRunspace.BeginInvoke()
+
+$Form.Controls.AddRange(@($l1,$c1))
+
+$is= $Form.WindowState
+
+$Form.add_Load({
+    $Form.WindowState = $InitialFormWindowState
+  })
+
+$rs = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace($Host)
+$rs.ApartmentState = 'STA'
+$rs.ThreadOptions = 'ReuseThread'
+$rs.Open()
+
+$rs.SessionStateProxy.SetVariable('Form',$Form)
+$po = [System.Management.Automation.PowerShell]::Create()
+$po.Runspace = $rs
+
+$po.AddScript({
+    [System.Windows.Forms.Application]::EnableVisualStyles()
+    [System.Windows.Forms.Application]::Run($Form)
+  })
+
+$res = $po.BeginInvoke()
+
 if ($PSBoundParameters['pause']) {
-  # block PowerShell Main-Thread to leave it alive until user enter something
   Write-Output 'Pause'
   try {
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
@@ -261,48 +237,53 @@ if ($PSBoundParameters['pause']) {
   Start-Sleep -Millisecond 1000
 }
 
-
-<#
-# Executing a Scriptblock (which represents a specified delegate), on the GUI thread that
-# owns the control's underlying window handle, with the specified list of arguments.
-$TextBox.Invoke(
-    [System.Action[string]] { param($Message) $TextBox.Text = $Message },
-    $MyMessage
-)
-#>
-
-
-$Eventargs = [System.EventArgs]::Empty
-Add-Member -InputObject $eventArgs -MemberType 'NoteProperty' -Name 'MyText' -Value 'Alle Achtung!' -Force
-$Handler = [System.EventHandler]{Param($Sender,$Eventargs); $Sender.Text = $Eventargs.MyText }
 
 <#
-$Eventargs2 = [System.EventArgs]::Empty
-Add-Member -InputObject $eventArgs2 -MemberType 'NoteProperty' -Name 'Progress' -Value 0 -Force
-$Handler2 = [System.EventHandler]{Param($Sender,$Eventargs2); $Sender.PCElapsedTime = $Eventargs2.Progress; $Sender.Increment(1) }
+
+# Executing a Scriptblock (which represents a specified delegate), on the GUI thread that
+# owns the control's underlying window handle, with the specified list of arguments.
+
+$TextBox.Invoke( [System.Action[string]] { param($Message) $TextBox.Text = $Message },
+    $MyMessage )
+
 #>
-# TODO - debug the
-# $Eventargs2 = New-Object -typeName 'System.EventArgs' 
-$Eventargs2 = [System.EventArgs]::Empty
-$Eventargs2 | Add-Member Noteproperty 'Progress' 0 -Force
-$Handler2 = [System.EventHandler]{Param($Sender,$Eventargs2); $Sender.Increment($Eventargs2.Progress) }
-
-# simulating heavy PowerShell work with a loop
-1..(25 + 1) | ForEach-Object {
-  $Eventargs.MyText = "Round: $_"
-  [void]$Label.BeginInvoke($Handler,($Label,$Eventargs))
-  $Eventargs2.Progress = 1
-  [void]$c1.BeginInvoke($Handler2,($c1,$Eventargs2))
-
+
+
+# subclass
+$eventargs = New-Object -TypeName 'System.EventArgs'
+
+Add-Member -InputObject $eventargs -MemberType 'NoteProperty' -Name 'Increment' -Value 0 -Force
+Add-Member -InputObject $eventargs -MemberType 'NoteProperty' -Name 'Total' -Value 0 -Force
+
+$handler = [System.EventHandler]{
+  param(
+    [object]$sender,
+    [System.EventArgs]$e
+  )
+  $local:increment = $e.Increment
+  $local:total = $e.Total
+  $sender.Increment($local:increment)
+  $sender.Text = $e.MyText
+  try {
+    $elems = $sender.Parent.Controls.Find('progress_label',$false)
+  } catch [exception]{
+  }
+  if ($elems -ne $null) {
+    $elems[0].Text = ('Round: {0}' -f $local:total)
+  }
+
+}
+
+1..25 | ForEach-Object {
+
+  $eventargs.Total = $_
+  $eventargs.Increment = 1
+  [void]$c1.BeginInvoke($handler,($c1,([System.EventArgs]$eventargs)))
+
   Start-Sleep -Milliseconds (Get-Random -Maximum 1000)
-
+
 }
-<# 
-# TODO: wait for Messagebox Dialog
-while ($so.Visible) {
-  Start-Sleep -Milliseconds  100 
-}
-#>
+
 if ($PSBoundParameters['pause']) {
   # block PowerShell Main-Thread to leave it alive until user enter something
   Write-Output 'Pause'
@@ -310,10 +291,13 @@ if ($PSBoundParameters['pause']) {
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
   } catch [exception]{}
 } else {
-  Start-Sleep -Millisecond 1000
+  Start-Sleep -Millisecond 2000
 }
-
-[System.Windows.Forms.Application]::Exit()
-$PowerShellRunspace.EndInvoke($AsyncResult)
-$Runspace.Close()
-$PowerShellRunspace.Dispose()
+
+
+[System.Windows.Forms.Application]::Exit()
+$po.EndInvoke($res)
+$rs.Close()
+$po.Dispose()
+
+
