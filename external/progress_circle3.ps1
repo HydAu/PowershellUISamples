@@ -199,8 +199,19 @@ $c1.TabIndex = 3
 $progress_complete = $c1.add_PCCompleted
 $progress_complete.Invoke({
     param([object]$sender,[string]$message)
-    # [System.Windows.Forms.MessageBox]::Show('Task completed!')
-    $l1.Text = ('Task completed!')
+    [System.Windows.Forms.MessageBox]::Show('Task completed!')
+    $local:message = 'Task completed!'
+    # this does not always work
+    $l1.Text = $local:message
+  try {
+    $elems = $sender.Parent.Controls.Find('progress_label',$false)
+  } catch [exception]{
+  }
+  if ($elems -ne $null) {
+    $elems[0].Text = $local:message
+  }
+
+
   })
 
 
@@ -274,19 +285,28 @@ $handler = [System.EventHandler]{
 }
 
 1..25 | ForEach-Object {
-
-  $eventargs.Total = $_
+  $total =  $_
+  $eventargs.Total = $total
   $eventargs.Increment = 1
+  $message = ('Round: {0}' -f $total)
   [void]$c1.BeginInvoke($handler,($c1,([System.EventArgs]$eventargs)))
 
 
 $c1.Invoke(
-    [System.Action[int]] { 
-        param($increment) 
+    [System.Action[int, string]] { 
+        param([int]$increment, [string]$message) 
 $sender.Increment($increment) 
+  try {
+    $elems = $sender.Parent.Controls.Find('progress_label',$false)
+  } catch [exception]{
+  }
+  if ($elems -ne $null) {
+    $elems[0].Text = $message
+  }
+
     },
     # Argument for the System.Action delegate scriptblock
-    1
+    @(1, $message)
 )
 
   Start-Sleep -Milliseconds (Get-Random -Maximum 1000)
