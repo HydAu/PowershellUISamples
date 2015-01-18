@@ -94,11 +94,11 @@ public Color PCElapsedTimeColor2
     get { return m_oColor2ElapsedTime; }
     set { m_oColor2ElapsedTime = value; }
 }
-private int m_iTotalTime = 100;
-public int PCTotalTime
+private int m_iTextTime = 100;
+public int PCTextTime
 {
-    get { return m_iTotalTime; }
-    set { m_iTotalTime = value; }
+    get { return m_iTextTime; }
+    set { m_iTextTime = value; }
 }
 private int m_iElapsedTime = 0;
 public int PCElapsedTime
@@ -114,11 +114,11 @@ public ProgressCircle()
 
 public void Increment (int a_iValue)
 {
-    if (m_iElapsedTime > m_iTotalTime)
+    if (m_iElapsedTime > m_iTextTime)
         return;
 
-    if (m_iElapsedTime + a_iValue >= m_iTotalTime) {
-        m_iElapsedTime = m_iTotalTime;
+    if (m_iElapsedTime + a_iValue >= m_iTextTime) {
+        m_iElapsedTime = m_iTextTime;
         this.Refresh ();
         if (m_EventIncremented != null)
             m_EventIncremented (this, null);
@@ -139,7 +139,7 @@ private void ProgressCircle_Paint (object sender, PaintEventArgs e)
     Brush t_oBrushElapsedTime = new LinearGradientBrush (t_oRectangle, m_oColor1ElapsedTime, m_oColor2ElapsedTime, m_eLinearGradientMode);
 
     e.Graphics.FillEllipse (t_oBrushRemainingTime, t_oRectangle);
-    e.Graphics.FillPie (t_oBrushElapsedTime, t_oRectangle, -90f, (float)(360 * m_iElapsedTime / m_iTotalTime));
+    e.Graphics.FillPie (t_oBrushElapsedTime, t_oRectangle, -90f, (float)(360 * m_iElapsedTime / m_iTextTime));
 }
 
 private void InitializeComponent ()
@@ -164,24 +164,26 @@ private void InitializeComponent ()
 # Asynchronous GUI by Peter Kriegel
 # Simon Mourier See: http://stackoverflow.com/questions/14401704/update-winforms-not-wpf-ui-from-another-thread
 
+$total_steps = 25
 Add-Type -AssemblyName 'System.Windows.Forms'
 Add-Type -AssemblyName 'System.Drawing'
 # VisualStyles are only needed for a very few Windows Forms controls like ProgessBar
 [void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms.VisualStyles')
 
 
-$Form = New-Object System.Windows.Forms.Form
+$f = New-Object System.Windows.Forms.Form
 $l1 = New-Object System.Windows.Forms.Label
 $is= New-Object System.Windows.Forms.FormWindowState
-$Form.Text = 'Demo Form'
-$Form.Name = 'Form'
-$Form.DataBindings.DefaultDataSourceUpdateMode = 0
-$Form.ClientSize = New-Object System.Drawing.Size (216,121)
+$f.Text = 'Demo Progress Form'
+$f.Name = 'Form'
+$f.DataBindings.DefaultDataSourceUpdateMode = 0
+$f.ClientSize = New-Object System.Drawing.Size (216,121)
 # Label 
 $l1.Name = 'progress_label'
+$l1.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',10.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,[System.Byte]0)
 $l1.Location = New-Object System.Drawing.Point (70,34)
-$l1.Size = New-Object System.Drawing.Size (100,23)
-$l1.Text = 'Round:'
+$l1.Size = New-Object System.Drawing.Size (140,23)
+$l1.Text = 'Start'
 
 
 #  progressCircle1
@@ -193,48 +195,79 @@ $c1.PCElapsedTimeColor2 = [System.Drawing.Color]::Yellow
 $c1.PCLinearGradientMode = [System.Drawing.Drawing2D.LinearGradientMode]::Vertical
 $c1.PCRemainingTimeColor1 = [System.Drawing.Color]::Navy
 $c1.PCRemainingTimeColor2 = [System.Drawing.Color]::LightBlue
-$c1.PCTotalTime = 25
+$c1.PCTextTime = $total_steps
 $c1.Size = New-Object System.Drawing.Size (47,45)
 $c1.TabIndex = 3
 $progress_complete = $c1.add_PCCompleted
 $progress_complete.Invoke({
     param([object]$sender,[string]$message)
-    [System.Windows.Forms.MessageBox]::Show('Task completed!')
     $local:message = 'Task completed!'
+    # [System.Windows.Forms.MessageBox]::Show($local:message)
     # this does not always work
     $l1.Text = $local:message
-  try {
-    $elems = $sender.Parent.Controls.Find('progress_label',$false)
-  } catch [exception]{
-  }
-  if ($elems -ne $null) {
-    $elems[0].Text = $local:message
-  }
+    try {
+      $elems = $sender.Parent.Controls.Find('progress_label',$false)
+    } catch [exception]{
+    }
+    if ($elems -ne $null) {
+      # write-host $elems.GetType()
+      # write-host $elems[0].GetType()
 
+      $elems[0].Text = $local:message
+    }
 
   })
 
 
-$Form.Controls.AddRange(@($l1,$c1))
+$f.Controls.AddRange(@($l1,$c1))
 
-$is= $Form.WindowState
+$is= $f.WindowState
 
-$Form.add_Load({
-    $Form.WindowState = $InitialFormWindowState
+$f.add_Load({
+    $f.WindowState = $is
   })
 
-$rs = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace($Host)
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"))
+  }
+}
+
+
+
+$so = [hashtable]::Synchronized(@{
+    'Visible' = [bool]$false;
+    'ScriptDirectory' = [string]'';
+    'Form' = [System.Windows.Forms.Form]$f;
+  })
+
+$Runspace = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace($host)
+
+$so.ScriptDirectory = Get-ScriptDirectory
+$rs = [runspacefactory]::CreateRunspace()
 $rs.ApartmentState = 'STA'
 $rs.ThreadOptions = 'ReuseThread'
 $rs.Open()
-
-$rs.SessionStateProxy.SetVariable('Form',$Form)
+$rs.SessionStateProxy.SetVariable('so',$so)
 $po = [System.Management.Automation.PowerShell]::Create()
 $po.Runspace = $rs
 
-$po.AddScript({
+$run_script = $po.AddScript({
     [System.Windows.Forms.Application]::EnableVisualStyles()
-    [System.Windows.Forms.Application]::Run($Form)
+    [System.Windows.Forms.Application]::Run($so.Form)
   })
 
 $res = $po.BeginInvoke()
@@ -264,7 +297,7 @@ $TextBox.Invoke( [System.Action[string]] { param($Message) $TextBox.Text = $Mess
 $eventargs = New-Object -TypeName 'System.EventArgs'
 
 Add-Member -InputObject $eventargs -MemberType 'NoteProperty' -Name 'Increment' -Value 0 -Force
-Add-Member -InputObject $eventargs -MemberType 'NoteProperty' -Name 'Total' -Value 0 -Force
+Add-Member -InputObject $eventargs -MemberType 'NoteProperty' -Name 'Text' -Value '' -Force
 
 $handler = [System.EventHandler]{
   param(
@@ -272,29 +305,31 @@ $handler = [System.EventHandler]{
     [System.EventArgs]$e
   )
   $local:increment = $e.Increment
-  $local:total = $e.Total
+  $local:text = $e.Text
   $sender.Increment($local:increment)
   try {
     $elems = $sender.Parent.Controls.Find('progress_label',$false)
   } catch [exception]{
   }
   if ($elems -ne $null) {
-    $elems[0].Text = ('Round: {0}' -f $local:total)
+    $elems[0].Text =  $local:text
   }
 
 }
 
-1..25 | ForEach-Object {
-  $total =  $_
-  $eventargs.Total = $total
-  $eventargs.Increment = 1
+1..($total_steps ) | ForEach-Object {
+
+  $current_step = $_
+  $eventargs.Text =( 'Processed {0} / {1}' -f $current_step , $total_steps )
   $message = ('Round: {0}' -f $total)
+
+  $eventargs.Increment = 1
   [void]$c1.BeginInvoke($handler,($c1,([System.EventArgs]$eventargs)))
-
-
+if ($host.Version.Major -eq 2) {
 $c1.Invoke(
     [System.Action[int, string]] { 
         param([int]$increment, [string]$message) 
+
 $sender.Increment($increment) 
   try {
     $elems = $sender.Parent.Controls.Find('progress_label',$false)
@@ -309,6 +344,7 @@ $sender.Increment($increment)
     @(1, $message)
 )
 
+}
   Start-Sleep -Milliseconds (Get-Random -Maximum 1000)
 
 }
@@ -320,7 +356,7 @@ if ($PSBoundParameters['pause']) {
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
   } catch [exception]{}
 } else {
-  Start-Sleep -Millisecond 2000
+  Start-Sleep -Millisecond 1000
 }
 
 
