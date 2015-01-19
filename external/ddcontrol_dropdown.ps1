@@ -31,8 +31,6 @@ param(
 #  http://www.codeproject.com/Tips/590903/How-to-Create-a-Dropdown-Button-Control
 #
 Add-Type -TypeDefinition @"
-
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,47 +41,52 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-namespace Dropdown_Button {
+namespace Dropdown_Button
+{
 
     public delegate void ItemClickedDelegate(object sender, ToolStripItemClickedEventArgs e);
 
-    public class DDControl : UserControl {
-
-    private string imgFolderPath= Directory.GetCurrentDirectory();
-
-    public string ImgFolderPath
+    public class DDControl : UserControl
     {
-        get { return imgFolderPath; }
-        set { imgFolderPath = value; }
-    }
 
-	
+        private string imgFolderPath = Directory.GetCurrentDirectory();
+
+        public string ImgFolderPath
+        {
+            get { return imgFolderPath; }
+            set { imgFolderPath = value; }
+        }
         public event ItemClickedDelegate ItemClickedEvent;
 
         public List<string> LstOfValues = new List<string>();
-# line 30
-        public DDControl() {
+        public DDControl()
+        {
             InitializeComponent();
         }
 
-        public void FillControlList(List<string> lst) {
+        public void FillControlList(List<string> lst)
+        {
             LstOfValues = lst;
             SetMyButtonProperties();
         }
 
-        private void ShowDropDown() {
+        private void ShowDropDown()
+        {
             ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
-            //get the path of the image
-            for (int i = 0; i <= LstOfValues.Count - 1; i++) {
+            for (int i = 0; i <= LstOfValues.Count - 1; i++)
+            {
                 //add the item
                 contextMenuStrip.Items.Add(LstOfValues[i]);
                 //add the image
-                 string imgPath = Path.Combine( imgFolderPath , @"icon" + i + ".bmp" );
-
-                if (File.Exists(imgPath )) {
-                    Console.Error.WriteLine(String.Format("{0} {1} {2}", i, LstOfValues[i], imgPath));
-
-                    contextMenuStrip.Items[i].Image = Image.FromFile(imgPath );
+                string imgPath = Path.Combine(imgFolderPath, @"icon" + i + ".bmp");
+                if (File.Exists(imgPath))
+                {
+                    // Console.Error.WriteLine(String.Format("{0} {1} {2}", i, LstOfValues[i], imgPath));
+                    contextMenuStrip.Items[i].Image = Image.FromFile(imgPath);
+                }
+                else
+                {
+                    // item will be added w/o image when out of images
                 }
             }
             //adding ItemClicked event to contextMenuStrip
@@ -92,11 +95,9 @@ namespace Dropdown_Button {
             contextMenuStrip.Show(btnDropDown, new Point(0, btnDropDown.Height));
         }
 
-        private void SetMyButtonProperties() {
-            // Assign an image to the button.
-            // TODO : fix the format
-            // string imgPath = GetFilePath();
-            btnDropDown.Image = Image.FromFile(Path.Combine( imgFolderPath ,  @"arrow.png"));
+        private void SetMyButtonProperties()
+        {
+            btnDropDown.Image = Image.FromFile(Path.Combine(imgFolderPath, @"arrow.png"));
             // Align the image right of the button
             btnDropDown.ImageAlign = ContentAlignment.MiddleRight;
             //Align the text left of the button.
@@ -104,39 +105,49 @@ namespace Dropdown_Button {
         }
 
 
-        private void btnDropDown_Click(object sender, EventArgs e) {
-            try {
+        private void btnDropDown_Click(object sender, EventArgs e)
+        {
+            try
+            {
                 ShowDropDown();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show(ex.ToString());
             }
         }
 
-        void contextMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
-            try {
+        void contextMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            try
+            {
                 ToolStripItem item = e.ClickedItem;
                 //set the text of the button
                 btnDropDown.Text = item.Text;
-                if (ItemClickedEvent != null) {
+                if (ItemClickedEvent != null)
+                {
                     ItemClickedEvent(sender, e);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show(ex.ToString());
             }
         }
 
         private System.ComponentModel.IContainer components = null;
 
-        protected override void Dispose(bool disposing) {
-            if (disposing && (components != null)) {
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
                 components.Dispose();
             }
             base.Dispose(disposing);
         }
 
-        private void InitializeComponent() {
+        private void InitializeComponent()
+        {
             this.btnDropDown = new System.Windows.Forms.Button();
             this.SuspendLayout();
             //
@@ -160,7 +171,6 @@ namespace Dropdown_Button {
             this.Name = "DDControl";
             this.Size = new System.Drawing.Size(122, 24);
             this.ResumeLayout(false);
-
         }
 
         private System.Windows.Forms.Button btnDropDown;
@@ -196,50 +206,36 @@ Add-Type -AssemblyName 'System.Drawing'
 $result = ''
 
 $f = New-Object System.Windows.Forms.Form
-# $is = New-Object System.Windows.Forms.FormWindowState
 $l1 = New-Object System.Windows.Forms.Label
 
 $l = New-Object System.Windows.Forms.Label
 $o = New-Object -TypeName 'Dropdown_Button.dDControl'
 $o.ImgFolderPath = (Get-ScriptDirectory)
-$x =  New-Object System.Collections.Generic.List[System.String]
-@( 'option 1','option 2','option 3') | foreach-object {$x.Add($_)}  
-$x 
-$o.FillControlList($x)
-# $o.FillControlList([System.Collections.Generic.List[string]]([string[]]@( 'icon0.bmp','icon1.bmp','icon2.bmp')))
+$o.FillControlList([System.Collections.Generic.List[string]]@( 'option 1','option 2','option 3','option 4'))
+
 $f.SuspendLayout()
-#
+
 # label1
-#
 $l.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 $l.Location = New-Object System.Drawing.Point (12,39)
 $l.Name = "label1"
 $l.Size = New-Object System.Drawing.Size (237,53)
 $l.TabIndex = 4
-#
+
 # dDControl
-# $nu
 $o.Location = New-Object System.Drawing.Point (12,12)
 $o.Name = "dDControl"
 $o.Size = New-Object System.Drawing.Size (237,24)
 $o.TabIndex = 1
-#
-# DemoForm
-#
+
+# Form
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (263,109)
-$f.Controls.Add($l)
-$f.Controls.Add($o)
+$f.Controls.AddRange(@($l,$o))
 $f.Name = "DemoForm"
 $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $f.Text = "DropDown Button Demo"
-# $is = $f.WindowState
-
-$f.add_Load({
-#    $f.WindowState = $is
-  })
-
 $f.ResumeLayout($false)
 
 $f.Add_Shown({ $f.Activate() })
