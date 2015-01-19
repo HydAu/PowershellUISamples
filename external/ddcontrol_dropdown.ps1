@@ -29,7 +29,7 @@ param(
 )
 
 #  http://www.codeproject.com/Tips/590903/How-to-Create-a-Dropdown-Button-Control
-# 
+#
 Add-Type -TypeDefinition @"
 
 
@@ -39,7 +39,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
@@ -50,25 +49,22 @@ namespace Dropdown_Button {
 
     public class DDControl : UserControl {
 
+    private string imgFolderPath= Directory.GetCurrentDirectory();
 
+    public string ImgFolderPath
+    {
+        get { return imgFolderPath; }
+        set { imgFolderPath = value; }
+    }
 
+	
         public event ItemClickedDelegate ItemClickedEvent;
 
-        #region Members
-
         public List<string> LstOfValues = new List<string>();
-
-        #endregion
-
-        #region Constructors
-# line 30 
+# line 30
         public DDControl() {
             InitializeComponent();
         }
-
-        #endregion
-
-        #region Methods
 
         public void FillControlList(List<string> lst) {
             LstOfValues = lst;
@@ -78,14 +74,16 @@ namespace Dropdown_Button {
         private void ShowDropDown() {
             ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
             //get the path of the image
-            string imgPath = GetFilePath();
-            //adding contextMenuStrip items acconrding to LstOfValues count
-            for (int i = 0; i < LstOfValues.Count - 1; i++) {
+            for (int i = 0; i <= LstOfValues.Count - 1; i++) {
                 //add the item
                 contextMenuStrip.Items.Add(LstOfValues[i]);
                 //add the image
-                if (File.Exists(imgPath + @"icon" + i + ".bmp")) {
-                    contextMenuStrip.Items[i].Image = Image.FromFile(imgPath + @"icon" + i + ".bmp");
+                 string imgPath = Path.Combine( imgFolderPath , @"icon" + i + ".bmp" );
+
+                if (File.Exists(imgPath )) {
+                    Console.Error.WriteLine(String.Format("{0} {1} {2}", i, LstOfValues[i], imgPath));
+
+                    contextMenuStrip.Items[i].Image = Image.FromFile(imgPath );
                 }
             }
             //adding ItemClicked event to contextMenuStrip
@@ -96,32 +94,15 @@ namespace Dropdown_Button {
 
         private void SetMyButtonProperties() {
             // Assign an image to the button.
-            string imgPath = GetFilePath();
-            btnDropDown.Image = Image.FromFile(imgPath + @"arrow.png");
+            // TODO : fix the format
+            // string imgPath = GetFilePath();
+            btnDropDown.Image = Image.FromFile(Path.Combine( imgFolderPath ,  @"arrow.png"));
             // Align the image right of the button
             btnDropDown.ImageAlign = ContentAlignment.MiddleRight;
             //Align the text left of the button.
             btnDropDown.TextAlign = ContentAlignment.MiddleLeft;
         }
 
-        private string GetFilePath() {
-            //string path = string.Empty;
-            //foreach (string value in Application.StartupPath.Split('\\')) {
-            //    if (value == "bin") {
-            //        break;
-            //    }
-            //    path += value + "\\";
-            //}
-            //return path;
-            string value = Application.StartupPath.Substring(Application.StartupPath.IndexOf(@"bin", System.StringComparison.Ordinal));
-            return Application.StartupPath.Replace(value, string.Empty);
-
-        }
-
-
-        #endregion
-
-        #region Events
 
         private void btnDropDown_Click(object sender, EventArgs e) {
             try {
@@ -146,17 +127,8 @@ namespace Dropdown_Button {
             }
         }
 
-        #endregion
-
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing) {
             if (disposing && (components != null)) {
                 components.Dispose();
@@ -164,20 +136,14 @@ namespace Dropdown_Button {
             base.Dispose(disposing);
         }
 
-        #region Component Designer generated code
-
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent() {
             this.btnDropDown = new System.Windows.Forms.Button();
             this.SuspendLayout();
-            // 
+            //
             // btnDropDown
-            // 
-            this.btnDropDown.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.btnDropDown.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDropDown.Location = new System.Drawing.Point(3, 0);
             this.btnDropDown.Name = "btnDropDown";
@@ -185,9 +151,9 @@ namespace Dropdown_Button {
             this.btnDropDown.TabIndex = 0;
             this.btnDropDown.UseVisualStyleBackColor = true;
             this.btnDropDown.Click += new System.EventHandler(this.btnDropDown_Click);
-            // 
+            //
             // DDControl
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.btnDropDown);
@@ -197,12 +163,85 @@ namespace Dropdown_Button {
 
         }
 
-        #endregion
-
         private System.Windows.Forms.Button btnDropDown;
-
 
     }
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
+
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"))
+  }
+}
+
+
+Add-Type -AssemblyName 'System.Windows.Forms'
+Add-Type -AssemblyName 'System.Drawing'
+[void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms.VisualStyles')
+$result = ''
+
+$f = New-Object System.Windows.Forms.Form
+# $is = New-Object System.Windows.Forms.FormWindowState
+$l1 = New-Object System.Windows.Forms.Label
+
+$l = New-Object System.Windows.Forms.Label
+$o = New-Object -TypeName 'Dropdown_Button.dDControl'
+$o.ImgFolderPath = (Get-ScriptDirectory)
+$x =  New-Object System.Collections.Generic.List[System.String]
+@( 'option 1','option 2','option 3') | foreach-object {$x.Add($_)}  
+$x 
+$o.FillControlList($x)
+# $o.FillControlList([System.Collections.Generic.List[string]]([string[]]@( 'icon0.bmp','icon1.bmp','icon2.bmp')))
+$f.SuspendLayout()
+#
+# label1
+#
+$l.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+$l.Location = New-Object System.Drawing.Point (12,39)
+$l.Name = "label1"
+$l.Size = New-Object System.Drawing.Size (237,53)
+$l.TabIndex = 4
+#
+# dDControl
+# $nu
+$o.Location = New-Object System.Drawing.Point (12,12)
+$o.Name = "dDControl"
+$o.Size = New-Object System.Drawing.Size (237,24)
+$o.TabIndex = 1
+#
+# DemoForm
+#
+$f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
+$f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
+$f.ClientSize = New-Object System.Drawing.Size (263,109)
+$f.Controls.Add($l)
+$f.Controls.Add($o)
+$f.Name = "DemoForm"
+$f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+$f.Text = "DropDown Button Demo"
+# $is = $f.WindowState
+
+$f.add_Load({
+#    $f.WindowState = $is
+  })
+
+$f.ResumeLayout($false)
+
+$f.Add_Shown({ $f.Activate() })
+[void]$f.ShowDialog()
+Write-Debug $result
