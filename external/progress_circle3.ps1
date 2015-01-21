@@ -183,11 +183,9 @@ private void InitializeComponent ()
 # Simon Mourier See: http://stackoverflow.com/questions/14401704/update-winforms-not-wpf-ui-from-another-thread
 
 $total_steps = 25
-Add-Type -AssemblyName 'System.Windows.Forms'
-Add-Type -AssemblyName 'System.Drawing'
-# VisualStyles are only needed for a very few Windows Forms controls like ProgessBar
-[void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms.VisualStyles')
 
+# VisualStyles are only needed for a very few Windows Forms controls like ProgessBar
+@( 'System.Drawing','System.Windows.Forms', 'System.Windows.Forms.VisualStyles') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
 $f = New-Object System.Windows.Forms.Form
 $l1 = New-Object System.Windows.Forms.Label

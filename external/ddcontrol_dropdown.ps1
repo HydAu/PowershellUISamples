@@ -199,10 +199,7 @@ function Get-ScriptDirectory
   }
 }
 
-
-Add-Type -AssemblyName 'System.Windows.Forms'
-Add-Type -AssemblyName 'System.Drawing'
-[void][Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms.VisualStyles')
+@( 'System.Drawing','System.Windows.Forms', 'System.Windows.Forms.VisualStyles') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 $result = ''
 
 $f = New-Object System.Windows.Forms.Form
@@ -211,7 +208,7 @@ $l1 = New-Object System.Windows.Forms.Label
 $l = New-Object System.Windows.Forms.Label
 $o = New-Object -TypeName 'Dropdown_Button.dDControl'
 $o.ImgFolderPath = (Get-ScriptDirectory)
-$o.FillControlList([System.Collections.Generic.List[string]]@( 'option 1','option 2','option 3','option 4'))
+$o.FillControlList([System.Collections.Generic.List[string]]@( 'option 1      ','option 2      ','option 3      ','option 4      '))
 
 $f.SuspendLayout()
 
@@ -232,12 +229,16 @@ $o.TabIndex = 1
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (263,109)
-$f.Controls.AddRange(@($l,$o))
+$f.Controls.Add($o)
+
+# $f.Controls.AddRange(@($l,$o))
 $f.Name = "DemoForm"
 $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $f.Text = "DropDown Button Demo"
 $f.ResumeLayout($false)
-
+# TODO: merge with http://www.codeproject.com/Articles/4479/A-Simple-Bitmap-Button-Implementation
+# http://www.alkanesolutions.co.uk/2013/04/19/embedding-base64-image-strings-inside-a-powershell-application/
 $f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog()
+$o.Text
 Write-Debug $result
