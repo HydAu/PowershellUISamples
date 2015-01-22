@@ -176,64 +176,113 @@ $result = ''
 $f = New-Object System.Windows.Forms.Form
 $l1 = New-Object System.Windows.Forms.Label
 
-$l = New-Object System.Windows.Forms.Label
-$o = New-Object -TypeName 'BitmapButton.BitmapButton'
+$l1 = New-Object System.Windows.Forms.Label
+$l2 = New-Object System.Windows.Forms.Label
+$o1 = New-Object -TypeName 'BitmapButton.BitmapButton'
 
-$o.Location = New-Object System.Drawing.Point (232,32)
-$o.Size = New-Object System.Drawing.Size (32,32)
-$o.TabIndex = 0
-$o.Text = "&Down"
-$o.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
+$o1.Location = New-Object System.Drawing.Point (232,32)
+$o1.Size = New-Object System.Drawing.Size (32,32)
+$o1.Name  = 'b1'
+$o1.TabIndex = 1
+$o1.Text = "b1"
+$o1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
+
+
+$o2 = New-Object -TypeName 'BitmapButton.BitmapButton'
+
+$o2.Location = New-Object System.Drawing.Point (232,64)
+$o2.Size = New-Object System.Drawing.Size (32,32)
+$o2.TabIndex = 2
+$o1.Name  = 'b2'
+$o2.Text = "b2"
+$o2.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
+
+# may switch to more coarse handlers 
 #			$oClick+=new EventHandler(BitmapButton_Click);
 
 $f.SuspendLayout()
 
 # label
-# $l.BorderStyle = [System.Windows.Forms.BorderStyle]::None
-$l.Location = New-Object System.Drawing.Point (12,39)
-$l.Name = "label1"
-$l.Size = New-Object System.Drawing.Size (207,23)
-$l.TabIndex = 4
+$l1.BorderStyle = [System.Windows.Forms.BorderStyle]::None
+$l1.Location = New-Object System.Drawing.Point (12,39)
+$l1.Name = "l1"
+$l1.Size = New-Object System.Drawing.Size (207,23)
+$l1.TabIndex = 4
 
-# dDControl
-# $o.Location = New-Object System.Drawing.Point (12,12)
-$o.Name = "bitmapButton"
-$o.TabIndex = 1
+# label
+$l2.BorderStyle = [System.Windows.Forms.BorderStyle]::None
+$l2.Location = New-Object System.Drawing.Point (12,51)
+$l2.Name = "l2"
+$l2.Size = New-Object System.Drawing.Size (207,23)
+$l2.TabIndex = 4
+
+# dDControls
+$o1.Name = "b1"
+$o1.TabIndex = 1
+$global:m = @{ 'b1' = 'l1';
+'b2' = 'l2';
+}
+
+function find_label {
+param([string]$button_name)
+  $local:label_name = $global:m[$button_name] 
+   
+  if (($local:label_name -eq $null ) -or ($local:label_name -eq  '' ))  { 
+   $local:label_name = 'notfound'
+  } 
+write-host ('Label Name = {0}' -f  $local:label_name )
+return $local:label_name
+
+}
 $button_OnMouseDown = {
   param(
     [object]$sender,[System.Windows.Forms.MouseEventArgs]$e
   )
+  $local:label_name = find_label  -button_name $sender.Text
   try {
-    $elems = $sender.Parent.Controls.Find('label1',$false)
+    $elems = $sender.Parent.Controls.Find($local:label_name,$false)
   } catch [exception]{
+     write-host $_.Exception.Message 
   }
   if ($elems -ne $null) {
+    write-host $elems '0:'
+    write-host $elems[0]
+
+    write-host $elems ' 1:'
+    write-host $elems[1]
     $elems[0].Text = 'Pressed'
   }
 }
 
-$o.add_MouseDown($button_OnMouseDown)
+$o1.add_MouseDown($button_OnMouseDown)
+$o2.add_MouseDown($button_OnMouseDown)
 $button_OnMouseUp = {
   param(
     [object]$sender,[System.Windows.Forms.MouseEventArgs]$e
   )
+  write-host $sender
+  write-host  ('sender.Text  = {0} ' -f $sender.Text)
+  $local:label_name = find_label  -button_name $sender.Text
   try {
-    $elems = $sender.Parent.Controls.Find('label1',$false)
+    $elems = $sender.Parent.Controls.Find($local:label_name,$false)
   } catch [exception]{
+     write-host $_.Exception.Message 
   }
   if ($elems -ne $null) {
     $elems[0].Text = ''
   }
 }
 
-$o.add_MouseUp($button_OnMouseUp)
+$o1.add_MouseUp($button_OnMouseUp)
+$o2.add_MouseUp($button_OnMouseUp)
 $button_OnEnabledChanged = {
   param(
     [object]$sender,[System.EventArgs]$e
   )
 }
 
-$o.add_EnabledChanged($button_OnEnabledChanged)
+$o1.add_EnabledChanged($button_OnEnabledChanged)
+$o2.add_EnabledChanged($button_OnEnabledChanged)
 
 $button_OnKeyDown = {
   param(
@@ -242,7 +291,7 @@ $button_OnKeyDown = {
   if ($e.KeyData -eq [System.Windows.Forms.Keys]::Space)
   {
     try {
-      $elems = $f.Controls.Find('label1',$false)
+      $elems = $f.Controls.Find('l1',$false)
     } catch [exception]{
     }
     if ($elems -ne $null) {
@@ -252,7 +301,8 @@ $button_OnKeyDown = {
   }
 }
 
-$o.add_KeyDown($button_OnKeyDown)
+$o1.add_KeyDown($button_OnKeyDown)
+$o2.add_KeyDown($button_OnKeyDown)
 $button_OnKeyUp = {
   param(
     [object]$sender,[System.Windows.Forms.KeyEventArgs]$e
@@ -260,7 +310,7 @@ $button_OnKeyUp = {
   if ($e.KeyData -eq [System.Windows.Forms.Keys]::Space)
   {
     try {
-      $elems = $f.Controls.Find('label1',$false)
+      $elems = $f.Controls.Find('l1',$false)
     } catch [exception]{
     }
     if ($elems -ne $null) {
@@ -270,15 +320,15 @@ $button_OnKeyUp = {
   }
 }
 
-$o.add_KeyUp($button_OnKeyUp)
+$o1.add_KeyUp($button_OnKeyUp)
 
 # Form
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (263,109)
-$f.Controls.Add($o)
+# $f.Controls.Add($o1, $o2  )
 
-$f.Controls.AddRange(@( $l,$o))
+$f.Controls.AddRange(@( $l1,$o1, $o2))
 $f.Name = 'form'
 $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $f.Text = 'Bitmap Button Demo'
@@ -287,5 +337,5 @@ $f.ResumeLayout($false)
 # http://www.alkanesolutions.co.uk/2013/04/19/embedding-base64-image-strings-inside-a-powershell-application/
 $f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog()
-$o.Text
+$o1.Text
 Write-Debug $result
