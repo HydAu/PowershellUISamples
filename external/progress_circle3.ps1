@@ -366,7 +366,7 @@ if ($PSBoundParameters['pause']) {
   Start-Sleep -Millisecond 1000
 }
 
-
+$so.Form.Close()
 [System.Windows.Forms.Application]::Exit()
 $po.EndInvoke($res)
 $rs.Close()
