@@ -184,7 +184,16 @@ $o1.Size = New-Object System.Drawing.Size (32,32)
 $o1.Name = 'b1'
 $o1.TabIndex = 1
 $o1.Text = "b1"
-$o1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
+# http://www.alkanesolutions.co.uk/2013/04/19/embedding-base64-image-strings-inside-a-powershell-application/
+
+$do = 'iVBORw0KGgoAAAANSUhEUgAAAKAAAAAgBAMAAABnUW7GAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAwUExURQAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//////08TJkkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFHSURBVEjH7daxjsMgDAbgKAvZ8g5dbuTVrFvMlmxku1fNRre7EmwCbk0lel1Ox/bLzidboWqGfajO/Goe5u/q7NNWnV3WZTZYHZDgWoNfElhlvgdDmd06+TIvu6zL/A++BwS+ROYxWNVlvoGO74RnkB8PBOZrSuCFTiCw7I8gZwaRxl545ZEASyuPHGnlst8k6NgfNRDyRJ0g8AYKCBwJLPsN5p29CtJIFhvgRwtMOyyogSnb89oY/LxQv2EqsQoIPFEvCLSxBgJFBiGuHE7QZVUBj5HiRDqITTDuvKAOxmzxBIt+w+8jvRkNBJqoG4S0gQpCihk8+xPo+HZr4G2kY6JuEM2CLRBHiyV49tPP0NPlVkFIE/WDENpgrstMoPNPQJzxNZCOCub6X/iTulbfHuskv2VEXeZ7cBMPSFDWtyfg737ODfMP1mxvUDAf+WQAAAAASUVORK5CYII='
+
+$i = [convert]::FromBase64String($do)
+$s = New-Object IO.MemoryStream ($i,0,$i.Length)
+$s.Write($i,0,$i.Length);
+$o1.Image = [System.Drawing.Image]::FromStream($s,$true)
+
+# $o1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
 
 
 $o2 = New-Object -TypeName 'BitmapButton.BitmapButton'
@@ -194,15 +203,8 @@ $o2.Size = New-Object System.Drawing.Size (32,32)
 $o2.TabIndex = 2
 $o1.Name = 'b2'
 $o2.Text = "b2"
-$o2.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
+$o2.Image = $o1.Image
 
-
-$do = 'iVBORw0KGgoAAAANSUhEUgAAAKAAAAAgBAMAAABnUW7GAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAwUExURQAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//////08TJkkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFHSURBVEjH7daxjsMgDAbgKAvZ8g5dbuTVrFvMlmxku1fNRre7EmwCbk0lel1Ox/bLzidboWqGfajO/Goe5u/q7NNWnV3WZTZYHZDgWoNfElhlvgdDmd06+TIvu6zL/A++BwS+ROYxWNVlvoGO74RnkB8PBOZrSuCFTiCw7I8gZwaRxl545ZEASyuPHGnlst8k6NgfNRDyRJ0g8AYKCBwJLPsN5p29CtJIFhvgRwtMOyyogSnb89oY/LxQv2EqsQoIPFEvCLSxBgJFBiGuHE7QZVUBj5HiRDqITTDuvKAOxmzxBIt+w+8jvRkNBJqoG4S0gQpCihk8+xPo+HZr4G2kY6JuEM2CLRBHiyV49tPP0NPlVkFIE/WDENpgrstMoPNPQJzxNZCOCub6X/iTulbfHuskv2VEXeZ7cBMPSFDWtyfg737ODfMP1mxvUDAf+WQAAAAASUVORK5CYII='
-
-$i = [Convert]::FromBase64String($do)
-$s = New-Object IO.MemoryStream($i, 0, $i.Length)
-$s.Write($i, 0, $i.Length);
-$o2.Image = [System.Drawing.Image]::FromStream($s, $true)
 
 
 $f.SuspendLayout()
@@ -328,18 +330,5 @@ $f.Name = 'form'
 $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $f.Text = 'Bitmap Button Demo'
 $f.ResumeLayout($false)
-# http://www.alkanesolutions.co.uk/2013/04/19/embedding-base64-image-strings-inside-a-powershell-application/
 $f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog()
-
-<#
-$base64ImageString = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAT6SURBVFhHvZcPbBNVHMe/1+tdu26l3R+3zmHt2ABF2TTqcNFgNhN0glXUKIbEaCBqjMZoTJyRIDGOhAiJiqKJI5iJGMmUsIyoaEDHIpapiWRjEGBL9rfAtnZr17W93p3v2lfWXu/2Bxc+6Uvf33u/936/+/1+xzy/0yljARAEkdb0MfEcDAYGMXF6roH+/284jp21iJIIIRajKxIsmABzgWGYeEnlugqgxZxtQJYERIUQBCkGSSZLEr+rJE5mAMvy4HkLONVJ9ZhVAFkWEY34EEEuiopWwJFth4k1ko1YJLeQJZnMI4JJYUxODWBwqBs+KQvZWRawGk9niCEmmVEAWSanDoeQ51qPypL7UHXnM6i0W+moNtHQP/D82YRTg7+j43wPjDk2sHQsiYGdqwAREc6KV/FUbT0qLLRzroRPovWXbfju9BkYzfqmpjsiywHwy+qxae01bK5grsa6R3fjMedkQkUpJRXdG2Cjy+F+6SjcebQjlZEWHO5sgy9K6mw+nKXPonaJKzGmItazCRubj8JM24r+U19F9o41tm20ngZ39wG8taKAtqaJXK5Hw6GP0Xb2V3T1d+Dc4Cmc6zuBrqwHUF2Ul6lvI4/Ov1sxTn1AqgEq6KqA6f8Ae4/vwonersRJ40yh4/DX6BwdB8vfgEUWUswWxCbPoLvtRwxJdFoq5nwsV/ZMFhX6RhgLkVePI/47B2bODCPLkdNFERz3QSRuVUEirlWMTSAYChD//hDefecnVGe8JF048mEdDtKWEgtS0TdC1gxOCRxRP8YDQ7ji68XQSC9GI154R/vQd6kPXv8gpOwarH2yBZ++fRD35NDFahiZXH+iqJnVEUnEA04GhjEWIgZjd6C68hXUVTyOpUW3osBspLNmgtzArkfQTFtqdAWQZQmx8AB8Uyyq3L/h9VX3w07H5kcXWndOC6D20LoqkIQRMM4vcaAhhveuefMEBrJLsqjRFEBxwbxjHxqf2wwb7dNDDPehq/t9fLZ3IzwTtHMeaArAyCzq1m+AibbTkEbg7dmDTxrtcG9h4N5+M7Z8vwMn/TxMmk8jECXHA6iGsjWXWKzbsVrrzoULOPZtIV785k10TNhwo6MMzsIyOOzFsLJWGHVsUiZ6V3Sv1r+CtgpcrquuM43RH7Bn2IXFeYthNZH8LvlgOYSw5V4Uai5S5ui/htoCpKUaKWQtwUrOh3AskVQyJAcQImMIiCW47cEaFMZ7M2HIFSSLGk0BDL7LEGg9DdvD2HyXGy5TMO6cxsIRWB3rsHrVbrxRVkwnqSHeUkxeVaYAmn6Awy3Y8PLPqM2mHSouXfwCHq8fMb4Q5eUvoCI388HTnMfxxhrsDxrjoUAU07fTFECSAii+vRFb657AfFMBJelOt8UwLrQvQ8NfBjDx1I12U7RVYLBi+PRWfH6sBT7aNysjX6HpSCOG09N+ghlO19MkjisHy7Qt3XxAxjj6B9rRe+UsgsaluCk/n6hGjYjA0H40t+/AIU8T/ujxoKTqNZSrJrKL1qB0/CN4RmlHCjMGI5lkuVEhCi67FAXWXGQpIZkakpIti1IIU5MD8E6MQWCyYeFkWGwrUWhKVwJv4iEH/8VFf+ZWs0ZDJSiJ4lT8k0oi9enJSoZjIBmuGSaj4hMSggkRPyLqvI/MYzkbzOp0iTCrAAuBTC1P/VmmoGmEC008F9TYXOG6CKAP8B8y8tsX2eJriwAAAABJRU5ErkJggg=="
-$imageBytes = [Convert]::FromBase64String($base64ImageString)
-$ms = New-Object IO.MemoryStream($imageBytes, 0, $imageBytes.Length)
-$ms.Write($imageBytes, 0, $imageBytes.Length);
-$alkanelogo = [System.Drawing.Image]::FromStream($ms, $true)
-$oms = New-Object IO.MemoryStream
-$o2.Image.Save($oms, [System.Drawing.Imaging.ImageFormat]::Png)
-$result = [System.Convert]::ToBase64String($oms.ToArray())
-write-output $result  | Out-File ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.converted.txt"))
-#>
