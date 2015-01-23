@@ -329,7 +329,8 @@ $handler = [System.EventHandler]{
   $eventargs.Increment = 1
   [void]$c1.BeginInvoke($handler,($c1,([System.EventArgs]$eventargs)))
   if ($host.Version.Major -eq 2) {
-    $c1.Invoke(
+    $c1.Invoke(
+
         [System.Action[int, string]] { 
             param(
               [int]$increment, 
@@ -344,12 +345,16 @@ $handler = [System.EventHandler]{
               $elems[0].Text = $message
             }
 
-        },
-        # Argument for the System.Action delegate scriptblock
-        @(1, $message)
+        },
+
+        # Argument for the System.Action delegate scriptblock
+
+        @(1, $message)
+
     )
   }
   Start-Sleep -Milliseconds (Get-Random -Maximum 1000)
+  write-output $message
 }
 
 if ($PSBoundParameters['pause']) {
