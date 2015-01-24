@@ -71,9 +71,10 @@ namespace BitmapButton
 
         private void BitmapButton_Paint(object sender, PaintEventArgs e)
         {
+
+              
             Graphics gr=e.Graphics;
             int indexWidth=Size.Width*(int)imgState;
-
             if (Image.Width > indexWidth)
             {
                 gr.DrawImage(Image, 0, 0, new Rectangle(new Point(indexWidth, 0), Size), GraphicsUnit.Pixel);
@@ -381,6 +382,7 @@ $so = [hashtable]::Synchronized(@{
     'Visible' = [bool]$false;
     'ScriptDirectory' = [string]'';
     'Form' = [System.Windows.Forms.Form]$f;
+    'button' = [BitmapButton.BitmapButton]$o1;
   })
 
 
@@ -473,6 +475,9 @@ $handler = [System.EventHandler]{
   }
 #>
  write-output $message
+ $so.Button.Enabled = $false
+ Start-Sleep -Millisecond 1000
+ $so.Button.Enabled = $true
  Start-Sleep -Millisecond 1000
 }
 
