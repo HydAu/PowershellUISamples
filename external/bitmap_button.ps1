@@ -320,6 +320,7 @@ $button_OnKeyUp = {
 }
 
 $o1.add_KeyUp($button_OnKeyUp)
+$o2.add_KeyUp($button_OnKeyUp)
 
 # Form
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
