@@ -43,6 +43,7 @@ $btnState = @{
 }
 
 Add-Member -InputObject $o1 -MemberType 'NoteProperty' -Name 'ImgState' -Value $btnState['BUTTON_UP'] -Force
+Add-Member -InputObject $o1 -MemberType 'NoteProperty' -Name 'mouseEnter' -Value $false -Force
 
 $do = 'iVBORw0KGgoAAAANSUhEUgAAAKAAAAAgBAMAAABnUW7GAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAwUExURQAAAIAAAACAAICAAAAAgIAAgACAgMDAwICAgP8AAAD/AP//AAAA//8A/wD//////08TJkkAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFHSURBVEjH7daxjsMgDAbgKAvZ8g5dbuTVrFvMlmxku1fNRre7EmwCbk0lel1Ox/bLzidboWqGfajO/Goe5u/q7NNWnV3WZTZYHZDgWoNfElhlvgdDmd06+TIvu6zL/A++BwS+ROYxWNVlvoGO74RnkB8PBOZrSuCFTiCw7I8gZwaRxl545ZEASyuPHGnlst8k6NgfNRDyRJ0g8AYKCBwJLPsN5p29CtJIFhvgRwtMOyyogSnb89oY/LxQv2EqsQoIPFEvCLSxBgJFBiGuHE7QZVUBj5HiRDqITTDuvKAOxmzxBIt+w+8jvRkNBJqoG4S0gQpCihk8+xPo+HZr4G2kY6JuEM2CLRBHiyV49tPP0NPlVkFIE/WDENpgrstMoPNPQJzxNZCOCub6X/iTulbfHuskv2VEXeZ7cBMPSFDWtyfg737ODfMP1mxvUDAf+WQAAAAASUVORK5CYII='
 
@@ -54,28 +55,84 @@ $o1.Image = [System.Drawing.Image]::FromStream($s,$true)
 
 $button_OnPaint = {
   param([object]$sender,[System.Windows.Forms.PaintEventArgs]$e)
-  [System.Drawing.Graphics] $gr= $e.Graphics
-  write-host ('Paint: {0}' -f $o1.ImgState)
+  [System.Drawing.Graphics]$gr = $e.Graphics
+  Write-Host ('Paint: {0}' -f $o1.ImgState)
   [int]$indexWidth = $o1.Size.Width * ([int]$o1.ImgState)
-  write-host ('Paint: indexWidth ={0}' -f $indexWidth)
+  Write-Host ('Paint: indexWidth ={0}' -f $indexWidth)
 
-  if ($Image.Width -gt $indexWidth)
+  if ($o1.Image.Width -gt $indexWidth)
   {
     $size = $o1.Size
-    $point = (New-Object System.Drawing.Point($indexWidth,0))
-    $rect = New-Object System.Drawing.Rectangle ($point ,$size )
+    $point = (New-Object System.Drawing.Point ($indexWidth,0))
+    $rect = New-Object System.Drawing.Rectangle ($point,$size)
     $gr.DrawImage($o1.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
   }
   else
   {
     $size = (New-Object System.Drawing.Size ($o1.Size.Width,$o1.Size.Height))
-    $point = (New-Object System.Drawing.Point(0,0))
-    $rect = New-Object System.Drawing.Rectangle ($point ,$size )
+    $point = (New-Object System.Drawing.Point (0,0))
+    $rect = New-Object System.Drawing.Rectangle ($point,$size)
     $gr.DrawImage($o1.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
   }
 }
 
 $o1.add_Paint($button_OnPaint)
+$button_OnGotFocus = {
+  param(
+    [object]$sender,[System.EventArgs]$e
+  )
+  $o1.ImgState = $btnState['BUTTON_FOCUSED']
+
+}
+$o1.add_GotFocus($button_OnGotFocus)
+
+$button_OnLostFocus = {
+  param(
+    [object]$sender,[System.EventArgs]$e
+  )
+  if ($o1.mouseEnter)
+  {
+    $o1.ImgState = $btnState['BUTTON_MOUSE_ENTER']
+  }
+  else
+  {
+    $o1.ImgState = $btnState['BUTTON_UP']
+  }
+
+
+}
+$o1.add_LostFocus($button_OnLostFocus)
+
+$button_OnMouseEnter = {
+  param(
+    [object]$sender,[System.EventArgs]$e
+  )
+  #  only show mouse enter if doesn't have focus
+  if ($o1.ImgState -eq $btnState['BUTTON_UP'])
+  {
+    $o1.ImgState = $btnState['BUTTON_MOUSE_ENTER']
+  }
+  $o1.mouseEnter = $true
+  $o1.Invalidate()
+
+}
+$o1.add_MouseEnter($button_OnMouseEnter)
+
+$button_OnMouseLeave = {
+  param(
+    [object]$sender,[System.EventArgs]$e
+  )
+  # only restore state if doesn't have focus
+  if ($o1.ImgState -ne $btnState['BUTTON_FOCUSED'])
+  {
+    $o1.ImgState = $btnState['BUTTON_UP']
+  }
+  $o1.mouseEnter = $false
+  $o1.Invalidate()
+
+}
+$o1.add_MouseLeave($button_OnMouseLeave)
+
 
 # http://www.alkanesolutions.co.uk/2013/04/19/embedding-base64-image-strings-inside-a-powershell-application/
 
@@ -133,8 +190,8 @@ $button_OnMouseDown = {
   param(
     [object]$sender,[System.Windows.Forms.MouseEventArgs]$e
   )
-  $o1.ImgState=$btnState['BUTTON_DOWN']
-  write-host ('MouseDown : {0}' -f $o1.ImgState)
+  $o1.ImgState = $btnState['BUTTON_DOWN']
+  Write-Host ('MouseDown : {0}' -f $o1.ImgState)
   $local:label_name = find_label -button_name $sender.Text
   try {
     $elems = $sender.Parent.Controls.Find($local:label_name,$false)
@@ -152,8 +209,8 @@ $button_OnMouseUp = {
   param(
     [object]$sender,[System.Windows.Forms.MouseEventArgs]$e
   )
-  $o1.ImgState=$btnState['BUTTON_FOCUSED']
-  write-host ('MouseUp: {0}' -f $o1.ImgState)
+  $o1.ImgState = $btnState['BUTTON_FOCUSED']
+  Write-Host ('MouseUp: {0}' -f $o1.ImgState)
 
   $local:label_name = find_label -button_name $sender.Text
   try {
@@ -183,6 +240,7 @@ $button_OnKeyDown = {
   )
   if ($e.KeyData -eq [System.Windows.Forms.Keys]::Space)
   {
+    $o1.imgState=$btnState['BUTTON_DOWN']
     try {
       $elems = $f.Controls.Find('l1',$false)
     } catch [exception]{
@@ -201,6 +259,7 @@ $button_OnKeyUp = {
   )
   if ($e.KeyData -eq [System.Windows.Forms.Keys]::Space)
   {
+    $o1.imgState=$btnState['BUTTON_FOCUSED']
     try {
       $elems = $f.Controls.Find('l1',$false)
     } catch [exception]{
