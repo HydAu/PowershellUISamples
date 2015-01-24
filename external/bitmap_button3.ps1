@@ -56,23 +56,21 @@ $o1.Image = [System.Drawing.Image]::FromStream($s,$true)
 $button_OnPaint = {
   param([object]$sender,[System.Windows.Forms.PaintEventArgs]$e)
   [System.Drawing.Graphics]$gr = $e.Graphics
-  Write-Host ('Paint: {0}' -f $o1.ImgState)
-  [int]$indexWidth = $o1.Size.Width * ([int]$o1.ImgState)
-  Write-Host ('Paint: indexWidth ={0}' -f $indexWidth)
+  [int]$indexWidth = $sender.Size.Width * ([int]$sender.ImgState)
 
-  if ($o1.Image.Width -gt $indexWidth)
+  if ($sender.Image.Width -gt $indexWidth)
   {
-    $size = $o1.Size
+    $size = $sender.Size
     $point = (New-Object System.Drawing.Point ($indexWidth,0))
     $rect = New-Object System.Drawing.Rectangle ($point,$size)
-    $gr.DrawImage($o1.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
+    $gr.DrawImage($sender.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
   }
   else
   {
-    $size = (New-Object System.Drawing.Size ($o1.Size.Width,$o1.Size.Height))
+    $size = (New-Object System.Drawing.Size ($sender.Size.Width,$sender.Size.Height))
     $point = (New-Object System.Drawing.Point (0,0))
     $rect = New-Object System.Drawing.Rectangle ($point,$size)
-    $gr.DrawImage($o1.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
+    $gr.DrawImage($sender.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
   }
 }
 
@@ -90,15 +88,15 @@ $button_OnLostFocus = {
   param(
     [object]$sender,[System.EventArgs]$e
   )
-  if ($o1.mouseEnter)
+  if ($sender.mouseEnter)
   {
-    $o1.ImgState = $btnState['BUTTON_MOUSE_ENTER']
+    $sender.ImgState = $btnState['BUTTON_MOUSE_ENTER']
   }
   else
   {
-    $o1.ImgState = $btnState['BUTTON_UP']
+    $sender.ImgState = $btnState['BUTTON_UP']
   }
-
+  $sender.Invalidate()
 
 }
 $o1.add_LostFocus($button_OnLostFocus)
@@ -108,12 +106,12 @@ $button_OnMouseEnter = {
     [object]$sender,[System.EventArgs]$e
   )
   #  only show mouse enter if doesn't have focus
-  if ($o1.ImgState -eq $btnState['BUTTON_UP'])
+  if ($sender.ImgState -eq $btnState['BUTTON_UP'])
   {
-    $o1.ImgState = $btnState['BUTTON_MOUSE_ENTER']
+    $sender.ImgState = $btnState['BUTTON_MOUSE_ENTER']
   }
-  $o1.mouseEnter = $true
-  $o1.Invalidate()
+  $sender.mouseEnter = $true
+  $sender.Invalidate()
 
 }
 $o1.add_MouseEnter($button_OnMouseEnter)
@@ -123,12 +121,12 @@ $button_OnMouseLeave = {
     [object]$sender,[System.EventArgs]$e
   )
   # only restore state if doesn't have focus
-  if ($o1.ImgState -ne $btnState['BUTTON_FOCUSED'])
+  if ($sender.ImgState -ne $btnState['BUTTON_FOCUSED'])
   {
-    $o1.ImgState = $btnState['BUTTON_UP']
+    $sender.ImgState = $btnState['BUTTON_UP']
   }
-  $o1.mouseEnter = $false
-  $o1.Invalidate()
+  $sender.mouseEnter = $false
+  $sender.Invalidate()
 
 }
 $o1.add_MouseLeave($button_OnMouseLeave)
@@ -190,8 +188,7 @@ $button_OnMouseDown = {
   param(
     [object]$sender,[System.Windows.Forms.MouseEventArgs]$e
   )
-  $o1.ImgState = $btnState['BUTTON_DOWN']
-  Write-Host ('MouseDown : {0}' -f $o1.ImgState)
+  $sender.ImgState = $btnState['BUTTON_DOWN']
   $local:label_name = find_label -button_name $sender.Text
   try {
     $elems = $sender.Parent.Controls.Find($local:label_name,$false)
@@ -201,6 +198,7 @@ $button_OnMouseDown = {
   if ($elems -ne $null) {
     $elems[0].Text = ('Pressed {0}' -f $sender.Text)
   }
+  $sender.Invalidate()
 }
 
 $o1.add_MouseDown($button_OnMouseDown)
@@ -209,9 +207,7 @@ $button_OnMouseUp = {
   param(
     [object]$sender,[System.Windows.Forms.MouseEventArgs]$e
   )
-  $o1.ImgState = $btnState['BUTTON_FOCUSED']
-  Write-Host ('MouseUp: {0}' -f $o1.ImgState)
-
+  $sender.ImgState = $btnState['BUTTON_FOCUSED']
   $local:label_name = find_label -button_name $sender.Text
   try {
     $elems = $sender.Parent.Controls.Find($local:label_name,$false)
@@ -221,6 +217,8 @@ $button_OnMouseUp = {
   if ($elems -ne $null) {
     $elems[0].Text = ''
   }
+  $sender.Invalidate()
+
 }
 
 $o1.add_MouseUp($button_OnMouseUp)
@@ -240,7 +238,7 @@ $button_OnKeyDown = {
   )
   if ($e.KeyData -eq [System.Windows.Forms.Keys]::Space)
   {
-    $o1.imgState=$btnState['BUTTON_DOWN']
+    $sender.imgState=$btnState['BUTTON_DOWN']
     try {
       $elems = $f.Controls.Find('l1',$false)
     } catch [exception]{
@@ -249,6 +247,7 @@ $button_OnKeyDown = {
       $elems[0].Text = ('Pressed {0}' -f $sender.Text)
     }
   }
+  $sender.Invalidate()
 }
 
 $o1.add_KeyDown($button_OnKeyDown)
@@ -259,7 +258,7 @@ $button_OnKeyUp = {
   )
   if ($e.KeyData -eq [System.Windows.Forms.Keys]::Space)
   {
-    $o1.imgState=$btnState['BUTTON_FOCUSED']
+    $sender.imgState=$btnState['BUTTON_FOCUSED']
     try {
       $elems = $f.Controls.Find('l1',$false)
     } catch [exception]{
@@ -268,6 +267,7 @@ $button_OnKeyUp = {
       $elems[0].Text = ''
     }
   }
+  $sender.Invalidate()
 }
 
 $o1.add_KeyUp($button_OnKeyUp)
