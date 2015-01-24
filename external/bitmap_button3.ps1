@@ -1,3 +1,30 @@
+#Copyright (c) 2014 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+# $DebugPreference = 'Continue'
+
+param(
+  [switch]$pause
+)
+
+
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -50,8 +77,6 @@ $global:m = @{
   'b1' = 'l1';
   'b2' = 'l2';
 }
-
-
 
 $o1.Location = New-Object System.Drawing.Point (200,32)
 $o1.Size = New-Object System.Drawing.Size (32,32)
@@ -238,11 +263,11 @@ $button_OnEnabledChanged = {
 
             if ($sender.Enabled)
             {
-                $sender.imgState=$btnState['BUTTON_UP']
+                $sender.imgState = $btnState['BUTTON_UP']
             }
             else
             {
-                $sender.imgState=btnState['BUTTON_DISABLED']
+                $sender.imgState = $btnState['BUTTON_DISABLED']
             }
             $sender.Invalidate()
 
@@ -298,10 +323,73 @@ $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (263,109)
 $f.Controls.AddRange(@( $l1,$l2,$o1,$o2))
-# $f.Controls.AddRange(@( $l1,$o1))
 $f.Name = 'form'
 $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-$f.Text = 'Bitmap Button Demo'
+$f.Text = 'Bitmap Button Job Launcher'
 $f.ResumeLayout($false)
 $f.Add_Shown({ $f.Activate() })
-[void]$f.ShowDialog()
+
+
+# http://poshcode.org/5520
+# Asynchronous GUI by Peter Kriegel
+# Simon Mourier See: http://stackoverflow.com/questions/14401704/update-winforms-not-wpf-ui-from-another-thread
+
+$so = [hashtable]::Synchronized(@{
+    'Visible' = [bool]$false;
+    'ScriptDirectory' = [string]'';
+    'Form' = [System.Windows.Forms.Form]$f;
+    'Buttons' = [System.Windows.Forms.Button[]]@($o1, $o2);
+  })
+
+$Runspace = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace($host)
+
+$so.ScriptDirectory = Get-ScriptDirectory
+$rs = [runspacefactory]::CreateRunspace()
+$rs.ApartmentState = 'STA'
+$rs.ThreadOptions = 'ReuseThread'
+$rs.Open()
+$rs.SessionStateProxy.SetVariable('so',$so)
+$po = [System.Management.Automation.PowerShell]::Create()
+$po.Runspace = $rs
+
+$run_script = $po.AddScript({
+    [System.Windows.Forms.Application]::EnableVisualStyles()
+    [System.Windows.Forms.Application]::Run($so.Form)
+  })
+
+$res = $po.BeginInvoke()
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'Pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+$total_steps = 10
+1..($total_steps ) | ForEach-Object {
+
+  $current_step = $_
+  $message = $eventargs.Text =( 'Processed {0} / {1}' -f $current_step , $total_steps )
+ write-output $message
+ $so.Buttons[0].Enabled = $false
+ Start-Sleep -Millisecond 1000
+ $so.Buttons[0].Enabled = $true
+ Start-Sleep -Millisecond 1000
+}
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'Pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+$so.Form.Close()
+[System.Windows.Forms.Application]::Exit()
+$po.EndInvoke($res)
+$rs.Close()
+$po.Dispose()
