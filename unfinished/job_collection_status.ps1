@@ -48,7 +48,7 @@ function Get-ScriptDirectory {
 if ($servers_file -eq '') {
   $servers_file = $env:SERVERS_FILE
 }
-if (($servers_file -eq $null) -or ($servers_file -eq '')){
+if (($servers_file -eq $null) -or ($servers_file -eq '')) {
   $(throw "Please specify a SERVERS_FILE to use.")
   exit 1
 }
@@ -78,7 +78,8 @@ foreach ($deployment_host in $deployment_hosts) {
   $deployment_host_ip = $deployment_host['ip']
   Write-Output $deployment_host_ip
 }
-# return
+$start = (Get-Date -UFormat '%s')
+
 foreach ($deployment_host in $deployment_hosts) {
   $deployment_host_server = $deployment_host['server']
   $deployment_host_ip = $deployment_host['ip']
@@ -95,6 +96,7 @@ foreach ($deployment_host in $deployment_hosts) {
   $jobs_remaining[$jobid] = $true
 }
 Write-Output 'Waiting for jobs to complete.'
+
 $jobs_completed = @()
 foreach ($retry in 0..$max_retry_count) {
   Write-Debug ('Try #{0}' -f $retry)
@@ -119,7 +121,10 @@ foreach ($retry in 0..$max_retry_count) {
   }
   $jobs_running = Get-Job -State 'Running' | Select-Object -ExpandProperty id | Where-Object { $jobs_remaining.containskey($_) }
   if ($jobs_running.Length -gt 0) {
-    Write-Host ('waiting {0} second for {1} remaining jobs to complete' -f $wait_retry_secs,$jobs_running.Length)
+    $end = (Get-Date -UFormat '%s')
+    $elapsed = New-TimeSpan -Seconds ($end - $start)
+    Write-Host ('waiting  {0:00}:{1:00}:{2:00} for {3} remaining jobs to complete' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,$jobs_running.Length)
+
     Start-Sleep -Seconds $wait_retry_secs
   } else {
     Write-Host 'All jobs complete'

@@ -125,18 +125,6 @@ $WebpageList | ForEach-Object {
 
   $warmup_response_time = [System.Math]::Round((Measure-Command ${function:download_content}).totalmilliseconds)
 
-  <#
-  # $warmup_response_time = [System.Math]::Round((Measure-Command {(new-object net.webclient).DownloadString( $url  )}).totalmilliseconds)
-  $warmup_response_time = [System.Math]::Round((Measure-Command {
-        try {
-          redirect_workaround -web_host $target_host -app_url $app_url
-        } catch [exception]{
-          Write-Output ("Exception `n{0}" -f (($_.Exception.Message) -split "`n")[0])
-        }
-      }
-    ).totalmilliseconds)
-#>
-
   Write-Output ("Opening page: {0} took {1} ms" -f $app_url,$warmup_response_time)
 
 };
