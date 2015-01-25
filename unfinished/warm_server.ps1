@@ -1,15 +1,7 @@
-param ([String] $hostname, [String] $host_ip)    
-
-
-
-param(
-  [string]$host_ip = '',
-  [int]$host_index = 0,
-  [string]$hostname = ''
-
+param([string]$hostname,
+  [string]$host_ip,
+  [bool]$debug = $false
 )
-
-
 
 function redirect_workaround {
 
@@ -35,12 +27,10 @@ function redirect_workaround {
     throw 'Url cannot be null'
   }
 
-  # workaround for 
+  # http://stackoverflow.com/questions/11696944/powershell-v3-invoke-webrequest-https-error
+  # workaround for:
   # The underlying connection was closed: Could not establish
   # trust relationship for the SSL/TLS secure channel.
-  # error 
-  # explained in 
-  # http://stackoverflow.com/questions/11696944/powershell-v3-invoke-webrequest-https-error
   Add-Type @"
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
@@ -78,65 +68,73 @@ function redirect_workaround {
 
 }
 
-
+# main program
 $target_host = ''
 if ($host_ip -ne $null -and $host_ip -ne '') {
   $target_host = $host_ip
-}
-
-
-if ($host_index -ne 0) {
-  $target_host = "web${host_index}"
-  return
 }
 
 if ($target_host -eq $null -or $target_host -eq '') {
   return
 }
 
-
-#Primed URLs    
-
+# collection of URLs to "Prime"
 
 $webpagelist = (
-        "http://$host_ip", 
-        "http://$host_ip/#q=selenium,&spell=1", 
-        "http://$host_ip/#q=Selenium+-+Google+Code",
-        "http://$host_ip/#q=Selenium+-+wikipedia"
-        )
+  "http://${host_ip}",
+  "http://${host_ip}/#q=selenium,&spell=1",
+  "http://${host_ip}/#q=Selenium+-+Google+Code",
+  "http://${host_ip}/#q=Selenium+-+wikipedia"
+)
 
-# introduced one short and one long response delay 
-# if ($debug -eq $true){
-  $mockup_delays  = @{"web30" = 100; "web23" = 30 }
-#}
+# Introduced one short and one long response delay 
+if ($debug -eq $true) {
+  $mockup_delays = @{ "web30" = 100; "web23" = 30 }
+} else {
+  $mockup_delays = @{}
+}
+[bool]$use_redirect_workaround = $true
 
+# uses global parameters
+function download_content {
+
+  if ($use_redirect_workaround) {
+    try {
+     [void]( redirect_workaround -web_host $target_host -app_url $app_url )
+    } catch [exception]{
+      Write-Output ("Exception `n{0}" -f (($_.Exception.Message) -split "`n")[0])
+    }
+  } else {
+    [void](New-Object net.webclient).DownloadString($app_url)
+  }
+
+}
 
 Write-Host ('Testing {0}' -f $hostname)
+
 $WebpageList | ForEach-Object {
+
   $app_url = $_
   Write-Output ('Trying {0}' -f $app_url)
+
+  if ($mockup_delays.containskey($hostname)) {
+    $delay = $mockup_delays[$hostname]
+    Write-Output ("Sleeping {0} seconds" -f $delay)
+    Start-Sleep -Seconds $delay;
+  }
+
+  $warmup_response_time = [System.Math]::Round((Measure-Command ${function:download_content}).totalmilliseconds)
+
+  <#
+  # $warmup_response_time = [System.Math]::Round((Measure-Command {(new-object net.webclient).DownloadString( $url  )}).totalmilliseconds)
   $warmup_response_time = [System.Math]::Round((Measure-Command {
         try {
           redirect_workaround -web_host $target_host -app_url $app_url
-          # (New-Object net.webclient).DownloadString($_)
         } catch [exception]{
           Write-Output ("Exception `n{0}" -f (($_.Exception.Message) -split "`n")[0])
         }
       }
     ).totalmilliseconds)
-
-
-  <#
-  if ( $url -like 'specials') {
-    if ($mockup_delays.containskey($hostname) ) {
-      $delay = $mockup_delays[$hostname]
-      write-output ("Sleeping {0} seconds" -f $delay)
-      start-sleep -seconds $delay;
-    }
-  }
-  Write-output ("Opening page: {0}" -f $url)
-  $warmup_response_time = [System.Math]::Round((Measure-Command {(new-object net.webclient).DownloadString( $url  )}).totalmilliseconds)
-  Write-output ("Opening page: {0} took {1} ms" -f $url, $warmup_response_time )
 #>
 
   Write-Output ("Opening page: {0} took {1} ms" -f $app_url,$warmup_response_time)
@@ -144,4 +142,4 @@ $WebpageList | ForEach-Object {
 };
 
 
-};
+
