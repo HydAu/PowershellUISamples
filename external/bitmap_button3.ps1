@@ -17,13 +17,15 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
-
 # $DebugPreference = 'Continue'
 
 param(
   [switch]$pause
 )
 
+if ($host.Version.Major -le 2) {
+  throw "This script will not work witn Powershell v2."
+}
 
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -115,21 +117,27 @@ $buttons += $o2
 BitmapButton.cs converted to Powershell syntax.
 #>
 
+# This example will fail on W2K3 after script fails to add properties to a System.Windows.Forms.Button object
+
 # properties to maintain the state
 $btnState = New-Object PSObject
-$btnState | Add-Member -NotePropertyName 'BUTTON_UP' -NotePropertyValue 0
-$btnState | Add-Member -NotePropertyName 'BUTTON_DOWN' -NotePropertyValue 1
-$btnState | Add-Member -NotePropertyName 'BUTTON_FOCUSED' -NotePropertyValue 2
-$btnState | Add-Member -NotePropertyName 'BUTTON_MOUSE_ENTER' -NotePropertyValue 3
-$btnState | Add-Member -NotePropertyName 'BUTTON_DISABLED' -NotePropertyValue 4
-$btnState | Add-Member -NotePropertyName 'BUTTON_FAILED' -NotePropertyValue 5 # currently unused
+$btnState | Add-Member -MemberType 'NoteProperty'  -Name 'BUTTON_UP' -Value 0
+$btnState | Add-Member -MemberType 'NoteProperty'  -Name 'BUTTON_DOWN' -Value 1
+$btnState | Add-Member -MemberType 'NoteProperty'  -Name 'BUTTON_FOCUSED' -Value 2
+$btnState | Add-Member -MemberType 'NoteProperty'  -Name 'BUTTON_MOUSE_ENTER' -Value 3
+$btnState | Add-Member -MemberType 'NoteProperty'  -Name 'BUTTON_DISABLED' -Value 4
+$btnState | Add-Member -MemberType 'NoteProperty'  -Name 'BUTTON_FAILED' -Value 5 # currently unused
 
 $buttons | ForEach-Object {
-  Add-Member -InputObject $_ -MemberType 'NoteProperty' -Name 'ImgState' -Value $btnState.BUTTON_UP -Force
-  Add-Member -InputObject $_ -MemberType 'NoteProperty' -Name 'mouseEnter' -Value $false -Force
-  Add-Member -InputObject $_ -MemberType 'NoteProperty' -Name 'Pressed' -Value $false -Force
+  Add-Member -InputObject $_ -MemberType 'NoteProperty'  -Name 'ImgState' -Value $btnState.BUTTON_UP -Force
+  Add-Member -InputObject $_ -MemberType 'NoteProperty'  -Name 'mouseEnter' -Value $false -Force
+  Add-Member -InputObject $_ -MemberType 'NoteProperty'  -Name 'Pressed' -Value $false -Force
 }
 
+Add-Member -InputObject $o1  -MemberType 'NoteProperty'  -Name 'ImgState' -Value $btnState.BUTTON_UP -Force
+
+$buttons[0] | get-member
+return
 # callbacks
 $button_OnPaint = {
   param([object]$sender,[System.Windows.Forms.PaintEventArgs]$e)
@@ -157,7 +165,7 @@ $button_OnGotFocus = {
     [object]$sender,[System.EventArgs]$e
   )
   $o1.ImgState = $btnState.BUTTON_FOCUSED
-
+  $sender.Invalidate()
 }
 
 $button_OnLostFocus = {
@@ -173,7 +181,6 @@ $button_OnLostFocus = {
     $sender.ImgState = $btnState.BUTTON_UP
   }
   $sender.Invalidate()
-
 }
 
 $button_OnMouseEnter = {
@@ -187,7 +194,6 @@ $button_OnMouseEnter = {
   }
   $sender.mouseEnter = $true
   $sender.Invalidate()
-
 }
 
 $button_OnMouseLeave = {
@@ -227,7 +233,7 @@ $button_OnMouseDown = {
     Write-Host $_.Exception.Message
   }
   if ($elems -ne $null) {
-    $elems[0].Text = ('Pressed {0}' -f $sender.Text)
+    $elems[0].Text = ('Pressed {0} "{1}"' -f $sender.Text,$sender.ImgState )
   }
   $sender.Invalidate()
 }
