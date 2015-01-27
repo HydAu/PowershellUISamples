@@ -1,16 +1,30 @@
-
-function Out-Form {
-  <#
+<#
     .Synopsis
         Output the results of a command in a Windows Form
     .Description
         Output the results of a command in a Windows Form with possibility to add buttons with actions 
     .Example
     
-        out-form -title "Services" -data (get-service) -columnNames ("Name", "Status") -columnProperties ("DisplayName", "Status") -actions @{"Start" = {$_.start()}; "Stop" = {$_.stop()};}
+        out-form 
+                 -title "Services" 
+                 -data (get-service) 
+                 -columnNames ("Name", "Status") 
+                 -columnProperties ("DisplayName", "Status") 
+                 -actions @{"Start" = {$_.start()}; "Stop" = {$_.stop()}; }
     #>
-  param($title = "",$data = $null,$columnNames = $null,$columnTag,
-    $columnProperties = $null,$actions = $null)
+# http://stackoverflow.com/questions/11010165/how-to-suspend-resume-a-process-in-windows
+# http://poshcode.org/2189
+function Out-Form {
+  param(
+    $title = '', 
+    $data = $null,
+    $columnNames = $null,
+    $columnTag,
+    $columnProperties = $null,
+    $actions = $null )
+
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+
   # a little data defaulting/validation
   if ($columnNames -eq $null) {
     $columnNames = $columnProperties
@@ -19,7 +33,7 @@ function Out-Form {
     $columnNames.Count -lt 1 -or
     $columnNames.Count -ne $columnNames.Count) {
 
-    throw "Data validation failed"
+    throw 'Data validation failed: column count mismatch'
   }
   $numCols = $columnNames.Count
 
@@ -30,12 +44,12 @@ function Out-Form {
     $width = $actionWidth
   }
 
-  # set up form
+  # set up form. Use alternative syntax
   $form = New-Object System.Windows.Forms.Form
   $form.Text = $title
   $form.Size = New-Object System.Drawing.Size ($width,400)
   $panel = New-Object System.Windows.Forms.Panel
-  $panel.Dock = "Fill"
+  $panel.Dock = 'Fill'
   $form.Controls.Add($panel)
 
   $lv = New-Object windows.forms.ListView
@@ -190,4 +204,4 @@ function Out-Form {
   $form.ShowDialog()
 }
 
-out-form -data (Get-Process) -columnNames ("Name","ID") -columnProperties ("Name","ID") -columnTag ("Text","Numeric")
+Out-Form -data (Get-Process) -columnNames ("Name","ID") -columnProperties ("Name","ID") -columnTag ("Text","Numeric")
