@@ -52,8 +52,10 @@ $f = New-Object System.Windows.Forms.Form
 
 $l1 = New-Object System.Windows.Forms.Label
 $l2 = New-Object System.Windows.Forms.Label
+$l3 = New-Object System.Windows.Forms.Label
 $o1 = New-Object -TypeName System.Windows.Forms.Button
 $o2 = New-Object -TypeName System.Windows.Forms.Button
+$o3 = New-Object -TypeName System.Windows.Forms.Button
 
 # label1
 $l1.BorderStyle = [System.Windows.Forms.BorderStyle]::None
@@ -71,12 +73,20 @@ $l2.Text = ''
 $l2.Size = New-Object System.Drawing.Size (172,23)
 $l2.TabIndex = 4
 
+# label2
+$l3.BorderStyle = [System.Windows.Forms.BorderStyle]::None
+$l3.Location = New-Object System.Drawing.Point (12,110)
+$l3.Name = "l3"
+$l3.Text = ''
+$l3.Size = New-Object System.Drawing.Size (172,23)
+$l3.TabIndex = 4
+
+
 # dDControls
-$o1.Name = "b1"
-$o1.TabIndex = 1
 $global:m = @{
   'b1' = 'l1';
   'b2' = 'l2';
+  'b3' = 'l3';
 }
 
 $o1.Location = New-Object System.Drawing.Point (200,32)
@@ -84,6 +94,9 @@ $o1.Size = New-Object System.Drawing.Size (32,32)
 $o1.Name = 'b1'
 $o1.TabIndex = 1
 $o1.Text = 'b1'
+$o1 | get-member
+# return
+$o1.Focused = $false
 
 # 
 # $o1.SetStyle([System.Windows.Forms.ControlStyles]::UserPaint -bor [System.Windows.Forms.ControlStyles]::AllPaintingInWmPaint -bor [System.Windows.Forms.ControlStyles]::DoubleBuffer,$true)
@@ -106,11 +119,19 @@ $o2.Text = 'b2'
 $o2.Image = $o1.Image
 
 
+$o3.Location = New-Object System.Drawing.Point (200,101)
+$o3.Size = New-Object System.Drawing.Size (32,32)
+$o3.Name = 'b3'
+$o3.TabIndex = 3
+$o3.Text = 'b3'
+$o3.Image = $o1.Image
+
 $f.SuspendLayout()
 
 [System.Windows.Forms.Button[]]$buttons = @()
 $buttons += $o1
 $buttons += $o2
+$buttons += $o3
 
 # http://www.codeproject.com/Articles/4479/A-Simple-Bitmap-Button-Implementation
 <#
@@ -133,27 +154,29 @@ $buttons | ForEach-Object {
   Add-Member -InputObject $_ -MemberType 'NoteProperty'  -Name 'mouseEnter' -Value $false -Force
   Add-Member -InputObject $_ -MemberType 'NoteProperty'  -Name 'Pressed' -Value $false -Force
 }
-
+$o1.ImgState = $btnState.BUTTON_UP 
 Add-Member -InputObject $o1  -MemberType 'NoteProperty'  -Name 'ImgState' -Value $btnState.BUTTON_UP -Force
 
-$buttons[0] | get-member
-return
 # callbacks
 $button_OnPaint = {
   param([object]$sender,[System.Windows.Forms.PaintEventArgs]$e)
   [System.Drawing.Graphics]$gr = $e.Graphics
+  # This math is used to determine which image go show
+  # TODO: refactor
   [int]$indexWidth = $sender.Size.Width * ([int]$sender.ImgState)
 
-  if ($sender.Image.Width -gt $indexWidth)
-  {
     $size = $sender.Size
+    $size = (New-Object System.Drawing.Size ($sender.Size.Width,$sender.Size.Height))
+
+  # if ($sender.Image.Width -gt $indexWidth)
+  if ($sender.ImgState -ne $btnState.BUTTON_UP)
+  {
     $point = (New-Object System.Drawing.Point ($indexWidth,0))
     $rect = New-Object System.Drawing.Rectangle ($point,$size)
     $gr.DrawImage($sender.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
   }
   else
   {
-    $size = (New-Object System.Drawing.Size ($sender.Size.Width,$sender.Size.Height))
     $point = (New-Object System.Drawing.Point (0,0))
     $rect = New-Object System.Drawing.Rectangle ($point,$size)
     $gr.DrawImage($sender.Image,0,0,$rect,[System.Drawing.GraphicsUnit]::Pixel)
@@ -328,8 +351,8 @@ $buttons | ForEach-Object {
 # Form
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
-$f.ClientSize = New-Object System.Drawing.Size (263,109)
-$f.Controls.AddRange(@( $l1,$l2,$o1,$o2))
+$f.ClientSize = New-Object System.Drawing.Size (263,139)
+$f.Controls.AddRange(@( $l1,$l2,$l3,$o1,$o2,$o3))
 $f.Name = 'form'
 $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $f.Text = 'Bitmap Button Job Launcher'
