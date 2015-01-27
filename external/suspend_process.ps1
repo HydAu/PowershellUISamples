@@ -17,14 +17,15 @@
     #>
 # http://stackoverflow.com/questions/11010165/how-to-suspend-resume-a-process-in-windows
 # http://poshcode.org/2189
+
 function Out-Form {
   param(
-    $title = '',
+    $title = '', 
     $data = $null,
     $columnNames = $null,
     $columnTag,
     $columnProperties = $null,
-    $actions = $null)
+    $actions = $null )
 
   @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
@@ -113,7 +114,8 @@ function Out-Form {
     $lv.Columns[$i].Tag = $columnTag[$i]
 
   }
-
+  # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/SortaListViewbyAnyColumn.htm
+  # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/UseRadioButtontocontroltheListViewdisplaystyle.htm
   $comparerClassString = @"
 
   using System;
@@ -208,6 +210,82 @@ function Out-Form {
 }
 
 
+Add-Type -TypeDefinition @"
+
+// "
+using System;
+using System.Text;
+using System.Net;
+using System.Windows.Forms;
+
+using System.Runtime.InteropServices;
+
+public class Helper
+{
+
+    [Flags]
+    public enum ProcessAccessFlags : uint
+    {
+        All = 0x001F0FFF,
+        Terminate = 0x00000001,
+        CreateThread = 0x00000002,
+        VMOperation = 0x00000008,
+        VMRead = 0x00000010,
+        VMWrite = 0x00000020,
+        DupHandle = 0x00000040,
+        SetInformation = 0x00000200,
+        QueryInformation = 0x00000400,
+        Synchronize = 0x00100000,
+        ReadControl = 0x00020000
+    }
+    [DllImport("ntdll.dll", SetLastError = true)]
+    public static extern IntPtr NtSuspendProcess(IntPtr ProcessHandle);
+
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr OpenProcess(
+         ProcessAccessFlags processAccess,
+         bool bInheritHandle,
+         IntPtr processId
+    );
+
+    public static uint PROCESS_SUSPEND_RESUME = 0x00000800;
+
+    [DllImport("ntdll.dll", SetLastError = true)]
+    public static extern IntPtr NtResumeProcess(IntPtr ProcessHandle);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern /* unsafe  */ bool CloseHandle(
+            IntPtr hObject   // handle to object
+            );
+
+
+    public static IntPtr SuspendResumeProcess(IntPtr Pid, bool Action)
+    {
+
+        IntPtr hProcess = OpenProcess((ProcessAccessFlags)PROCESS_SUSPEND_RESUME, false, Pid);
+        IntPtr result = IntPtr.Zero;
+        if (hProcess != IntPtr.Zero)
+        {
+            if (Action)
+            {
+                result = NtSuspendProcess(hProcess);
+            }
+            else
+            {
+                result = NtResumeProcess(hProcess);
+            }
+            CloseHandle(hProcess);
+        }
+        return result;
+    }
+
+}
+
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Runtime.InteropServices.dll','System.Net.dll'
+$o  = New-Object -TypeName 'Helper'
+
 function Suspend-Process {
   <#
     .EXAMPLE
@@ -218,49 +296,99 @@ function Suspend-Process {
         Author: greg zakharov
   #>
   param(
-    [Parameter(Mandatory = $true,Position = 0,ValueFromPipeline = $true)]
-    [int32]$ProcessId,
-
-    [Parameter(Position = 1)]
-    [switch]$Resume
+    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
+    [Int32]$ProcessId,
+    
+    [Parameter(Position=1)]
+    [Switch]$Resume
   )
+  # http://pinvoke.net/default.aspx/ntdll/NtSuspendProcess.html
+  # http://www.developpez.net/forums/d397538/dotnet/langages/vb-net/vb-net-suspendre-process/
 
+<#
+
+[DllImport("ntdll.dll", SetLastError = true)]
+public static extern IntPtr NtSuspendProcess(IntPtr ProcessHandle);
+
+[DllImport("kernel32.dll")]
+public static extern IntPtr OpenProcess(
+     ProcessAccessFlags processAccess,
+     bool bInheritHandle,
+     int processId
+);
+public static IntPtr OpenProcess(Process proc, ProcessAccessFlags flags)
+{
+     return OpenProcess(flags, false, proc.Id);
+}
+
+[DllImport("ntdll.dll", SetLastError = true)]
+public static extern IntPtr NtResumeProcess(IntPtr ProcessHandle);
+
+[DllImport("kernel32.dll", SetLastError=true)]
+[return: MarshalAs(UnmanagedType.Bool)]
+static extern unsafe bool CloseHandle(
+        IntPtr hObject   // handle to object
+        );
+
+Private Declare Function OpenProcess Lib "Kernel32.dll" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessId As Long) As Long
+    Private Declare Function NtSuspendProcess Lib "Ntdll.dll" (ByVal hProc As Long) As Long
+    Private Declare Function NtResumeProcess Lib "Ntdll.dll" (ByVal hProc As Long) As Long
+    Private Declare Function CloseHandle Lib "Kernel32.dll" (ByVal hObject As Long) As Long
+    Private Const PROCESS_SUSPEND_RESUME As Long = &H800
+ 
+    Public Function SuspendResumeProcess(ByVal Pid As Long, ByVal Action As Boolean) As Long
+ 
+        Dim hProcess As Long
+ 
+        hProcess = OpenProcess(PROCESS_SUSPEND_RESUME, 0&, Pid)
+ 
+        If hProcess Then
+            If Action Then
+                SuspendResumeProcess = NtSuspendProcess(hProcess)
+            Else
+                SuspendResumeProcess = NtResumeProcess(hProcess)
+            End If
+            CloseHandle(hProcess)
+        End If
+ 
+    End Function
+#>
   begin {
-    if (!(($cd = [appdomain]::CurrentDomain).GetAssemblies() | ? {
-          $_.FullName.Contains('Nt')
-        })) {
+    if (!(($cd = [AppDomain]::CurrentDomain).GetAssemblies() | ? {
+      $_.FullName.Contains('Nt')
+    })) {
       $attr = 'AnsiClass, Class, Public, Sealed, BeforeFieldInit'
       $type = (($cd.DefineDynamicAssembly(
-            (New-Object Reflection.AssemblyName ('Nt')),'Run'
-          )).DefineDynamicModule('Nt',$false)).DefineType('Suspend',$attr)
-      [void]$type.DefinePInvokeMethod('NtSuspendProcess','ntdll.dll',
-        'Public, Static, PinvokeImpl','Standard',[int32],
-        @( [intptr]),'WinApi','Auto'
+        (New-Object Reflection.AssemblyName('Nt')), 'Run'
+      )).DefineDynamicModule('Nt', $false)).DefineType('Suspend', $attr)
+      [void]$type.DefinePInvokeMethod('NtSuspendProcess', 'ntdll.dll',
+        'Public, Static, PinvokeImpl', 'Standard', [Int32],
+        @([IntPtr]), 'WinApi', 'Auto'
       )
-      [void]$type.DefinePInvokeMethod('NtResumeProcess','ntdll.dll',
-        'Public, Static, PinvokeImpl','Standard',[int32],
-        @( [intptr]),'WinApi','Auto'
+      [void]$type.DefinePInvokeMethod('NtResumeProcess', 'ntdll.dll',
+        'Public, Static, PinvokeImpl', 'Standard', [Int32],
+        @([IntPtr]), 'WinApi', 'Auto'
       )
       Set-Variable Nt -Value $type.CreateType() -Option ReadOnly -Scope global
     }
-
-    $OpenProcess = [regex].Assembly.GetType(
+    
+    $OpenProcess = [RegEx].Assembly.GetType(
       'Microsoft.Win32.NativeMethods'
     ).GetMethod('OpenProcess') #returns SafeProcessHandle type
-
+    
     $PROCESS_SUSPEND_RESUME = 0x00000800
   }
   process {
     try {
-      $sph = $OpenProcess.Invoke($null,@( $PROCESS_SUSPEND_RESUME,$false,$ProcessId))
+      $sph = $OpenProcess.Invoke($null, @($PROCESS_SUSPEND_RESUME, $false, $ProcessId))
       if ($sph.IsInvalid) {
         Write-Warning "process with specified ID does not exist."
         return
       }
       $ptr = $sph.DangerousGetHandle()
-
+      
       switch ($Resume) {
-        $true { [void]$Nt::NtResumeProcess($ptr) }
+        $true  { [void]$Nt::NtResumeProcess($ptr) }
         $false { [void]$Nt::NtSuspendProcess($ptr) }
       }
     }
@@ -276,5 +404,5 @@ function Suspend-Process {
 
 
 Out-Form -data (Get-Process) -columnNames ("Name","ID") -columnProperties ("Name","ID") -columnTag ("Text","Numeric") `
-   -actions @{ "Suspend" = { Suspend-Process $_.Id }; "resume" = { Suspend-Process $_.Id -Resume }; }
+                 -actions @{"Suspend" = {Suspend-Process $_.Id}; "resume" = {Suspend-Process $_.Id -resume}; }
 
