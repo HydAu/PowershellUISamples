@@ -180,9 +180,12 @@ $l2 = New-Object System.Windows.Forms.Label
 $o1 = New-Object -TypeName 'BitmapButton.BitmapButton'
 
 $o1.Location = New-Object System.Drawing.Point (200,32)
-$o1.Size = New-Object System.Drawing.Size (32,32)
+$o1.Size = New-Object System.Drawing.Size (16,15)
+$l1.TabIndex = 1
 $o1.Name = 'b1'
-$o1.TabIndex = 1
+# tabindex 1 is a tabu
+# http://www.iconspedia.com/icon/arrow-mini-left-icon-23724.html
+$o1.TabIndex = 2
 $o1.Text = "b1"
 # http://www.alkanesolutions.co.uk/2013/04/19/embedding-base64-image-strings-inside-a-powershell-application/
 
@@ -193,14 +196,14 @@ $s = New-Object IO.MemoryStream ($i,0,$i.Length)
 $s.Write($i,0,$i.Length);
 $o1.Image = [System.Drawing.Image]::FromStream($s,$true)
 
-# $o1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow.bmp"))
+$o1.Image = New-Object System.Drawing.Bitmap ([System.IO.Path]::Combine((Get-ScriptDirectory),"downArrow16.bmp"))
 
 
 $o2 = New-Object -TypeName 'BitmapButton.BitmapButton'
 
 $o2.Location = New-Object System.Drawing.Point (200,70)
-$o2.Size = New-Object System.Drawing.Size (32,32)
-$o2.TabIndex = 2
+$o2.Size = New-Object System.Drawing.Size (16,15)
+$o2.TabIndex = 3
 $o1.Name = 'b2'
 $o2.Text = "b2"
 $o2.Image = $o1.Image
