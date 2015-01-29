@@ -224,138 +224,74 @@ $wait.PollingInterval = 150
 [NUnit.Framework.Assert]::IsTrue(($selenium.Title -match 'Holland America Line'))
 Write-Output $selenium.Title
 
-$selenium.Manage().Window.Maximize()
+function verify_destination {
 
-$value0 = 'destinations'
+  param([string]$value4,
+    [string]$text4,
+    [string]$title4
+  )
 
-$css_selector0 = ('li#{0} a.pnavmenu_link' -f $value0)
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 50
+  $value0 = 'destinations'
 
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  $css_selector0 = ('li#{0} a.pnavmenu_link' -f $value0)
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 50
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
+  } catch [exception]{
+    Write-Debug ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  }
+
+  $element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
+
+  [OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
+  Start-Sleep -Millisecond 50
+  Write-Debug ('Hovering over ' + $element0.GetAttribute('title'))
+
+  $css_selector3 = ("a[href='{0}']" -f $value4)
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 150
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector3)))
+  } catch [exception]{
+    Write-Debug ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  }
+
+  [OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector3))
+  [NUnit.Framework.Assert]::IsTrue(($element4.Text -match $text4), $text4)
+  Write-Debug ('Clicking on ' + $element4.Text)
+  $element4.Click()
+  Start-Sleep -Millisecond 100
+  Write-Debug $selenium.Title
+  [NUnit.Framework.Assert]::IsTrue(($selenium.Title -match $title4),$title4 )
+
+  $selenium.Navigate().back()
+
 }
 
-$element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
+verify_destination `
+   -value4 '/cruise-destinations/alaska?WT.ac=pnav_DestMap_Alaska' `
+   -text4  'Alaska & Yukon' `
+   -title4 'Alaska Cruise Vacations'
 
-[OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
-Start-Sleep -Millisecond 50
-Write-Output ('Hovering over ' + $element0.GetAttribute('title'))
+verify_destination `
+   -value4 '/cruise-destinations/pacific-northwest-cruises?WT.ac=pnav_DestMap_PNW' `
+   -text4 'Pacific Northwest & Pacific Coast' `
+   -title4 'Pacific Coast Cruises'
 
-$value1 = '/cruise-destinations/alaska?WT.ac=pnav_DestMap_Alaska'
-$text1 = 'Alaska & Yukon'
-$css_selector1 = ("a[href='{0}']" -f $value1)
+verify_destination `
+   -value4 '/cruise-destinations/canada-new-england-cruises?WT.ac=pnav_DestMap_CNE' `
+   -text4 'Canada/New England' `
+   -title4 'Canada travel and New England cruises'
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-[OpenQA.Selenium.IWebElement]$element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-
-try {
-  Write-Output ('Highlighting element: {0}' -f $element1.Text)
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript('arguments[0].setAttribute("style", arguments[1]);',$element1,'color: #CC6600; border: 4px solid #CC3300;')
-  Start-Sleep 3
-  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript('arguments[0].setAttribute("style", arguments[1]);',$element1,'')
-} catch [exception]{
-  Write-Output $_.Exception.Message
-}
-[NUnit.Framework.Assert]::IsTrue(($element1.Text -match $text1))
-Write-Output ('Clicking on ' + $element1.Text)
-
-$element1.Click()
-Start-Sleep -Millisecond 100
-$selenium.Navigate().back()
-
-$value0 = 'destinations'
-
-$css_selector0 = ('li#{0} a.pnavmenu_link' -f $value0)
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 50
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-$element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
-
-[OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
-Start-Sleep -Millisecond 50
-Write-Output ('Hovering over ' + $element0.GetAttribute('title'))
-
-$value2 = '/cruise-destinations/canada-new-england-cruises?WT.ac=pnav_DestMap_CNE'
-$text2 = 'Canada/New England'
-$css_selector2 = ("a[href='{0}']" -f $value2)
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector2)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-[OpenQA.Selenium.IWebElement]$element2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-[NUnit.Framework.Assert]::IsTrue(($element2.Text -match $text2))
-Write-Output ('Clicking on ' + $element2.Text)
-$element2.Click()
-Start-Sleep -Millisecond 100
-
-$selenium.Navigate().back()
-
-
-$value0 = 'destinations'
-
-$css_selector0 = ('li#{0} a.pnavmenu_link' -f $value0)
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 50
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-$element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
-
-[OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
-Start-Sleep -Millisecond 50
-Write-Output ('Hovering over ' + $element0.GetAttribute('title'))
-
-$value3 = '/cruise-destinations/pacific-northwest-cruises?WT.ac=pnav_DestMap_PNW'
-$text3 = 'Pacific Northwest & Pacific Coast'
-$css_selector3 = ("a[href='{0}']" -f $value3)
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
-$wait.PollingInterval = 150
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector3)))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-
-[OpenQA.Selenium.IWebElement]$element3 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector3))
-[NUnit.Framework.Assert]::IsTrue(($element3.Text -match $text3))
-Write-Output ('Clicking on ' + $element3.Text)
-$element3.Click()
-Start-Sleep -Millisecond 100
-
-$selenium.Navigate().back()
-
+verify_destination `
+   -value4 '/cruise-destinations/mexican-cruises?WT.ac=pnav_DestMap_Mexico' `
+   -text4 'Mexico' `
+   -title4 'Mexico Cruises'
 
 # Cleanup
 try {
