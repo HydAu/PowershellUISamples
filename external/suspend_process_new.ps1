@@ -306,11 +306,11 @@ param ([int]$process_id)
 }
 
 function resume_process {
-param ([int]$id)
+param ([int]$process_id )
 
 [Nt.Helper]::SuspendResumeProcess($process_id,$false )
 
 }
 
 Out-Form -data (Get-Process) -columnNames ("Name","ID") -columnProperties ("Name","ID") -columnTag ("Text","Numeric") `
-                 -actions @{"Suspend" = {suspend_process $_.Id}; "resume" = {resume_process $_.Id -resume}; }
+                 -actions @{"Suspend" = {suspend_process -process_id $_.Id}; "resume" = {resume_process -process_id  $_.Id }; }
