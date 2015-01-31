@@ -266,33 +266,12 @@ public class ListViewItemComparer : System.Collections.IComparer
             float fl1 = float.Parse(l1.SubItems[col].Text);
             float fl2 = float.Parse(l2.SubItems[col].Text);
             return (Order == SortOrder.Ascending) ?  fl1.CompareTo(fl2) :  fl2.CompareTo(fl1);
-/*
-            if (Order == SortOrder.Ascending)
-            {
-                return fl1.CompareTo(fl2);
-            }
-            else
-            {
-                return fl2.CompareTo(fl1);
-            }
-*/
         }
         else
         {
             string str1 = l1.SubItems[col].Text;
             string str2 = l2.SubItems[col].Text;
             return (Order == SortOrder.Ascending) ? str1.CompareTo(str2) : str2.CompareTo(str1);
-/*
-            if (Order == SortOrder.Ascending)
-            {
-                return str1.CompareTo(str2);
-            }
-            else
-            {
-                return str2.CompareTo(str1);
-
-            }
-*/
         }
 
     }
