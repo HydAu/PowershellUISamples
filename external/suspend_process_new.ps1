@@ -160,34 +160,39 @@ function draw_processes {
   $title = 'Select process'
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
-  $f.Size = New-Object System.Drawing.Size (300,200)
+  $f.Size = New-Object System.Drawing.Size ($width,400)
   $f.StartPosition = 'CenterScreen'
 
   $f.KeyPreview = $true
 
   $r = New-Object System.Windows.Forms.Button
-  $r.Location = New-Object System.Drawing.Size (150,120)
-  $r.Size = New-Object System.Drawing.Size (75,23)
+  $r.Location = New-Object System.Drawing.Size (90,10)
+  $r.Size = New-Object System.Drawing.Size (70,23)
   $r.Text = 'Resume'
   $r.add_click({
       resume_process ($owner.Item)
     })
-  $f.Controls.Add($r)
 
   $s = New-Object System.Windows.Forms.Button
-  $s.Location = New-Object System.Drawing.Size (75,120)
-  $s.Size = New-Object System.Drawing.Size (75,23)
+  $s.Location = New-Object System.Drawing.Size (10,10)
+  $s.Size = New-Object System.Drawing.Size (70,23)
   $s.Text = 'Suspend'
   $s.add_click({
       suspend_process ($owner.Item)
     })
-  $f.Controls.Add($s)
+
+  $button_panel = New-Object System.Windows.Forms.Panel
+  $button_panel.Height = 40
+  $button_panel.Dock = "Bottom"
+  $button_panel.Controls.AddRange(@( $s,$r))
+
 
   $panel = New-Object System.Windows.Forms.Panel
   $panel.Dock = 'Fill'
   $f.Controls.Add($panel)
   $lv = New-Object windows.forms.ListView
   $panel.Controls.Add($lv)
+  $panel.Controls.Add($button_panel)
 
 
   # create the columns
@@ -197,18 +202,19 @@ function draw_processes {
   $lv.GridLines = $true
   $lv.Dock = 'Fill'
   foreach ($col in $columnNames) {
-    $lv.Columns.Add($col,200) > $null
+    [void]$lv.Columns.Add($col,200)
   }
 
   # populate the view
   foreach ($d in $data) {
-    $item =
-    New-Object System.Windows.Forms.ListViewItem (
-      (Invoke-Expression ('$d.' + $columnProperties[0])).ToString())
-
+    $item = New-Object System.Windows.Forms.ListViewItem (
+      (Invoke-Expression (('$d.{0}' -f $columnProperties[0]))).ToString())
     for ($i = 1; $i -lt $columnProperties.Count; $i++) {
-      [void]$item.SubItems.Add(
-        (Invoke-Expression ('$d.' + $columnProperties[$i])).ToString())
+      $c = (Invoke-Expression ('$d.{0}' -f $columnProperties[$i]))
+      if ($c -eq $null) {
+        $c = ''
+      }
+      [void]$item.SubItems.Add($c.ToString())
     }
     $item.Tag = $d
     [void]$lv.Items.Add($item)
@@ -233,15 +239,17 @@ function draw_processes {
       $owner.Item = $process_id
     })
 
-# sort 
+  # sort 
   for ($i = 0; $i -lt $columnTag.Count; $i++) {
 
     $lv.Columns[$i].Tag = $columnTag[$i]
 
   }
-# http://www.java2s.com/Code/CSharp/GUI-Windows-Form/SortaListViewbyAnyColumn.htm
-# http://www.java2s.com/Code/CSharp/GUI-Windows-Form/UseRadioButtontocontroltheListViewdisplaystyle.htm
-Add-Type -TypeDefinition @"
+
+  # http://poshcode.org/5635
+  # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/SortaListViewbyAnyColumn.htm
+  # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/UseRadioButtontocontroltheListViewdisplaystyle.htm
+  Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
 using System.Drawing;
@@ -294,19 +302,24 @@ public class ListViewItemComparer : System.Collections.IComparer
     }
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms','System.Drawing'
-  
+
   $lv.Add_ColumnClick({
-   $lv.ListViewItemSorter = New-Object ListViewItemComparer ($_.Column, $owner.IsAscending)
-   $owner.IsAscending = !$owner.IsAscending
-  })
+      $lv.ListViewItemSorter = New-Object ListViewItemComparer ($_.Column,$owner.IsAscending)
+      $owner.IsAscending = !$owner.IsAscending
+    })
 
   $f.Topmost = $True
   $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  $owner.Item = 42;
 
   $f.Add_Shown({ $f.Activate() })
   $x = $f.ShowDialog($owner)
 
 }
 
-draw_processes -data (Get-Process) -columnNames ('Name','ID') -columnProperties ("Name","ID") -columnTag ("Text","Numeric")
+$data =
+Get-Process | ForEach-Object {
+  $processid = $_.id
+  Get-WmiObject Win32_Process -Filter "processid = '$processid'" |
+  select Name,CommandLine,ProcessId,Tag
+}
+draw_processes -data $data -columnNames ('Name','ProcessId','CommandLine') -columnProperties ('Name','ProcessId','CommandLine') -columnTag ('Text','Numeric','Text')
