@@ -1,225 +1,37 @@
-try { 
+Add-Type -TypeDefinition @"
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-} catch [Exception] { 
+// "
+using System;
+using System.Windows.Forms;
 
-write-output $_.Exception.Message
-return
-}
-#requires -version 2.0
-<#
-    .Synopsis
-        Output the results of a command in a Windows Form
-    .Description
-        Output the results of a command in a Windows Form with possibility to add buttons with actions 
-    .Example
-    
-        out-form 
-                 -title "Services" 
-                 -data (get-service) 
-                 -columnNames ("Name", "Status") 
-                 -columnProperties ("DisplayName", "Status") 
-                 -actions @{"Start" = {$_.start()}; "Stop" = {$_.stop()}; }
-    #>
-# http://stackoverflow.com/questions/11010165/how-to-suspend-resume-a-process-in-windows
-# http://poshcode.org/2189
+public class Win32Window : IWin32Window
+{
+    private IntPtr _hWnd;
 
-function Out-Form {
-  param(
-    $title = '', 
-    $data = $null,
-    $columnNames = $null,
-    $columnTag,
-    $columnProperties = $null,
-    $actions = $null )
+    private  String _item;
 
-  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
-
-  # a little data defaulting/validation
-  if ($columnNames -eq $null) {
-    $columnNames = $columnProperties
-  }
-  if ($columnProperties -eq $null -or
-    $columnNames.Count -lt 1 -or
-    $columnNames.Count -ne $columnNames.Count) {
-
-    throw 'Data validation failed: column count mismatch'
-  }
-  $numCols = $columnNames.Count
-
-  # figure out form width
-  $width = $numCols * 200
-  $actionWidth = $actions.Count * 100 + 40
-  if ($actionWidth -gt $width) {
-    $width = $actionWidth
-  }
-
-  # set up form. Use alternative syntax
-  $form = New-Object System.Windows.Forms.Form
-  $form.Text = $title
-  $form.Size = New-Object System.Drawing.Size ($width,400)
-  $panel = New-Object System.Windows.Forms.Panel
-  $panel.Dock = 'Fill'
-  $form.Controls.Add($panel)
-
-  $lv = New-Object windows.forms.ListView
-  $panel.Controls.Add($lv)
-
-  # add the buttons
-  $btnPanel = New-Object System.Windows.Forms.Panel
-  $btnPanel.Height = 40
-  $btnPanel.Dock = "Bottom"
-  $panel.Controls.Add($btnPanel)
-
-  $btns = New-Object System.Collections.ArrayList
-  if ($actions -ne $null) {
-    $btnOffset = 20
-    foreach ($action in $actions.GetEnumerator()) {
-      $btn = New-Object windows.forms.Button
-      $btn.DialogResult = [System.Windows.Forms.DialogResult]"OK"
-      $btn.Text = $action.Name
-      $btn.Left = $btnOffset
-      $btn.Width = 80
-      $btn.Top = 10
-      $exprString = '{$lv.SelectedItems | foreach-object { $_.Tag } | foreach-object {' + $action.Value + '}}'
-      $scriptBlock = Invoke-Expression $exprString
-      $btn.add_click($scriptBlock)
-      $btnPanel.Controls.Add($btn)
-      $btnOffset += 100
-      $btns += $btn
+    public String Item    {
+        get { return _item; }
+        set { _item = value; }
     }
-  }
+    private bool _asc = true;
 
-  # create the columns
-  $lv.View = [System.Windows.Forms.View]"Details"
-  $lv.Size = New-Object System.Drawing.Size ($width,350)
-  $lv.FullRowSelect = $true
-  $lv.GridLines = $true
-  $lv.Dock = "Fill"
-  foreach ($col in $columnNames) {
-    $lv.Columns.Add($col,200) > $null
-  }
-
-  # populate the view
-  foreach ($d in $data) {
-    $item =
-    New-Object System.Windows.Forms.ListViewItem (
-      (Invoke-Expression ('$d.' + $columnProperties[0])).ToString())
-
-    for ($i = 1; $i -lt $columnProperties.Count; $i++) {
-      $item.SubItems.Add(
-        (Invoke-Expression ('$d.' + $columnProperties[$i])).ToString()) > $null
+    public bool IsAscending  {
+        get { return _asc; }
+        set { _asc = value; }
     }
-    $item.Tag = $d
-    $lv.Items.Add($item) > $null
-  }
 
-  # Added by Bar971.it  
-  for ($i = 0; $i -lt $columnTag.Count; $i++) {
-
-    $lv.Columns[$i].Tag = $columnTag[$i]
-
-  }
-  # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/SortaListViewbyAnyColumn.htm
-  # http://www.java2s.com/Code/CSharp/GUI-Windows-Form/UseRadioButtontocontroltheListViewdisplaystyle.htm
-  $comparerClassString = @"
-
-  using System;
-  using System.Windows.Forms;
-  using System.Drawing;
-  using System.Collections;
-
-  public class ListViewItemComparer : System.Collections.IComparer 
-  { 
-    public int col = 0;
-    
-    public System.Windows.Forms.SortOrder Order; // = SortOrder.Ascending;
-  
-    public ListViewItemComparer()
+    public Win32Window(IntPtr handle)
     {
-        col = 0;        
+        _hWnd = handle;
     }
-    
-    public ListViewItemComparer(int column, bool asc)
+
+    public IntPtr Handle
     {
-        col = column; 
-        if (asc) 
-        {Order = SortOrder.Ascending;}
-        else
-        {Order = SortOrder.Descending;}        
+        get { return _hWnd; }
     }
-    
-    public int Compare(object x, object y) // IComparer Member     
-    {   
-        if (!(x is ListViewItem)) return (0);
-        if (!(y is ListViewItem)) return (0);
-            
-        ListViewItem l1 = (ListViewItem)x;
-        ListViewItem l2 = (ListViewItem)y;
-            
-        if (l1.ListView.Columns[col].Tag == null)
-            {
-                l1.ListView.Columns[col].Tag = "Text";
-            }
-        
-        if (l1.ListView.Columns[col].Tag.ToString() == "Numeric") 
-            {
-                float fl1 = float.Parse(l1.SubItems[col].Text);
-                float fl2 = float.Parse(l2.SubItems[col].Text);
-                    
-                if (Order == SortOrder.Ascending)
-                    {
-                        return fl1.CompareTo(fl2);
-                    }
-                else
-                    {
-                        return fl2.CompareTo(fl1);
-                    }
-             }
-         else
-             {
-                string str1 = l1.SubItems[col].Text;
-                string str2 = l2.SubItems[col].Text;
-                    
-                if (Order == SortOrder.Ascending)
-                    {
-                        return str1.CompareTo(str2);
-                    }
-                else
-                    {
-                        return str2.CompareTo(str1);
-                    }
-              }     
-    }
-} 
-"@
-  Add-Type -TypeDefinition $comparerClassString `
-     -ReferencedAssemblies (`
-       'System.Windows.Forms','System.Drawing')
-
-  $bool = $true
-  $columnClick =
-  {
-    $lv.ListViewItemSorter = New-Object ListViewItemComparer ($_.Column,$bool)
-
-    $bool = !$bool
-  }
-  $lv.Add_ColumnClick($columnClick)
-  # End Add by Bar971.it
-
-  # display it
-  $form.Add_Shown({ $form.Activate() })
-  if ($btns.Count -gt 0) {
-    $form.AcceptButton = $btns[0]
-  }
-  $form.ShowDialog()
 }
-
-<# 
-System.Runtime.InteropServices.dll 
-may be missing 
-if present, look in .Net 4.0 
-#>
+"@ -ReferencedAssemblies "System.Windows.Forms.dll"
 
 Add-Type -TypeDefinition @"
 
@@ -232,7 +44,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 namespace Nt
 {
-public class Helper
+public class ProcessHelper
 {
 
     [Flags]
@@ -268,7 +80,7 @@ public class Helper
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern /* unsafe  */ bool CloseHandle(
-            IntPtr hObject   // handle to object
+            IntPtr hObject
             );
 
 
@@ -278,16 +90,8 @@ public class Helper
         IntPtr hProcess = OpenProcess((ProcessAccessFlags)PROCESS_SUSPEND_RESUME, false, Pid);
         IntPtr result = IntPtr.Zero;
         if (hProcess != IntPtr.Zero)
-        {
-            if (Action)
-            {
-                result = NtSuspendProcess(hProcess);
-            }
-            else
-            {
-                result = NtResumeProcess(hProcess);
-            }
-            CloseHandle(hProcess);
+        {           
+          result = (Action) ? NtSuspendProcess(hProcess) : NtResumeProcess(hProcess);
         }
         return result;
     }
@@ -295,22 +99,218 @@ public class Helper
 }
 
 }
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Net.dll', 'System.Runtime.InteropServices.dll'
-$o  = New-Object -TypeName 'Nt.Helper'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Net.dll','System.Runtime.InteropServices.dll'
+$o = New-Object -TypeName 'Nt.ProcessHelper'
 
 function suspend_process {
-param ([int]$process_id)
+  param([int]$process_id)
 
-[Nt.Helper]::SuspendResumeProcess($process_id,$true)
+  [Nt.ProcessHelper]::SuspendResumeProcess($process_id,$true)
 
 }
 
 function resume_process {
-param ([int]$process_id )
+  param([int]$process_id)
 
-[Nt.Helper]::SuspendResumeProcess($process_id,$false )
+  [Nt.ProcessHelper]::SuspendResumeProcess($process_id,$false)
 
 }
 
-Out-Form -data (Get-Process) -columnNames ("Name","ID") -columnProperties ("Name","ID") -columnTag ("Text","Numeric") `
-                 -actions @{"Suspend" = {suspend_process -process_id $_.Id}; "resume" = {resume_process -process_id  $_.Id }; }
+function draw_processes {
+  param(
+    [object[]]$data = $null,
+    [string[]]$columnNames = $null,
+    [string[]]$columnTag,
+    [string[]]$columnProperties = $null,
+    [bool]$debug
+  )
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+
+  if ($columnNames -eq $null) {
+    $columnNames = $columnProperties
+  }
+  if ($columnProperties -eq $null -or
+    $columnNames.Count -lt 1 -or
+    $columnNames.Count -ne $columnNames.Count) {
+
+    throw 'Data validation failed: column count mismatch'
+  }
+  $numCols = $columnNames.Count
+
+  # figure out form width
+  $width = $numCols * 200
+
+  $title = 'Select process'
+  $f = New-Object System.Windows.Forms.Form
+  $f.Text = $title
+  $f.Size = New-Object System.Drawing.Size (300,200)
+  $f.StartPosition = 'CenterScreen'
+
+  $f.KeyPreview = $true
+
+  $r = New-Object System.Windows.Forms.Button
+  $r.Location = New-Object System.Drawing.Size (150,120)
+  $r.Size = New-Object System.Drawing.Size (75,23)
+  $r.Text = 'Resume'
+  $r.add_click({
+      resume_process ($owner.Item)
+    })
+  $f.Controls.Add($r)
+
+  $s = New-Object System.Windows.Forms.Button
+  $s.Location = New-Object System.Drawing.Size (75,120)
+  $s.Size = New-Object System.Drawing.Size (75,23)
+  $s.Text = 'Suspend'
+  $s.add_click({
+      suspend_process ($owner.Item)
+    })
+  $f.Controls.Add($s)
+
+  $panel = New-Object System.Windows.Forms.Panel
+  $panel.Dock = 'Fill'
+  $f.Controls.Add($panel)
+  $lv = New-Object windows.forms.ListView
+  $panel.Controls.Add($lv)
+
+
+  # create the columns
+  $lv.View = [System.Windows.Forms.View]'Details'
+  $lv.Size = New-Object System.Drawing.Size ($width,350)
+  $lv.FullRowSelect = $true
+  $lv.GridLines = $true
+  $lv.Dock = 'Fill'
+  foreach ($col in $columnNames) {
+    $lv.Columns.Add($col,200) > $null
+  }
+
+  # populate the view
+  foreach ($d in $data) {
+    $item =
+    New-Object System.Windows.Forms.ListViewItem (
+      (Invoke-Expression ('$d.' + $columnProperties[0])).ToString())
+
+    for ($i = 1; $i -lt $columnProperties.Count; $i++) {
+      [void]$item.SubItems.Add(
+        (Invoke-Expression ('$d.' + $columnProperties[$i])).ToString())
+    }
+    $item.Tag = $d
+    [void]$lv.Items.Add($item)
+  }
+  <#
+  $lv.add_ItemActivate({
+      param(
+        [object]$sender,[System.EventArgs]$e)
+
+      [System.Windows.Forms.ListView]$lw = [System.Windows.Forms.ListView]$sender
+      [string]$filename = $lw.SelectedItems[0].Tag.ToString()
+    })
+  #>
+  $lv.add_ItemSelectionChanged({
+      param(
+        [object]$sender,[System.Windows.Forms.ListViewItemSelectionChangedEventArgs]$e)
+
+      [System.Windows.Forms.ListView]$lw = [System.Windows.Forms.ListView]$sender
+      $si = $e.Item.SubItems[1]
+      [int]$process_id = 0
+      [int32]::TryParse($si.Text,([ref]$process_id))
+      $owner.Item = $process_id
+    })
+
+# sort 
+  for ($i = 0; $i -lt $columnTag.Count; $i++) {
+
+    $lv.Columns[$i].Tag = $columnTag[$i]
+
+  }
+# http://www.java2s.com/Code/CSharp/GUI-Windows-Form/SortaListViewbyAnyColumn.htm
+# http://www.java2s.com/Code/CSharp/GUI-Windows-Form/UseRadioButtontocontroltheListViewdisplaystyle.htm
+Add-Type -TypeDefinition @"
+using System;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Collections;
+
+public class ListViewItemComparer : System.Collections.IComparer
+{
+    public int col = 0;
+    public System.Windows.Forms.SortOrder Order;
+    public ListViewItemComparer()
+    {
+        col = 0;
+    }
+
+    public ListViewItemComparer(int column, bool asc)
+    {
+        col = column;
+        if (asc)
+        { Order = SortOrder.Ascending; }
+        else
+        { Order = SortOrder.Descending; }
+    }
+
+    public int Compare(object x, object y)
+    {
+        if (!(x is ListViewItem)) return (0);
+        if (!(y is ListViewItem)) return (0);
+
+        ListViewItem l1 = (ListViewItem)x;
+        ListViewItem l2 = (ListViewItem)y;
+
+        if (l1.ListView.Columns[col].Tag == null)
+        {
+            l1.ListView.Columns[col].Tag = "Text";
+        }
+
+        if (l1.ListView.Columns[col].Tag.ToString() == "Numeric")
+        {
+            float fl1 = float.Parse(l1.SubItems[col].Text);
+            float fl2 = float.Parse(l2.SubItems[col].Text);
+            return (Order == SortOrder.Ascending) ?  fl1.CompareTo(fl2) :  fl2.CompareTo(fl1);
+/*
+            if (Order == SortOrder.Ascending)
+            {
+                return fl1.CompareTo(fl2);
+            }
+            else
+            {
+                return fl2.CompareTo(fl1);
+            }
+*/
+        }
+        else
+        {
+            string str1 = l1.SubItems[col].Text;
+            string str2 = l2.SubItems[col].Text;
+            return (Order == SortOrder.Ascending) ? str1.CompareTo(str2) : str2.CompareTo(str1);
+/*
+            if (Order == SortOrder.Ascending)
+            {
+                return str1.CompareTo(str2);
+            }
+            else
+            {
+                return str2.CompareTo(str1);
+
+            }
+*/
+        }
+
+    }
+}
+"@ -ReferencedAssemblies 'System.Windows.Forms','System.Drawing'
+  
+  $lv.Add_ColumnClick({
+   $lv.ListViewItemSorter = New-Object ListViewItemComparer ($_.Column, $owner.IsAscending)
+   $owner.IsAscending = !$owner.IsAscending
+  })
+
+  $f.Topmost = $True
+  $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
+  $owner.Item = 42;
+
+  $f.Add_Shown({ $f.Activate() })
+  $x = $f.ShowDialog($owner)
+
+}
+
+draw_processes -data (Get-Process) -columnNames ('Name','ID') -columnProperties ("Name","ID") -columnTag ("Text","Numeric")
