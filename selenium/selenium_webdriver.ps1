@@ -141,8 +141,8 @@ if ($PSBoundParameters['browser']) {
 }
 # http://selenium.googlecode.com/git/docs/api/dotnet/index.html
 [void]$selenium.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $selenium.Url = 'http://www.wikipedia.org';
-$selenium.Navigate().GoToUrl(('{0}/' -f $baseURL))
+[string]$base_url = $selenium.Url = 'http://www.wikipedia.org';
+$selenium.Navigate().GoToUrl(('{0}/' -f $base_url))
 [OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $selenium.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 
 $queryBox.Clear()

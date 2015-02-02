@@ -71,7 +71,7 @@ symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
 #>
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = "http://www.wikipedia.org"
+$base_url = "http://www.wikipedia.org"
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
   try {
@@ -99,7 +99,7 @@ if ($PSBoundParameters["browser"]) {
 
 
 
-$selenium.Navigate().GoToUrl($baseURL )
+$selenium.Navigate().GoToUrl($base_url )
 $selenium.Navigate().Refresh()
 
 [string]$title = ([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript("return document.title")

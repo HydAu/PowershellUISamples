@@ -83,7 +83,7 @@ $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = 'http://www.wikipedia.org'
+$base_url = 'http://www.wikipedia.org'
 if ($browser -ne $null -and $browser -ne '') {
   try {
     $connection = (New-Object Net.Sockets.TcpClient)
@@ -128,7 +128,7 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 
-$selenium.Navigate().GoToUrl($baseURL)
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 
 set_timeouts ([ref]$selenium)

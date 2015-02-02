@@ -116,13 +116,13 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 # http://stackoverflow.com/questions/6927229/context-click-in-selenium-2-2
-# $baseURL = "http://www.flickr.com/photos/davidcampbellphotography/4581594452"
+# $base_url = "http://www.flickr.com/photos/davidcampbellphotography/4581594452"
 # 
 
-$baseURL = "http://www.urbandictionary.com"
+$base_url = "http://www.urbandictionary.com"
 
 
-$selenium.Navigate().GoToUrl($baseURL + "/")
+$selenium.Navigate().GoToUrl($base_url + "/")
 $selenium.Manage().Window.Maximize()
 # $element = $selenium.FindElement([OpenQA.Selenium.By]::ClassName("main-photo"))
 Start-Sleep 5

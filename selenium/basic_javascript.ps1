@@ -78,7 +78,7 @@ symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
 #>
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = "http://192.168.0.8:8080"
+$base_url = "http://192.168.0.8:8080"
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
   try {
@@ -105,7 +105,7 @@ if ($PSBoundParameters["browser"]) {
 
 
 
-$selenium.Navigate().GoToUrl($baseURL + "")
+$selenium.Navigate().GoToUrl($base_url + "")
 $selenium.Navigate().Refresh()
 $selenium.FindElement([OpenQA.Selenium.By]::CssSelector("a.task-link[href='/manage']")).Click()
 Start-Sleep 3

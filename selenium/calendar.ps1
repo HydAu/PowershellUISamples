@@ -173,8 +173,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 
-$baseURL = "http://www.redbus.in"
-$selenium.Navigate().GoToUrl($baseURL)
+$base_url = "http://www.redbus.in"
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Manage().Window.Maximize()
 
 # 

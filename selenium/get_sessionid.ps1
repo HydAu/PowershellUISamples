@@ -169,8 +169,8 @@ try {
 }
 
 [void]$selenium.manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $selenium.Url = 'http://192.168.56.101/';
-$selenium.Navigate().GoToUrl($baseURL)
+[string]$base_url = $selenium.Url = 'http://192.168.56.101/';
+$selenium.Navigate().GoToUrl($base_url)
 
 [NUnit.Framework.Assert]::IsTrue($sessionid -ne $null)
 

@@ -65,7 +65,7 @@ $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = 'http://www.wikipedia.org/'
+$base_url = 'http://www.wikipedia.org/'
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
   try {
@@ -90,7 +90,7 @@ if ($PSBoundParameters["browser"]) {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$selenium.Navigate().GoToUrl($baseURL)
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 
 [void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(10))

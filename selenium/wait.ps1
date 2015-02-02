@@ -104,8 +104,8 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = 'http://www.google.com'
-$selenium.Navigate().GoToUrl($baseURL)
+$base_url = 'http://www.google.com'
+$selenium.Navigate().GoToUrl($base_url)
 
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
 $wait.PollingInterval = 100

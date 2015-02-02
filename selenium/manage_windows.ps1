@@ -112,8 +112,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 [void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
-[string]$baseURL = 'http://www.naukri.com/'
-$selenium.Navigate().GoToUrl($baseURL)
+[string]$base_url = 'http://www.naukri.com/'
+$selenium.Navigate().GoToUrl($base_url)
 
 $initial_window_handle = $selenium.CurrentWindowHandle
 
