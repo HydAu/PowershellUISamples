@@ -168,7 +168,7 @@ $phantomjs_executable_folder = 'C:\tools\phantomjs'
   return -2 
   }
 
-  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::phantomjs()
   $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
 
   $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
@@ -184,14 +184,37 @@ $queryBox.Clear()
 $queryBox.SendKeys('Selenium')
 $queryBox.SendKeys([OpenQA.Selenium.Keys]::ArrowDown)
 $queryBox.Submit()
+<#
+Execute javascript using
+OpenQA.Selenium.IJavaScriptExecutor
+and not
+OpenQA.Selenium.PhantomJS.PhantomJSDriver
+#>
+  $element0 = $selenium.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)'))
+
+  try {
+
+    [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element0,'color: #CC6600; border: 4px solid #CC3300;')
+    Write-Output ('Optionally Highlighting element: {0}' -f $element0.Text)
+    Start-Sleep 3
+    [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element0,'')
+    Start-Sleep 3
+  } catch [exception]{
+
+    Write-Debug ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0]) 
+
+}
 $selenium.FindElement([OpenQA.Selenium.By]::LinkText('Selenium (software)')).Click()
+
 $title = $selenium.Title
+
+
 
 assert -Script { ($title.IndexOf('Selenium (software)') -gt -1) } -Message $title
 assert -Script { ($selenium.SessionId -eq $null) } -Message 'non null session id'
 
 # Take screenshot identifying the browser
-$selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
+# $selenium.Navigate().GoToUrl("https://www.whatismybrowser.com/")
 [OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
 $screenshot.SaveAsFile([System.IO.Path]::Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) , [System.Drawing.Imaging.ImageFormat]::Png )
 
