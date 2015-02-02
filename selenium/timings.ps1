@@ -67,7 +67,7 @@ $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = 'http://www.carnival.com/'
+$base_url = 'http://www.carnival.com/'
 $uri = [System.Uri]('http://127.0.0.1:4444/wd/hub')
 if ($browser -ne $null -and $browser -ne '') {
   try {
@@ -119,7 +119,7 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability('phantomjs.executable.path',$phantomjs_executable_folder)
 }
 
-$selenium.Navigate().GoToUrl($baseURL)
+$selenium.Navigate().GoToUrl($base_url)
 try {
 
   [OpenQA.Selenium.Remote.HttpCommandExecutor]$executor = New-Object OpenQA.Selenium.Remote.HttpCommandExecutor ($uri,[System.TimeSpan]::FromSeconds(10))

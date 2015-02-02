@@ -112,8 +112,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 [void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
-$selenium.url = $baseURL = 'http://translation2.paralink.com/'
-$selenium.Navigate().GoToUrl($baseURL)
+$selenium.url = $base_url = 'http://translation2.paralink.com/'
+$selenium.Navigate().GoToUrl($base_url)
 [string]$xpath = "//frame[@id='topfr']"
 $top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
 $frame_driver = $selenium.SwitchTo().Frame($top_frame)

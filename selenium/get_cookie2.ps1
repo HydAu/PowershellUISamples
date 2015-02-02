@@ -163,8 +163,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 [void]$driver.manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://www.google.com';
-$driver.Navigate().GoToUrl($baseURL)
+[string]$base_url = $driver.Url = 'http://www.google.com';
+$driver.Navigate().GoToUrl($base_url)
 
 # Unable to find type [OpenQA.Selenium.Remote.RemoteCookieJar].
 

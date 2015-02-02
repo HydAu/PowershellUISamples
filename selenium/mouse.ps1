@@ -171,8 +171,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 
 
-$baseURL = "file:///C:/developer/sergueik/powershell_ui_samples/external/architecture.svg"
-$selenium.Navigate().GoToUrl($baseURL)
+$base_url = "file:///C:/developer/sergueik/powershell_ui_samples/external/architecture.svg"
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 
 

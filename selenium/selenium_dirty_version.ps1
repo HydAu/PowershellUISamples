@@ -89,8 +89,8 @@ if ($PSBoundParameters['browser']) {
 # http://www.andykelk.net/tech/headless-browser-testing-with-phantomjs-selenium-webdriver-c-nunit-and-mono
 
 [void]$driver.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(10))
-[string]$baseURL = $driver.Url = 'http://www.wikipedia.org';
-$driver.Navigate().GoToUrl(('{0}/' -f $baseURL))
+[string]$base_url = $driver.Url = 'http://www.wikipedia.org';
+$driver.Navigate().GoToUrl(('{0}/' -f $base_url))
 [OpenQA.Selenium.Remote.RemoteWebElement]$queryBox = $driver.FindElement([OpenQA.Selenium.By]::Id('searchInput'))
 
 # write-output $queryBox.GetType() | format-table -autosize

@@ -123,8 +123,8 @@ if ($browser -ne $null -and $browser -ne '') {
 
 # http://www.w3schools.com/xpath/xpath_axes.asp
 
-$baseURL = "file:///C:/developer/sergueik/powershell_ui_samples/external/example2.html"
-$selenium.Navigate().GoToUrl($baseURL)
+$base_url = "file:///C:/developer/sergueik/powershell_ui_samples/external/example2.html"
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 
 # locator # 1

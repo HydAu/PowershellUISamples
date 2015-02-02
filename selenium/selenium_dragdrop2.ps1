@@ -60,7 +60,7 @@ symbolic link created for phantomjs <<===>> C:\phantomjs-1.9.7-windows
 
 $verificationErrors = New-Object System.Text.StringBuilder
 # use Default Web Site to host the page. Enable Directory Browsing.
-$baseURL = "http://localhost/jOrgChart-master2/example.html"
+$base_url = "http://localhost/jOrgChart-master2/example.html"
 $phantomjs_executable_folder = "C:\tools\phantomjs"
 if ($PSBoundParameters["browser"]) {
   try {
@@ -88,7 +88,7 @@ if ($PSBoundParameters["browser"]) {
 
 
 
-$selenium.Navigate().GoToUrl($baseURL )
+$selenium.Navigate().GoToUrl($base_url )
 $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Maximize()
 

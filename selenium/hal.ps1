@@ -215,9 +215,9 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 
-$baseURL = 'http://www.hollandamerica.com'
+$base_url = 'http://www.hollandamerica.com'
 
-$selenium.Navigate().GoToUrl($baseURL + "/")
+$selenium.Navigate().GoToUrl($base_url + "/")
 [void]$selenium.Manage().Window.Maximize()
 [void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(360))
 # protect from blank page

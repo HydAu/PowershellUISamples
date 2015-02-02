@@ -105,9 +105,9 @@ if ($PSBoundParameters["browser"]) {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$baseURL = 'file:///C:/developer/sergueik/powershell_ui_samples/external/grid-console.html'
-# $baseURL = 'http://localhost/selenium-grid/console.html'
-$selenium.Navigate().GoToUrl($baseURL)
+$base_url = 'file:///C:/developer/sergueik/powershell_ui_samples/external/grid-console.html'
+# $base_url = 'http://localhost/selenium-grid/console.html'
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Navigate().Refresh()
 $selenium.Manage().Window.Maximize()
 

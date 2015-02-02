@@ -211,12 +211,12 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$baseURL = "http://www.carnival.com"
+$base_url = "http://www.carnival.com"
 
-if (!$baseUrl.EndsWith("/")) {
-		$baseUrl = $baseUrl + "/"
+if (!$base_url.EndsWith('/')) {
+		$base_url = $base_url + '/'
 	}
-$selenium.Navigate().GoToUrl($baseURL )
+$selenium.Navigate().GoToUrl($base_url )
 
 [void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(360))
 # protect from blank page

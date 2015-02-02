@@ -84,8 +84,8 @@ if ($PSBoundParameters["browser"]) {
 }
 
 $verificationErrors = New-Object System.Text.StringBuilder
-$baseURL = 'http://www.google.com'
-$selenium.Navigate().GoToUrl($baseURL)
+$base_url = 'http://www.google.com'
+$selenium.Navigate().GoToUrl($base_url)
 # https://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html
 [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::Id('hplogo'))
 [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element,'color: yellow; border: 4px solid yellow;')

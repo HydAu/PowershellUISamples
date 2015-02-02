@@ -111,10 +111,10 @@ if ($browser -ne $null -and $browser -ne '') {
 
 [void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
-$selenium.url = $baseURL = 'http://translation2.paralink.com/'
-# $selenium.url = $baseURL = 'http://www.freetranslation.com/'
+$selenium.url = $base_url = 'http://translation2.paralink.com/'
+# $selenium.url = $base_url = 'http://www.freetranslation.com/'
 
-$selenium.Navigate().GoToUrl($baseURL)
+$selenium.Navigate().GoToUrl($base_url)
 $selenium.Manage().Window.Maximize()
 
 [string]$xpath = "//frame[@id='topfr']"
