@@ -212,9 +212,11 @@ if ($browser -ne $null -and $browser -ne '') {
 }
 
 $baseURL = "http://www.carnival.com"
-# $baseURL = 'http://www4.uatcarnival.com/';
 
-$selenium.Navigate().GoToUrl($baseURL + "/")
+if (!$baseUrl.EndsWith("/")) {
+		$baseUrl = $baseUrl + "/"
+	}
+$selenium.Navigate().GoToUrl($baseURL )
 
 [void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(360))
 # protect from blank page
