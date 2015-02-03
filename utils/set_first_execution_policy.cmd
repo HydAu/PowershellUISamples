@@ -17,7 +17,19 @@ echo Enabling Powershell Remoting
 call C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy %TARGET_EXECUTIONPOLICY% "&{Enable-PSRemoting -Force } "
 
 
-goto :EOF 
+goto :EOF
+REM http://www.ifunky.net/Blog/post/How-To-Enable-PowerShell-Remoting-%28WinRM%29.aspx
+
+REM Enable-PSRemoting –force 
+REM Set-Item wsman:\localhost\client\auth\CredSSP -value true -force 
+REM Enable-WSManCredSSP -force -role server -force
+REM set-item wsman:localhost\client\trustedhosts -value * -force
+REM #set-item wsman:localhost\client\trustedhosts -value 1.1.2.242 
+REM set-item wsman:\localhost\listener\listener*\port -value 81 -force
+REM restart-Service winrm 
+REM winrm get winrm/config 
+REM winrm enumerate winrm/config/listener 
+
 REM 
 REM Set-WSManQuickConfig : 
 REM <f:WSManFault xmlns:f="http://schemas.microsoft.com/wbem/wsman/1/wsmanfault" Code="2150859113" Machine="localhost">
