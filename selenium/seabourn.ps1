@@ -159,6 +159,7 @@ function hover_menus {
 function click_menu {
   param(
     [string]$value0,
+    [bool]$nested,
     [bool]$pause
   )
   if ($value0 -eq '' -or $value0 -eq $null) {
@@ -181,7 +182,9 @@ function click_menu {
   Write-Output ('Clicking over ' + $element0.GetAttribute('title'))
   $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Click().Build().Perform()
   Start-Sleep -Millisecond 50
-explore_portaction 
+  if ($nested) { 
+    explore_portaction
+  }  
   if ($pause) {
     Write-Output 'pause'
     try {
@@ -206,8 +209,6 @@ if ($PSBoundParameters['pause']) {
 }
 
 function explore_portaction {
-
-
 
   Write-Output ('Title: {0}' -f $selenium.Title)
   $explicit = 10
@@ -303,9 +304,8 @@ function explore_portaction {
 
 #  hover_menus -value0 'pnav-planACruise' -pause $pause
 
-click_menu -value0 'pnav-planACruise' -pause $pause
-
-#  click_menu -value0 'pnav-planACruise' -pause $pause
-
+click_menu -value0 'pnav-planACruise' -nested $true -pause $pause
+click_menu -value0 'pnav-planACruise' -nested $false  -pause $pause
+explore_portaction
 
 $selenium.Quit()
