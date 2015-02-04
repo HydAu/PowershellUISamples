@@ -181,6 +181,7 @@ function click_menu {
   Write-Output ('Clicking over ' + $element0.GetAttribute('title'))
   $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Click().Build().Perform()
   Start-Sleep -Millisecond 50
+explore_portaction 
   if ($pause) {
     Write-Output 'pause'
     try {
@@ -204,10 +205,106 @@ if ($PSBoundParameters['pause']) {
   $pause = $false
 }
 
+function explore_portaction {
+
+
+
+  Write-Output ('Title: {0}' -f $selenium.Title)
+  $explicit = 10
+  [void]($selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
+
+
+  $text1 = 'Pacific Northwest & Pacific Coast'
+
+  $value0 = 'destinationsbox'
+  $value0 = 'CruiseFinderDestinationSelectbox'
+
+  $css_selector0 = ('select#{0}' -f $value0)
+  $xpath0 = ('//select[@id="{0}"]' -f $value0)
+  write-output ('finding {0}' -f $css_selector0 ) 
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+  $wait.PollingInterval = 50
+
+  try {
+    $element =  $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::CssSelector($css_selector0)))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector0)
+  }
+   write-output 'xxx1'
+  $element
+  write-output ('finding {0}' -f $xpath0 ) 
+  try {
+    $element =  $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementIsVisible([OpenQA.Selenium.By]::XPath($xpath0)))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector0)
+  }
+
+   write-output 'xxx2'
+  $element
+  [OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
+  $element
+  [OpenQA.Selenium.Support.UI.SelectElement]$select_element = New-Object OpenQA.Selenium.Support.UI.SelectElement ($element)
+
+
+  $select_element
+  $availableOptions = $select_element.Options
+  $availableOptions
+  $index = 0
+  $max_count = 10
+  [bool]$found = $false
+  # http://stackoverflow.com/questions/15535069/select-each-option-in-a-dropdown-using-selenium
+  foreach ($item in $availableOptions)
+  {
+
+    if ($index -gt $max_count) {
+      continue
+    }
+    if ($found) {
+      continue
+    } else {
+
+      [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+      $actions.MoveToElement($element).Build().Perform()
+    }
+    # $item
+
+
+    if ($item.Text -eq $text1) {
+
+      $found = $true
+
+      $select_element.SelectByText($item.Text)
+      $select_element.SelectByIndex($index)
+      $select_element.SelectByValue($item.GetAttribute('value'))
+
+      $result = $select_element.SelectedOption
+      Write-Output $result.Text
+      Write-Output $index
+
+      [NUnit.Framework.Assert]::AreEqual($result.Text,$item.Text)
+
+      $result.Click()
+      Start-Sleep -Milliseconds 1000
+
+      # NOTE: The [OpenQA.Selenium.Keys]::Enter,Space,Return do not work
+      [void]$actions.SendKeys($item,[OpenQA.Selenium.Keys]::Enter)
+      # Start-Sleep -Milliseconds 1000
+      [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
+      Start-Sleep -Milliseconds 1000
+    }
+
+    $index++
+
+
+  }
+
+}
+
 
 #  hover_menus -value0 'pnav-planACruise' -pause $pause
 
 click_menu -value0 'pnav-planACruise' -pause $pause
+
 #  click_menu -value0 'pnav-planACruise' -pause $pause
 
 
