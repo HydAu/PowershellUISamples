@@ -253,7 +253,7 @@ function PromptRibbon {
   )
 
 
-@('System.Drawing','System.Windows.Forms') |  foreach-object {   [void] [System.Reflection.Assembly]::LoadWithPartialName($_) } 
+  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
 
@@ -299,46 +299,64 @@ function PromptRibbon {
   $p4.SuspendLayout()
   $p5.SuspendLayout()
   $u.SuspendLayout()
-  #  
-  #  panel1
-  #  
-  $p1.BackColor = [System.Drawing.Color]::Silver
-  $p1.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p1.Controls.AddRange(@($b4,$b3,$b2,$b1))
+
+  #  panels
+  $cnt = 0
+  @( ([ref]$p1),([ref]$p2),([ref]$p3),([ref]$p4),([ref]$p5)) | ForEach-Object {
+    $p = $_.Value
+    $p.BackColor = [System.Drawing.Color]::Silver
+    $p.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
+    $p.Dock = [System.Windows.Forms.DockStyle]::Left
+    $p.Location = New-Object System.Drawing.Point ((178 * $cnt),0)
+    $p.Name = ('panel {0}' -f $cnt)
+    $p.Size = New-Object System.Drawing.Size (178,100)
+    $p.TabIndex = $cnt
+    $cnt++
+  }
+
+  # labels
+  $cnt = 0
+  @( ([ref]$l1),([ref]$l2),([ref]$l3),([ref]$l4),([ref]$l5)) | ForEach-Object {
+    $l = $_.Value
+    $l.BackColor = [System.Drawing.Color]::DarkGray
+    $l.Dock = [System.Windows.Forms.DockStyle]::Top
+    $l.Location = New-Object System.Drawing.Point (0,0)
+    $l.Name = ('label {0}' -f $cnt)
+    $l.Size = New-Object System.Drawing.Size (176,23)
+    $l.TabIndex = 0
+    $l.Text = ('Menu Group  {0}' -f $cnt)
+    $l.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $cnt++
+  }
+  # buttons
+
+$cnt = 1
+
+@(([ref]$b1),([ref]$b2),([ref]$b3),([ref]$b4),([ref]$b5),([ref]$b6),([ref]$b7),([ref]$b8),([ref]$b9),([ref]$b10)) | foreach-object { 
+  $b = $_.Value
+  $b.Location = New-Object System.Drawing.Point (6,27)
+  $b.Name = ('button{0}' -f $cnt)
+  $b.Size = New-Object System.Drawing.Size (80,30)
+  $b.TabIndex = 1
+  $b.Text = ('Button {0}' -f $cnt)
+  $b.UseVisualStyleBackColor = $true
+  $cnt++
+
+}  
+  # Panel1 label and buttons
   $p1.Controls.Add($l1)
-  $p1.Dock = [System.Windows.Forms.DockStyle]::Left
-  $p1.Location = New-Object System.Drawing.Point (0,0)
-  $p1.Name = "panel1"
-  $p1.Size = New-Object System.Drawing.Size (178,100)
-  $p1.TabIndex = 0
-  #  
-  #  label1
-  #  
-  $l1.BackColor = [System.Drawing.Color]::DarkGray
-  $l1.Dock = [System.Windows.Forms.DockStyle]::Top
-  $l1.Location = New-Object System.Drawing.Point (0,0)
-  $l1.Name = "label1"
-  $l1.Size = New-Object System.Drawing.Size (176,23)
-  $l1.TabIndex = 0
-  $l1.Text = "Menu Group 1"
-  $l1.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-  #  
+  $p1.Controls.AddRange(@( $b4,$b3,$b2,$b1))
+
   #  button1
-  #  
   $b1.Location = New-Object System.Drawing.Point (6,27)
-  $b1.Name = "button1"
-  $b1.Size = New-Object System.Drawing.Size (80,30)
-  $b1.TabIndex = 1
-  $b1.Text = "button1"
-  $b1.UseVisualStyleBackColor = $true
   function button_click {
 
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $who = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $who = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
 
   }
   $eventMethod1 = $b1.add_click
@@ -348,21 +366,12 @@ function PromptRibbon {
         [System.EventArgs]$eventargs
       )
       $caller.Data = $sender.Text
-      button_click -sender $sender -eventargs $eventargs
+      button_click -Sender $sender -eventargs $eventargs
 
     })
 
-  #  
   #  button2
-  #  
   $b2.Location = New-Object System.Drawing.Point (6,64)
-  $b2.Name = "button2"
-  $b2.Size = New-Object System.Drawing.Size (80,30)
-  $b2.TabIndex = 2
-  $b2.Text = "button2"
-  $b2.UseVisualStyleBackColor = $true
-
-
   $eventMethod2 = $b2.add_click
   $eventMethod2.Invoke({
       param(
@@ -370,19 +379,12 @@ function PromptRibbon {
         [System.EventArgs]$eventargs
       )
       $caller.Data = $sender.Text
-      button_click -sender $sender -eventargs $eventargs
+      button_click -Sender $sender -eventargs $eventargs
     })
 
 
-  #  
   #  button3
-  #  
   $b3.Location = New-Object System.Drawing.Point (92,28)
-  $b3.Name = "button3"
-  $b3.Size = New-Object System.Drawing.Size (80,30)
-  $b3.TabIndex = 3
-  $b3.Text = "button3"
-  $b3.UseVisualStyleBackColor = $true
   $eventMethod3 = $b3.add_click
   $eventMethod3.Invoke({
       param(
@@ -390,107 +392,38 @@ function PromptRibbon {
         [System.EventArgs]$eventargs
       )
       $caller.Data = $sender.Text
-      button_click -sender $sender -eventargs $eventargs
+      button_click -Sender $sender -eventargs $eventargs
     })
 
-  #  
   #  button4
-  #  
   $b4.Location = New-Object System.Drawing.Point (92,64)
-  $b4.Name = "button4"
-  $b4.Size = New-Object System.Drawing.Size (80,30)
-  $b4.TabIndex = 4
-  $b4.Text = "button4"
-  $b4.UseVisualStyleBackColor = $true
-  #  
-  #  panel2
-  #  
-  $p2.BackColor = [System.Drawing.Color]::Silver
-  $p2.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p2.Controls.AddRange(@($b5,$b6,$b7,$b8))
+
+  # Panel2 label and buttons
+  $p2.Controls.AddRange(@( $b5, $b6, $b7, $b8))
   $p2.Controls.Add($l2)
-  $p2.Dock = [System.Windows.Forms.DockStyle]::Left
-  $p2.Location = New-Object System.Drawing.Point (178,0)
-  $p2.Name = "panel2"
-  $p2.Size = New-Object System.Drawing.Size (178,100)
-  $p2.TabIndex = 1
-  #  
+
   #  button5
-  #  
   $b5.Location = New-Object System.Drawing.Point (92,64)
-  $b5.Name = "button5"
-  $b5.Size = New-Object System.Drawing.Size (80,30)
-  $b5.TabIndex = 4
-  $b5.Text = "button5"
-  $b5.UseVisualStyleBackColor = $true
-  #  
+
   #  button6
-  #  
   $b6.Location = New-Object System.Drawing.Point (92,28)
-  $b6.Name = "button6"
-  $b6.Size = New-Object System.Drawing.Size (80,30)
-  $b6.TabIndex = 3
-  $b6.Text = "button6"
-  $b6.UseVisualStyleBackColor = $true
-  #  
+
   #  button7
-  #  
   $b7.Location = New-Object System.Drawing.Point (6,64)
-  $b7.Name = "button7"
-  $b7.Size = New-Object System.Drawing.Size (80,30)
-  $b7.TabIndex = 2
-  $b7.Text = "button7"
-  $b7.UseVisualStyleBackColor = $true
-  #  
+
   #  button8
-  #  
   $b8.Location = New-Object System.Drawing.Point (6,27)
-  $b8.Name = "button8"
-  $b8.Size = New-Object System.Drawing.Size (80,30)
-  $b8.TabIndex = 1
-  $b8.Text = "button8"
-  $b8.UseVisualStyleBackColor = $true
-  #  
-  #  label2
-  #  
-  $l2.BackColor = [System.Drawing.Color]::DarkGray
-  $l2.Dock = [System.Windows.Forms.DockStyle]::Top
-  $l2.Location = New-Object System.Drawing.Point (0,0)
-  $l2.Name = "label2"
-  $l2.Size = New-Object System.Drawing.Size (176,23)
-  $l2.TabIndex = 0
-  $l2.Text = "Menu Group 2"
-  $l2.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-  #  
-  #  panel3
-  #  
-  $p3.BackColor = [System.Drawing.Color]::Silver
-  $p3.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p3.Controls.AddRange(@($b9,$b10,$b11,$b12))
+
+  #  label and buttons
+  $p3.Controls.AddRange(@( $b9,$b10,$b11,$b12))
   $p3.Controls.Add($l3)
-  $p3.Dock = [System.Windows.Forms.DockStyle]::Left
-  $p3.Location = New-Object System.Drawing.Point (356,0)
-  $p3.Name = "panel3"
-  $p3.Size = New-Object System.Drawing.Size (178,100)
-  $p3.TabIndex = 2
-  #  
+
   #  button9
-  #  
   $b9.Location = New-Object System.Drawing.Point (92,64)
-  $b9.Name = "button9"
-  $b9.Size = New-Object System.Drawing.Size (80,30)
-  $b9.TabIndex = 4
-  $b9.Text = "button9"
-  $b9.UseVisualStyleBackColor = $true
-  #  
+
   #  button10
-  #  
   $b10.Location = New-Object System.Drawing.Point (92,28)
-  $b10.Name = "button10"
-  $b10.Size = New-Object System.Drawing.Size (80,30)
-  $b10.TabIndex = 3
-  $b10.Text = "button10"
-  $b10.UseVisualStyleBackColor = $true
+
   #  
   #  button11
   #  
@@ -509,29 +442,10 @@ function PromptRibbon {
   $b12.TabIndex = 1
   $b12.Text = "button12"
   $b12.UseVisualStyleBackColor = $true
-  #  
-  #  label3
-  #  
-  $l3.BackColor = [System.Drawing.Color]::DarkGray
-  $l3.Dock = [System.Windows.Forms.DockStyle]::Top
-  $l3.Location = New-Object System.Drawing.Point (0,0)
-  $l3.Name = "label3"
-  $l3.Size = New-Object System.Drawing.Size (176,23)
-  $l3.TabIndex = 0
-  $l3.Text = "Menu Group 3"
-  $l3.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-  #  
-  #  panel4
-  #  
-  $p4.BackColor = [System.Drawing.Color]::Silver
-  $p4.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p4.Controls.AddRange(@($b13,$b14,$b15,$b16))
+
+  #  panel4 label and buttons
+  $p4.Controls.AddRange(@( $b13,$b14,$b15,$b16))
   $p4.Controls.Add($l4)
-  $p4.Dock = [System.Windows.Forms.DockStyle]::Left
-  $p4.Location = New-Object System.Drawing.Point (534,0)
-  $p4.Name = "panel4"
-  $p4.Size = New-Object System.Drawing.Size (178,100)
-  $p4.TabIndex = 3
   #  
   #  button13
   #  
@@ -559,7 +473,7 @@ function PromptRibbon {
       )
       $who = $sender.Text
       [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-      $caller.Data= $sender.Text
+      $caller.Data = $sender.Text
     })
 
 
@@ -581,29 +495,11 @@ function PromptRibbon {
   $b16.TabIndex = 1
   $b16.Text = "button16"
   $b16.UseVisualStyleBackColor = $true
-  #  
-  #  label4
-  #  
-  $l4.BackColor = [System.Drawing.Color]::DarkGray
-  $l4.Dock = [System.Windows.Forms.DockStyle]::Top
-  $l4.Location = New-Object System.Drawing.Point (0,0)
-  $l4.Name = "label4"
-  $l4.Size = New-Object System.Drawing.Size (176,23)
-  $l4.TabIndex = 0
-  $l4.Text = 'Powershell Menu Group 4'
-  $l4.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-  #  
-  #  panel5
-  #  
-  $p5.BackColor = [System.Drawing.Color]::Silver
-  $p5.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
-  $p5.Controls.AddRange(@($b17,$b18,$b19,$b20))
+
+  #  panel5 label and buttons
+  $p5.Controls.AddRange(@( $b17,$b18,$b19,$b20))
   $p5.Controls.Add($l5)
-  $p5.Dock = [System.Windows.Forms.DockStyle]::Left
-  $p5.Location = New-Object System.Drawing.Point (712,0)
-  $p5.Name = "panel5"
-  $p5.Size = New-Object System.Drawing.Size (178,100)
-  $p5.TabIndex = 4
+
   #  
   #  button17
   #  
@@ -640,17 +536,7 @@ function PromptRibbon {
   $b20.TabIndex = 1
   $b20.Text = "button20"
   $b20.UseVisualStyleBackColor = $true
-  #  
-  #  label5
-  #  
-  $l5.BackColor = [System.Drawing.Color]::DarkGray
-  $l5.Dock = [System.Windows.Forms.DockStyle]::Top
-  $l5.Location = New-Object System.Drawing.Point (0,0)
-  $l5.Name = "label5"
-  $l5.Size = New-Object System.Drawing.Size (176,23)
-  $l5.TabIndex = 0
-  $l5.Text = 'Powershell Menu Group 5'
-  $l5.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+
   #  
   #  UserControl1
   #  
@@ -658,7 +544,7 @@ function PromptRibbon {
   $u.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $u.BackColor = [System.Drawing.Color]::Gainsboro
 
-  $u.Controls.AddRange(@($p5,$p4,$p3,$p2, $p1))
+  $u.Controls.AddRange(@( $p5,$p4,$p3,$p2,$p1))
   $u.Name = "UserControl1"
   $u.Size = New-Object System.Drawing.Size (948,100)
   $p1.ResumeLayout($false)
@@ -683,5 +569,5 @@ function PromptRibbon {
 $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 PromptRibbon -Title 'Floating Menu Sample Project' -caller $caller
-write-output $caller.Data
+Write-Output $caller.Data
 
