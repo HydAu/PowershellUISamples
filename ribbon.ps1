@@ -302,7 +302,13 @@ function PromptRibbon {
 
   #  panels
   $cnt = 0
-  @( ([ref]$p1),([ref]$p2),([ref]$p3),([ref]$p4),([ref]$p5)) | ForEach-Object {
+  @(
+    ([ref]$p1),
+    ([ref]$p2),
+    ([ref]$p3),
+    ([ref]$p4),
+    ([ref]$p5)
+  ) | ForEach-Object {
     $p = $_.Value
     $p.BackColor = [System.Drawing.Color]::Silver
     $p.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
@@ -316,7 +322,13 @@ function PromptRibbon {
 
   # labels
   $cnt = 0
-  @( ([ref]$l1),([ref]$l2),([ref]$l3),([ref]$l4),([ref]$l5)) | ForEach-Object {
+  @(
+    ([ref]$l1),
+    ([ref]$l2),
+    ([ref]$l3),
+    ([ref]$l4),
+    ([ref]$l5)
+  ) | ForEach-Object {
     $l = $_.Value
     $l.BackColor = [System.Drawing.Color]::DarkGray
     $l.Dock = [System.Windows.Forms.DockStyle]::Top
@@ -330,19 +342,41 @@ function PromptRibbon {
   }
   # buttons
 
-$cnt = 1
+  $cnt = 1
 
-@(([ref]$b1),([ref]$b2),([ref]$b3),([ref]$b4),([ref]$b5),([ref]$b6),([ref]$b7),([ref]$b8),([ref]$b9),([ref]$b10)) | foreach-object { 
-  $b = $_.Value
-  $b.Location = New-Object System.Drawing.Point (6,27)
-  $b.Name = ('button{0}' -f $cnt)
-  $b.Size = New-Object System.Drawing.Size (80,30)
-  $b.TabIndex = 1
-  $b.Text = ('Button {0}' -f $cnt)
-  $b.UseVisualStyleBackColor = $true
-  $cnt++
+  @(
+    ([ref]$b1),
+    ([ref]$b2),
+    ([ref]$b3),
+    ([ref]$b4),
+    ([ref]$b5),
+    ([ref]$b6),
+    ([ref]$b7),
+    ([ref]$b8),
+    ([ref]$b9),
+    ([ref]$b10),
+    ([ref]$b11),
+    ([ref]$b12),
+    ([ref]$b13),
+    ([ref]$b14),
+    ([ref]$b15),
+    ([ref]$b16),
+    ([ref]$b17),
+    ([ref]$b18),
+    ([ref]$b19),
+    ([ref]$b20)
+  ) | ForEach-Object {
+    $b = $_.Value
+    # TODO: formula for location two-row buttons
+    $b.Location = New-Object System.Drawing.Point (6,27)
+    $b.Name = ('button{0}' -f $cnt)
+    $b.Size = New-Object System.Drawing.Size (80,30)
+    $b.TabIndex = 1
+    $b.Text = ('Button {0}' -f $cnt)
+    $b.UseVisualStyleBackColor = $true
+    $cnt++
 
-}  
+  }
   # Panel1 label and buttons
   $p1.Controls.Add($l1)
   $p1.Controls.AddRange(@( $b4,$b3,$b2,$b1))
@@ -384,7 +418,7 @@ $cnt = 1
 
 
   #  button3
-  $b3.Location = New-Object System.Drawing.Point (92,28)
+  $b3.Location = New-Object System.Drawing.Point (92,27)
   $eventMethod3 = $b3.add_click
   $eventMethod3.Invoke({
       param(
@@ -399,14 +433,14 @@ $cnt = 1
   $b4.Location = New-Object System.Drawing.Point (92,64)
 
   # Panel2 label and buttons
-  $p2.Controls.AddRange(@( $b5, $b6, $b7, $b8))
+  $p2.Controls.AddRange(@( $b5,$b6,$b7,$b8))
   $p2.Controls.Add($l2)
 
   #  button5
   $b5.Location = New-Object System.Drawing.Point (92,64)
 
   #  button6
-  $b6.Location = New-Object System.Drawing.Point (92,28)
+  $b6.Location = New-Object System.Drawing.Point (92,27)
 
   #  button7
   $b7.Location = New-Object System.Drawing.Point (6,64)
@@ -422,48 +456,23 @@ $cnt = 1
   $b9.Location = New-Object System.Drawing.Point (92,64)
 
   #  button10
-  $b10.Location = New-Object System.Drawing.Point (92,28)
+  $b10.Location = New-Object System.Drawing.Point (92,27)
 
-  #  
   #  button11
-  #  
   $b11.Location = New-Object System.Drawing.Point (6,64)
-  $b11.Name = "button11"
-  $b11.Size = New-Object System.Drawing.Size (80,30)
-  $b11.TabIndex = 2
-  $b11.Text = "button11"
-  $b11.UseVisualStyleBackColor = $true
-  #  
+
   #  button12
-  #  
   $b12.Location = New-Object System.Drawing.Point (6,27)
-  $b12.Name = "button12"
-  $b12.Size = New-Object System.Drawing.Size (80,30)
-  $b12.TabIndex = 1
-  $b12.Text = "button12"
-  $b12.UseVisualStyleBackColor = $true
 
   #  panel4 label and buttons
   $p4.Controls.AddRange(@( $b13,$b14,$b15,$b16))
   $p4.Controls.Add($l4)
-  #  
+
   #  button13
-  #  
   $b13.Location = New-Object System.Drawing.Point (92,64)
-  $b13.Name = "button13"
-  $b13.Size = New-Object System.Drawing.Size (80,30)
-  $b13.TabIndex = 4
-  $b13.Text = "button13"
-  $b13.UseVisualStyleBackColor = $true
-  #  
+
   #  button14
-  #  
-  $b14.Location = New-Object System.Drawing.Point (92,28)
-  $b14.Name = "button14"
-  $b14.Size = New-Object System.Drawing.Size (80,30)
-  $b14.TabIndex = 3
-  $b14.Text = "button14"
-  $b14.UseVisualStyleBackColor = $true
+  $b14.Location = New-Object System.Drawing.Point (92,27)
 
   $eventMethod14 = $b14.add_click
   $eventMethod14.Invoke({
@@ -476,66 +485,27 @@ $cnt = 1
       $caller.Data = $sender.Text
     })
 
-
-  #  
   #  button15
-  #  
   $b15.Location = New-Object System.Drawing.Point (6,64)
-  $b15.Name = "button15"
-  $b15.Size = New-Object System.Drawing.Size (80,30)
-  $b15.TabIndex = 2
-  $b15.Text = "button15"
-  $b15.UseVisualStyleBackColor = $true
-  #  
+
   #  button16
-  #  
   $b16.Location = New-Object System.Drawing.Point (6,27)
-  $b16.Name = "button16"
-  $b16.Size = New-Object System.Drawing.Size (80,30)
-  $b16.TabIndex = 1
-  $b16.Text = "button16"
-  $b16.UseVisualStyleBackColor = $true
 
   #  panel5 label and buttons
   $p5.Controls.AddRange(@( $b17,$b18,$b19,$b20))
   $p5.Controls.Add($l5)
 
-  #  
   #  button17
-  #  
   $b17.Location = New-Object System.Drawing.Point (92,64)
-  $b17.Name = "button17"
-  $b17.Size = New-Object System.Drawing.Size (80,30)
-  $b17.TabIndex = 4
-  $b17.Text = "button17"
-  $b17.UseVisualStyleBackColor = $true
-  #  
+
   #  button18
-  #  
   $b18.Location = New-Object System.Drawing.Point (92,28)
-  $b18.Name = "button18"
-  $b18.Size = New-Object System.Drawing.Size (80,30)
-  $b18.TabIndex = 3
-  $b18.Text = "button18"
-  $b18.UseVisualStyleBackColor = $true
-  #  
+
   #  button19
-  #  
   $b19.Location = New-Object System.Drawing.Point (6,64)
-  $b19.Name = "button19"
-  $b19.Size = New-Object System.Drawing.Size (80,30)
-  $b19.TabIndex = 2
-  $b19.Text = "button19"
-  $b19.UseVisualStyleBackColor = $true
-  #  
+
   #  button20
-  #  
   $b20.Location = New-Object System.Drawing.Point (6,27)
-  $b20.Name = "button20"
-  $b20.Size = New-Object System.Drawing.Size (80,30)
-  $b20.TabIndex = 1
-  $b20.Text = "button20"
-  $b20.UseVisualStyleBackColor = $true
 
   #  
   #  UserControl1
