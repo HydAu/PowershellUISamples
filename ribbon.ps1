@@ -331,15 +331,24 @@ function PromptRibbon {
   $b1.TabIndex = 1
   $b1.Text = "button1"
   $b1.UseVisualStyleBackColor = $true
+  function button_click {
 
-  $eventMethod1 = $b1.add_click
-  $eventMethod1.Invoke({
       param(
         [object]$sender,
         [System.EventArgs]$eventargs
       )
       $who = $sender.Text
       [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
+
+  }
+  $eventMethod1 = $b1.add_click
+  $eventMethod1.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $caller.Data = $sender.Text
+      button_click -sender $sender -eventargs $eventargs
 
     })
 
@@ -352,6 +361,19 @@ function PromptRibbon {
   $b2.TabIndex = 2
   $b2.Text = "button2"
   $b2.UseVisualStyleBackColor = $true
+
+
+  $eventMethod2 = $b2.add_click
+  $eventMethod2.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $caller.Data = $sender.Text
+      button_click -sender $sender -eventargs $eventargs
+    })
+
+
   #  
   #  button3
   #  
@@ -361,6 +383,16 @@ function PromptRibbon {
   $b3.TabIndex = 3
   $b3.Text = "button3"
   $b3.UseVisualStyleBackColor = $true
+  $eventMethod3 = $b3.add_click
+  $eventMethod3.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $caller.Data = $sender.Text
+      button_click -sender $sender -eventargs $eventargs
+    })
+
   #  
   #  button4
   #  
