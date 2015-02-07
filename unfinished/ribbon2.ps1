@@ -293,6 +293,17 @@ function PromptRibbon {
   $p2.SuspendLayout()
   $u.SuspendLayout()
 
+  $callbacks = @{
+    'b10' = [scriptblock]{
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(("We are processing callback function for {0}." -f $who))
+    };
+  }
+
   #  panels
   $cnt = 0
   @(
@@ -328,29 +339,29 @@ function PromptRibbon {
     $cnt++
   }
   # buttons
-$positions = @{
-1  = @{'x' =   6; 'y' = 27; };
-2  = @{'x' =   6; 'y' = 64; };
-3  = @{'x' =  92; 'y' = 27; };
-4  = @{'x' =  92; 'y' = 64; };
-5  = @{'x' = 178; 'y' = 27; };
-6  = @{'x' = 178; 'y' = 64; };
-7  = @{'x' = 264; 'y' = 27; };
-8  = @{'x' = 264; 'y' = 64; };
-9  = @{'x' = 350; 'y' = 27; };
-10 = @{'x' = 350; 'y' = 64; };
-11 = @{'x' =   6; 'y' = 27; };
-12 = @{'x' =   6; 'y' = 64; };
-13 = @{'x' =  92; 'y' = 27; };
-14 = @{'x' =  92; 'y' = 64; };
-15 = @{'x' = 178; 'y' = 27; };
-16 = @{'x' = 178; 'y' = 64; };
-17 = @{'x' = 264; 'y' = 27; };
-18 = @{'x' = 264; 'y' = 64; };
-19 = @{'x' = 350; 'y' = 27; };
-20 = @{'x' = 350; 'y' = 64; };
+  $positions = @{
+    'b1' = @{ 'x' = 6; 'y' = 27; };
+    'b2' = @{ 'x' = 6; 'y' = 64; };
+    'b3' = @{ 'x' = 92; 'y' = 27; };
+    'b4' = @{ 'x' = 92; 'y' = 64; };
+    'b5' = @{ 'x' = 178; 'y' = 27; };
+    'b6' = @{ 'x' = 178; 'y' = 64; };
+    'b7' = @{ 'x' = 264; 'y' = 27; };
+    'b8' = @{ 'x' = 264; 'y' = 64; };
+    'b9' = @{ 'x' = 350; 'y' = 27; };
+    'b10' = @{ 'x' = 350; 'y' = 64; };
+    'b11' = @{ 'x' = 6; 'y' = 27; };
+    'b12' = @{ 'x' = 6; 'y' = 64; };
+    'b13' = @{ 'x' = 92; 'y' = 27; };
+    'b14' = @{ 'x' = 92; 'y' = 64; };
+    'b15' = @{ 'x' = 178; 'y' = 27; };
+    'b16' = @{ 'x' = 178; 'y' = 64; };
+    'b17' = @{ 'x' = 264; 'y' = 27; };
+    'b18' = @{ 'x' = 264; 'y' = 64; };
+    'b19' = @{ 'x' = 350; 'y' = 27; };
+    'b20' = @{ 'x' = 350; 'y' = 64; };
 
-}
+  }
   $cnt = 1
 
   @(
@@ -376,11 +387,11 @@ $positions = @{
     ([ref]$b20)
   ) | ForEach-Object {
     $b = $_.Value
-    $x = $positions[$cnt]['x']
-    $y = $positions[$cnt]['y']
-    write-Debug ('button{0} x = {1}  y = {2}' -f $cnt,$x,$y)
-    $b.Location = New-Object System.Drawing.Point ( $x, $y)
-    $b.Name = ('button{0}' -f $cnt)
+    $b.Name = ('b{0}' -f $cnt)
+    $x = $positions[$b.Name].x
+    $y = $positions[$b.Name].y
+    Write-Debug ('button{0} x = {1}  y = {2}' -f $cnt,$x,$y)
+    $b.Location = New-Object System.Drawing.Point ($x,$y)
     $b.Size = New-Object System.Drawing.Size (80,30)
     $b.TabIndex = 1
     $b.Text = ('Button {0}' -f $cnt)
@@ -449,9 +460,23 @@ $positions = @{
 
   #  button10
 
+  $eventMethod10 = $b10.add_click
+  $eventMethod10.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      [scriptblock]$s = $callbacks[$sender.Name]
+      $local:result = $null
+      Invoke-Command $s -ArgumentList $sender,$eventargs
+
+
+    })
+
+
   # Panel1 label and buttons
   $p1.Controls.Add($l1)
-  $p1.Controls.AddRange(@( $b10,$b9,$b8,$b7,$b6,$b5, $b4,$b3,$b2,$b1))
+  $p1.Controls.AddRange(@( $b10,$b9,$b8,$b7,$b6,$b5,$b4,$b3,$b2,$b1))
 
 
   #  button11
@@ -487,7 +512,7 @@ $positions = @{
 
 
   # Panel2 label and buttons
-  $p2.Controls.AddRange(@( $b20,$b19,$b18,$b17,$b16,$b15, $b14,$b13,$b12,$b11))
+  $p2.Controls.AddRange(@( $b20,$b19,$b18,$b17,$b16,$b15,$b14,$b13,$b12,$b11))
   $p2.Controls.Add($l2)
 
   #  UserControl1
@@ -495,7 +520,7 @@ $positions = @{
   $u.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $u.BackColor = [System.Drawing.Color]::Gainsboro
 
-  $u.Controls.AddRange(@($p2,$p1))
+  $u.Controls.AddRange(@( $p2,$p1))
   $u.Name = 'UserControl1'
   $u.Size = New-Object System.Drawing.Size (948,100)
   $p1.ResumeLayout($false)
