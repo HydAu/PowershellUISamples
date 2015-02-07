@@ -293,15 +293,33 @@ function PromptRibbon {
   $p2.SuspendLayout()
   $u.SuspendLayout()
 
+  function button_click {
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $who = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(("We are processing {0}.`rThere is no callback defined yet." -f $who))
+  }
+
   $callbacks = @{
-    'b10' = [scriptblock]{
+    'b1' = [scriptblock]{
       param(
         [object]$sender,
         [System.EventArgs]$eventargs
       )
       $who = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(("We are processing callback function for {0}." -f $who))
+      [System.Windows.Forms.MessageBox]::Show(("We are processing`rcallback function for {0}." -f $who))
     };
+    'b3' = [scriptblock]{
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(("We are processing`rcallback function defined for {0}." -f $who))
+    };
+
   }
 
   #  panels
@@ -396,120 +414,39 @@ function PromptRibbon {
     $b.TabIndex = 1
     $b.Text = ('Button {0}' -f $cnt)
     $b.UseVisualStyleBackColor = $true
+    if ($callbacks[$b.Name]) {
+      $b.add_click({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          [scriptblock]$s = $callbacks[$sender.Name]
+          $local:result = $null
+          Invoke-Command $s -ArgumentList $sender,$eventargs
+
+
+        })
+
+    } else {
+      $b.add_click({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          $caller.Data = $sender.Text
+          button_click -Sender $sender -eventargs $eventargs
+
+        })
+
+    }
     $cnt++
 
   }
 
-  #  button1
-  function button_click {
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $who = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-
-  }
-  $eventMethod1 = $b1.add_click
-  $eventMethod1.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $caller.Data = $sender.Text
-      button_click -Sender $sender -eventargs $eventargs
-
-    })
-
-  #  button2
-  $eventMethod2 = $b2.add_click
-  $eventMethod2.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $caller.Data = $sender.Text
-      button_click -Sender $sender -eventargs $eventargs
-    })
-
-  #  button3
-
-  $eventMethod3 = $b3.add_click
-  $eventMethod3.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $caller.Data = $sender.Text
-      button_click -Sender $sender -eventargs $eventargs
-    })
-
-  #  button4
-
-
-  #  button5
-
-  #  button6
-
-  #  button7
-
-  #  button8
-
-  #  button9
-
-  #  button10
-
-  $eventMethod10 = $b10.add_click
-  $eventMethod10.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      [scriptblock]$s = $callbacks[$sender.Name]
-      $local:result = $null
-      Invoke-Command $s -ArgumentList $sender,$eventargs
-
-
-    })
-
-
   # Panel1 label and buttons
+
   $p1.Controls.Add($l1)
   $p1.Controls.AddRange(@( $b10,$b9,$b8,$b7,$b6,$b5,$b4,$b3,$b2,$b1))
-
-
-  #  button11
-
-  #  button12
-
-  #  button13
-
-  #  button14
-
-  $eventMethod14 = $b14.add_click
-  $eventMethod14.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $who = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-      $caller.Data = $sender.Text
-    })
-
-  #  button15
-
-  #  button16
-
-  #  button17
-
-  #  button18
-
-  #  button19
-
-  #  button20
-
 
   # Panel2 label and buttons
   $p2.Controls.AddRange(@( $b20,$b19,$b18,$b17,$b16,$b15,$b14,$b13,$b12,$b11))
