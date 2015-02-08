@@ -265,57 +265,76 @@ function PromptRibbon {
   $u = New-Object System.Windows.Forms.UserControl
   $p1 = New-Object System.Windows.Forms.Panel
   $l1 = New-Object System.Windows.Forms.Label
+
+  $p2 = New-Object System.Windows.Forms.Panel
+  $l2 = New-Object System.Windows.Forms.Label
+
   $b1 = New-Object System.Windows.Forms.Button
   $b2 = New-Object System.Windows.Forms.Button
   $b3 = New-Object System.Windows.Forms.Button
   $b4 = New-Object System.Windows.Forms.Button
-  $p2 = New-Object System.Windows.Forms.Panel
   $b5 = New-Object System.Windows.Forms.Button
   $b6 = New-Object System.Windows.Forms.Button
   $b7 = New-Object System.Windows.Forms.Button
   $b8 = New-Object System.Windows.Forms.Button
-  $l2 = New-Object System.Windows.Forms.Label
-  $p3 = New-Object System.Windows.Forms.Panel
   $b9 = New-Object System.Windows.Forms.Button
   $b10 = New-Object System.Windows.Forms.Button
   $b11 = New-Object System.Windows.Forms.Button
   $b12 = New-Object System.Windows.Forms.Button
-  $l3 = New-Object System.Windows.Forms.Label
-  $p4 = New-Object System.Windows.Forms.Panel
   $b13 = New-Object System.Windows.Forms.Button
   $b14 = New-Object System.Windows.Forms.Button
   $b15 = New-Object System.Windows.Forms.Button
   $b16 = New-Object System.Windows.Forms.Button
-  $l4 = New-Object System.Windows.Forms.Label
-  $p5 = New-Object System.Windows.Forms.Panel
   $b17 = New-Object System.Windows.Forms.Button
   $b18 = New-Object System.Windows.Forms.Button
   $b19 = New-Object System.Windows.Forms.Button
   $b20 = New-Object System.Windows.Forms.Button
-  $l5 = New-Object System.Windows.Forms.Label
   $p1.SuspendLayout()
   $p2.SuspendLayout()
-  $p3.SuspendLayout()
-  $p4.SuspendLayout()
-  $p5.SuspendLayout()
   $u.SuspendLayout()
+
+  function button_click {
+    param(
+      [object]$sender,
+      [System.EventArgs]$eventargs
+    )
+    $who = $sender.Text
+    [System.Windows.Forms.MessageBox]::Show(("We are processing {0}.`rThere is no callback defined yet." -f $who))
+  }
+
+  $callbacks = @{
+    'b1' = [scriptblock]{
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(("We are processing`rcallback function for {0}." -f $who))
+    };
+    'b3' = [scriptblock]{
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      $who = $sender.Text
+      [System.Windows.Forms.MessageBox]::Show(("We are processing`rcallback function defined for {0}." -f $who))
+    };
+
+  }
 
   #  panels
   $cnt = 0
   @(
     ([ref]$p1),
-    ([ref]$p2),
-    ([ref]$p3),
-    ([ref]$p4),
-    ([ref]$p5)
+    ([ref]$p2)
   ) | ForEach-Object {
     $p = $_.Value
     $p.BackColor = [System.Drawing.Color]::Silver
     $p.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
     $p.Dock = [System.Windows.Forms.DockStyle]::Left
-    $p.Location = New-Object System.Drawing.Point ((178 * $cnt),0)
+    $p.Location = New-Object System.Drawing.Point ((440 * $cnt),0)
     $p.Name = ('panel {0}' -f $cnt)
-    $p.Size = New-Object System.Drawing.Size (178,100)
+    $p.Size = New-Object System.Drawing.Size (440,100)
     $p.TabIndex = $cnt
     $cnt++
   }
@@ -324,10 +343,7 @@ function PromptRibbon {
   $cnt = 0
   @(
     ([ref]$l1),
-    ([ref]$l2),
-    ([ref]$l3),
-    ([ref]$l4),
-    ([ref]$l5)
+    ([ref]$l2)
   ) | ForEach-Object {
     $l = $_.Value
     $l.BackColor = [System.Drawing.Color]::DarkGray
@@ -341,7 +357,29 @@ function PromptRibbon {
     $cnt++
   }
   # buttons
+  $positions = @{
+    'b1' = @{ 'x' = 6; 'y' = 27; };
+    'b2' = @{ 'x' = 6; 'y' = 64; };
+    'b3' = @{ 'x' = 92; 'y' = 27; };
+    'b4' = @{ 'x' = 92; 'y' = 64; };
+    'b5' = @{ 'x' = 178; 'y' = 27; };
+    'b6' = @{ 'x' = 178; 'y' = 64; };
+    'b7' = @{ 'x' = 264; 'y' = 27; };
+    'b8' = @{ 'x' = 264; 'y' = 64; };
+    'b9' = @{ 'x' = 350; 'y' = 27; };
+    'b10' = @{ 'x' = 350; 'y' = 64; };
+    'b11' = @{ 'x' = 6; 'y' = 27; };
+    'b12' = @{ 'x' = 6; 'y' = 64; };
+    'b13' = @{ 'x' = 92; 'y' = 27; };
+    'b14' = @{ 'x' = 92; 'y' = 64; };
+    'b15' = @{ 'x' = 178; 'y' = 27; };
+    'b16' = @{ 'x' = 178; 'y' = 64; };
+    'b17' = @{ 'x' = 264; 'y' = 27; };
+    'b18' = @{ 'x' = 264; 'y' = 64; };
+    'b19' = @{ 'x' = 350; 'y' = 27; };
+    'b20' = @{ 'x' = 350; 'y' = 64; };
 
+  }
   $cnt = 1
 
   @(
@@ -367,161 +405,63 @@ function PromptRibbon {
     ([ref]$b20)
   ) | ForEach-Object {
     $b = $_.Value
-    # TODO: formula for location two-row buttons
-    $b.Location = New-Object System.Drawing.Point (6,27)
-    $b.Name = ('button{0}' -f $cnt)
+    $b.Name = ('b{0}' -f $cnt)
+    $x = $positions[$b.Name].x
+    $y = $positions[$b.Name].y
+    Write-Debug ('button{0} x = {1}  y = {2}' -f $cnt,$x,$y)
+    $b.Location = New-Object System.Drawing.Point ($x,$y)
     $b.Size = New-Object System.Drawing.Size (80,30)
     $b.TabIndex = 1
     $b.Text = ('Button {0}' -f $cnt)
     $b.UseVisualStyleBackColor = $true
+    if ($callbacks[$b.Name]) {
+      $b.add_click({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          [scriptblock]$s = $callbacks[$sender.Name]
+          $local:result = $null
+          Invoke-Command $s -ArgumentList $sender,$eventargs
+
+
+        })
+
+    } else {
+      $b.add_click({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          $caller.Data = $sender.Text
+          button_click -Sender $sender -eventargs $eventargs
+
+        })
+
+    }
     $cnt++
 
   }
+
   # Panel1 label and buttons
+
   $p1.Controls.Add($l1)
-  $p1.Controls.AddRange(@( $b4,$b3,$b2,$b1))
-
-  #  button1
-  $b1.Location = New-Object System.Drawing.Point (6,27)
-  function button_click {
-
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs
-    )
-    $who = $sender.Text
-    [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-
-  }
-  $eventMethod1 = $b1.add_click
-  $eventMethod1.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $caller.Data = $sender.Text
-      button_click -Sender $sender -eventargs $eventargs
-
-    })
-
-  #  button2
-  $b2.Location = New-Object System.Drawing.Point (6,64)
-  $eventMethod2 = $b2.add_click
-  $eventMethod2.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $caller.Data = $sender.Text
-      button_click -Sender $sender -eventargs $eventargs
-    })
-
-
-  #  button3
-  $b3.Location = New-Object System.Drawing.Point (92,27)
-  $eventMethod3 = $b3.add_click
-  $eventMethod3.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $caller.Data = $sender.Text
-      button_click -Sender $sender -eventargs $eventargs
-    })
-
-  #  button4
-  $b4.Location = New-Object System.Drawing.Point (92,64)
+  $p1.Controls.AddRange(@( $b10,$b9,$b8,$b7,$b6,$b5,$b4,$b3,$b2,$b1))
 
   # Panel2 label and buttons
-  $p2.Controls.AddRange(@( $b5,$b6,$b7,$b8))
+  $p2.Controls.AddRange(@( $b20,$b19,$b18,$b17,$b16,$b15,$b14,$b13,$b12,$b11))
   $p2.Controls.Add($l2)
 
-  #  button5
-  $b5.Location = New-Object System.Drawing.Point (92,64)
-
-  #  button6
-  $b6.Location = New-Object System.Drawing.Point (92,27)
-
-  #  button7
-  $b7.Location = New-Object System.Drawing.Point (6,64)
-
-  #  button8
-  $b8.Location = New-Object System.Drawing.Point (6,27)
-
-  #  label and buttons
-  $p3.Controls.AddRange(@( $b9,$b10,$b11,$b12))
-  $p3.Controls.Add($l3)
-
-  #  button9
-  $b9.Location = New-Object System.Drawing.Point (92,64)
-
-  #  button10
-  $b10.Location = New-Object System.Drawing.Point (92,27)
-
-  #  button11
-  $b11.Location = New-Object System.Drawing.Point (6,64)
-
-  #  button12
-  $b12.Location = New-Object System.Drawing.Point (6,27)
-
-  #  panel4 label and buttons
-  $p4.Controls.AddRange(@( $b13,$b14,$b15,$b16))
-  $p4.Controls.Add($l4)
-
-  #  button13
-  $b13.Location = New-Object System.Drawing.Point (92,64)
-
-  #  button14
-  $b14.Location = New-Object System.Drawing.Point (92,27)
-
-  $eventMethod14 = $b14.add_click
-  $eventMethod14.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      $who = $sender.Text
-      [System.Windows.Forms.MessageBox]::Show(("We are processing {0}." -f $who))
-      $caller.Data = $sender.Text
-    })
-
-  #  button15
-  $b15.Location = New-Object System.Drawing.Point (6,64)
-
-  #  button16
-  $b16.Location = New-Object System.Drawing.Point (6,27)
-
-  #  panel5 label and buttons
-  $p5.Controls.AddRange(@( $b17,$b18,$b19,$b20))
-  $p5.Controls.Add($l5)
-
-  #  button17
-  $b17.Location = New-Object System.Drawing.Point (92,64)
-
-  #  button18
-  $b18.Location = New-Object System.Drawing.Point (92,28)
-
-  #  button19
-  $b19.Location = New-Object System.Drawing.Point (6,64)
-
-  #  button20
-  $b20.Location = New-Object System.Drawing.Point (6,27)
-
-  #  
   #  UserControl1
-  #  
   $u.AutoScaleDimensions = New-Object System.Drawing.SizeF (6,13)
   $u.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $u.BackColor = [System.Drawing.Color]::Gainsboro
 
-  $u.Controls.AddRange(@( $p5,$p4,$p3,$p2,$p1))
-  $u.Name = "UserControl1"
+  $u.Controls.AddRange(@( $p2,$p1))
+  $u.Name = 'UserControl1'
   $u.Size = New-Object System.Drawing.Size (948,100)
   $p1.ResumeLayout($false)
   $p2.ResumeLayout($false)
-  $p3.ResumeLayout($false)
-  $p4.ResumeLayout($false)
-  $p5.ResumeLayout($false)
   $u.ResumeLayout($false)
 
   $r = New-Object -TypeName 'Ribbon.Panel' -ArgumentList ([System.Windows.Forms.UserControl]$u)
@@ -540,4 +480,3 @@ $caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.
 
 PromptRibbon -Title 'Floating Menu Sample Project' -caller $caller
 Write-Output $caller.Data
-
