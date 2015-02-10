@@ -1,3 +1,6 @@
+# note:
+# https://gist.github.com/qwertie/1150228
+# http://www.codeproject.com/Articles/132992/A-WPF-DateTimePicker-That-Works-Like-the-One-in-Wi
 # Get-EventLog time picker at http://showui.codeplex.com/ 
 # among other things.
 # http://www.c-sharpcorner.com/UploadFile/mahesh/wpf-datepicker/
