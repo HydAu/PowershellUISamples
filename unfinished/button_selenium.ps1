@@ -1555,11 +1555,11 @@ namespace System.Windows
             public static class Win32ControlType
             {
                 public static string Button = "Button";
-                public static string ComboBox = "ComboBox";	//The class for a combo box.
-                public static string Edit = "Edit";	    //The class for an edit control.
-                public static string ListBox = "ListBox";	//The class for a list box.
-                public static string ScrollBar = "ScrollBar";	//The class for a scroll bar.
-                public static string Static = "Static";	//The class for a static control.
+                public static string ComboBox = "ComboBox";     //The class for a combo box.
+                public static string Edit = "Edit";         //The class for an edit control.
+                public static string ListBox = "ListBox";       //The class for a list box.
+                public static string ScrollBar = "ScrollBar";   //The class for a scroll bar.
+                public static string Static = "Static"; //The class for a static control.
                 //public static string Custom = "MyWindow"; //Creates a new custom window
             }
 
@@ -3205,5 +3205,6 @@ $Button.Add_Click({ write-host 'Pressed'} )
 $window.AddControl($Button)
 
 start-sleep 10
+
 
 
