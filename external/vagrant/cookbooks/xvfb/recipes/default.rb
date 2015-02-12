@@ -49,14 +49,27 @@ end
 
 # Create init script for selenium hub and node
 # https://github.com/esycat/selenium-grid-init
-%w{hub node}.each do |init_script| 
+%w{selenium_hub selenium_node}.each do |init_script| 
 cookbook_file ("/etc/init.d/#{init_script}") do 
- source 'xvfb'
+ source init_script
  owner 'root'
  group 'root'
  mode 00755
  Chef::Log.info('generate init script for #{init_script}')
 end 
+end
+# create directory for selenium
+# TODO: create a user (not really necessary with Xvfb)
+directory '/root/selenium' do
+  owner 'root'
+  group 'root'
+  mode  00755
+  action :create
+end
+file '/root/selenium/selenium.jar' do
+  owner 'root'
+  content ::File.open("#{Chef::Config[:file_cache_path]}/selenium.jar").read
+action :create
 end
 # start Jenkins server
 
