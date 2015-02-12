@@ -47,7 +47,6 @@ $m.ShowTodayCircle = $false
 $m.ShowWeekNumbers = $true
 $m.TabIndex = 0
 
-
 $b.Location = New-Object System.Drawing.Point(48, 184)
 $b.Name = 'button1'
 $b.Size = New-Object System.Drawing.Size(128, 23)
@@ -62,19 +61,18 @@ $f.ResumeLayout($false)
 
 	 
 $Calendar_Load = $f.Add_Load 
-$Calendar_Load_Handler = {
+$Calendar_Load.Invoke({
 	param(
 		[object]$sender,
 		[System.EventArgs]$e 
 	)
 
 	[string ]$str = $m.Text.ToString()  
-}
-$Calendar_Load.Invoke($Calendar_Load_Handler )
+})
 
 $b_Click = $b.Add_Click 
 
-$b_Click_Handler = {
+$b_Click.Invoke({
 	param(
 		[object]$sender,
 		[System.EventArgs]$e 
@@ -84,16 +82,11 @@ $b_Click_Handler = {
 	[SelectionRange]$st = $sr.Start
 	[SelectionRange]$se = $sr.End  
 	$caller.Data =  ( "RANGE START = {0}`nRANGE END = {1}" -f $st.ToString() , $se.ToString() );
-}
-
-$b_Click.Invoke($b_Click_Handler )
+})
 
   $f.Topmost = $True
-
   $f.Add_Shown({ $f.Activate() })
-
   [void]$f.ShowDialog([win32window ]($caller))
-
   $f.Dispose()
 }
 
