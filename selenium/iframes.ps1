@@ -18,7 +18,8 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 param(
-  [string]$browser
+  [string]$browser = 'chrome',
+  [switch]$pause
 )
 
 
@@ -38,7 +39,6 @@ function cleanup
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
-  'Selenium.WebDriverBackedSelenium.dll',
   'nunit.core.dll',
   'nunit.framework.dll'
 )
@@ -60,7 +60,9 @@ $shared_assemblies | ForEach-Object {
   Add-Type -Path $_
 }
 popd
+[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 
+$DebugPreference = 'Continue'
 # Convertfrom-JSON applies To: Windows PowerShell 3.0 and above
 [NUnit.Framework.Assert]::IsTrue($host.Version.Major -gt 2)
 
@@ -112,37 +114,142 @@ if ($browser -ne $null -and $browser -ne '') {
 
 [void]$selenium.Manage().timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds(60))
 
-$selenium.url = $base_url = 'http://translation2.paralink.com/'
-$selenium.Navigate().GoToUrl($base_url)
+$selenium.url = $base_url = 'http://translation2.paralink.com'
+$selenium.Navigate().GoToUrl(($base_url + '/'))
 [string]$xpath = "//frame[@id='topfr']"
 $top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
-$frame_driver = $selenium.SwitchTo().Frame($top_frame)
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newtop.asp',$frame_driver.url)
-Write-Debug '1'
+$current_frame = $selenium.SwitchTo().Frame($top_frame)
+[NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
+Write-Debug ('Switched to {0} {1}' -f $current_frame.url, $xpath)
+[string]$xpath2 = "//textarea[@id='source']"
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+
+try {
+Question  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath2)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $current_frame.FindElement([OpenQA.Selenium.By]::XPath($xpath2))
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+
+[void]$element.SendKeys("Question")
+Start-Sleep -Milliseconds 1000
+$css_selector = 'img[src*="btn-en-tran.gif"]'
+
+Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
+  # Exception with : Value cannot be null.
+  # Parameter name: key ...
+  # ???
+}
+
+[OpenQA.Selenium.IWebElement]$element = $current_frame.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+
+# [NUnit.Framework.Assert]::AreEqual($element.Text,'Select a Destination')
+
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+
+
+
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 
 [void]$selenium.SwitchTo().DefaultContent()
 
 $xpath = "//frame[@id='botfr']"
 $bot_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
-$frame_driver = $selenium.SwitchTo().Frame($bot_frame)
+$current_frame = $selenium.SwitchTo().Frame($bot_frame)
 
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newbot.asp',$frame_driver.url)
-Write-Debug '2'
+[NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
+Write-Debug ('Switched to {0}' -f $current_frame.url)
+
+
+
+[string]$xpath2 = "//textarea[@id='target']"
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath2)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath2))
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+
 #
 # https://code.google.com/p/selenium/source/browse/java/client/src/org/openqa/selenium/remote/HttpCommandExecutor.java?r=3f4622ced689d2670851b74dac0c556bcae2d0fe
-# write-output $frame_driver.PageSource
+# write-output $frame.PageSource
 [void]$selenium.SwitchTo().DefaultContent()
 
-$driver = $selenium.SwitchTo().Frame(1)
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newbot.asp',$frame_driver.url)
+$current_frame = $selenium.SwitchTo().Frame(1)
+[NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+
 
 [void]$selenium.SwitchTo().DefaultContent()
-Write-Debug '3'
-$driver = $selenium.SwitchTo().Frame(0)
-[NUnit.Framework.Assert]::AreEqual($frame_driver.url,'http://translation2.paralink.com/newtop.asp',$frame_driver.url)
+$current_frame = $selenium.SwitchTo().Frame(0)
+[NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
+Write-Debug ('Switched to {0}' -f $current_frame.url)
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 
 [void]$selenium.SwitchTo().DefaultContent()
-Write-Debug '4'
+Write-Debug ('Switched to {0}' -f $selenium.url)
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
 
 # TODO:
 # [void]$selenium.SwitchOutOfIFrame()
