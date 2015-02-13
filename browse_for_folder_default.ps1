@@ -149,7 +149,7 @@ $FileBrowser.FileNames
 # *** Entry Point to Script ***
 
 Get-FileName -initialDirectory "c:\fso"
-https://social.technet.microsoft.com/Forums/en-US/ebc8a618-4cd0-4328-b0f1-3c70d811309c/getting-the-file-location-using-openfiledialog-in-powershell
+# https://social.technet.microsoft.com/Forums/en-US/ebc8a618-4cd0-4328-b0f1-3c70d811309c/getting-the-file-location-using-openfiledialog-in-powershell
 #>
 <#
 Add-Type -AssemblyName system.Windows.Forms
