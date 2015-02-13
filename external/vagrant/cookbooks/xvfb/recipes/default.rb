@@ -71,22 +71,38 @@ file '/root/selenium/selenium.jar' do
   content ::File.open("#{Chef::Config[:file_cache_path]}/selenium.jar").read
 action :create
 end
-# start Jenkins server
 
-# start Jenkins client
+template '/root/selenium/node.json' do
+  source 'node.json.erb'
+
+  variables(
+   # variable :platform will be provided by the runtime
+   :my_platform => node['my_platform']
+  )
+  owner 'root'
+  group 'root'
+  mode 00644
+  Chef::Log.info('configure node')
+end 
+# start X window server
+%w{vncserver Xvfb}.each do |service_name|
+  service service_name do
+    # NOTE: Init replace with Upstart for 14.04
+    unless node[:platform_version].match( /14\./).nil?
+      provider Chef::Provider::Service::Upstart
+    else
+      provider Chef::Provider::Service::Debian
+    end
+    action [:enable, :start]
+    supports :status => true, :restart => true
+    Chef::Log.info("started #{service_name}")
+  end
+end
+
+# start Jenkins server and client
 
 # TODO: optionally start phantomJS
-%w{vncserver Xvfb}.each do |service_name|
-service service_name do
- # NOTE: replace with Upstart for 14.04
- unless node[:platform_version].match( /14\./).nil?
-   provider Chef::Provider::Service::Upstart
- else
-   provider Chef::Provider::Service::Debian
- end
-  action [:enable, :start]
-  supports :status => true, :restart => true
-  Chef::Log.info("started #{service_name}")
-end
-end
+
+
+
 # ssh -o StrictHostKeyChecking=no username@hostname.com
