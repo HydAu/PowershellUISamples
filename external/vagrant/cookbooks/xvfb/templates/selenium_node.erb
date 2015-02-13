@@ -1,6 +1,10 @@
 #!/bin/sh
+
+
 # set -x
+
 set -e
+
 SELENIUM_USER='root'
 SELENIUM_HOME='/root/selenium'
 SERVICE_NAME='selenium'
@@ -8,30 +12,25 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DEFAULTS="/etc/default/${SERVICE_NAME}"
 INITSCRIPT="$(basename "$0")"
 JOB="${INITSCRIPT%.sh}"
-PIDFILE='/var/run/hub.pid'
-LOGFILE_DIR='var/log'
-PIDFILE_DIR='/var/run'
-COMMAND="$1"
-
 
 export NODE_PORT=5555
 export HUB_IP_ADDRESS=127.0.0.1
 export HUB_PORT=4444
-export SELENIUM_JAR_VERSION=2.43.1
+export NODE_CONFIG="${SELENIUM_HOME}/node.json"
 export DISPLAY_PORT=99
-export JVM_ARGS='-XX:MaxPermSize=256M -Xmn128M -Xms256M -Xmx256M'
+export JVM_ARGS='-Xmn128M -Xms256M -Xmx256M'
 export SELENIUM_JAR_VERSION=2.44.0 # currently unused
 export ROLE=node
 
-# TODO: process when JAVA_HOME not set 
+PIDFILE="/var/run/${ROLE}.pid"
+LOGFILE_DIR='var/log'
+PIDFILE_DIR='/var/run'
+COMMAND="$1"
 
-SELENIUM_ARGS=`<<END_ARGS
--classpath \
-$SELENIUM_HOME/log4j-1.2.17.jar:$SELENIUM_HOME/selenium-server-standalone.jar: \
--Dlog4j.configuration=node.log4j.properties \
-org.openqa.grid.selenium.GridLauncher \
--role node \
--host $NODE_HOST \
+# TODO: process when JAVA_HOME not set 
+export JAVA_HOME='/usr/bin'
+SELENIUM_ARGS=`cat<<END_ARGS
+-role $ROLE \
 -port $NODE_PORT \
 -hub http://${HUB_IP_ADDRESS}:${HUB_PORT}/hub/register \
 -nodeConfig $NODE_CONFIG  \
@@ -40,13 +39,17 @@ org.openqa.grid.selenium.GridLauncher \
 -trustAllSSLCertificates
 END_ARGS
 `
-
+export SELENIUM_ARGS
 [ -r "$DEFAULTS" ] && . "$DEFAULTS"
 . /lib/init/vars.sh
 . /lib/lsb/init-functions
-
-DAEMON_ARGS="--quiet --pidfile $PIDFILE --user $SELENIUM_USER"
-DAEMON_CMD="$JAVA_HOME/java -- $JVM_ARGS ${SELENIUM_ARGS}"
+# export JVM_ARGS=
+DAEMON_ARGS="--name $ROLE --quiet --pidfile $PIDFILE --user $SELENIUM_USER"
+DAEMON_CMD="/usr/bin/java -- $JVM_ARGS -jar ${SELENIUM_HOME}/selenium.jar ${SELENIUM_ARGS}"
+if [ "$DEBUG" != "" ]  
+then
+  echo $DAEMON_CMD
+fi
 
 start() {
     logger "Starting Selenium Grid in ${SERVICE_ROLE} mode..."
