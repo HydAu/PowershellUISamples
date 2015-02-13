@@ -50,8 +50,11 @@ end
 # Create init script for selenium hub and node
 # https://github.com/esycat/selenium-grid-init
 %w{selenium_hub selenium_node}.each do |init_script| 
-cookbook_file ("/etc/init.d/#{init_script}") do 
- source init_script
+template ("/etc/init.d/#{init_script}") do 
+ source"#{init_script}.erb"
+ variables(
+   #TODO
+ ) 
  owner 'root'
  group 'root'
  mode 00755
@@ -98,9 +101,29 @@ end
     Chef::Log.info("started #{service_name}")
   end
 end
+# http://www.apache.org/dyn/closer.cgi/logging/log4j/1.2.17/log4j-1.2.17.tar.gz
+remote_file "#{Chef::Config[:file_cache_path]}/log4j.tar.gz" do
+  source "#{node['log4j']['url']}"
+# NOTE version !
+ Chef::Log.info('downloaded selenium jar into: ' + Chef::Config[:file_cache_path])
+end
+# TODO  : expand the tar
 
 # start Jenkins server and client
 
+%w{selenium_hub selenium_node}.each do |service_name|
+  service service_name do
+    # NOTE: Init replace with Upstart for 14.04
+    unless node[:platform_version].match( /14\./).nil?
+      provider Chef::Provider::Service::Upstart
+    else
+      provider Chef::Provider::Service::Debian
+    end
+    action [:enable, :start]
+    supports :status => true, :restart => true
+    Chef::Log.info("started #{service_name}")
+  end
+end
 # TODO: optionally start phantomJS
 
 

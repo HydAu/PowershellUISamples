@@ -15,7 +15,7 @@ COMMAND="$1"
 export JVM_ARGS='-XX:MaxPermSize=256M -Xmn128M -Xms256M -Xmx256M'
 export HUB_PORT=4444
 export SELENIUM_JAR_VERSION=2.44.0 # currently unused
-export ROLE=node
+export ROLE=hub
 
 # TODO: process when JAVA_HOME not set 
 
@@ -25,9 +25,9 @@ SELENIUM_ARGS="-role $ROLE -port $HUB_PORT"
 . /lib/init/vars.sh
 . /lib/lsb/init-functions
 
-DAEMON_ARGS="--quiet --pidfile $PIDFILE --user $SELENIUM_USER"
+DAEMON_ARGS="--name $ROLE --quiet --pidfile $PIDFILE --user $SELENIUM_USER"
 DAEMON_CMD="/usr/bin/java -- $JVM_ARGS -jar ${SELENIUM_HOME}/selenium.jar ${SELENIUM_ARGS}"
-
+echo $DAEMON_CMD
 start() {
     logger "Starting Selenium Grid in ${SERVICE_ROLE} mode..."
 
