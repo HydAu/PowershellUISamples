@@ -11,6 +11,10 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.OutputType;
+import org.apache.commons.io.FilenameUtils;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -83,7 +87,7 @@ public class App
 
 static WebDriver driver;
 
-public static void main(String[] args) throws InterruptedException {
+public static void main(String[] args) throws InterruptedException,java.io.IOException {
 
 	DesiredCapabilities capabilities = DesiredCapabilities.firefox();
 
@@ -105,9 +109,10 @@ public static void main(String[] args) throws InterruptedException {
 	driver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
 
 
-	String value0 = "destinations";
-	String title0  = "Destinations - opens .*";
-	String css_selector0 = String.format("li#%s a.pnavmenu_link", value0);
+	String value0 = "pnav-destinations";
+	String title0  = "Destinations & Excursions - opens submenu";
+
+	String css_selector0 = String.format("a#%s", value0);
 	// Hover over menu
 	WebElement element0 =  driver.findElement(By.cssSelector(css_selector0));
 	Actions a1 = new Actions(driver);
@@ -115,7 +120,7 @@ public static void main(String[] args) throws InterruptedException {
 	// http://junit.sourceforge.net/javadoc/org/junit/Assert.html
 	// assertEquals(200, response.getStatusLine().getStatusCode());
 	assertTrue(String.format("Unexpected title '%s'", element0.getAttribute("title")), element0.getAttribute("title").matches(title0) );
-
+/*
 	String value1  = "/cruise-destinations/alaska?WT.ac=pnav_DestMap_Alaska";
 	String text1   = "Alaska & Yukon";
 	String title1  = "Alaska Cruise Vacations";
@@ -125,16 +130,22 @@ public static void main(String[] args) throws InterruptedException {
 	wait.withTimeout(1, TimeUnit.SECONDS).pollingEvery(150, TimeUnit.MICROSECONDS ); 
 	wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(css_selector1)));
 	WebElement element1 = driver.findElement(By.cssSelector(css_selector1));
-    assertTrue(String.format("Unexpected text '%s'" , element1.getText()), element1.getText().matches(text1) ); 
+        assertTrue(String.format("Unexpected text '%s'" , element1.getText()), element1.getText().matches(text1) ); 
 	System.out.println(String.format("Click on '%s'", element1.getText()));
 	new Actions(driver).moveToElement(element1).click().build().perform();
 	Thread.sleep(3000L);
-    assertTrue(driver.getTitle(),driver.getTitle().contains(title1));
+        assertTrue(driver.getTitle(),driver.getTitle().contains(title1));
 	driver.navigate().back();
+*/
+	//take a screenshot
+	File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+	String currentDir = System.getProperty("user.dir");
+	//save the screenshot in png format on the disk.
+	FileUtils.copyFile(scrFile, new File(FilenameUtils.concat(currentDir, "screenshot.png")));
 
 	//closing current driver window
 	driver.close();
 }
-
+       // http://selenium-interview-questions.blogspot.in/2014/02/how-to-take-screenshot-of-webpage-using.html
 }
 
