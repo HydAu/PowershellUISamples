@@ -257,7 +257,7 @@ param([string] $value0 )
 
 }
 
-('pnav-planACruise' , 'pnav-specialOffers', 'pnav-destination' , 'pnav-onboard') | foreach-object {hover_menus -value0 $_}
+('pnav-planACruise' , 'pnav-specialOffers', 'pnav-destinations' , 'pnav-onboard') | foreach-object {hover_menus -value0 $_}
 hover_menus 
 
 # Cleanup
