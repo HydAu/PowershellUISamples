@@ -18,7 +18,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 param(
-  [string]$browser = 'firefox',
+  [string]$browser = 'chrome',
   [switch]$pause
 )
 
@@ -129,18 +129,51 @@ if ($browser -ne $null -and $browser -ne '') {
 
 $selenium.url = $base_url = 'http://translation2.paralink.com'
 $selenium.Navigate().GoToUrl(($base_url + '/'))
+
 [string]$xpath = "//frame[@id='topfr']"
 $top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
 $current_frame = $selenium.SwitchTo().Frame($top_frame)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
 Write-Debug ('Switched to {0} {1}' -f $current_frame.url,$xpath)
+
+
+#==========
+# select id="directions"
+
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
+$wait.PollingInterval = 100
+$css_selector = 'select#directions > option[value="es/ru"]'
+# > 
+
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+} catch [exception]{
+  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+}
+[OpenQA.Selenium.IWebElement[]]$element = $current_frame.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector))
+# write-output $element
+$element.Click()
+
+[NUnit.Framework.Assert]::AreEqual($element.Text,'Spanish-Russian translation' , $element.Text)
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+
+
 [string]$xpath2 = "//textarea[@id='source']"
 
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
 
 try {
-  Question [void]$wait.Until ([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Xpath($xpath2)))
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Xpath($xpath2)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
@@ -148,7 +181,13 @@ try {
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 highlight ([ref]$current_frame) ([ref]$element)
-[void]$element.SendKeys("Question")
+
+$text = @"
+TASA
+
+Yo, Juan Gallo de Andrada, escribano de Cámara del Rey nuestro señor, de los que residen en su Consejo, certifico y doy fe que, habiendo visto por los señores dél un libro intitulado El ingenioso hidalgo de la Mancha, compuesto por Miguel de Cervantes Saavedra, tasaron cada pliego del dicho libro a tres maravedís y medio; el cual tiene ochenta y tres pliegos, que al dicho precio monta el dicho libro docientos y noventa maravedís y medio, en que se ha de vender en papel;.
+"@
+[void]$element.SendKeys($text)
 
 Start-Sleep -Milliseconds 1000
 $css_selector = 'img[src*="btn-en-tran.gif"]'
@@ -268,6 +307,7 @@ if ($PSBoundParameters['pause']) {
   Start-Sleep -Millisecond 1000
 }
 
+#>
 
 # TODO:
 # [void]$selenium.SwitchOutOfIFrame()
