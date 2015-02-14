@@ -18,11 +18,24 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 param(
-  [string]$browser = 'chrome',
+  [string]$browser = 'firefox',
   [switch]$pause
 )
 
+function highlight {
 
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref,
+    [System.Management.Automation.PSReference]$element_ref,
+    [int]$delay = 300
+  )
+
+  # https://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium_ref.Value.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element_ref.Value,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep -Millisecond $delay
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium_ref.Value.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element_ref.Value,'')
+
+}
 function cleanup
 {
   param(
@@ -120,22 +133,23 @@ $selenium.Navigate().GoToUrl(($base_url + '/'))
 $top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
 $current_frame = $selenium.SwitchTo().Frame($top_frame)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
-Write-Debug ('Switched to {0} {1}' -f $current_frame.url, $xpath)
+Write-Debug ('Switched to {0} {1}' -f $current_frame.url,$xpath)
 [string]$xpath2 = "//textarea[@id='source']"
 
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
 
 try {
-Question  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath2)))
+  Question [void]$wait.Until ([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Xpath($xpath2)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-[OpenQA.Selenium.IWebElement]$element = $current_frame.FindElement([OpenQA.Selenium.By]::XPath($xpath2))
+[OpenQA.Selenium.IWebElement]$element = $current_frame.findElement([OpenQA.Selenium.By]::Xpath($xpath2))
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-
+highlight ([ref]$current_frame) ([ref]$element)
 [void]$element.SendKeys("Question")
+
 Start-Sleep -Milliseconds 1000
 $css_selector = 'img[src*="btn-en-tran.gif"]'
 
@@ -152,9 +166,10 @@ try {
   # ???
 }
 
-[OpenQA.Selenium.IWebElement]$element = $current_frame.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+[OpenQA.Selenium.IWebElement]$element = $current_frame.findElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 
 # [NUnit.Framework.Assert]::AreEqual($element.Text,'Select a Destination')
+highlight ([ref]$current_frame) ([ref]$element)
 
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
@@ -189,13 +204,16 @@ Write-Debug ('Switched to {0}' -f $current_frame.url)
 $wait.PollingInterval = 100
 
 try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath2)))
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Xpath($xpath2)))
 } catch [exception]{
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
-[OpenQA.Selenium.IWebElement]$element = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath2))
+[OpenQA.Selenium.IWebElement]$element = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath2))
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+
+highlight ([ref]$current_frame) ([ref]$element)
+Write-Output $element.Text
+# $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 if ($PSBoundParameters['pause']) {
   Write-Output 'pause'
