@@ -1,22 +1,33 @@
 #!/bin/sh
-
+# set -x
 set -e
-SERVICE_NAME="selenium"
+SELENIUM_USER='root'
+SELENIUM_HOME='/root/selenium'
+SERVICE_NAME='selenium'
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DEFAULTS="/etc/default/${SERVICE_NAME}"
 INITSCRIPT="$(basename "$0")"
 JOB="${INITSCRIPT%.sh}"
-PIDFILE=/var/run/hub.pid
-
+PIDFILE='/var/run/hub.pid'
+LOGFILE_DIR='var/log'
+PIDFILE_DIR='/var/run'
 COMMAND="$1"
+export JVM_ARGS='-XX:MaxPermSize=256M -Xmn128M -Xms256M -Xmx256M'
+export HUB_PORT=<%= @hub_port %>
+export SELENIUM_JAR_VERSION=2.44.0 # currently unused
+export ROLE=hub
+
+# TODO: process when JAVA_HOME not set 
+
+SELENIUM_ARGS="-role $ROLE -port $HUB_PORT"
 
 [ -r "$DEFAULTS" ] && . "$DEFAULTS"
 . /lib/init/vars.sh
 . /lib/lsb/init-functions
 
-DAEMON_ARGS="--quiet --pidfile $PIDFILE --user $SELENIUM_USER"
-DAEMON_CMD="$JAVA_HOME/java -- $JVM_ARGS -jar ${SELENIUM_HOME}/server-standalone.jar ${SELENIUM_ARGS}"
-
+DAEMON_ARGS="--name $ROLE --quiet --pidfile $PIDFILE --user $SELENIUM_USER"
+DAEMON_CMD="/usr/bin/java -- $JVM_ARGS -jar ${SELENIUM_HOME}/selenium.jar ${SELENIUM_ARGS}"
+echo $DAEMON_CMD
 start() {
     logger "Starting Selenium Grid in ${SERVICE_ROLE} mode..."
 
