@@ -1,5 +1,5 @@
 @echo OFF
-OLDCWD=%CD%
+set OLDCWD=%CD%
 pushd %~dp0
 set GROOVY_VERSION=2.3.8
 set JAVA_VERSION=1.6.0_45
