@@ -205,12 +205,15 @@ $selenium.Navigate().GoToUrl(($base_url + '/'))
 
 [string]$text  = 'Spanish-Russian translation' 
 [string]$xpath = "//frame[@id='topfr']"
-$top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
+[Object]$top_frame = $null
+find_page_element_by_xpath ([ref]$selenium) ([ref]$top_frame) $xpath
 $current_frame = $selenium.SwitchTo().Frame($top_frame)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
 Write-Debug ('Switched to {0} {1}' -f $current_frame.url,$xpath)
+$top_frame = $null 
+
 $css_selector = 'select#directions > option[value="es/ru"]'
-[OpenQA.Selenium.IWebElement[]]$element = $null 
+[OpenQA.Selenium.IWebElement]$element = $null 
 find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element)  $css_selector
 [NUnit.Framework.Assert]::AreEqual($text, $element.Text, $element.Text)
 $element.Click()
@@ -220,19 +223,12 @@ custom_pause
 
 [string]$xpath2 = "//textarea[@id='source']"
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Xpath($xpath2)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-[OpenQA.Selenium.IWebElement]$element = $current_frame.findElement([OpenQA.Selenium.By]::Xpath($xpath2))
-$element
+[OpenQA.Selenium.IWebElement]$element = $null 
+find_page_element_by_xpath ([ref]$current_frame) ([ref]$element) $xpath2
+highlight ([ref]$current_frame) ([ref]$element)
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-highlight ([ref]$current_frame) ([ref]$element)
+
 $text = @"
 Yo, Juan Gallo de Andrada, escribano de Cámara del Rey nuestro señor, de los que residen en su Consejo, certifico y doy fe que, habiendo visto por los señores dél un libro intitulado El ingenioso hidalgo de la Mancha, compuesto por Miguel de Cervantes Saavedra, tasaron cada pliego del dicho libro a tres maravedís y medio; el cual tiene ochenta y tres pliegos, que al dicho precio monta el dicho libro docientos y noventa maravedís y medio, en que se ha de vender en papel;.
 "@
@@ -254,29 +250,20 @@ custom_pause
 
 [void]$selenium.SwitchTo().DefaultContent()
 
-$xpath = "//frame[@id='botfr']"
-$bot_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
+[string]$xpath = "//frame[@id='botfr']"
+[Object]$bot_frame = $null
+find_page_element_by_xpath ([ref]$selenium) ([ref]$bot_frame) $xpath
 $current_frame = $selenium.SwitchTo().Frame($bot_frame)
-
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
 Write-Debug ('Switched to {0}' -f $current_frame.url)
+$bot_frame = $null 
 
 [string]$xpath2 = "//textarea[@id='target']"
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Xpath($xpath2)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-[OpenQA.Selenium.IWebElement]$element = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath2))
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-
+[OpenQA.Selenium.IWebElement]$element = $null 
+find_page_element_by_xpath ([ref]$current_frame) ([ref]$element) $xpath2
 highlight ([ref]$current_frame) ([ref]$element)
 Write-Output $element.Text
-# $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 custom_pause
 
@@ -298,16 +285,6 @@ custom_pause
 
 [void]$selenium.SwitchTo().DefaultContent()
 Write-Debug ('Switched to {0}' -f $selenium.url)
-if ($PSBoundParameters['custom_pause']) {
-  Write-Output 'custom_pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
-}
-
-#>
 
 # TODO:
 # [void]$selenium.SwitchOutOfIFrame()
