@@ -22,6 +22,19 @@ param(
   [switch]$pause
 )
 
+function custom_pause { 
+
+if ($PSBoundParameters['pause']) {
+  Write-Output 'pause'
+  try {
+    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+  } catch [exception]{}
+} else {
+  Start-Sleep -Millisecond 1000
+}
+
+} 
+
 function highlight {
 
   param(
@@ -35,7 +48,67 @@ function highlight {
   Start-Sleep -Millisecond $delay
   [OpenQA.Selenium.IJavaScriptExecutor]$selenium_ref.Value.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element_ref.Value,'')
 
+
 }
+
+function find_page_element_by_css_selector {
+
+  param(
+    [System.Management.Automation.PSReference]$selenium_driver_ref,
+    [System.Management.Automation.PSReference]$element_ref,
+    [string] $css_selector,
+    [int]$wait_seconds = 10
+
+  )
+
+   if ($css_selector -eq '' -or $css_selector -eq $null ) {
+  return 
+}
+  $local:element = $null 
+  [OpenQA.Selenium.Remote.RemoteWebDriver]$local:selenum_driver = $selenium_driver_ref.Value
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($local:selenum_driver,[System.TimeSpan]::FromSeconds($wait_seconds))
+  $wait.PollingInterval = 50
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+  } catch [exception]{
+    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0], $css_selector )
+  }
+
+  $local:element = $local:selenum_driver.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+  $element_ref.Value =  $local:element
+
+}
+
+function find_page_element_by_xpath {
+
+  param(
+    [System.Management.Automation.PSReference]$selenium_driver_ref,
+    [System.Management.Automation.PSReference]$element_ref,
+    [string] $xpath,
+    [int]$wait_seconds = 10
+
+  )
+
+   if ($xpath -eq '' -or $xpath -eq $null ) {
+  return 
+}
+  $local:element = $null 
+  [OpenQA.Selenium.Remote.RemoteWebDriver]$local:selenum_driver = $selenium_driver_ref.Value
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($local:selenum_driver,[System.TimeSpan]::FromSeconds($wait_seconds))
+  $wait.PollingInterval = 50
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
+  } catch [exception]{
+    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0], $css_selector )
+  }
+
+  $local:element = $local:selenum_driver.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+  $element_ref.Value =  $local:element
+
+}
+
 function cleanup
 {
   param(
@@ -130,42 +203,20 @@ if ($browser -ne $null -and $browser -ne '') {
 $selenium.url = $base_url = 'http://translation2.paralink.com'
 $selenium.Navigate().GoToUrl(($base_url + '/'))
 
+[string]$text  = 'Spanish-Russian translation' 
 [string]$xpath = "//frame[@id='topfr']"
 $top_frame = $selenium.findElement([OpenQA.Selenium.By]::Xpath($xpath))
 $current_frame = $selenium.SwitchTo().Frame($top_frame)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
 Write-Debug ('Switched to {0} {1}' -f $current_frame.url,$xpath)
-
-
-#==========
-# select id="directions"
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
 $css_selector = 'select#directions > option[value="es/ru"]'
-# > 
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-[OpenQA.Selenium.IWebElement[]]$element = $current_frame.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector))
-# write-output $element
+[OpenQA.Selenium.IWebElement[]]$element = $null 
+find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element)  $css_selector
+[NUnit.Framework.Assert]::AreEqual($text, $element.Text, $element.Text)
 $element.Click()
+$element = $null 
 
-[NUnit.Framework.Assert]::AreEqual($element.Text,'Spanish-Russian translation' , $element.Text)
-
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
-}
-
-
+custom_pause
 
 [string]$xpath2 = "//textarea[@id='source']"
 
@@ -178,53 +229,28 @@ try {
   Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
 }
 [OpenQA.Selenium.IWebElement]$element = $current_frame.findElement([OpenQA.Selenium.By]::Xpath($xpath2))
+$element
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 highlight ([ref]$current_frame) ([ref]$element)
-
 $text = @"
-TASA
-
 Yo, Juan Gallo de Andrada, escribano de Cámara del Rey nuestro señor, de los que residen en su Consejo, certifico y doy fe que, habiendo visto por los señores dél un libro intitulado El ingenioso hidalgo de la Mancha, compuesto por Miguel de Cervantes Saavedra, tasaron cada pliego del dicho libro a tres maravedís y medio; el cual tiene ochenta y tres pliegos, que al dicho precio monta el dicho libro docientos y noventa maravedís y medio, en que se ha de vender en papel;.
 "@
 [void]$element.SendKeys($text)
+$element = $null
 
 Start-Sleep -Milliseconds 1000
 $css_selector = 'img[src*="btn-en-tran.gif"]'
 
-Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
-  # Exception with : Value cannot be null.
-  # Parameter name: key ...
-  # ???
-}
-
-[OpenQA.Selenium.IWebElement]$element = $current_frame.findElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-
-# [NUnit.Framework.Assert]::AreEqual($element.Text,'Select a Destination')
+find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element)  $css_selector
+[NUnit.Framework.Assert]::AreEqual('Translate' , $element.GetAttribute('title'),$element.GetAttribute('title'))
 highlight ([ref]$current_frame) ([ref]$element)
-
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
-
-
-
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
-}
-
+$element = $null 
+custom_pause
 
 [void]$selenium.SwitchTo().DefaultContent()
 
@@ -234,8 +260,6 @@ $current_frame = $selenium.SwitchTo().Frame($bot_frame)
 
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
 Write-Debug ('Switched to {0}' -f $current_frame.url)
-
-
 
 [string]$xpath2 = "//textarea[@id='target']"
 
@@ -254,15 +278,7 @@ highlight ([ref]$current_frame) ([ref]$element)
 Write-Output $element.Text
 # $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
-}
-
+custom_pause
 
 #
 # https://code.google.com/p/selenium/source/browse/java/client/src/org/openqa/selenium/remote/HttpCommandExecutor.java?r=3f4622ced689d2670851b74dac0c556bcae2d0fe
@@ -271,35 +287,19 @@ if ($PSBoundParameters['pause']) {
 
 $current_frame = $selenium.SwitchTo().Frame(1)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
-}
 
-
+custom_pause
 
 [void]$selenium.SwitchTo().DefaultContent()
 $current_frame = $selenium.SwitchTo().Frame(0)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
 Write-Debug ('Switched to {0}' -f $current_frame.url)
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
-}
-
+custom_pause
 
 [void]$selenium.SwitchTo().DefaultContent()
 Write-Debug ('Switched to {0}' -f $selenium.url)
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
+if ($PSBoundParameters['custom_pause']) {
+  Write-Output 'custom_pause'
   try {
     [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
   } catch [exception]{}
