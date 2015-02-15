@@ -3168,18 +3168,18 @@ namespace System.Windows
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','Microsoft.CSharp.dll','System.Xml.Linq.dll','System.Xml.dll'
 
-function custom_pause { 
+function custom_pause {
 
-if ($PSBoundParameters['pause']) {
-  Write-Output 'pause'
-  try {
-    [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-  } catch [exception]{}
-} else {
-  Start-Sleep -Millisecond 1000
+  if ($PSBoundParameters['pause']) {
+    Write-Output 'pause'
+    try {
+      [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    } catch [exception]{}
+  } else {
+    Start-Sleep -Millisecond 1000
+  }
+
 }
-
-} 
 
 function highlight {
 
@@ -3202,15 +3202,15 @@ function find_page_element_by_css_selector {
   param(
     [System.Management.Automation.PSReference]$selenium_driver_ref,
     [System.Management.Automation.PSReference]$element_ref,
-    [string] $css_selector,
+    [string]$css_selector,
     [int]$wait_seconds = 10
 
   )
 
-   if ($css_selector -eq '' -or $css_selector -eq $null ) {
-  return 
-}
-  $local:element = $null 
+  if ($css_selector -eq '' -or $css_selector -eq $null) {
+    return
+  }
+  $local:element = $null
   [OpenQA.Selenium.Remote.RemoteWebDriver]$local:selenum_driver = $selenium_driver_ref.Value
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($local:selenum_driver,[System.TimeSpan]::FromSeconds($wait_seconds))
   $wait.PollingInterval = 50
@@ -3218,11 +3218,11 @@ function find_page_element_by_css_selector {
   try {
     [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
   } catch [exception]{
-    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0], $css_selector )
+    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector)
   }
 
   $local:element = $local:selenum_driver.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-  $element_ref.Value =  $local:element
+  $element_ref.Value = $local:element
 
 }
 
@@ -3231,15 +3231,15 @@ function find_page_element_by_xpath {
   param(
     [System.Management.Automation.PSReference]$selenium_driver_ref,
     [System.Management.Automation.PSReference]$element_ref,
-    [string] $xpath,
+    [string]$xpath,
     [int]$wait_seconds = 10
 
   )
 
-   if ($xpath -eq '' -or $xpath -eq $null ) {
-  return 
-}
-  $local:element = $null 
+  if ($xpath -eq '' -or $xpath -eq $null) {
+    return
+  }
+  $local:element = $null
   [OpenQA.Selenium.Remote.RemoteWebDriver]$local:selenum_driver = $selenium_driver_ref.Value
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($local:selenum_driver,[System.TimeSpan]::FromSeconds($wait_seconds))
   $wait.PollingInterval = 50
@@ -3247,11 +3247,11 @@ function find_page_element_by_xpath {
   try {
     [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
   } catch [exception]{
-    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0], $css_selector )
+    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector)
   }
 
   $local:element = $local:selenum_driver.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-  $element_ref.Value =  $local:element
+  $element_ref.Value = $local:element
 
 }
 
@@ -3268,39 +3268,39 @@ function cleanup
   }
 }
 
-function custom_debug { 
+function custom_debug {
   param(
     [System.Management.Automation.PSReference]$local:button_ref,
-    [string] $message
+    [string]$message
   )
-Write-Debug $message
-  $local:button  = $local:button_ref.Value 
-  if ($local:button-eq $null )  {  
-$exlorer_window = [System.Windows.Win32Window]::FromProcessName('explorer')
-# $window.ClassName = Shell_TrayWnd
-$exlorer_window.Title = "A control WINDOW";
-$local:button = New-Object System.Windows.Win32Button
-# TODO close children
-# $exlorer_window
-# NOTE: The are manually set
-$y = -20
-$local:button.TopMost = $true
-$local:button.Width = 600
-$local:button.Height = 60
-$x = ($exlorer_window.Position.Right - $local:button.Width)
-# Write-Output ('x={0}' -f $x)
-# Write-Output ('y={0}' -f $y)
+  Write-Debug $message
+  $local:button = $local:button_ref.Value
+  if ($local:button -eq $null) {
+    $exlorer_window = [System.Windows.Win32Window]::FromProcessName('explorer')
+    # $window.ClassName = Shell_TrayWnd
+    $exlorer_window.Title = "A control WINDOW";
+    $local:button = New-Object System.Windows.Win32Button
+    # TODO close children
+    # $exlorer_window
+    # NOTE: The are manually set
+    $y = -20
+    $local:button.TopMost = $true
+    $local:button.Width = 600
+    $local:button.Height = 60
+    $x = ($exlorer_window.Position.Right - $local:button.Width)
+    # Write-Output ('x={0}' -f $x)
+    # Write-Output ('y={0}' -f $y)
 
-$local:button.Pos_X = $x
-# $local:button.Pos_Y = ( $window.Position.Bottom - 30 )
-$local:button.Pos_Y = $y
+    $local:button.Pos_X = $x
+    # $local:button.Pos_Y = ( $window.Position.Bottom - 30 )
+    $local:button.Pos_Y = $y
 
-$local:button.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
-$exlorer_window.AddControl($local:button)
+    $local:button.Font = New-Object System.Drawing.Font ('Microsoft Sans Serif',7,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+    $exlorer_window.AddControl($local:button)
 
-$local:button_ref.Value  = $local:button 
-}
-$local:button.Text =  $message
+    $local:button_ref.Value = $local:button
+  }
+  $local:button.Text = $message
 }
 
 $shared_assemblies = @(
@@ -3337,7 +3337,7 @@ $hub_host = '127.0.0.1'
 $hub_port = '4444'
 
 $uri = [System.Uri](('http://{0}:{1}/wd/hub' -f $hub_host,$hub_port))
-[Object]$button = $null
+[object]$button = $null
 
 custom_debug ([ref]$button) 'Starting firefox'
 
@@ -3388,72 +3388,72 @@ $selenium.url = $base_url = 'http://translation2.paralink.com'
 $selenium.Navigate().GoToUrl(($base_url + '/'))
 
 [string]$xpath = "//frame[@id='topfr']"
-[Object]$top_frame = $null
+[object]$top_frame = $null
 find_page_element_by_xpath ([ref]$selenium) ([ref]$top_frame) $xpath
 $current_frame = $selenium.SwitchTo().Frame($top_frame)
 
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newtop.asp'),$current_frame.url)
 Write-Debug ('Switched to {0} {1}' -f $current_frame.url,$xpath)
 custom_debug ([ref]$button) ('Switched to {0} {1}' -f $current_frame.url,$xpath)
-$top_frame = $null 
+$top_frame = $null
 
-[string]$text  = 'Spanish-Russian translation' 
+[string]$text = 'Spanish-Russian translation'
 $css_selector = 'select#directions > option[value="es/ru"]'
-[OpenQA.Selenium.IWebElement]$element = $null 
-find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element)  $css_selector
-[NUnit.Framework.Assert]::AreEqual($text, $element.Text, $element.Text)
-custom_debug ([ref]$button)  ('selected "{0}"' -f $text )
+[OpenQA.Selenium.IWebElement]$element = $null
+find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element) $css_selector
+[NUnit.Framework.Assert]::AreEqual($text,$element.Text,$element.Text)
+custom_debug ([ref]$button) ('selected "{0}"' -f $text)
 $element.Click()
-$element = $null 
+$element = $null
 
 custom_pause
 
 [string]$xpath2 = "//textarea[@id='source']"
 
-[OpenQA.Selenium.IWebElement]$element = $null 
+[OpenQA.Selenium.IWebElement]$element = $null
 find_page_element_by_xpath ([ref]$current_frame) ([ref]$element) $xpath2
 highlight ([ref]$current_frame) ([ref]$element)
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
 
 $text = @"
-Yo, Juan Gallo de Andrada, escribano de Cámara del Rey nuestro señor, de los que residen en su Consejo, certifico y doy fe que, habiendo visto por los señores dél un libro intitulado El ingenioso hidalgo de la Mancha, compuesto por Miguel de Cervantes Saavedra, tasaron cada pliego del dicho libro a tres maravedís y medio; el cual tiene ochenta y tres pliegos, que al dicho precio monta el dicho libro docientos y noventa maravedís y medio, en que se ha de vender en papel;.
+Yo, Juan Gallo de Andrada, escribano de C?mara del Rey nuestro se?or, de los que residen en su Consejo, certifico y doy fe que, habiendo visto por los se?ores d?l un libro intitulado El ingenioso hidalgo de la Mancha, compuesto por Miguel de Cervantes Saavedra, tasaron cada pliego del dicho libro a tres maraved?s y medio; el cual tiene ochenta y tres pliegos, que al dicho precio monta el dicho libro docientos y noventa maraved?s y medio, en que se ha de vender en papel;.
 "@
 [void]$element.SendKeys($text)
-custom_debug ([ref]$button)  ('Entered "{0}"' -f $text.Substring(0,100) )
+custom_debug ([ref]$button) ('Entered "{0}"' -f $text.Substring(0,100))
 $element = $null
 
 Start-Sleep -Milliseconds 1000
 $css_selector = 'img[src*="btn-en-tran.gif"]'
 
 $title = 'Translate'
-find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element)  $css_selector
-[NUnit.Framework.Assert]::AreEqual( $title , $element.GetAttribute('title'),$element.GetAttribute('title'))
+find_page_element_by_css_selector ([ref]$current_frame) ([ref]$element) $css_selector
+[NUnit.Framework.Assert]::AreEqual($title,$element.GetAttribute('title'),$element.GetAttribute('title'))
 highlight ([ref]$current_frame) ([ref]$element)
 [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($current_frame)
 $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
-custom_debug ([ref]$button)  ('Clicked on "{0}"' -f $title )
+custom_debug ([ref]$button) ('Clicked on "{0}"' -f $title)
 
-$element = $null 
+$element = $null
 custom_pause
 
 [void]$selenium.SwitchTo().DefaultContent()
 
 [string]$xpath = "//frame[@id='botfr']"
-[Object]$bot_frame = $null
+[object]$bot_frame = $null
 find_page_element_by_xpath ([ref]$selenium) ([ref]$bot_frame) $xpath
 $current_frame = $selenium.SwitchTo().Frame($bot_frame)
 [NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
-custom_debug ([ref]$button)  ('Switched to {0}' -f $current_frame.url)
-$bot_frame = $null 
+custom_debug ([ref]$button) ('Switched to {0}' -f $current_frame.url)
+$bot_frame = $null
 
 [string]$xpath2 = "//textarea[@id='target']"
 
-[OpenQA.Selenium.IWebElement]$element = $null 
+[OpenQA.Selenium.IWebElement]$element = $null
 find_page_element_by_xpath ([ref]$current_frame) ([ref]$element) $xpath2
 highlight ([ref]$current_frame) ([ref]$element)
 $text = $element.Text
-custom_debug ([ref]$button) ('Read "{0}"' -f $text.Substring(0,100) )
+custom_debug ([ref]$button) ('Read "{0}"' -f $text.Substring(0,100))
 custom_pause
 
 # https://code.google.com/p/selenium/source/browse/java/client/src/org/openqa/selenium/remote/HttpCommandExecutor.java?r=3f4622ced689d2670851b74dac0c556bcae2d0fe
@@ -3461,7 +3461,7 @@ custom_pause
 [void]$selenium.SwitchTo().DefaultContent()
 
 $current_frame = $selenium.SwitchTo().Frame(1)
-[NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'), $current_frame.url) 
+[NUnit.Framework.Assert]::AreEqual($current_frame.url,('{0}/{1}' -f $base_url,'newbot.asp'),$current_frame.url)
 
 custom_pause
 
