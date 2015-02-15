@@ -152,6 +152,70 @@ public class WindowHelper
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll'
 
+
+function find_page_element_by_css_selector {
+
+  param(
+    [System.Management.Automation.PSReference]$selenium_driver_ref,
+    [System.Management.Automation.PSReference]$element_ref,
+    [string]$css_selector,
+    [int]$wait_seconds = 10
+
+  )
+
+  if ($css_selector -eq '' -or $css_selector -eq $null) {
+    return
+  }
+  $local:element = $null
+  [OpenQA.Selenium.Remote.RemoteWebDriver]$local:selenum_driver = $selenium_driver_ref.Value
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($local:selenum_driver,[System.TimeSpan]::FromSeconds($wait_seconds))
+  $wait.PollingInterval = 50
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
+  } catch [exception]{
+    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector)
+  }
+
+  $local:element = $local:selenum_driver.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
+  $element_ref.Value = $local:element
+
+}
+
+
+function hover_menus {
+  param([string]$value)
+
+  if ($value -eq '' -or $value -eq $null) {
+    return
+  }
+  $local:css_selector = ('a#{0}' -f $value)
+  $local:element = $null
+  find_page_element_by_css_selector ([ref]$selenium) ([ref]$local:element) $css_selector
+
+  [OpenQA.Selenium.Interactions.Actions]$local:actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $local:actions.MoveToElement([OpenQA.Selenium.IWebElement]$local:element).Build().Perform()
+  Start-Sleep -Millisecond 50
+  Write-Output ('Hovering over ' + $local:element.GetAttribute('title'))
+
+
+}
+
+
+function cleanup
+{
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref
+  )
+  try {
+    $selenium_ref.Value.Quit()
+  } catch [exception]{
+    Write-Output (($_.Exception.Message) -split "`n")[0]
+    # Ignore errors if unable to close the browser
+  }
+}
+
+
 $shared_assemblies = @(
   'WebDriver.dll',
   'WebDriver.Support.dll',
@@ -213,11 +277,9 @@ if ($browser -ne $null -and $browser -ne '') {
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
 
-$baseURL = 'http://www.hollandamerica.com'
+$base_url = 'http://www.hollandamerica.com'
 
-$selenium.Navigate().GoToUrl($baseURL + "/")
-
-
+$selenium.Navigate().GoToUrl($base_url + '/')
 
 
 [void]$selenium.Manage().timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(360))
@@ -225,44 +287,14 @@ $selenium.Navigate().GoToUrl($baseURL + "/")
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
 $wait.PollingInterval = 150
 [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::ClassName("hp-logo")))
-$element0  =  $selenium.FindElement( [OpenQA.Selenium.By]::ClassName("hp-logo")) 
-write-output ('Logo: ' + $element0.GetAttribute('alt'))
+$element0 = $selenium.FindElement([OpenQA.Selenium.By]::ClassName("hp-logo"))
+Write-Output ('Logo: ' + $element0.GetAttribute('alt'))
 
 [NUnit.Framework.Assert]::IsTrue(($selenium.Title -match 'Holland America Line'))
-write-output $selenium.Title
+Write-Output $selenium.Title
 
-
-function hover_menus {
-param([string] $value0 )
-   if ($value0 -eq ''  -or $value0 -eq $null ) {
-  return 
-}
-  $css_selector0 = ('a#{0}' -f $value0)
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
-  $wait.PollingInterval = 50
-
-  try {
-    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
-  } catch [exception]{
-    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector0 )
-  }
-
-  $element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
-
-  [OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-  $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
-  Start-Sleep -Millisecond 50
-  write-output ('Hovering over ' + $element0.GetAttribute('title'))
-
-
-}
-
-('pnav-planACruise' , 'pnav-specialOffers', 'pnav-destinations' , 'pnav-onboard') | foreach-object {hover_menus -value0 $_}
-hover_menus 
+('pnav-planACruise','pnav-specialOffers','pnav-destinations','pnav-onboard') | ForEach-Object { hover_menus -Value $_ }
+hover_menus
 
 # Cleanup
-try {
-  $selenium.Quit()
-} catch [exception]{
-  # Ignore errors if unable to close the browser
-}
+cleanup ([ref]$selenium)
