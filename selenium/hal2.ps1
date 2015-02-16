@@ -22,7 +22,7 @@ param(
   [switch]$destinations,
   [switch]$cruises,
   [string]$browser = 'firefox',
-
+  [string] $filename = 'screenshot',
   [int]$version
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
@@ -295,6 +295,14 @@ Write-Output $selenium.Title
 
 ('pnav-planACruise','pnav-specialOffers','pnav-destinations','pnav-onboard') | ForEach-Object { hover_menus -Value $_ }
 hover_menus
+
+$env:SCREENSHOT_PATH = (Get-ScriptDirectory)
+
+$screenshot_path = $env:SCREENSHOT_PATH
+
+[OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
+
+$screenshot.SaveAsFile([System.IO.Path]::Combine( $screenshot_path, ('{0}.{1}' -f $filename,  'png' ) ) , [System.Drawing.Imaging.ImageFormat]::Png)
 
 # Cleanup
 cleanup ([ref]$selenium)
