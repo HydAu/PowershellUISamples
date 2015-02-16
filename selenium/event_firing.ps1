@@ -21,24 +21,12 @@
 
 # http://seleniumeasy.com/selenium-tutorials/set-browser-width-and-height-in-selenium-webdriver
 param(
-  [switch]$browser,
+  [string]$browser = 'firefox',
+  [int]$event_delay = 250,
   [switch]$pause
 
 )
 
-function set_timeouts {
-  param(
-    [System.Management.Automation.PSReference]$selenium_ref,
-    [int]$explicit = 120,
-    [int]$page_load = 600,
-    [int]$script = 3000
-  )
-
-  [void]($selenium_ref.Value.Manage().Timeouts().ImplicitlyWait([System.TimeSpan]::FromSeconds($explicit)))
-  [void]($selenium_ref.Value.Manage().Timeouts().SetPageLoadTimeout([System.TimeSpan]::FromSeconds($pageload)))
-  [void]($selenium_ref.Value.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds($script)))
-
-}
 
 function netstat_check
 {
@@ -88,27 +76,42 @@ popd
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 $verificationErrors = New-Object System.Text.StringBuilder
 $phantomjs_executable_folder = "C:\tools\phantomjs"
-if ($PSBoundParameters["browser"]) {
-
-  if (-not (netstat_check)) {
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\selenium.cmd"
-    Start-Sleep -Seconds 4
+if ($browser -ne $null -and $browser -ne '') {
+  try {
+    $connection = (New-Object Net.Sockets.TcpClient)
+    $connection.Connect("127.0.0.1",4444)
+    $connection.Close()
+  } catch {
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+    Start-Sleep -Seconds 10
   }
+  Write-Host "Running on ${browser}" -foreground 'Yellow'
+  if ($browser -match 'firefox') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Firefox()
 
-  [object]$profile_manager = New-Object OpenQA.Selenium.Firefox.FirefoxProfileManager
+  }
+  elseif ($browser -match 'chrome') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Chrome()
+  }
+  elseif ($browser -match 'ie') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::InternetExplorer()
+    if ($version -ne $null -and $version -ne 0) {
+      $capability.SetCapability("version",$version.ToString());
+    }
 
-  [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = $profile_manager.GetProfile($profile)
-  [OpenQA.Selenium.Firefox.FirefoxProfile]$selected_profile_object = New-Object OpenQA.Selenium.Firefox.FirefoxProfile ($profile)
-  $selected_profile_object.setPreference('general.useragent.override','Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16')
-  $selenium = New-Object OpenQA.Selenium.Firefox.FirefoxDriver ($selected_profile_object)
-  [OpenQA.Selenium.Firefox.FirefoxProfile[]]$profiles = $profile_manager.ExistingProfiles
-
-  # [NUnit.Framework.Assert]::IsInstanceOfType($profiles , new-object System.Type( FirefoxProfile[]))
-  [NUnit.Framework.StringAssert]::AreEqualIgnoringCase($profiles.GetType().ToString(),'OpenQA.Selenium.Firefox.FirefoxProfile[]')
-
-  $DebugPreference = 'Continue'
-
+  }
+  elseif ($browser -match 'safari') {
+    $capability = [OpenQA.Selenium.Remote.DesiredCapabilities]::Safari()
+  }
+  else {
+    throw "unknown browser choice:${browser}"
+  }
+  $uri = [System.Uri]("http://127.0.0.1:4444/wd/hub")
+  $selenium = New-Object OpenQA.Selenium.Remote.RemoteWebDriver ($uri,$capability)
 } else {
+  Write-Host 'Running on phantomjs' -foreground 'Yellow'
+  $phantomjs_executable_folder = "C:\tools\phantomjs"
   $selenium = New-Object OpenQA.Selenium.PhantomJS.PhantomJSDriver ($phantomjs_executable_folder)
   $selenium.Capabilities.SetCapability("ssl-protocol","any")
   $selenium.Capabilities.SetCapability("ignore-ssl-errors",$true)
@@ -117,173 +120,82 @@ if ($PSBoundParameters["browser"]) {
   $options = New-Object OpenQA.Selenium.PhantomJS.PhantomJSOptions
   $options.AddAdditionalCapability("phantomjs.executable.path",$phantomjs_executable_folder)
 }
-[void]$selenium.Manage().Timeouts().SetScriptTimeout([System.TimeSpan]::FromSeconds(3000))
 
 
 if ($host.Version.Major -le 2) {
   [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  $selenium.Manage().Window.Size = New-Object System.Drawing.Size (480,600)
+  $selenium.Manage().Window.Size = New-Object System.Drawing.Size (600,400)
   $selenium.Manage().Window.Position = New-Object System.Drawing.Point (0,0)
 } else {
-  $selenium.Manage().Window.Size = @{ 'Height' = 600; 'Width' = 480; }
+  $selenium.Manage().Window.Size = @{ 'Height' = 400; 'Width' = 600; }
   $selenium.Manage().Window.Position = @{ 'X' = 0; 'Y' = 0 }
 }
 
 $window_position = $selenium.Manage().Window.Position
 $window_size = $selenium.Manage().Window.Size
 
-$base_url = 'http://www.carnival.com/'
-#
+$base_url = 'http://www.google.com/'
 
-# TODO 
-# invoke NLog assembly for proper logging triggered by the events
+# TODO: invoke NLog assembly for quicker logging triggered by the events
 # www.codeproject.com/Tips/749612/How-to-NLog-with-VisualStudio
 
 $event = New-Object -Type 'OpenQA.Selenium.Support.Events.EventFiringWebDriver' -ArgumentList @( $selenium)
 
-# $event | get-member 
-# Start-Sleep -Millisecond 1000
-# Write-Output ($event | Get-Member -MemberType Event) #
-#
-
-$navigating_handler = $event.add_Navigating
-$navigating_handler.Invoke(
-
-  {
-
-    param(
-      [object]$sender,
-      [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
-    )
-    Write-Host "Navigating handler"
-    Write-Host ($eventargs | Get-Member -MemberType Property) # 
-    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
-    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null))
-
-  })
-
-
-$clicking_handler = $event.add_ElementClicking
-$clicking_handler.Invoke(
-
-  {
-
-    param(
-      [object]$sender,
-      [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
-    )
-    Write-Host "Clicking handler"
-    Write-Host ($eventargs | Get-Member -MemberType Property) # 
-    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
-    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
-
-  })
-
-
-$navigating_back_handler = $event.add_NavigatingBack
-$navigating_back_handler.Invoke(
-
-  {
-
-    param(
-      [object]$sender,
-      [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
-    )
-
-    Write-Host "Navigating back handler"
-    Write-Host ($eventargs | Get-Member -MemberType Property) # 
-    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
-    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
-
-  })
-
 $element_value_changing_handler = $event.add_ElementValueChanging
 $element_value_changing_handler.Invoke(
-
   {
-
     param(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebElementEventArgs]$eventargs
     )
-    # OpenQA.Selenium.Support.Events.WebElementEventArgs.Element
-    # OpenQA.Selenium.Support.Extensions.WebDriverExtensions.ExecuteJavaScript
-    Write-Host "Value Change handler"
-    Write-Host ($eventargs | Get-Member -MemberType Property) # 
-
-    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
-    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
-
-  })
-
-$script_executing_handler = $event.add_ScriptExecuting
-$script_executing_handler.Invoke(
-
-  {
-
-    param(
-      [object]$sender,
-      [OpenQA.Selenium.Support.Events.WebDriverScriptEventArgs]$eventargs
-
-    )
-    Write-Host "Script Executing handler"
-    Write-Host ($eventargs | Get-Member -MemberType Property) # 
-
-    [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
-    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
+    Write-Host 'Value Change handler' -foreground 'Yellow'
+    if ($eventargs.Element.GetAttribute('id') -eq 'gbqfq') {
+      $xpath1 = "//div[@class='sbsb_a']"
+      try {
+        [OpenQA.Selenium.IWebElement]$local:element = $sender.FindElement([OpenQA.Selenium.By]::XPath($xpath1))
+      } catch [exception]{
+      }
+      Write-Host $local:element.Text -foreground 'Blue'
+    }
 
   })
 
-$finding_element_handler = $event.add_FindingElement
-$finding_element_handler.Invoke(
-
-  {
-
-    param(
-      [object]$sender,
-      [OpenQA.Selenium.Support.Events.FindElementEventArgs]$eventargs
-    )
-    Write-Host "Finding Element handler"
-    Write-Host ($eventargs | Get-Member -MemberType Property) # 
-    Write-Host $eventargs
-    $local:find_method = $eventargs.FindMethod
-    Write-Host ($local:find_method | Get-Member -MemberType Method) # 
-    Write-Host $local:find_method 
-    # [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
-    #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
-
-  })
-
-
-
+$verificationErrors = New-Object System.Text.StringBuilder
+$base_url = 'http://www.google.com'
 $event.Navigate().GoToUrl($base_url)
 
+# protect from blank page
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($event,[System.TimeSpan]::FromSeconds(10))
+$wait.PollingInterval = 50
+[void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::Id("hplogo")))
 
-# -- fragment of pseudo_mobile2.ps1
+$xpath = "//input[@id='gbqfq']"
 
-$css_selector = 'select[data-param=dest] option[disabled][selected]'
-Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
+# for mobile
+# $xpath = "//input[@id='mib']"
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($event,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,$_.Exception.Message)
-}
+[OpenQA.Selenium.IWebElement]$element = $event.FindElement([OpenQA.Selenium.By]::XPath($xpath))
 
-[OpenQA.Selenium.IWebElement]$element = $event.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
-##[NUnit.Framework.Assert]::IsTrue($event.Text -match 'Sail to')##
-##
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($event)
-# [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
-$actions.MoveToElement($element).Click().Build().Perform()
-Write-Output ('Processing : "{0}"' -f $element.Text)
+# http://software-testing-tutorials-automation.blogspot.com/2014/05/how-to-handle-ajax-auto-suggest-drop.html
+$element.SendKeys('Sele')
+# NOTE:cannot use 
+# [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($event)
+# $actions.SendKeys($element,'Sele')
+Start-Sleep -Millisecond $event_delay
+$element.SendKeys('nium')
+Start-Sleep -Millisecond $event_delay
+$element.SendKeys(' webdriver')
+Start-Sleep -Millisecond $event_delay
+$element.SendKeys(' C#')
+Start-Sleep -Millisecond $event_delay
+$element.SendKeys(' tutorial')
+Start-Sleep -Millisecond $event_delay
+$element.SendKeys([OpenQA.Selenium.Keys]::Enter)
+Start-Sleep 10
 
-
-set_timeouts ([ref]$event)
 # Cleanup
 cleanup ([ref]$event)
+
 
 
 
