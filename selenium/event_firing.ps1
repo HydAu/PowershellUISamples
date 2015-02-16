@@ -155,6 +155,7 @@ $navigating_handler.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
     )
+    Write-Host "Navigating handler"
     Write-Host ($eventargs | Get-Member -MemberType Property) # 
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null))
@@ -171,6 +172,7 @@ $clicking_handler.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
     )
+    Write-Host "Clicking handler"
     Write-Host ($eventargs | Get-Member -MemberType Property) # 
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
     #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
@@ -187,6 +189,8 @@ $navigating_back_handler.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebDriverNavigationEventArgs]$eventargs
     )
+
+    Write-Host "Navigating back handler"
     Write-Host ($eventargs | Get-Member -MemberType Property) # 
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
     #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
@@ -202,7 +206,11 @@ $element_value_changing_handler.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.WebElementEventArgs]$eventargs
     )
+    # OpenQA.Selenium.Support.Events.WebElementEventArgs.Element
+    # OpenQA.Selenium.Support.Extensions.WebDriverExtensions.ExecuteJavaScript
+    Write-Host "Value Change handler"
     Write-Host ($eventargs | Get-Member -MemberType Property) # 
+
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
     #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
 
@@ -218,7 +226,9 @@ $script_executing_handler.Invoke(
       [OpenQA.Selenium.Support.Events.WebDriverScriptEventArgs]$eventargs
 
     )
+    Write-Host "Script Executing handler"
     Write-Host ($eventargs | Get-Member -MemberType Property) # 
+
     [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
     #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
 
@@ -233,7 +243,12 @@ $finding_element_handler.Invoke(
       [object]$sender,
       [OpenQA.Selenium.Support.Events.FindElementEventArgs]$eventargs
     )
+    Write-Host "Finding Element handler"
     Write-Host ($eventargs | Get-Member -MemberType Property) # 
+    Write-Host $eventargs
+    $local:find_method = $eventargs.FindMethod
+    Write-Host ($local:find_method | Get-Member -MemberType Method) # 
+    Write-Host $local:find_method 
     # [NUnit.Framework.Assert]::IsTrue(($eventargs.Driver.ToString() -eq 'OpenQA.Selenium.Support.Events.EventFiringWebDriver'))
     #    [NUnit.Framework.Assert]::IsTrue(($eventargs.Url -ne $null ))
 
@@ -249,7 +264,7 @@ $event.Navigate().GoToUrl($base_url)
 $css_selector = 'select[data-param=dest] option[disabled][selected]'
 Write-Output ('Locating via CSS SELECTOR: "{0}"' -f $css_selector)
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($event,[System.TimeSpan]::FromSeconds(1))
 $wait.PollingInterval = 100
 try {
   [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector)))
@@ -260,7 +275,7 @@ try {
 [OpenQA.Selenium.IWebElement]$element = $event.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector))
 ##[NUnit.Framework.Assert]::IsTrue($event.Text -match 'Sail to')##
 ##
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($event)
 # [void]$actions.SendKeys($result,[System.Windows.Forms.SendKeys]::SendWait("{ENTER}"))
 $actions.MoveToElement($element).Click().Build().Perform()
 Write-Output ('Processing : "{0}"' -f $element.Text)
