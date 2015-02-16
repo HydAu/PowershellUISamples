@@ -11,11 +11,8 @@ end
 puts  \
 node['selenium']['display_driver']['install_flavor']
 
-remote_file "#{Chef::Config[:file_cache_path]}/selenium.jar" do
-  source "#{node['selenium']['selenium']['url']}"
-# NOTE version !
- Chef::Log.info('downloaded selenium jar into: ' + Chef::Config[:file_cache_path])
-end
+
+
 
 # http://www.abdevelopment.ca/blog/start-vnc-server-ubuntu-boot
 cookbook_file '/etc/init.d/vncserver' do 
@@ -66,11 +63,21 @@ directory '/root/selenium' do
   action :create
 end
 
-file '/root/selenium/selenium.jar' do
+# Recipe Compile Error
+remote_file "#{Chef::Config[:file_cache_path]}/selenium.jar" do
+  source "#{node['selenium']['selenium']['url']}"
+  action :create_if_missing
+# NOTE version !
+ Chef::Log.info('downloaded selenium jar '  + node['selenium']['selenium']['url'] + ' into: ' + Chef::Config[:file_cache_path])
+end
+
+remote_file '/root/selenium/selenium.jar' do
+  source "#{node['selenium']['selenium']['url']}"
+  action :create_if_missing
+ # NOTE version !
+  Chef::Log.info('downloaded selenium jar '  + node['selenium']['selenium']['url'] + ' into: ' + '/root/selenium/selenium.jar' )
   owner 'root'
-  content ::File.open("#{Chef::Config[:file_cache_path]}/selenium.jar").read
   action :create
-  Chef::Log.info('copy selenium jar')
 end
 
 template '/root/selenium/node.json' do
@@ -132,7 +139,7 @@ end
     end
     action [:enable, :start]
     supports :status => true, :restart => true
-    subscribes :reload, "/etc/init.d/#{service_name}", :immediately
+    # subscribes :reload, "/etc/init.d/#{service_name}", :immediately
     Chef::Log.info("started #{service_name}")
   end
 end
