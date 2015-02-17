@@ -71,8 +71,27 @@ function get_remote_computer_network_interfaces {
 
 
   $command_outputs = Invoke-Command -computer $remotecomputer -ScriptBlock ${function:get_computer_network_interfaces}
+
+
+
   $local:ipv4_addresses = $command_outputs
-  $local:res = @{ 'primary' = $ipv4_addresses[($ipv4_addresses.Count - 1)];
+
+  <#
+NOTE:
+cclprdecodms2.cclinternet.com
+Primary IP address:
+        1
+IP addresses:
+        172.26.4.14
+
+#>
+  $local:primary = $null
+  if ($ipv4_addresses.Count -gt 1) {
+    $local:primary = $ipv4_addresses[($ipv4_addresses.Count - 1)]
+  } else {
+    $local:primary = $ipv4_addresses
+  }
+  $local:res = @{ 'primary' = $local:primary;
     'addresses' = $ipv4_addresses
   }
 
