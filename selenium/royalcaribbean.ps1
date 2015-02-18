@@ -22,9 +22,27 @@ param(
   [switch]$destinations,
   [switch]$cruises,
   [string]$browser = 'firefox',
-  [string] $filename = 'screenshot',
+  [string]$filename = 'screenshot',
   [int]$version
 )
+
+function highlight {
+
+  param(
+    [System.Management.Automation.PSReference]$selenium_ref,
+    [System.Management.Automation.PSReference]$element_ref,
+    [int]$delay = 300
+  )
+
+  # https://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/JavascriptExecutor.html
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium_ref.Value.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element_ref.Value,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep -Millisecond $delay
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium_ref.Value.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element_ref.Value,'')
+
+
+}
+
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -225,51 +243,87 @@ $selenium.Navigate().GoToUrl($baseURL + "/")
 [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
 $wait.PollingInterval = 150
 [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::ClassName($logo_class)))
-$element0  =  $selenium.FindElement( [OpenQA.Selenium.By]::ClassName($logo_class)) 
-$image0 = $element0.FindElement( [OpenQA.Selenium.By]::TagName('img')) 
-write-output ('Logo: ' + $image0.GetAttribute('alt'))
+$element0 = $selenium.FindElement([OpenQA.Selenium.By]::ClassName($logo_class))
+$image0 = $element0.FindElement([OpenQA.Selenium.By]::TagName('img'))
+Write-Output ('Logo: ' + $image0.GetAttribute('alt'))
 [NUnit.Framework.Assert]::IsTrue(($image0.GetAttribute('alt') -match 'Royal Caribbean International'))
 
 [NUnit.Framework.Assert]::IsTrue(($selenium.Title -match 'Welcome'))
-write-output $selenium.Title
-<#
+Write-Output $selenium.Title
 
-function hover_menus {
-param([string] $value0 )
-   if ($value0 -eq ''  -or $value0 -eq $null ) {
-  return 
-}
-}
-#>
-  $class0 = 'findACruise'
-  $css_selector0 = ('body div.{0}' -f $class0)
-  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
-  $wait.PollingInterval = 50
+$class0 = 'findACruise'
+$css_selector0 = ('body div.{0}' -f $class0)
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(10))
+$wait.PollingInterval = 50
 
-  try {
-    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
-  } catch [exception]{
-    Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector0 )
+try {
+  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector0)))
+} catch [exception]{
+  Write-Debug ("Exception : {0} ...`ncss_selector={1}" -f (($_.Exception.Message) -split "`n")[0],$css_selector0)
+}
+
+$element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
+
+[OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+$actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
+Start-Sleep -Millisecond 50
+$header0 = $element0.FindElement([OpenQA.Selenium.By]::TagName('h2'))
+
+highlight ([ref]$selenium) ([ref]$header0)
+
+
+$csspath = 'cufon'
+$element = $header0
+$attribute = 'alt'
+
+[OpenQA.Selenium.IWebElement[]]$elements = $element.FindElements([OpenQA.Selenium.By]::CssSelector($csspath))
+
+if ($elements -ne $null) {
+  Write-Output ('Iterate descendants of {0} directly:' -f $element.TagName)
+  $elements | ForEach-Object { $element = $_
+    try {
+      [NUnit.Framework.Assert]::IsTrue(($element.GetAttribute($attribute) -ne $null))
+      Write-Output (' {0} => {1}' -f $element.TagName,$element.GetAttribute($attribute))
+      highlight ([ref]$selenium) ([ref]$element)
+
+    } catch [exception]{}
   }
+}
 
-  $element0 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector0))
 
-  [OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-  $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element0).Build().Perform()
-  Start-Sleep -Millisecond 50
-  $header0 = $element0.FindElement( [OpenQA.Selenium.By]::TagName('h2')) 
 
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$header0 ,'color: yellow; border: 4px solid yellow;')
+$class = 'selectContainer'
+$csspath = ('div[class *="{0}"]' -f $class)
+$element = $element0
+$attribute = 'class'
+
+
+[OpenQA.Selenium.IWebElement[]]$elements = $element.FindElements([OpenQA.Selenium.By]::CssSelector($csspath))
+
+if ($elements -ne $null) {
+  Write-Output ('Iterate descendants of {0} directly:' -f $element.TagName)
+  $elements | ForEach-Object { $element = $_
+    try {
+      [NUnit.Framework.Assert]::IsTrue(($element.GetAttribute($attribute) -ne $null))
+      Write-Output (' {0} => {1}' -f $element.TagName,$element.GetAttribute($attribute))
+      highlight ([ref]$selenium) ([ref]$element)
+      [OpenQA.Selenium.Interactions.Actions]$actions0 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+      $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+      # $element.Size.Height
+      # $element.LocationOnScreenOnceScrolledIntoView.Y
+      if ($element.LocationOnScreenOnceScrolledIntoView.Y -gt 0) {
+        $d = $element.LocationOnScreenOnceScrolledIntoView.Y + 100
+        [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, {0})' -f $d),$null)
+        Start-Sleep -Millisecond 300
+        [void]([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript(('scroll(0, -{0})' -f $d),$null)
+      }
+      Start-Sleep 2
+      $actions0.MoveToElement([OpenQA.Selenium.IWebElement]$element).Click().Build().Perform()
+
+    } catch [exception]{}
+  }
+}
 Start-Sleep 3
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$header0 ,'')
-
-  write-output ('Hovering over ' + $header0.Text)
-
-
-
-# div class="findACruise"
-# ('pnav-planACruise' , 'pnav-specialOffers', 'pnav-destinations' , 'pnav-onboard') | foreach-object {hover_menus -value0 $_}
-# hover_menus 
 <# 
 $env:SCREENSHOT_PATH = (Get-ScriptDirectory)
 
