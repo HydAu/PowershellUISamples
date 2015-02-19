@@ -1,5 +1,0 @@
-C:\developer\sergueik\csharp\TreeTabControlTest\TreeTabControlTest\obj\Debug\ResolveAssemblyReference.cache
-C:\developer\sergueik\csharp\TreeTabControlTest\TreeTabControlTest\obj\Debug\Example.baml
-C:\developer\sergueik\csharp\TreeTabControlTest\TreeTabControlTest\obj\Debug\Example.g.cs
-C:\developer\sergueik\csharp\TreeTabControlTest\TreeTabControlTest\obj\Debug\App.g.cs
-C:\developer\sergueik\csharp\TreeTabControlTest\TreeTabControlTest\obj\Debug\TreeTabControlTest_MarkupCompile.cache
