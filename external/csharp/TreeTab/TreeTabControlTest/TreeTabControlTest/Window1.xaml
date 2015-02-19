@@ -1,0 +1,35 @@
+﻿<Window x:Class="TreeTabTest.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:custom="clr-namespace:TreeTab;assembly=TreeTab"
+    Title="Window1" Margin="0,0,0,0">
+    <Grid x:Name="Container">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>                
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnAddTab1" Grid.Column="0" Click="btnAddTab1_Click">Add Main Tab</Button>
+            <Button x:Name="btnAddTab2" Grid.Column="1" Click="btnAddTab2_Click">Add Closable Group Tab</Button>
+            <Button x:Name="btnAddTab3" Grid.Column="2" Click="btnAddTab3_Click">Add Children to Tab Group</Button>
+            <Button x:Name="btnAddTab4" Grid.Column="3" Click="btnAddTab4_Click">Add Group Tab</Button>
+            <Button x:Name="btnAddTab5" Grid.Column="4" Click="btnAddTab5_Click">Add Children to Tab Group</Button>
+            <Button x:Name="btnCollapseTree" Grid.Column="5" Click="btnCollapseTree_Click">Collapse Tree</Button>
+            <Button x:Name="btnExpandTree" Grid.Column="6" Click="btnExpandTree_Click">Expand Tree</Button>
+        </Grid>
+        <Grid x:Name="Container2" Grid.Row="1" Margin="5,5,5,5">
+            <custom:TreeTabControl Name="treeTab" IsTreeExpanded="True">
+                
+            </custom:TreeTabControl>
+        </Grid>
+    </Grid>
+</Window>

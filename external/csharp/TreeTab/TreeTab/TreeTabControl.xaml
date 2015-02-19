@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="TreeTab.TreeTabControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Margin="0,0,0,0">
+    <Grid MinHeight="250" Name="ContentGrid" MinWidth="1050" ShowGridLines="False" Margin="0,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TreeView Margin="10,5,10,5" Name="treeView" Grid.Column="0" />
+        <TabControl Grid.Column="1" Name="tabContainer" Margin="10,5,10,5" />
+    </Grid>
+</UserControl>
