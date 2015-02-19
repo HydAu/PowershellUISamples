@@ -89,25 +89,19 @@ Add-Type -AssemblyName PresentationFramework
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>                
             </Grid.ColumnDefinitions>
-            <Button Name="btnAddTab1" Grid.Column="0">Add Main Tab</Button>
-            <Button Name="btnAddTab2" Grid.Column="1">Add Closable Group Tab</Button>
-            <Button Name="btnAddTab3" Grid.Column="2">Add Children to Tab Group</Button>
-            <Button Name="btnAddTab4" Grid.Column="3">Add Group Tab</Button>
-            <Button Name="btnAddTab5" Grid.Column="4">Add Children to Tab Group</Button>
-            <Button Name="btnCollapseTree" Grid.Column="5">Collapse Tree</Button>
-            <Button Name="btnExpandTree" Grid.Column="6">Expand Tree</Button>
+            <Button x:Name="btnAddTab1" Grid.Column="0">Add Main Tab</Button>
+            <Button x:Name="btnAddTab2" Grid.Column="1">Add Closable Group Tab</Button>
+            <Button x:Name="btnAddTab3" Grid.Column="2">Add Children to Tab Group</Button>
+            <Button x:Name="btnAddTab4" Grid.Column="3">Add Group Tab</Button>
+            <Button x:Name="btnAddTab5" Grid.Column="4">Add Children to Tab Group</Button>
+            <Button x:Name="btnCollapseTree" Grid.Column="5">Collapse Tree</Button>
+            <Button x:Name="btnExpandTree" Grid.Column="6">Expand Tree</Button>
         </Grid>
 
 
         <Grid x:Name="Container2" Grid.Row="1" Margin="5,5,5,5">
 
-    <StackPanel Height="100" Width="300">
-          <TextBlock FontSize="14" FontWeight="Bold" 
-                   Text="A spell-checking TextBox:"/>
-        <TextBox AcceptsReturn="True" AcceptsTab="True" FontSize="14" 
-                 Margin="5" SpellCheck.IsEnabled="True" TextWrapping="Wrap" x:Name="textbox">
-            
-        </TextBox>
+    <StackPanel Height="100" x:Name="TreeTabContainer" >
 
   </StackPanel>
 <!--
@@ -127,8 +121,43 @@ $target = [Windows.Markup.XamlReader]::Load($reader)
 $control = $target.FindName("btnAddTab1")
 $eventMethod = $control.add_click
 $eventMethod.Invoke({ $target.Title = "Hello $((Get-Date).ToString('G'))" })
+
+$o = new-Object -type 'TreeTab.TreeTabControl' 
+
+
+    $control = $target.FindName("TreeTabContainer")
+# $control | get-member
+$o.IsTreeExpanded = $true
+$o.Name="treeTab"
+$control.AddChild($o)
+
 $target.ShowDialog() | Out-Null
 <#
+    $so.Indicator = $target.FindName("hourglass")
+    $contents = $target.FindName("tooltip_textbox")
+    $so.Control = $control
+    $so.Contents = $contents
+    $handler_opened = {
+      param(
+        [object]$sender,
+        [System.Windows.RoutedEventArgs]$eventargs
+      )
+      $so.Contents.Text = 'please wait...'
+      $so.Indicator.Visibility = 'Visible'
+      $so.NeedData = $true
+      $so.Result = ''
+    }
+    $handler_closed = {
+      param(
+        [object]$sender,
+        [System.Windows.RoutedEventArgs]$eventargs
+      )
+      $so.HaveData = $false
+      $so.NeedData = $false
+    }
+#>
+<#
+Execution of the script frequently leads  to
 Exception calling "ShowDialog" with "0" argument(s): "Not enough quota is available to process this command"
 
 #>
