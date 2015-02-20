@@ -153,6 +153,21 @@ namespace TreeTab
             return tab;
         }
 
+        private TreeTabItem CreateTabItem(string _id, string _headerText, bool _showCloseButton, string _typestring, string _tooltip)
+        {
+            TreeTabItem tab;
+            TreeItem.TREEITEM_TYPE _type;
+            if (String.Compare(_typestring, "MAIN", true) == 0)
+            	_type = TreeItem.TREEITEM_TYPE.MAIN; 
+                
+            else
+            	_type = TreeItem.TREEITEM_TYPE.GROUP;
+                tab = CreateTabItem(_id, _headerText, _showCloseButton,_type);
+                tab.ToolTip = _tooltip;
+            return tab;
+        }
+        
+        
         /// <summary>
         /// Checks if the Id is available.
         /// </summary>
@@ -166,12 +181,14 @@ namespace TreeTab
         #endregion
 
         #region Public Methods
-
+       
         /// <summary>
         /// Hides the TreeView Control if the it is shown.
         /// </summary>
         public void HideTree()
         {
+        	
+        
             if (this.isTreeExpanded)
             {
                 this.treeView.Visibility = Visibility.Collapsed;
@@ -294,6 +311,30 @@ namespace TreeTab
             }
             return tab;
         }
+
+        
+        public TreeTabItem AddTabItem(string _id, string _headerText, bool _showCloseButton, string _typestring, TreeTabItemGroup _parent)
+        {
+            TreeTabItem tab = null;
+                        TreeItem.TREEITEM_TYPE _type;
+            if (String.Compare(_typestring, "MAIN", true) == 0)
+            	_type = TreeItem.TREEITEM_TYPE.MAIN; 
+                
+            else
+            	_type = TreeItem.TREEITEM_TYPE.GROUP;
+
+            if (_parent != null && this.CheckId(_id))
+            {
+                tab = this.CreateTabItem(_id, _headerText, _showCloseButton, _type);
+                TreeItem tItem = new TreeItem(_type, _headerText, _id);
+                tItem.LinkedTabItem = tab;
+                _parent.Items.Add(tab);
+                TreeItem tParent = this.GetTreeItemById(_parent.Id);
+                tParent.Items.Add(tItem);
+            }
+            return tab;
+        }
+
 
         /// <summary>
         /// Gets a already created TreeItem by its Id.
