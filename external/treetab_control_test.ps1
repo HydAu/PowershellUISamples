@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2015 Serguei Kouzmine
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
 #in the Software without restriction, including without limitation the rights
@@ -69,94 +69,87 @@ Exception calling "Load" with "1" argument(s): "Cannot create unknown type
 Add-Type -AssemblyName PresentationFramework
 [xml]$xaml =
 @"
-<Window
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:custom="clr-namespace:TreeTab;assembly=TreeTab"
-    Title="Window1" Margin="0,0,0,0">
-    <Grid x:Name="Container">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>                
-            </Grid.ColumnDefinitions>
-            <Button x:Name="btnAddTab1" Grid.Column="0">Add Main Tab</Button>
-            <Button x:Name="btnAddTab2" Grid.Column="1">Add Closable Group Tab</Button>
-            <Button x:Name="btnAddTab3" Grid.Column="2">Add Children to Tab Group</Button>
-            <Button x:Name="btnAddTab4" Grid.Column="3">Add Group Tab</Button>
-            <Button x:Name="btnAddTab5" Grid.Column="4">Add Children to Tab Group</Button>
-            <Button x:Name="btnCollapseTree" Grid.Column="5">Collapse Tree</Button>
-            <Button x:Name="btnExpandTree" Grid.Column="6">Expand Tree</Button>
-        </Grid>
-
-
-        <Grid x:Name="Container2" Grid.Row="1" Margin="5,5,5,5">
-
-    <StackPanel Height="100" x:Name="TreeTabContainer" >
+<?xml version="1.0"?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:custom="clr-namespace:TreeTab;assembly=TreeTab" Title="Window1" Margin="0,0,0,0">
+  <Grid x:Name="Container">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="50"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+        <ColumnDefinition/>
+      </Grid.ColumnDefinitions>
+      <Button x:Name="btnAddTab1" Grid.Column="0">Add Main Tab</Button>
+      <Button x:Name="btnAddTab2" Grid.Column="1">Add Closable Group Tab</Button>
+      <Button x:Name="btnAddTab3" Grid.Column="2">Add Children to Tab Group</Button>
+      <Button x:Name="btnAddTab4" Grid.Column="3">Add Group Tab</Button>
+      <Button x:Name="btnAddTab5" Grid.Column="4">Add Children to Tab Group</Button>
+      <Button x:Name="btnCollapseTree" Grid.Column="5">Collapse Tree</Button>
+      <Button x:Name="btnExpandTree" Grid.Column="6">Expand Tree</Button>
+    </Grid>
+    <Grid x:Name="Container2" Grid.Row="1" Margin="5,5,5,5">
+      <StackPanel Height="100" x:Name="TreeTabContainer">
 
   </StackPanel>
-<!--
+      <!--
             <custom:TreeTabControl Name="treeTab" IsTreeExpanded="True">
                 
             </custom:TreeTabControl>
 -->
-        </Grid>
-
     </Grid>
+  </Grid>
 </Window>
 "@
 
 Clear-Host
+
+
 $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
-$control = $target.FindName("btnAddTab1")
-$eventMethod = $control.add_click
-$eventMethod.Invoke({ $target.Title = "Hello $((Get-Date).ToString('G'))" })
 
-$o = new-Object -type 'TreeTab.TreeTabControl' 
+$t = New-Object -TypeName 'TreeTab.TreeTabControl'
+# $t | get-member
+# $i = New-Object -TypeName 'TreeTab.TreeItem'  # the TREEITEM_TYPE struct seems to be not visible 
+
+$c = $target.FindName("TreeTabContainer")
+$t.IsTreeExpanded = $true
+$t.Name = "treeTab"
+[void]$t.HideTree()
+[void]$t.AddTabItem("One","Main Tab One",$false,'MAIN','')
+[void]$t.AddTabItem("Two","Group Tab",$true,'GROUP','')
+
+[void]$t.AddTabItem("Three","Main Tab Three",$false,'MAIN','')
+[void]$t.AddTabItem("Four","Main Tab Four",$false,'MAIN','')
+[void]$t.AddTabItem("Five", "Group without close", $false, 'GROUP', "This tab cannot be closed!", $null);
+[void]$t.AddTabItem("seven", "Child Group 1", $true, 'MAIN', "I belong to my parent!", [TreeTab.TreeTabItemGroup]($t.GetTabItemById("Five")))
 
 
-    $control = $target.FindName("TreeTabContainer")
-# $control | get-member
-$o.IsTreeExpanded = $true
-$o.Name="treeTab"
-$control.AddChild($o)
+[TreeTab.TreeTabItemGroup]$tParent = [TreeTab.TreeTabItemGroup]$t.GetTabItemById("Two")
+[TreeTab.TreeTabItem]$tItem = $t.AddTabItem("tree","Child Group 1",$true,'MAIN',$tParent)
+
+[void]$t.AddTabItem("four","Child Group 2",$true,'MAIN',$tParent)
+[void]$t.AddTabItem("five","Child Group 3",$true,'MAIN',$tParent)
+[void]$t.ShowTree()
+[void]$c.AddChild($t)
+
+
+$bc = $target.FindName("btnAddTab1")
+$bc.add_click.Invoke({
+    # $target.Title = "Hello $((Get-Date).ToString('G'))" 
+    $t.AddTabItem("one","Main Tab",$false,[TreeTab.TreeItem]::TREEITEM_TYPE.MAIN,'')
+  })
+$bc = $null
 
 $target.ShowDialog() | Out-Null
 <#
-    $so.Indicator = $target.FindName("hourglass")
-    $contents = $target.FindName("tooltip_textbox")
-    $so.Control = $control
-    $so.Contents = $contents
-    $handler_opened = {
-      param(
-        [object]$sender,
-        [System.Windows.RoutedEventArgs]$eventargs
-      )
-      $so.Contents.Text = 'please wait...'
-      $so.Indicator.Visibility = 'Visible'
-      $so.NeedData = $true
-      $so.Result = ''
-    }
-    $handler_closed = {
-      param(
-        [object]$sender,
-        [System.Windows.RoutedEventArgs]$eventargs
-      )
-      $so.HaveData = $false
-      $so.NeedData = $false
-    }
-#>
-<#
+TODO: handle 
 Execution of the script frequently leads  to
 Exception calling "ShowDialog" with "0" argument(s): "Not enough quota is available to process this command"
 
