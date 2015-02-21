@@ -7,3 +7,5 @@ test-output/
 **/*~
 **/*.swp
 **/.vagrant/**
+**/obj/**
+**/bin/**
