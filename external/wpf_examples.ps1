@@ -34,9 +34,60 @@ function Get-ScriptDirectory
   }
 }
 
-$verificationErrors = New-Object System.Text.StringBuilder
 
-Add-Type -AssemblyName PresentationFramework
+function Get-Runspace ($ScriptPath){
+
+  if ($runspaceCreated -or [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace.apartmentstate -eq "STA")  {
+    Write-Debug "No new runspace was created"
+    return
+  }
+  if ($PSBoundParameters.ContainsKey('ScriptPath'))  {
+    $ScriptPath = Resolve-Path $ScriptPath
+  }
+  elseif ($host.version.major -ge 3)
+
+  {
+    $ScriptPath = $MyInvocation.PSCommandPath
+  }
+
+  else
+
+  {
+
+    $ScriptPath = Resolve-Path (Get-PSCallStack)[-2].InvocationInfo.InvocationName
+
+  }
+
+
+
+  Write-Debug "Script path: $ScriptPath"
+  Write-Debug "Creating a new STA runspace ..."
+  # Create a new runspace
+
+  $rs = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace($Host)
+  $rs.apartmentstate = "STA"
+  $rs.ThreadOptions = ?ReuseThread?
+  $rs.Open()
+  $rs.SessionStateProxy.SetVariable("runspaceCreated",$true)
+  $rs.SessionStateProxy.SetVariable("debugPreference",$debugPreference)
+  # Rerun the script in the new apartment
+  $psCmd = [System.Management.Automation.PowerShell]::Create()
+  $psCmd.Runspace = $rs
+  Write-Debug "Rerunning $ScriptPath"
+  [void]$psCmd.AddCommand("Set-Location")
+  [void]$pscmd.AddParameter("Path",(Get-Location).Path)
+  [void]$psCmd.AddScript($ScriptPath)
+  [void]$psCmd.Invoke()
+  $rs.Close()
+  exit
+}
+
+
+
+$verificationErrors = New-Object System.Text.StringBuilder
+Add-Type -AssemblyName 'PresentationFramework'
+Add-Type -AssemblyName 'PresentationCore'
+#Add-Type -AssemblyName 'WindowsBase'
 
 
 # requires -version 2
@@ -45,15 +96,13 @@ Add-Type -AssemblyName PresentationFramework
 [xml]$xaml =
 @"
 <?xml version="1.0"?>
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Window1" Margin="0,0,0,0">
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Window1" Margin="5,5,5,5" Height="310" Width="420">
 <ScrollViewer>
     <WrapPanel>
   <Grid x:Name="LayoutRoot">
   </Grid>
-
      </WrapPanel>
   </ScrollViewer>
-
 </Window>
 "@
 
@@ -62,7 +111,6 @@ Clear-Host
 
 
 $shared_assemblies = @(
-  'TreeTab.dll',
   'nunit.framework.dll'
 )
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
@@ -72,10 +120,17 @@ $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
   $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 }
-
 pushd $shared_assemblies_path
-$shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
+$shared_assemblies | ForEach-Object {
+
+  if ($host.Version.Major -gt 2) {
+    Unblock-File -Path $_;
+  }
+  Write-Debug $_
+  Add-Type -Path $_
+}
 popd
+
 # TODO: http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/GetsthecurrentlyselectedComboBoxItemwhentheuserclickstheButton.htm
 # does not work 
 
@@ -177,8 +232,38 @@ popd
   </StackPanel>
 </Grid>
 "@
+[xml]$example = @"
+<?xml version="1.0"?>
+    <StackPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="400" Width="300">
+        <Slider Minimum="0" Maximum="10" Name="sliderDrop" Value="14"/>
+        <TextBox Text="{Binding ElementName=sliderDrop, Path=Value}"/>
+    </StackPanel>
+"@
 
-# Clear-Host
+Clear-Host
+
+$check_for_apartment = $true
+if ($check_for_apartment -and [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace.apartmentstate -ne 'STA'){
+  throw "This script must be run in a single threaded apartment.`r`nStart PowerShell with the -STA flag and rerun the script."
+
+  exit
+<#
+
+W2K3:
+Exception calling "Load" with "1" argument(s): 
+"The invocation of the constructor on type 'System.Windows.Window' that matches the specified 
+binding constraints threw an exception."
+
+#>
+
+}
+
+
+
+$nsmgr = New-Object system.xml.xmlnamespacemanager ($xaml.nametable)
+$nsmgr.AddNamespace("x",$xaml.DocumentElement.x)
+$xaml.window.RemoveAttribute('x:Class')
 
 $layout_reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($layout_reader)
@@ -195,3 +280,4 @@ $target.ShowDialog() | Out-Null
 Exception calling "ShowDialog" with "0" argument(s): "Not enough quota is
 available to process this command"
 #>
+
