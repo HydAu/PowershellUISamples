@@ -35,7 +35,10 @@ function Get-ScriptDirectory
 }
 
 
-function Get-Runspace ($ScriptPath){
+function Get-Runspace {
+param(
+[string]$ScriptPath
+)
 
   if ($runspaceCreated -or [System.Management.Automation.Runspaces.Runspace]::DefaultRunspace.apartmentstate -eq "STA")  {
     Write-Debug "No new runspace was created"
@@ -155,7 +158,9 @@ popd
   </UserControl>
 </StackPanel>
 "@
+# http://learn-powershell.net/2015/02/15/dealing-with-variables-in-a-winform-event-handler-an-alternative-to-script-scope/
 # http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/DisplayaPasswordEntryBoxandgettheinput.htm
+# https://msdn.microsoft.com/en-us/library/system.windows.controls.passwordbox_events%28v=vs.110%29.aspx
 [xml]$example = @"
 <?xml version="1.0"?>
 <StackPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Orientation="Horizontal">
@@ -240,7 +245,33 @@ popd
         <TextBox Text="{Binding ElementName=sliderDrop, Path=Value}"/>
     </StackPanel>
 "@
+# http://www.techques.com/question/1-408646/How-to-make-two-images-overlapping-with-WPF?
+# https://msdn.microsoft.com/en-us/library/system.windows.controls.image%28v=vs.110%29.aspx
+# http://stackoverflow.com/questions/1394297/generate-transparent-png-c-sharp
+#// https://www.google.com/search?q=png+image+with+transparent+background&client=ubuntu&hs=yKp&channel=fs&tbm=isch&imgil=FbKw4dB_sLPEnM%253A%253BweoXd3QGdajWMM%253Bhttp%25253A%25252F%25252Fcommons.wikimedia.org%25252Fwiki%25252FFile%25253AGluecksklee_(transparent_background).png&source=iu&pf=m&fir=FbKw4dB_sLPEnM%253A%252CweoXd3QGdajWMM%252C_&usg=__VBVhCNnxSJcmBt1KaTKexgs36b0%3D
+#// http://upload.wikimedia.org/wikipedia/commons/b/bc/Gluecksklee_%28transparent_background%29.png
+#// http://farm1.static.flickr.com/2/1703693_687c42c89f_s.jpg
+#// http://l.yimg.com/g/images/flickr_logo_gamma.gif.v59899.14
+#// http://ataulswebdesigns.com/wp-content/uploads/2014/11/PNG-Transparency-in-IE6-with-GIMP.jpg
 
+[xml]$example = @"
+<?xml version="1.0"?>
+<WrapPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+    <Grid>
+        <Border BorderBrush="Gray" BorderThickness="1" Margin="3">
+            <Border BorderBrush="White" BorderThickness="3">
+                <Border BorderBrush="LightGray" BorderThickness="0.5">
+                    <Image Source="http://upload.wikimedia.org/wikipedia/commons/b/bc/Gluecksklee_%28transparent_background%29.png" Stretch="Uniform" />
+                </Border>
+            </Border>
+        </Border>
+<Canvas Width="80" Height="80" VerticalAlignment="Bottom">
+        <Image Margin="5" HorizontalAlignment="Right" VerticalAlignment="Center" Source="http://upload.wikimedia.org/wikipedia/commons/3/38/Brown_Trapdoor_Spider,_transparent_background.png" Height="80" />
+</Canvas>
+    </Grid>
+</WrapPanel>
+
+"@
 Clear-Host
 
 $check_for_apartment = $true
@@ -258,6 +289,7 @@ binding constraints threw an exception."
 #>
 
 }
+
 
 
 
@@ -281,3 +313,48 @@ Exception calling "ShowDialog" with "0" argument(s): "Not enough quota is
 available to process this command"
 #>
 
+<#
+
+http://stackoverflow.com/questions/388677/can-you-make-an-alpha-transparent-png-with-c
+
+Font f = GetSystemConfiguredFont();
+//this sets the text to be rotated 90deg clockwise (i.e. down)
+StringFormat stringFormat = new StringFormat { FormatFlags = StringFormatFlags.DirectionVertical };
+
+SizeF size;
+// creates 1Kx1K image buffer and uses it to find out how bit the image needs to be to fit the text
+using ( Image imageg = (Image) new Bitmap( 1000, 1000 ) )
+    size = Graphics.FromImage( imageg ).
+    	MeasureString( text, f, 25, stringFormat );
+
+using ( Bitmap image = new Bitmap( (int) size.Width, (int) size.Height ) )
+{
+    Graphics g = Graphics.FromImage( (Image) image );
+    g.FillRectangle( Brushes.White, 0f, 0f, image.Width, image.Height );
+    g.TranslateTransform( image.Width, image.Height );
+    g.RotateTransform( 180.0F ); //note that we need the rotation as the default is down
+
+    // draw text
+    g.DrawString( text, f, Brushes.Black, 0f, 0f, stringFormat );
+
+    //make be background transparent - this will be an index (rather than an alpha) transparency
+    image.MakeTransparent( Color.White );
+
+    //note that this image has to be a PNG, as GDI+'s gif handling renders any transparency as black.
+    context.Response.AddHeader( "ContentType", "image/png" );
+    using ( MemoryStream memStream = new MemoryStream() )
+    {
+    	image.Save( memStream, ImageFormat.Png );
+    	memStream.WriteTo( context.Response.OutputStream );
+    }
+}
+var timer = new DispatcherTimer();
+timer.Interval = TimeSpan.FromSeconds(1);
+timer.Start();
+timer.Tick += (s,e) =>
+{
+  myImage.Source = // next image in sequence
+}
+http://stackoverflow.com/questions/14336597/adding-image-objects-to-wpf-with-code
+http://www.java2s.com/Code/CSharp/Windows-Presentation-Foundation/CanvaswithoutViewbox.htm
+#>
