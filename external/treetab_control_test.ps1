@@ -45,7 +45,7 @@ Add-Type -AssemblyName PresentationFramework
 [xml]$xaml =
 @"
 <?xml version="1.0"?>
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:custom="clr-namespace:TreeTab;assembly=TreeTab" Title="Window1" Margin="0,0,0,0">
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:custom="clr-namespace:TreeTab;assembly=TreeTab" Title="Window1" Margin="0,0,0,0" Height="244" Width="633">
   <Grid x:Name="Container">
     <Grid.RowDefinitions>
       <RowDefinition Height="30"/>
@@ -65,6 +65,8 @@ Add-Type -AssemblyName PresentationFramework
   </Grid>
 </Window>
 "@
+
+
 
 
 $shared_assemblies = @(
@@ -91,52 +93,46 @@ $reader = (New-Object System.Xml.XmlNodeReader $xaml)
 $target = [Windows.Markup.XamlReader]::Load($reader)
 
 $t = New-Object -TypeName 'TreeTab.TreeTabControl'
-# $i = New-Object -TypeName 'TreeTab.TreeItem'  # the TREEITEM_TYPE struct seems to not be accessible 
 
-$c = $target.FindName("TreeTabContainer")
+$c = $target.FindName('TreeTabContainer')
 $t.IsTreeExpanded = $true
-$t.Name = "treeTab"
+$t.Name = 'treeTab'
 [void]$t.HideTree()
-[void]$t.AddTabItem('Global','Global',$false,'MAIN','')
-[void]$t.AddTabItem('Staging_Environment','Staging Environment',$false,'GROUP','')
-[void]$t.AddTabItem('Test_Environment','Test Environment',$false,'GROUP','')
-[void]$t.AddTabItem('UAT_Environment','UAT Environment',$false,'GROUP','')
-
-[void]$t.AddTabItem('Group_with_close','Group with close',$true,'GROUP','This tab can be closed!');
-[void]$t.AddTabItem('6','Child Group 6',$false,'MAIN','I belong to my parent!',[TreeTab.TreeTabItemGroup]($t.GetTabItemById('Group_with_close')))
-
+[void]$t.AddTabItem('Global','Global',$false,$t.ConvertType('MAIN'),'')
+[void]$t.AddTabItem('Staging_Environment','Staging Environment',$false,$t.ConvertType('GROUP'),'')
+[void]$t.AddTabItem('Test_Environment','Test Environment',$false,$t.ConvertType($t.ConvertType('GROUP')),'')
 
 [TreeTab.TreeTabItemGroup]$tp0 = [TreeTab.TreeTabItemGroup]$t.GetTabItemById('Staging_Environment')
-[TreeTab.TreeTabItem]$tItem = $t.AddTabItem('Certificates','Certificates',$false,'MAIN',$tp0)
-[void]$t.AddTabItem('IIS_Web_Sites','IIS Web Sites',$false,'GROUP',$tp0)
-[void]$t.AddTabItem('Databases','Databases',$false,'GROUP',$tp0)
+[TreeTab.TreeTabItem]$tItem = $t.AddTabItem('Certificates','Certificates',$false,$t.ConvertType('MAIN'),$tp0)
+[void]$t.AddTabItem('IIS_Web_Sites','IIS Web Sites',$false,$t.ConvertType('GROUP'),$tp0)
+[void]$t.AddTabItem('Databases','Databases',$false,$t.ConvertType('GROUP'),$tp0)
 
 [TreeTab.TreeTabItemGroup]$tp02 = [TreeTab.TreeTabItemGroup]$t.GetTabItemById('Databases')
-[void]$t.AddTabItem('DB_1','DB 1',$true,'MAIN',$tp02)
-[void]$t.AddTabItem('DB_2','DB 2',$true,'MAIN',$tp02)
+[void]$t.AddTabItem('DB_1','DB 1',$true,$t.ConvertType('MAIN'),$tp02)
+[void]$t.AddTabItem('DB_2','DB 2',$true,$t.ConvertType('MAIN'),$tp02)
 
 [TreeTab.TreeTabItemGroup]$tp03 = [TreeTab.TreeTabItemGroup]$t.GetTabItemById('IIS_Web_Sites')
-[void]$t.AddTabItem('Site_1','Site 1',$true,'MAIN',$tp03)
-[void]$t.AddTabItem('Site_2','Site 2',$true,'MAIN',$tp03)
-[void]$t.AddTabItem('Site_3','Site 3',$true,'MAIN',$tp03)
-[void]$t.AddTabItem('Site_4','Site 4',$true,'MAIN',$tp03)
+[void]$t.AddTabItem('Site_1','Site 1',$true,$t.ConvertType('MAIN'),$tp03)
+[void]$t.AddTabItem('Site_2','Site 2',$true,$t.ConvertType('MAIN'),$tp03)
+[void]$t.AddTabItem('Site_3','Site 3',$true,$t.ConvertType('MAIN'),$tp03)
+[void]$t.AddTabItem('Site_4','Site 4',$true,$t.ConvertType('MAIN'),$tp03)
 
 
 [TreeTab.TreeTabItemGroup]$tp01 = [TreeTab.TreeTabItemGroup]$t.GetTabItemById('Test_Environment')
-[TreeTab.TreeTabItem]$t23 = $t.AddTabItem('Certificates1','Certificates',$false,'MAIN',$tp01)
-[void]$t.AddTabItem('IIS_Web_Sites2','IIS Web Sites',$false,'GROUP',$tp01)
-[void]$t.AddTabItem('Databases2','Databases',$false,'GROUP',$tp01)
+[TreeTab.TreeTabItem]$t23 = $t.AddTabItem('Certificates1','Certificates',$false,$t.ConvertType('MAIN'),$tp01)
+[void]$t.AddTabItem('IIS_Web_Sites2','IIS Web Sites',$false,$t.ConvertType('GROUP'),$tp01)
+[void]$t.AddTabItem('Databases2','Databases',$false,$t.ConvertType('GROUP'),$tp01)
 
 
 [TreeTab.TreeTabItemGroup]$tp12 = [TreeTab.TreeTabItemGroup]$t.GetTabItemById('Databases2')
-[void]$t.AddTabItem('DB_11','DB 1',$true,'MAIN',$tp12)
-[void]$t.AddTabItem('DB_12','DB 2',$true,'MAIN',$tp12)
+[void]$t.AddTabItem('DB_11','DB 1',$true,$t.ConvertType('MAIN'),$tp12)
+[void]$t.AddTabItem('DB_12','DB 2',$true,$t.ConvertType('MAIN'),$tp12)
 
 [TreeTab.TreeTabItemGroup]$tp13 = [TreeTab.TreeTabItemGroup]$t.GetTabItemById('IIS_Web_Sites2')
-[void]$t.AddTabItem('Site_11','Site 1',$true,'MAIN',$tp13)
-[void]$t.AddTabItem('Site_12','Site 2',$true,'MAIN',$tp13)
-[void]$t.AddTabItem('Site_13','Site 3',$true,'MAIN',$tp13)
-[void]$t.AddTabItem('Site_14','Site 4',$true,'MAIN',$tp13)
+[void]$t.AddTabItem('Site_11','Site 1',$true,$t.ConvertType('MAIN'),$tp13)
+[void]$t.AddTabItem('Site_12','Site 2',$true,$t.ConvertType('MAIN'),$tp13)
+[void]$t.AddTabItem('Site_13','Site 3',$true,$t.ConvertType('MAIN'),$tp13)
+[void]$t.AddTabItem('Site_14','Site 4',$true,$t.ConvertType('MAIN'),$tp13)
 
 
 [void]$t.ShowTree()

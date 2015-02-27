@@ -153,19 +153,6 @@ namespace TreeTab
             return tab;
         }
 
-        private TreeTabItem CreateTabItem(string _id, string _headerText, bool _showCloseButton, string _typestring, string _tooltip)
-        {
-            TreeTabItem tab;
-            TreeItem.TREEITEM_TYPE _type;
-            if (String.Compare(_typestring, "MAIN", true) == 0)
-            	_type = TreeItem.TREEITEM_TYPE.MAIN; 
-                
-            else
-            	_type = TreeItem.TREEITEM_TYPE.GROUP;
-                tab = CreateTabItem(_id, _headerText, _showCloseButton,_type);
-                tab.ToolTip = _tooltip;
-            return tab;
-        }
         
         
         /// <summary>
@@ -236,8 +223,22 @@ namespace TreeTab
             }
             return tab;
         }
-
+        
         /// <summary>
+        /// Converts the string parameter to TreeItemType enumeration.
+        /// </summary>
+        /// <param name="_typestring">string</param>
+        /// <returns>_type</returns>
+        public TreeItem.TREEITEM_TYPE ConvertType(string _typestring ){
+         TreeItem.TREEITEM_TYPE _type;
+            if (String.Compare(_typestring, "MAIN", true) == 0)
+            	_type = TreeItem.TREEITEM_TYPE.MAIN;         
+            else
+            	_type = TreeItem.TREEITEM_TYPE.GROUP;
+            return _type;
+        }
+        
+ 	    /// <summary>
         /// Adds a new TreeTabItem at the collection of the main tab container.
         /// Adds a new TreeItem at the TreeView control.
         /// </summary>
@@ -311,30 +312,6 @@ namespace TreeTab
             }
             return tab;
         }
-
-        
-        public TreeTabItem AddTabItem(string _id, string _headerText, bool _showCloseButton, string _typestring, TreeTabItemGroup _parent)
-        {
-            TreeTabItem tab = null;
-                        TreeItem.TREEITEM_TYPE _type;
-            if (String.Compare(_typestring, "MAIN", true) == 0)
-            	_type = TreeItem.TREEITEM_TYPE.MAIN; 
-                
-            else
-            	_type = TreeItem.TREEITEM_TYPE.GROUP;
-
-            if (_parent != null && this.CheckId(_id))
-            {
-                tab = this.CreateTabItem(_id, _headerText, _showCloseButton, _type);
-                TreeItem tItem = new TreeItem(_type, _headerText, _id);
-                tItem.LinkedTabItem = tab;
-                _parent.Items.Add(tab);
-                TreeItem tParent = this.GetTreeItemById(_parent.Id);
-                tParent.Items.Add(tItem);
-            }
-            return tab;
-        }
-
 
         /// <summary>
         /// Gets a already created TreeItem by its Id.
