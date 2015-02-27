@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows;
@@ -236,8 +236,16 @@ namespace TreeTab
             }
             return tab;
         }
-
-        /// <summary>
+        public TreeItem.TREEITEM_TYPE ConvertType(string _typestring ){
+         TreeItem.TREEITEM_TYPE _type;
+            if (String.Compare(_typestring, "MAIN", true) == 0)
+            	_type = TreeItem.TREEITEM_TYPE.MAIN; 
+                
+            else
+            	_type = TreeItem.TREEITEM_TYPE.GROUP;
+            return _type;
+        }
+ 	/// <summary>
         /// Adds a new TreeTabItem at the collection of the main tab container.
         /// Adds a new TreeItem at the TreeView control.
         /// </summary>
