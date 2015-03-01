@@ -159,7 +159,11 @@ $aut | Get-Member
 $aut.SearchProperties['ClassName'] = 'Notepad'
 $aut.WindowTitles.Add('Untitled - Notepad')
 
-$uINewCtrlNMenuItem = $aut.UIApplicationMenuBar.UIFileMenuItem.UINewCtrlNMenuItem
+$uINewCtrlNMenuItem = new-object       Microsoft.VisualStudio.TestTools.UITesting.WinControls.WinMenuItem
+$uINewCtrlNMenuItem.SearchProperties['Name']  = "New\tCtrl+N"
+$uINewCtrlNMenuItem.WindowTitles.Add("Untitled - Notepad")
+$uINewCtrlNMenuItem.Find()
+
 <#
 this.mUINewCtrlNMenuItem = new WinMenuItem(this);
     #region Search Criteria
@@ -168,4 +172,4 @@ this.mUINewCtrlNMenuItem = new WinMenuItem(this);
     this.mUINewCtrlNMenuItem.WindowTitles.Add("Untitled - Notepad");
 #>
 $UIItemEdit = $aut.UIUntitledNotepadWindow.UIItemWindow.UIItemEdit
-[Microsoft.VisualStudio.TestTools.UITesting.Mouse]::Click($uINewCtrlNMenuItem,(New-Object System.Drawing.Point (38,10)))
+[Microsoft.VisualStudio.TestTools.UITesting.Mouse]::Click($uINewCtrlNMenuItem ,(New-Object System.Drawing.Point (38,10)))
