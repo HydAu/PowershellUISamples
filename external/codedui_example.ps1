@@ -165,11 +165,45 @@ $uINewCtrlNMenuItem.WindowTitles.Add("Untitled - Notepad")
 $uINewCtrlNMenuItem.Find()
 
 <#
-this.mUINewCtrlNMenuItem = new WinMenuItem(this);
-    #region Search Criteria
-    this.mUINewCtrlNMenuItem.SearchProperties[WinMenuItem.PropertyNames.Name] = "New\tCtrl+N";
-    this.mUINewCtrlNMenuItem.SearchConfigurations.Add(SearchConfiguration.ExpandWhileSearching);
-    this.mUINewCtrlNMenuItem.WindowTitles.Add("Untitled - Notepad");
+            Debug.WriteLine(DateTime.Now.ToString("dd-MM-yyyy:ss:mm")+ "\t start");
+            ApplicationUnderTest aut = ApplicationUnderTest.Launch(@"C:\developer\sergueik\csharp\ControlOperations\ControlOperationsWinForms\bin\Debug\ControlOperationsWinForms.exe");
+            WinButton wb = new WinButton(aut);
+            wb.SearchProperties.Add(WinButton.PropertyNames.Name, "Create Listbox");
+            wb.SearchProperties.Add(WinButton.PropertyNames.Name, "Create Listbox", PropertyExpressionOperator.Contains);
+            Mouse.Click(wb);
+            Debug.WriteLine(DateTime.Now.ToString("dd-MM-yyyy:ss:mm")+"\t Click");
+            // now find the control that will apear after 5 seconds
+            WinList wl = new WinList(aut);
+            wl.SearchProperties.Add(WinList.PropertyNames.Name, "DynamicListbox");
+            wl.WaitForControlExist(7000);
+            // now click the button to wait for the control to become enabled
+            Debug.WriteLine(DateTime.Now.ToString("dd-MM-yyyy:ss:mm")+"\t Found control ");
+            
+            WinButton wb2 = new WinButton(aut);
+            wb2.SearchProperties.Add(WinButton.PropertyNames.Name, "btnEnable");
+            
+            Mouse.Click(wb2);
+            Debug.WriteLine( DateTime.Now.ToString("dd-MM-yyyy:ss:mm")+ "\t click btn 2 " );
+            
+            wl.WaitForControlEnabled(7000);
+            wl.SelectedItemsAsString = "Blue";
+            Debug.WriteLine(DateTime.Now.ToString("dd-MM-yyyy:ss:mm") + "\t blue selected ");
+            
+            WinButton wb3 = new WinButton(aut);
+            wb3.SearchProperties.Add(WinButton.PropertyNames.Name, "Remove Listbox");
+            Mouse.Click(wb3);
+            Debug.WriteLine( DateTime.Now.ToString("dd-MM-yyyy:ss:mm")+"\t Click 3 ");
+
+            if (wl.WaitForControlNotExist(7000))
+            {
+                // control is now gone, so assert true
+                Debug.WriteLine(DateTime.Now.ToString("dd-MM-yyyy:ss:mm")+"\t Control removed ");
+
+                Assert.IsTrue(true);
+            }
+            else { Assert.IsTrue(false); }
+
+
 #>
 $UIItemEdit = $aut.UIUntitledNotepadWindow.UIItemWindow.UIItemEdit
 [Microsoft.VisualStudio.TestTools.UITesting.Mouse]::Click($uINewCtrlNMenuItem ,(New-Object System.Drawing.Point (38,10)))
