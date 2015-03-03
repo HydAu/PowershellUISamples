@@ -20,7 +20,9 @@
 param(
   # in the current environment phantomejs is not installed 
   [string]$browser = 'firefox',
-  [int]$version
+  [int]$version,
+  [switch]$pause
+
 )
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
@@ -185,8 +187,8 @@ if ($browser -ne $null -and $browser -ne '') {
     $connection.Connect("127.0.0.1",4444)
     $connection.Close()
   } catch {
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\hub.cmd"
-    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start cmd.exe /c c:\java\selenium\node.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start /min cmd.exe /c c:\java\selenium\hub.cmd"
+    Start-Process -FilePath "C:\Windows\System32\cmd.exe" -ArgumentList "start /min cmd.exe /c c:\java\selenium\node.cmd"
     Start-Sleep -Seconds 10
   }
   Write-Host "Running on ${browser}"
@@ -249,8 +251,11 @@ $destinations = @{
   'Transatlantic' = 'ET'
   'Caribbean' = 'C';
 }
-$ports = @{ 'Miami, FL' = 'MIA';
+$ports = @{ 
+  'Miami, FL' = 'MIA';
   'Jacksonville, FL' = 'JAX';
+  'Fort Lauderdale, FL' = 'FLL';
+  'Seattle, WA' = 'SEA';
 }
 
 
@@ -273,6 +278,8 @@ function select_first_option {
   }
   $wait = $null
   $select_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($select_css_selector))
+  Start-Sleep -Milliseconds 200
+
   [NUnit.Framework.Assert]::IsTrue(($select_element.Text -match $label))
 
   Write-Output ('Clicking on ' + $select_element.Text)
@@ -293,13 +300,15 @@ function select_first_option {
   }
   $wait = $null
   $value_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($select_value_css_selector))
+
+  Start-Sleep -Milliseconds 100
   Write-Output ('Selecting value: {0} / attribute "{1}"' -f $value_element.Text, $value_element.GetAttribute('data-id'))
   # Write-Output ('Clicking on value : {0}  / {1}' -f $value_element.Text, $select_value_css_selector )
   [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
   $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$value_element).Click().Build().Perform()
   $value_element = $null
   $actions2 = $null
-  Start-Sleep -Milliseconds 20000
+  Start-Sleep -Milliseconds 200
 
 
 
@@ -319,6 +328,7 @@ function select_criteria {
   if ($value) {
     $selecting_value = $value
   } else {
+    write-output $option
     $selecting_value = $choice_value_ref.Value[$option]
   }
   $select_css_selector = ('a[data-param={0}]' -f $select_name)
@@ -331,12 +341,14 @@ function select_criteria {
   }
   $wait = $null
   $select_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($select_css_selector))
+  Start-Sleep -Milliseconds 100
   [NUnit.Framework.Assert]::IsTrue(($select_element.Text -match $label))
 
   Write-Output ('Clicking on ' + $select_element.Text)
   $select_element.Click()
-  $select_element = $null
   Start-Sleep -Milliseconds 200
+  $select_element = $null
+
 
   [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
   $wait.PollingInterval = 150
@@ -347,13 +359,15 @@ function select_criteria {
   } catch [exception]{
     Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
   }
-  $wait = $null
   $value_element = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($select_value_css_selector))
+  Start-Sleep -Milliseconds 150
+
   Write-Output ('Selecting value: {0}' -f $value_element.Text)
   # Write-Output ('Clicking on value : {0}  / {1}' -f $value_element.Text, $select_value_css_selector )
   [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
   $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$value_element).Click().Build().Perform()
-  Start-Sleep -Milliseconds 200
+  Start-Sleep -Milliseconds 250
+  $wait = $null
   $actions2 = $null
   $value_element = $null
 
@@ -377,6 +391,10 @@ function search_cruises {
 
 }
 function count_cruises {
+param(
+    [System.Management.Automation.PSReference]$result_ref = ([ref]$null)
+)
+
   $css_selector1 = "li[class*=num-found] strong"
   try {
     [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
@@ -385,22 +403,25 @@ function count_cruises {
   }
 
   $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-  [NUnit.Framework.Assert]::IsTrue(($element1.Text -match '[1-9][0-9]*'))
+  [NUnit.Framework.Assert]::IsTrue(($element1.Text -match '[123456789][0123456789]*'))
   Write-Output ('Found ' + $element1.Text)
-
+  $result_ref.Value =  0 
 
 }
 
 select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
-select_criteria -choice 'dest' -label 'Sail To' -Option 'Bahamas' -choice_value_ref ([ref]$destinations)
-select_criteria -choice 'port' -label 'Sail from' -Option 'Jacksonville, FL' -choice_value_ref ([ref]$ports)
-select_first_option -choice 'dat' -Value '"042015"' -label 'Date'
-# select_criteria -choice 'dest' -Value 'C' -label 'Sail To' -option  'Caribbean' -choice_value_ref ([ref] $destinations)  
-# select_criteria -choice 'port' -Value 'MIA' -label 'Sail from'
-# need to find first avail
-# select_criteria -choice 'dat' -Value '"042015"' -label 'Date'
-#search_cruises
-#count_cruises
+select_criteria -choice 'dest' -label 'Sail To' -Option 'Caribbean' -choice_value_ref ([ref]$destinations)
+select_criteria -choice 'port' -label 'Sail from' -Option 'Fort Lauderdale, FL' -choice_value_ref ([ref]$ports)
+
+<#
+select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
+select_criteria -choice 'dest' -label 'Sail To' -Option 'Alaska' -choice_value_ref ([ref]$destinations)
+select_criteria -choice 'port' -label 'Sail from' -Option 'Seattle, WA' -choice_value_ref ([ref]$ports)
+#>
+# find first avail
+select_first_option -choice 'dat' -label 'Date'
+search_cruises
+count_cruises
 
 if (-not ($host.Name -match 'ISE')) {
   if ($PSBoundParameters['pause']) {
@@ -412,8 +433,8 @@ if (-not ($host.Name -match 'ISE')) {
   }
 }
 
-<#
-Write-Output 'Repeat 5 times.'
+
+Write-Output 'Repeat 3 times.'
 
 (1,2,3) | ForEach-Object {
   $cnt = 0
@@ -446,7 +467,7 @@ Write-Output 'Repeat 5 times.'
 
   }
 }
-
+<#
 # get first element 
 $elements1 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
 $elements1 | ForEach-Object {
