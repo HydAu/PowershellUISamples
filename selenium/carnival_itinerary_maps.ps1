@@ -435,7 +435,7 @@ select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
 #select_criteria -choice 'port' -label 'Sail from' -Option 'Los Angeles, CA' -choice_value_ref ([ref]$ports)
 
 select_criteria -choice 'dest' -label 'Sail To' -Option 'Bahamas' -choice_value_ref ([ref]$destinations)
-select_criteria -choice 'port' -label 'Sail from' -Option 'Jacksonville, FL' -choice_value_ref ([ref]$ports)
+select_criteria -choice 'port' -label 'Sail from' -Option 'Fort Lauderdale, FL' -choice_value_ref ([ref]$ports)
 
 # find first avail
 select_first_option -choice 'dat' -label 'Date'
@@ -515,7 +515,7 @@ $elements1 | ForEach-Object {
             }
           }
         }
-        $element8 = $null 
+        $element8 = $null
         [OpenQA.Selenium.Interactions.Actions]$actions4 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
 
         [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$book_now_element,'color: yellow; border: 4px solid yellow;')
@@ -529,24 +529,24 @@ $elements1 | ForEach-Object {
         $book_now_element.Click()
         Start-Sleep -Milliseconds 1000
         try {
-        [NUnit.Framework.StringAssert]::Contains('http://www.carnival.com/BookingEngine/Stateroom',$selenium.url,{})
-        } catch [Exception] {
-         #  exit 
+          [NUnit.Framework.StringAssert]::Contains('http://www.carnival.com/BookingEngine/Stateroom',$selenium.url,{})
+        } catch [exception]{
+          #  exit 
         }
-# System.Net.WebException: Unable to connect to the remote server
+        # System.Net.WebException: Unable to connect to the remote server
         #  But was:  "http://www.carnival.com/BookingEngine/Booking/Book/  
         Write-Output $selenium.url
-                $view_itin_css_selector = 'span.viewitin'
+        $view_itin_css_selector = 'span.viewitin'
 
         try {
           [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($view_itin_css_selector)))
-#          Write-Output 'Found ...'
+          #          Write-Output 'Found ...'
         } catch [exception]{
           Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
         }
 
         $view_itin_button = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($view_itin_css_selector))
-        write-output ('Clicked {0} ' -f  $view_itin_button.Text )
+        Write-Output ('Clicked {0} ' -f $view_itin_button.Text)
         $view_itin_button.Click()
         Start-Sleep -Milliseconds 2000
         # TODO: role=presentation is not found
@@ -569,16 +569,17 @@ $elements1 | ForEach-Object {
           start-sleep -millisecond 1000
         }
         #>
-        write-output 'trying page source'
-        $page_source = (( $selenium.PageSource ) -join '')
- 
-if ($page_source -match '/~/media/Images/Itineraries/Maps') {
-  $results = $page_source | where { $_ -match '(?<media>/~/media/Images/Itineraries/Maps[^\"]+)' } |
-  ForEach-Object { New-Object PSObject –prop @{ Media = $matches['media']; } }
-  
-  Write-Output ('Found media images: {0}' -f $results.Media )
+        Write-Output 'trying page source'
+        $page_source = (($selenium.PageSource) -join '')
 
- }
+        if ($page_source -match '/~/media/Images/Itineraries/Maps') {
+          $results = $page_source | where { $_ -match '(?<media>/~/media/Images/Itineraries/Maps[^\"]+)' } |
+          # unicode 
+          ForEach-Object { New-Object PSObject -prop @{ Media = $matches['media']; } }
+
+          Write-Output ('Found media images: {0}' -f $results.Media)
+
+        }
 
         # TODO: inner-pages itinerary is not found
         <# 
@@ -604,7 +605,7 @@ if ($page_source -match '/~/media/Images/Itineraries/Maps') {
         #       <!--Pre load map to allow lightbox to be properly sized-->
         #       <img style="display: none;" src="/~/media/Images/Itineraries/Maps/JAX-BAE-04gif.ashx" />
 
-        
+
         # <img src="/~/media/Images/Itineraries/Maps/LAX-LAH-04gif.ashx" style="display: none;">
         $close_itin_css_selector = 'a[id = fancybox-close]'
 
