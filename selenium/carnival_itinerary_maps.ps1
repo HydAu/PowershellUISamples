@@ -570,12 +570,15 @@ $elements1 | ForEach-Object {
         }
         #>
         write-output 'trying page source'
-        $page_source = $selenium.PageSource
-        if (($page_source -join '' ) -match '/~/media/Images/Itineraries/Maps') { 
-          write-output 'Found media images'
-          write-output $page_source
-        }
+        $page_source = (( $selenium.PageSource ) -join '')
  
+if ($page_source -match '/~/media/Images/Itineraries/Maps') {
+  $results = $page_source | where { $_ -match '(?<media>/~/media/Images/Itineraries/Maps[^\"]+)' } |
+  ForEach-Object { New-Object PSObject –prop @{ Media = $matches['media']; } }
+  
+  Write-Output ('Found media images: {0}' -f $results.Media )
+
+ }
 
         # TODO: inner-pages itinerary is not found
         <# 
