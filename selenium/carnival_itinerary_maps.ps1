@@ -1,4 +1,4 @@
-#Copyright (c) 2015 Serguei Kouzmine
+﻿#Copyright (c) 2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,41 @@ param(
   [switch]$pause
 
 )
+function extract_match {
+
+  param(
+    [string]$source,
+    [string]$capturing_match_expression,
+    [string]$label,
+    [System.Management.Automation.PSReference]$result_ref = ([ref]$null)
+
+  )
+  write-Debug ('Extracting from {0}' -f $source )
+  $local:results = { }
+  $local:results = $source | where { $_ -match $capturing_match_expression } |
+  ForEach-Object { New-Object PSObject -prop @{ Media = $matches[$label]; } }
+  Write-Debug 'extract_match:'
+  write-Debug $local:results
+  $result_ref.Value = $local:results.Media
+}
+
+
+function custom_pause {
+
+  param([bool]$fullstop)
+  # Do not close Browser / Selenium when run from Powershell ISE
+
+  if ($fullstop) {
+    try {
+      Write-Output 'pause'
+      [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
+    } catch [exception]{}
+  } else {
+    Start-Sleep -Millisecond 1000
+  }
+
+}
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -244,10 +279,11 @@ $selenium.Manage().Window.Maximize()
 $destinations = @{
   'Alaska' = 'A';
   'Bahamas' = 'BH';
-  'Bermuda' = 'E'
-  'Europe' = 'BA'
+  'Bermuda' = 'BM';
+  'Europe' = 'E';
   'Hawaii' = 'H'
   'Mexico' = 'M'
+  'Canada/New England' = 'NN'; 
   'Transatlantic' = 'ET'
   'Caribbean' = 'C';
 }
@@ -257,7 +293,7 @@ $ports = @{
   'Fort Lauderdale, FL' = 'FLL';
   'Seattle, WA' = 'SEA';
   'Los Angeles, CA' = 'LAX';
-
+  'Barcelona, Spain' = 'BCN';
 }
 
 
@@ -367,7 +403,7 @@ function select_criteria {
   $value_element = $null
   try {
     [OpenQA.Selenium.Remote.RemoteWebElement]$value_element = $wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($select_value_css_selector)))
-    Write-Output 'Found ...'
+    Write-Output 'Found value_element...'
     $value_element
     Write-Output ('Selected value: {0} / attribute "{1}"' -f $value_element.Text,$value_element.GetAttribute('data-id'))
 
@@ -424,46 +460,59 @@ function count_cruises {
   }
 
   $element1 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-  [NUnit.Framework.Assert]::IsTrue(($element1.Text -match '[123456789][0123456789]*'))
   Write-Output ('Found ' + $element1.Text)
-  $result_ref.Value = 0
+  $result_ref.Value = $element1.Text
 
 }
 
-select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
-#select_criteria -choice 'dest' -label 'Sail To' -Option 'Mexico' -choice_value_ref ([ref]$destinations)
-#select_criteria -choice 'port' -label 'Sail from' -Option 'Los Angeles, CA' -choice_value_ref ([ref]$ports)
 
-select_criteria -choice 'dest' -label 'Sail To' -Option 'Bahamas' -choice_value_ref ([ref]$destinations)
-select_criteria -choice 'port' -label 'Sail from' -Option 'Fort Lauderdale, FL' -choice_value_ref ([ref]$ports)
+# TODO :finish parameters
+$fullstop = (($PSBoundParameters['pause']) -ne $null)
+
+select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
+# select_criteria -choice 'dest' -label 'Sail To' -Option 'Mexico' -choice_value_ref ([ref]$destinations)
+# select_criteria -choice 'port' -label 'Sail from' -Option 'Los Angeles, CA' -choice_value_ref ([ref]$ports)
+
+# select_criteria -choice 'dest' -label 'Sail To' -Option 'Bahamas' -choice_value_ref ([ref]$destinations)
+# select_criteria -choice 'port' -label 'Sail from' -Option 'Fort Lauderdale, FL' -choice_value_ref ([ref]$ports)
+
+select_criteria -choice 'dest' -label 'Sail To' -Option 'Europe' -choice_value_ref ([ref]$destinations)
+select_criteria -choice 'port' -label 'Sail from' -Option 'Barcelona, Spain' -choice_value_ref ([ref]$ports)
 
 # find first avail
 select_first_option -choice 'dat' -label 'Date'
 search_cruises
 Start-Sleep -Milliseconds 10000
-count_cruises
+$cruises_count_text = $null
+count_cruises -result_ref ([ref]$cruises_count_text)
+write-output $cruises_count_text
+extract_match -Source $cruises_count_text -capturing_match_expression '\b(?<media>\d+)\b' -label 'media' -result_ref ([ref]$result)
+Write-Output ('Found # itinearies: {0}' -f $result)
+[NUnit.Framework.Assert]::IsTrue(($result -match '\d+'))
+
+$select_choice = Get-Random -minimum 1 -maximum $result
+write-output ("Will try {0}th" -f $select_choice)
+
 $element5 = $null
-$css_selector1 = "div[class*=search-result] a.itin-select"
+$css_selector1 = 'div[class*=search-result] a.itin-select'
 Write-Output $css_selector1
 try {
   [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-  Write-Output 'found element'
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
 }
 $elements1 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
+$learn_more_cnt = 0
 $elements1 | ForEach-Object {
-
   $element3 = $_
-  Write-Output ('Inspecting {0}' -f $element3)
 
   if (($element5 -eq $null)) {
     if ($element3.Text -match '\S') {
 
       if (-not ($element3.Text -match 'LEARN MORE')) {
         # $element3
-        $cnt = $cnt + 1
-        Write-Output ('Found: {0} {1}' -f $element3.Text,$cnt)
+        
+        Write-Output ('Found: {0} count = {1}' -f $element3.Text,$learn_more_cnt)
         [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
         $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
         [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
@@ -472,6 +521,11 @@ $elements1 | ForEach-Object {
       }
 
       if ($element3.Text -match 'LEARN MORE') {
+        Write-Output ('Found: {0} count = {1}' -f $element3.Text,$learn_more_cnt)
+       $learn_more_cnt = $learn_more_cnt + 1
+
+  if($learn_more_cnt -eq $select_choice) { 
+    write-output 'Selecting this itinerary'
 
         Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element3.Text,$result)
         Write-Output ('Clicking on ' + $element3.Text)
@@ -479,26 +533,16 @@ $elements1 | ForEach-Object {
         $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Click().Build().Perform()
         Start-Sleep -Milliseconds 3000
         [NUnit.Framework.StringAssert]::Contains('http://www.carnival.com/itinerary/',$selenium.url,{})
-        Write-Output $selenium.url
+        Write-Output ("Redirected to url: `n`t'{0}'" -f $selenium.url )
 
-        if (-not ($host.Name -match 'ISE')) {
-          if ($PSBoundParameters['pause']) {
-            try {
-              [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-            } catch [exception]{}
-          } else {
-            Start-Sleep -Millisecond 1000
-          }
-        }
-        # about to quit soon
+        custom_pause -fullstop $fullstop
 
-        # click on book now  
+        # Click on Book Now
 
         $book_now_css_selector = 'li[class = action-col] a[class *=btn-red]'
 
         try {
           [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($book_now_css_selector)))
-          Write-Output 'Found ...'
         } catch [exception]{
           Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
         }
@@ -509,8 +553,7 @@ $elements1 | ForEach-Object {
         foreach ($element8 in $book_now_buttons) {
           if (!$book_now_element) {
             if ($element8.Text -match 'BOOK NOW') {
-              # $element8
-              Write-Output 'Selecting BOOK NOW'
+              Write-Output ('Selecting {0}' -f $element8.Text)
               $book_now_element = $element8
             }
           }
@@ -531,11 +574,11 @@ $elements1 | ForEach-Object {
         try {
           [NUnit.Framework.StringAssert]::Contains('http://www.carnival.com/BookingEngine/Stateroom',$selenium.url,{})
         } catch [exception]{
-          #  exit 
+          write-output ("Unexpected redirect:`r`t{0}`rtAborting." -f $selenium.url )
+          cleanup ([ref]$selenium)
+          return
         }
-        # System.Net.WebException: Unable to connect to the remote server
-        #  But was:  "http://www.carnival.com/BookingEngine/Booking/Book/  
-        Write-Output $selenium.url
+        # Write-Output $selenium.url
         $view_itin_css_selector = 'span.viewitin'
 
         try {
@@ -549,8 +592,9 @@ $elements1 | ForEach-Object {
         Write-Output ('Clicked {0} ' -f $view_itin_button.Text)
         $view_itin_button.Click()
         Start-Sleep -Milliseconds 2000
-        # TODO: role=presentation is not found
+
         <#
+        # TODO: role=presentation is not found
         $presentation_css_selector = 'a[role=presentation]'
         [OpenQA.Selenium.Support.UI.WebDriverWait]$wait44 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
         $wait44.PollingInterval = 500
@@ -573,12 +617,12 @@ $elements1 | ForEach-Object {
         $page_source = (($selenium.PageSource) -join '')
 
         if ($page_source -match '/~/media/Images/Itineraries/Maps') {
-          $results = $page_source | where { $_ -match '(?<media>/~/media/Images/Itineraries/Maps[^\"]+)' } |
-          # unicode 
-          ForEach-Object { New-Object PSObject -prop @{ Media = $matches['media']; } }
 
-          Write-Output ('Found media images: {0}' -f $results.Media)
-
+           $result = $null
+           extract_match -Source $page_source -capturing_match_expression '(?<media>/~/media/Images/Itineraries/Maps[^\"]+)' -label 'media' -result_ref ([ref]$result)
+           Write-Output ('Found media images: {0}' -f $result)
+        } else  { 
+           Write-Output ('No media images found')
         }
 
         # TODO: inner-pages itinerary is not found
@@ -627,18 +671,13 @@ $elements1 | ForEach-Object {
       }
     }
   }
+  }
 
 }
 
+custom_pause -fullstop $fullstop
 # Do not close Browser / Selenium when run from Powershell ISE
 if (-not ($host.Name -match 'ISE')) {
-  if ($PSBoundParameters['pause']) {
-    try {
-      [void]$host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown')
-    } catch [exception]{}
-  } else {
-    Start-Sleep -Millisecond 1000
-  }
   # Cleanup
   cleanup ([ref]$selenium)
 }
