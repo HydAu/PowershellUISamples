@@ -399,7 +399,6 @@ function search_cruises {
   Write-Output ('Clicking on ' + $element1.Text)
   $element1.Click()
   $element1 = $null
-  Start-Sleep 1
 
 
 }
@@ -409,6 +408,15 @@ function count_cruises {
   )
 
   $css_selector1 = "li[class*=num-found] strong"
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+  $wait.PollingInterval = 500
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($css_selector1)))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  }
+
   try {
     [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
   } catch [exception]{
@@ -423,12 +431,16 @@ function count_cruises {
 }
 
 select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
-select_criteria -choice 'dest' -label 'Sail To' -Option 'Mexico' -choice_value_ref ([ref]$destinations)
-select_criteria -choice 'port' -label 'Sail from' -Option 'Los Angeles, CA' -choice_value_ref ([ref]$ports)
+#select_criteria -choice 'dest' -label 'Sail To' -Option 'Mexico' -choice_value_ref ([ref]$destinations)
+#select_criteria -choice 'port' -label 'Sail from' -Option 'Los Angeles, CA' -choice_value_ref ([ref]$ports)
+
+select_criteria -choice 'dest' -label 'Sail To' -Option 'Bahamas' -choice_value_ref ([ref]$destinations)
+select_criteria -choice 'port' -label 'Sail from' -Option 'Jacksonville, FL' -choice_value_ref ([ref]$ports)
+
 # find first avail
 select_first_option -choice 'dat' -label 'Date'
 search_cruises
-Start-Sleep -Milliseconds 1000
+Start-Sleep -Milliseconds 10000
 count_cruises
 $element5 = $null
 $css_selector1 = "div[class*=search-result] a.itin-select"
@@ -537,26 +549,77 @@ $elements1 | ForEach-Object {
         write-output ('Clicked {0} ' -f  $view_itin_button.Text )
         $view_itin_button.Click()
         Start-Sleep -Milliseconds 2000
-                $close_itin_css_selector = 'a[id = fancybox-close]'
+        # TODO: role=presentation is not found
+        <#
+        $presentation_css_selector = 'a[role=presentation]'
+        [OpenQA.Selenium.Support.UI.WebDriverWait]$wait44 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(3))
+        $wait44.PollingInterval = 500
+
+        try {
+          [void]$wait44.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($presentation_css_selector)))
+          $found_presentation = $true   
+        } catch [exception]{
+          Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+          $found_presentation = $false
+        }
+        if ($found_presentation) {
+          $presentation_button = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($presentation_css_selector))
+
+          $presentation_button.Click()
+          start-sleep -millisecond 1000
+        }
+        #>
+        write-output 'trying page source'
+        $page_source = $selenium.PageSource
+        if (($page_source -join '' ) -match '/~/media/Images/Itineraries/Maps') { 
+          write-output 'Found media images'
+          write-output $page_source
+        }
+ 
+
+        # TODO: inner-pages itinerary is not found
+        <# 
+        $inner_pages_itinerary_css_selector = 'div[class *= itinerary]'
+        $inner_pages_itinerary_css_selector =  'form[action *="ItineraryLightbox.aspx"]'
+        [OpenQA.Selenium.Support.UI.WebDriverWait]$wait55 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(30))
+        $wait55.PollingInterval = 500
+
+        try {
+          [void]$wait55.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($inner_pages_itinerary_css_selector)))
+          $found_inner_pages_itinerary = $true   
+        } catch [exception]{
+          Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+          $found_inner_pages_itinerary = $false
+        }
+        if ($found_inner_pages_itinerary) {
+          $inner_pages_itinerary_button = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($inner_pages_itinerary_css_selector))
+
+          $inner_pages_itinerary_button.GetAttribute("innerHTML")
+          start-sleep -millisecond 1000
+        }
+        #>
+        #       <!--Pre load map to allow lightbox to be properly sized-->
+        #       <img style="display: none;" src="/~/media/Images/Itineraries/Maps/JAX-BAE-04gif.ashx" />
+
+        
+        # <img src="/~/media/Images/Itineraries/Maps/LAX-LAH-04gif.ashx" style="display: none;">
+        $close_itin_css_selector = 'a[id = fancybox-close]'
 
         try {
           [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($close_itin_css_selector)))
         } catch [exception]{
           Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
         }
-
         $close_itin_button = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($close_itin_css_selector))
 
         $close_itin_button.Click()
-        Start-Sleep -Milliseconds 120000
+        # cannot LEARN_MORE in a loop 
+
+        Start-Sleep -Milliseconds 100
 
         cleanup ([ref]$selenium)
-        # http://www.carnival.com/BookingEngine/Stateroom/Stateroom2/?embkCode=LAX&itinCode=LAH&durDays=4&shipCode=IS&subRegionCode=MB&sailDate=03162015&sailingID=69883&numGuests=2&showDbl=False&isOver55=N&isPastGuest=N&stateCode=&isMilitary=N&evsel=&be_version=1
         exit 0
-        #      $selenium.Navigate().back()
-        #      Start-Sleep -Milliseconds 5000
 
-        # cannot LEARN_MORE in a loop 
       }
     }
   }
