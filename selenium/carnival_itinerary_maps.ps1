@@ -486,6 +486,7 @@ Start-Sleep -Milliseconds 10000
 $cruises_count_text = $null
 count_cruises -result_ref ([ref]$cruises_count_text)
 write-output $cruises_count_text
+$result = 1
 extract_match -Source $cruises_count_text -capturing_match_expression '\b(?<media>\d+)\b' -label 'media' -result_ref ([ref]$result)
 Write-Output ('Found # itinearies: {0}' -f $result)
 [NUnit.Framework.Assert]::IsTrue(($result -match '\d+'))
