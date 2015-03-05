@@ -675,9 +675,106 @@ $elements1 | ForEach-Object {
   }
 
 }
+<#
+# store xpath locators for all sailings
+# get first element 
+$elements1 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
+$elements1 | ForEach-Object {
+
+  if (($element5 -eq $null)) {
+    if ($element3.Text -match 'LEARN MORE') {
+      # $element3
+
+
+      Start-Sleep -Milliseconds 3000
+      [string]$script = @"
+function getPathTo(element) {
+    if (element.id!=='')
+        return '*[@id="'+element.id+'"]';
+    if (element===document.body)
+        return element.tagName;
+
+    var ix= 0;
+    var siblings= element.parentNode.childNodes;
+    for (var i= 0; i<siblings.length; i++) {
+        var sibling= siblings[i];
+        if (sibling===element)
+            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
+            ix++;
+    }
+}
+return getPathTo(arguments[0]);
+"@
+      $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element3,'')).ToString()
+
+      Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element3.Text, $result )
+      Write-Output ('Clicking on ' + $element3.Text)
+      [OpenQA.Selenium.Interactions.Actions]$actions2 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+      $actions2.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Click().Build().Perform()
+      Start-Sleep -Milliseconds 3000
+      $selenium.Navigate().back()
+      Start-Sleep -Milliseconds 5000
+
+      Write-Output ('Javascript-generated XPath = "{0}"' -f $result)
+
+
+      [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+      $wait.PollingInterval = 100
+      $xpath = ('//{0}' -f $result)
+
+      try {
+        [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
+      } catch [exception]{
+        Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+      }
+
+      [OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+
+          Write-Output ('Found: {0} {1}' -f $element4.Text,$cnt)
+          [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+          $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
+          [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
+          Start-Sleep -Milliseconds 3000
+          [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
+          Start-Sleep -Milliseconds 3000
+
+    }
+  }
+
+}
+
+#>
+# take and stamp screenshot
+
+<#
+try {
+  [OpenQA.Selenium.Screenshot]$screenshot = $selenium.GetScreenshot()
+  $guid = [guid]::NewGuid()
+  $image_name = ($guid.ToString())
+  [string]$image_path = ('{0}\{1}\{2}.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
+
+  [string]$stamped_image_path = ('{0}\{1}\{2}-stamped.{3}' -f (Get-ScriptDirectory),'temp',$image_name,'.jpg')
+  $screenshot.SaveAsFile($image_path,[System.Drawing.Imaging.ImageFormat]::Jpeg)
+
+
+  $owner = New-Object WindowHelper
+  $owner.count = $iteration
+  $owner.Browser = $browser
+  $owner.SrcImagePath = $image_path
+  $owner.TimeStamp = Get-Date
+  $owner.DstImagePath = $stamped_image_path
+  [boolean]$stamp = $false
+
+  $owner.StampScreenshot()
+
+} catch [exception]{
+  Write-Output $_.Exception.Message
+}
+#>
 
 custom_pause -fullstop $fullstop
-# Do not close Browser / Selenium when run from Powershell ISE
+# At the end of the run - do not close Browser / Selenium when executing from Powershell ISE
 if (-not ($host.Name -match 'ISE')) {
   # Cleanup
   cleanup ([ref]$selenium)
