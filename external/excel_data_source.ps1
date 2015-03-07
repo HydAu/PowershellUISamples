@@ -58,10 +58,12 @@ $sql =  "Insert into [${sheet_name}] (server,status) values('sergueik9',2)"
 $command.CommandText = $sql
 $command.ExecuteNonQuery()
 
-# $sql = "Update [${sheet_name}] set status = '2' && server='SKOUZMINE9' where server=SKOUZMINE9";
-# $command.CommandText = $sql
-# $command.ExecuteNonQuery()
-# Exception calling "ExecuteNonQuery" with "0" argument(s): "No value given for one or more required parameters."
+$sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status WHERE [server] = @server"
+$command.Parameters.Add("@server", [System.Data.OleDb.OleDbType]::VarChar).Value = 'sergueik9'
+$command.Parameters.Add("@status", [System.Data.OleDb.OleDbType]::VarChar).Value = '42'
+$command.CommandText = $sql
+$command.ExecuteNonQuery()
 
+$command.Dispose()
 $connection.close()
 
