@@ -371,35 +371,33 @@ $current_frame = $selenium.SwitchTo().Frame($top_frame)
 # role=presentation 
 # div#fancybox-content  is parent of iframe
 
-$presentation_css_selector = 'a[href="#map-view"]'
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait44 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(3))
-$wait44.PollingInterval = 500
+$map_css_selector = 'a[href="#map-view"]'
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait_map = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(3))
+$wait_map.PollingInterval = 500
 
 try {
-  [void]$wait44.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($presentation_css_selector)))
+  [void]$wait_map.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($map_css_selector)))
   $found_presentation = $true
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
   $found_presentation = $false
 }
 if ($found_presentation) {
-  $presentation_button = $current_frame.FindElement([OpenQA.Selenium.By]::CssSelector($presentation_css_selector))
+  $map_button = $current_frame.FindElement([OpenQA.Selenium.By]::CssSelector($map_css_selector))
 
-  if ($presentation_button.Displayed) {
+  if ($map_button.Displayed) {
    write-output 'This itinerary has a map'
-    $presentation_button.Click()
+    $map_button.Click()
     Start-Sleep -Millisecond 1000
   }
 }
 
-# TODO: inner-pages itinerary is not found
-$inner_pages_itinerary_css_selector = 'div[class *= itinerary]'
 $inner_pages_itinerary_css_selector = 'form[action *="ItineraryLightbox.aspx"]'
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait55 = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(30))
-$wait55.PollingInterval = 500
+[OpenQA.Selenium.Support.UI.WebDriverWait]$wait_inner_pages_itinerary = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($current_frame,[System.TimeSpan]::FromSeconds(30))
+$wait_inner_pages_itinerary.PollingInterval = 500
 
 try {
-  [void]$wait55.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($inner_pages_itinerary_css_selector)))
+  [void]$wait_inner_pages_itinerary.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::CssSelector($inner_pages_itinerary_css_selector)))
   $found_inner_pages_itinerary = $true
 } catch [exception]{
   Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
