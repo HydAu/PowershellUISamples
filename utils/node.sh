@@ -224,3 +224,12 @@ org.openqa.grid.selenium.GridLauncher \
 
 echo $NODE_PID
 ps ax | grep [j]ava
+
+
+# -browser "seleniumProtocol=WebDriver,browserName=firefox,maxInstances=5,platform=LINUX" \
+# -browser "seleniumProtocol=Selenium,browserName=*firefox,maxInstances=5,platform=LINUX"  \
+# -browser "seleniumProtocol=WebDriver,browserName=chrome,maxInstances=5,platform=LINUX" \
+# -browser "seleniumProtocol=Selenium,browserName=*googlechrome,maxInstances=5,platform=LINUX" \
+# -Dwebdriver.chrome.driver=/home/vncuser/selenium/seleniumchromedriver \
+# -Dwebdriver.ie.driver.logfile=c:\selenium\logs\IEDriverServerWin64.log \
+# -Dwebdriver.logging.Level=ALL \
