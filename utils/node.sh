@@ -118,8 +118,19 @@ else
 echo "Please launch the Selenium hub on ${HUB_PORT} first." 
 exit 1
 fi
-
-
+if [ `/bin/false` ] 
+then
+SERVICE_INFO=$(/sbin/service --status-all | egrep -i 'vncserver|xvnc')
+echo '1'
+echo $SERVICE_INFO
+STATUS=$(expr "$SERVICE_INFO" : '.* is \(.*\)')
+echo $STATUS | grep -ivn 'runnng'  > /dev/null
+if [ $? != 0 ]
+then
+echo Starting service
+/sbin/service vncserver start
+fi
+fi
 # This code detects the already running instances. Only one selenium node can run listening to a given port
 #
 echo "Checking if there is already Selenium process listening to ${NODE_PORT} and terminating"
