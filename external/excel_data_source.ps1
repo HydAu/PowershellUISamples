@@ -66,4 +66,20 @@ $command.ExecuteNonQuery()
 
 $command.Dispose()
 $connection.close()
+<#
 
+$com_object=New-Object -ComObject Excel.Application
+$com_object.Visible=$false
+$workbook=$com_object.Workbooks.Open($data_name)
+$sheet_name = 'ServerList$'
+$worksheet = $workbook.sheets.item($sheet_name)
+$rows_count =  ($worksheet.UsedRange.Rows).count
+$col_num = 1
+
+for($row_num = 2 ; $row_num -le $rows_count ; $row_num++)
+{
+  $worksheet.cells.item($row_num,$col_num).value2 | out-null
+   }
+$com_object.quit()
+
+#>
