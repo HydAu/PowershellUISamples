@@ -23,11 +23,11 @@ $sheet_name = 'ServerList$'
 $data_source = "Data Source = $filename"
 $ext_arg = "Extended Properties=Excel 8.0"
 [string]$query = "Select * from [${sheet_name}]"
-[System.Data.OleDb.OleDbConnection]$connection= New-Object System.Data.OleDb.OleDbConnection("$oledb_provider;$data_source;$ext_arg")
-[System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand($query)
+[System.Data.OleDb.OleDbConnection]$connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
+[System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand ($query)
 
 
-[System.Data.DataTable]$data_table = new-object System.Data.DataTable
+[System.Data.DataTable]$data_table = New-Object System.Data.DataTable
 [System.Data.OleDb.OleDbDataAdapter]$ole_db_adapter = New-Object System.Data.OleDb.OleDbDataAdapter
 $ole_db_adapter.SelectCommand = $command
 
@@ -42,27 +42,63 @@ $connection.open()
 $data_reader = $command.ExecuteReader()
 
 $row = 1
-[System.Data.DataRow]$data_record = $null 
-ForEach ($data_record in $data_table) {
- 
-    # Reading the columns of the current row
-    # $data_record | get-member
-    $server_cell_value = $data_record.'server'
-    $status_cell_value = $data_record.'status'
-    write-host ("row:{0}`nserver={1}`nstatus={2}`n" -f $row,$server_cell_value,$status_cell_value )
-    $row++
+[System.Data.DataRow]$data_record = $null
+foreach ($data_record in $data_table) {
+
+  # Reading the columns of the current row
+  # $data_record | get-member
+  $server_cell_value = $data_record.'server'
+  $status_cell_value = $data_record.'status'
+  $date_cell_value = $data_record.'date'
+  $result_cell_value = $data_record.'result'
+  $id_cell_value = $data_record.'id'
+  $cell_name = 'id'
+  $id_cell_value = $data_record."${cell_name}"
+  $row_data = @{
+    'id' = $null;
+    'server' = $null;
+    'status' = $null;
+    'date' = $null;
+    'result' = $null;
+  }
+  $row_data_keys = New-Object object[] ($row_data.Keys.Count)
+  [array]::copy(($row_data.Keys),$row_data_keys,$row_data.Keys.Count)
+  $row_data_keys | ForEach-Object {
+    $cell_name = $_
+    $cell_value = $data_record."${cell_name}"
+    $row_data[$cell_name] = $cell_value
+  }
+  Write-Output ("row:{0}" -f $row)
+  $row_data
+  <#
+  $result =  @()
+  $row_data_keys | foreach-object {  
+    $key_name = $_
+   $result += ( '{0}="{1}"' -f $key_name, $row_data[$key_name] )
+  }
+
+  Write-Output ("row:{0}`n{1}`n" -f $row,[System.String]::Join("`r`n", $result))
+  #>
+  Write-Output "`n"
+  $row++
 }
 $data_reader.close()
 
-$sql =  "Insert into [${sheet_name}] (server,status) values('sergueik9',2)"
+$sql = "Insert into [${sheet_name}] ([server],[status],[result],[date]) values('sergueik9',True,42,'03/08/2015')"
 $command.CommandText = $sql
-$command.ExecuteNonQuery()
+$result = $command.ExecuteNonQuery()
 
-$sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status WHERE [server] = @server"
-$command.Parameters.Add("@server", [System.Data.OleDb.OleDbType]::VarChar).Value = 'sergueik9'
-$command.Parameters.Add("@status", [System.Data.OleDb.OleDbType]::VarChar).Value = '42'
+Write-Output ('Insert result: {0}' -f $result)
+
+$sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status, [result] = @result  WHERE [id] = @id"
+# https://msdn.microsoft.com/en-us/library/system.data.oledb.oledbtype%28v=vs.110%29.aspx
+$command.Parameters.Add("@id",[System.Data.OleDb.OleDbType]::VarChar).Value = '1C12A94C6B554223BF46B2BF0F4DF3B8'
+$command.Parameters.Add("@server",[System.Data.OleDb.OleDbType]::VarChar).Value = 'sergueik9'
+$command.Parameters.Add("@status",[System.Data.OleDb.OleDbType]::Boolean).Value = $true
+$command.Parameters.Add("@result",[System.Data.OleDb.OleDbType]::Numeric).Value = 42
 $command.CommandText = $sql
-$command.ExecuteNonQuery()
+$result = $command.ExecuteNonQuery()
+Write-Output ('Update result: {0}' -f $result)
 
 $command.Dispose()
 $connection.close()
