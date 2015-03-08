@@ -16,8 +16,12 @@ fi
 #
 RUNNING_PID=$(sudo netstat -npl | grep $HUB_PORT | awk '{print $7}'| grep '/java'|head -1 | sed 's/\/.*$//')
 if [ "$RUNNING_PID" != "" ] ; then
-echo killing java $RUNNING_PID
+echo killing java process $RUNNING_PID
 ps -ocomm -oargs -p $RUNNING_PID
+# alternarive
+# sudo ps ax -opid,comm,args |  grep java |  grep $HUB_PORT 2>/dev/null| tail -1 | awk  '{print $1}' | xargs kill -HUP
+# sleep 1
+
 # sending HUP
 kill -HUP $RUNNING_PID
 # echo
