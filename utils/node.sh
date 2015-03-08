@@ -142,7 +142,7 @@ echo Killing firefoxes
 # This code terminates Firefox instances 
 # (unfinished)
 # WARNING - all running will be stopped
-ps ax -opid,comm | grep [f]irefox | tail -1 | awk '{print $1}' | xargs echo kill -1
+ps ax -opid,comm | grep [f]irefox | tail -1 | awk '{print $1}' | xargs kill -HUP 
 sleep 10
 
 PROFILE=$(grep -Eio 'Path=(.*)' ~/.mozilla/firefox/profiles.ini)
