@@ -139,7 +139,7 @@ $source_text.SendKeys('good morning')
 
 Start-Sleep -Seconds 1
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-
+# http://msdn.microsoft.com/en-us/library/system.windows.forms.sendkeys.send%28v=vs.110%29.aspx
 [void]$actions.SendKeys($source_text,[System.Windows.Forms.SendKeys]::SendWait("^a"))
 
 # Copy text
