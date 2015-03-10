@@ -41,9 +41,7 @@ namespace ADVAPI32
             // http://www.pinvoke.net/default.aspx/advapi32/CredRead.html
 
             read = CredRead(key, (CRED_TYPE)type, 0,  out  nCredPtr);
-        
             int lastError = Marshal.GetLastWin32Error();
-
             // If the API was successful then...
             if (read)
             {
