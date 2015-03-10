@@ -60,12 +60,9 @@ Add-Type -UsingNamespace @(
   'System.Text' `
   ) `
    -MemberDefinition @"
-
 public const int SM_CXSCREEN = 0;
 public const int SM_CYSCREEN = 1;
-
 public const Int32 CURSOR_SHOWING = 0x00000001;
-
 [StructLayout(LayoutKind.Sequential)]
 public struct ICONINFO
 {
@@ -264,8 +261,7 @@ public void Screenshot()
 	finalBMP = CaptureDesktopWithCursor();
 	graphics = Graphics.FromImage(finalBMP);
 	// graphics.CopyFromScreen(0, 0, 0, 0, finalBMP.Size);
-	finalBMP.Save(_imagePath, ImageFormat.Png);
-	finalBMP.Dispose();
+	finalBMP.Save(_imagePath, ImageFormat.Png);finalBMP.Dispose();
 	graphics.Dispose();
 }
 "@ -ReferencedAssemblies @( 'System.Windows.Forms.dll',`
