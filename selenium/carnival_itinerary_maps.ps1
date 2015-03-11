@@ -207,10 +207,15 @@ $shared_assemblies = @(
   'nunit.framework.dll'
 )
 
-$env:SHARED_ASSEMBLIES_PATH = "c:\developer\sergueik\csharp\SharedAssemblies"
+$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 
-$shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
+  $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
+}
+
 pushd $shared_assemblies_path
+
+
 $shared_assemblies | ForEach-Object { Unblock-File -Path $_; Add-Type -Path $_ }
 popd
 
