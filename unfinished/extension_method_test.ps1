@@ -18,27 +18,47 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
+# you have to load extension class first .
+Add-Type -Path 'C:\developer\sergueik\powershell_ui_samples\unfinished\obj\Debug\extension_class.dll'
+
+# you can copy 
+# http://www.java2s.com/Tutorial/CSharp/0140__Class/Addingextensionmethodforint.htm
 # https://www.google.com/search?q=msbuild+copy+all+reference+assemblies+to+output&ie=utf-8&oe=utf-8
 Add-Type -TypeDefinition @"
 using System;
 using ExtensionMethods;
 
-class ExtensionMethodTest : Object
-{
-    void TestExtension()
-    {
-        this.DisplayDefiningAssembly();
+public class ExtensionMethodTest : Object {
+    public void ExtensionMethod_Wrapper(){
+        this.ExtensionMethod();
+    }
+
+    public static void Main(string[] args) {
+        ExtensionMethodTest o = new ExtensionMethodTest();
+        o.ExtensionMethod();
+        o.ExtensionMethod_Wrapper();
     }
 }
 "@ -ReferencedAssemblies 'C:\developer\sergueik\powershell_ui_samples\unfinished\obj\Debug\extension_class.dll'
 
-$o = new-object -Type 'ExtensionMethodTest'
-$o.DisplayDefiningAssembly();
-$o.TestExtension();
+$o = New-Object -Type 'ExtensionMethodTest'
+
+
 try {
+  $o.ExtensionMethod();
 
+} catch [exception]{
+  # this will fail with 
+  Write-Output $_.Exception.Message
 
-  } catch [Exception] {
-write-output  $_.Exception.Message
 }
 
+
+
+try {
+  # this will fail with 
+  $o.ExtensionMethod_Wrapper();
+
+} catch [exception]{
+  Write-Output $_.Exception.Message
+}
