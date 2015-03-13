@@ -2,20 +2,17 @@ using System;
 using System.Text;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-namespace ExtensionMethods {
-  public static class Extensions {
-    public static DateTime StartOfWeek(this DateTime dt, DayOfWeek startOfWeek) {
-      int diff = dt.DayOfWeek - startOfWeek;
-      if (diff < 0) {
-        diff += 7;
-      }
-      return dt.AddDays(-1 * diff).Date;
-    }
-
-    public static void DisplayDefiningAssembly(this object obj)
+// Origin http://www.java2s.com/Tutorial/CSharp/0140__Class/Addingextensionmethodforint.htm
+namespace ExtensionMethods
+{
+    public static class Extensions
     {
-        Console.WriteLine(obj.GetType().Name);
-        Console.WriteLine(Assembly.GetAssembly(obj.GetType()));
+        public static void ExtensionMethod(this object obj)
+        {
+            Console.WriteLine("This extension method will attempt to display  defining assembly of the bound class:");
+            // TODO: move try catch here
+            // Console.WriteLine(obj.GetType().Name);
+            // Console.WriteLine(Assembly.GetAssembly(obj.GetType()));
+        }
     }
-  }
 }
