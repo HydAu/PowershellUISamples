@@ -22,7 +22,7 @@ $sheet_name = 'ServerList$'
 [string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
 $data_source = "Data Source = $filename"
 $ext_arg = "Extended Properties=Excel 8.0"
-[string]$query = "Select * from [${sheet_name}] where [id] = 4"
+[string]$query = "Select * from [${sheet_name}] where [id] = 15"
 [System.Data.OleDb.OleDbConnection]$connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
 [System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand ($query)
 
@@ -108,7 +108,7 @@ function insert_row {
     $column_name = $_
     $column_data = $new_row_data[$column_name]
     $local:command.Parameters.Add(('@{0}' -f $column_name),$column_data['type']).Value = $column_data['value']
-    Write-Output ('@{0} = {1}' -f $column_name, $column_data['value'])
+    Write-Output ('@{0} = {1}' -f $column_name,$column_data['value'])
 
   }
   $local:result = $local:command.ExecuteNonQuery()
@@ -122,6 +122,54 @@ function insert_row {
 }
 
 
+
+function insert_row_new {
+  param(
+    [string]$sql,
+    # [ref]$connection does not work here
+    # [System.Management.Automation.PSReference]$connection_ref,
+    [System.Data.OleDb.OleDbConnection]$connection,
+    [object]$new_row_data,
+    [string[]]$columns
+
+  )
+
+
+  [System.Data.OleDb.OleDbCommand]$local:command = New-Object System.Data.OleDb.OleDbCommand
+  $local:command.Connection = $connection
+
+  $local:insert_name_part = @()
+  $local:insert_value_part = @()
+
+  $new_row_data.Keys | ForEach-Object {
+    $column_name = $_
+    $column_data = $new_row_data[$column_name]
+    $local:command.Parameters.Add(('@{0}' -f $column_name),$column_data['type']).Value = $column_data['value']
+    Write-Output ('@{0} = {1}' -f $column_name,$column_data['value'])
+    $local:insert_name_part += ('[{0}]' -f $column_name)
+    $local:insert_value_part += ('@{0}' -f $column_name)
+  }
+
+  $local:generated_sql = (($sql -replace '@insert_name_part',($local:insert_name_part -join ',')) -replace '@insert_value_part',($local:insert_value_part -join ','))
+
+  Write-Output ('Insert query: {0}' -f $local:generated_sql)
+
+  $new_row_data.Keys | ForEach-Object {
+    $column_name = $_
+    $column_data = $new_row_data[$column_name]
+    Write-Output ('@{0} = {1}' -f $column_name,$column_data['value'])
+  }
+  $local:command.CommandText = $local:generated_sql
+
+  $local:result = $local:command.ExecuteNonQuery()
+
+  Write-Output ('Insert result: {0}' -f $local:result)
+
+  $local:command.Dispose()
+
+  return $local:result
+
+}
 
 
 function update_single_field {
@@ -158,7 +206,13 @@ function update_single_field {
 
 }
 
-update_single_field -connection $connection -sql "UPDATE [${sheet_name}] SET [server] = @server WHERE [id] = @id" -update_column_name '@server' -update_column_value 'sergueik11' -where_column_name '@id' -where_column_value 11
+update_single_field `
+   -connection $connection `
+   -sql "UPDATE [${sheet_name}] SET [server] = @server WHERE [id] = @id" `
+   -update_column_name '@server' `
+   -update_column_value 'sergueik11' `
+   -where_column_name '@id' `
+   -where_column_value 11
 
 $new_record_id = 11
 $new_guid = $guid = [guid]::NewGuid()
@@ -172,27 +226,48 @@ Write-Output ('Insert result: {0}' -f $result)
 # TODO : multiple columns
 # $sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status, [result] = @result , [guid]  = '@guid' WHERE [id] = @id"
 
-update_single_field -connection $connection -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" -update_column_name '@guid' -update_column_value ([guid]::NewGuid()).ToString() -where_column_name '@id' -where_column_value 1
-update_single_field -connection $connection -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" -update_column_name '@guid' -update_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' -where_column_name '@id' -where_column_value 2
-update_single_field -connection $connection -sql "UPDATE [${sheet_name}] SET [status] = @status WHERE [id] = @id" -update_column_name "@status" -update_column_value $false -update_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Boolean) -where_column_name '@id' -where_column_value 2
+update_single_field `
+   -connection $connection `
+   -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" `
+   -update_column_name '@guid' `
+   -update_column_value ([guid]::NewGuid()).ToString() `
+   -where_column_name '@id' `
+   -where_column_value 1
+
+update_single_field `
+   -connection $connection `
+   -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" `
+   -update_column_name '@guid' `
+   -update_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' `
+   -where_column_name '@id' `
+   -where_column_value 2
 
 
-update_single_field -connection $connection `
+update_single_field `
+   -connection $connection `
+   -sql "UPDATE [${sheet_name}] SET [status] = @status WHERE [id] = @id" `
+   -update_column_name "@status" `
+   -update_column_value $false `
+   -update_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Boolean) `
+   -where_column_name '@id' `
+   -where_column_value 2
+
+
+update_single_field `
+   -connection $connection `
    -sql "UPDATE [${sheet_name}] SET [id] = @id WHERE [server] = @server" `
    -where_column_name '@server' -where_column_value 'sergueik11' `
    -update_column_name '@id' -update_column_value 11 `
    -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::VarChar)
 
-
-
-update_single_field -connection $connection `
+update_single_field `
+   -connection $connection `
    -sql "UPDATE [${sheet_name}] SET [id] = @id WHERE [guid] = @guid" `
    -where_column_name '@guid' `
    -where_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' `
    -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::VarChar) `
    -update_column_name '@id' `
    -update_column_value 2 `
-
 
 
 $row_num = 14
@@ -228,10 +303,29 @@ $new_row_data = @{
 
 #insert_row -sql "Insert into [${sheet_name}] ([id],[server],[guid],[status]) values(@id, @server, @guid, @status )" `
 #-connection $connection -new_row_data $new_row_data
+insert_row `
+   -connection $connection `
+   -sql "Insert into [${sheet_name}] ([id], [guid], [server], [status], [result], [date]) values(@id, @server, @guid, @status, @result, @date)" `
+   -new_row_data $new_row_data -columns @( 'id','guid','server','status','result','date')
 
-insert_row -sql "Insert into [${sheet_name}] ([id], [server], [guid], [status], [result], [date]) values(@id, @server, @guid, @status, @result, @date)" `
-   -connection $connection -new_row_data $new_row_data -columns @( 'id','server','guid','status','result','date')
 
+
+$row_num = 15
+$new_row_data['id']['value'] = $row_num
+
+insert_row `
+   -sql "Insert into [${sheet_name}] ([id], [server], [guid], [status], [result], [date]) values(@id, @server, @guid, @status, @result, @date)" `
+   -connection $connection `
+   -new_row_data $new_row_data `
+   -columns @( 'id','server','guid','status','result','date')
+
+
+$new_row_data['id']['value']++
+
+insert_row_new `
+   -connection $connection `
+   -sql "Insert into [${sheet_name}] (@insert_name_part) values (@insert_value_part)" `
+   -new_row_data $new_row_data
 
 $command.Dispose()
 
