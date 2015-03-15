@@ -22,7 +22,7 @@ $sheet_name = 'ServerList$'
 [string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
 $data_source = "Data Source = $filename"
 $ext_arg = "Extended Properties=Excel 8.0"
-[string]$query = "Select * from [${sheet_name}]"
+[string]$query = "Select * from [${sheet_name}] where [id] = 4"
 [System.Data.OleDb.OleDbConnection]$connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
 [System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand ($query)
 
@@ -40,7 +40,7 @@ $data_reader = $command.ExecuteReader()
 $row_num = 1
 [System.Data.DataRow]$data_record = $null
 foreach ($data_record in $data_table) {
-
+$data_record 
   # Reading the columns of the current row
   Write-Host ("row:{0}" -f $row_num)
   $row_data = @{
@@ -50,10 +50,15 @@ foreach ($data_record in $data_table) {
     'date' = $null;
     'result' = $null;
     'guid' = $null;
-
   }
-  $row_data_keys = New-Object object[] ($row_data.Keys.Count)
-  [array]::copy(($row_data.Keys),$row_data_keys,$row_data.Keys.Count)
+  #
+  # $row_data_keys = New-Object object[] ($row_data.Keys.Count)
+  # [System.Array]::copy(($row_data.Keys),$row_data_keys,$row_data.Keys.Count)
+  # Cannot find an overload for "Copy" and the argument count: "3".
+  # 
+  # $row_data_keys = ($row_data.Keys).Clone()
+  # Method invocation failed because [System.Collections.Hashtable+KeyCollection] doesn't contain a method named 'Clone'.
+  $row_data_keys = [String[]]($row_data.Keys)
   $row_data_keys | ForEach-Object {
     # An error occurred while enumerating through a collection: Collection was
     # modified; enumeration operation may not execute..
@@ -75,27 +80,80 @@ foreach ($data_record in $data_table) {
   Write-Output "`n"
   $row_num++
 }
+
+
 $data_reader.close()
+
+function update_fields  {  
+param (
+    [string]$sql ,
+    # [ref]$connection does not work here
+    # [System.Management.Automation.PSReference]$connection_ref,
+    [System.Data.OleDb.OleDbConnection]$connection,
+    [String]$where_column_name,
+    [Object]$where_column_value,
+    [String]$update_column_name,
+    [Object]$update_column_value,
+    [System.Management.Automation.PSReference]$update_column_type_ref = ([ref] [System.Data.OleDb.OleDbType]::VarChar) ,
+    [System.Management.Automation.PSReference]$where_column_type_ref = ([ref] [System.Data.OleDb.OleDbType]::Numeric ) 
+ 
+
+)
+
+[System.Data.OleDb.OleDbCommand]$local:command = New-Object System.Data.OleDb.OleDbCommand
+$local:command.Connection = $connection
+
+$local:command.Parameters.Add($update_column_name,$update_column_type_ref.Value).Value = $update_column_value
+$local:command.Parameters.Add($where_column_name,$where_column_type_ref.Value).Value = $where_column_value
+$local:command.CommandText = $sql
+
+# Exception calling "Prepare" with "0" argument(s): "OleDbCommand.Prepare method requires all variable length parameters to have an explicitly set non-zero Size."
+# $command.Prepare()
+
+$local:result = $local:command.ExecuteNonQuery()
+Write-Output ('Update query: {0}' -f (($sql -replace $update_column_name, $update_column_value) -replace $where_column_name, $where_column_value ))
+Write-Output ('Update result: {0}' -f $local:result)
+
+$local:command.Dispose()
+
+return
+
+}
+
+
+update_fields  -connection $connection -sql "UPDATE [${sheet_name}] SET [server] = @server WHERE [id] = @id" -update_column_name '@server' -update_column_value 'sergueik11' -where_column_name '@id' -where_column_value 11 
+
+$new_record_id  = 11
 $new_guid = $guid = [guid]::NewGuid()
-$sql = "Insert into [${sheet_name}] ([id],[server],[status],[result],[date],[guid]) values($row_num, 'sergueik9','True',42,'3/8/2015 4:00:00 PM', '${new_guid}')"
+
+$sql = "Insert into [${sheet_name}] ([id],[server],[status],[result],[date],[guid]) values($new_record_id, 'sergueik9','True',42,'3/8/2015 4:00:00 PM', '${new_guid}')"
 $command.CommandText = $sql
 $result = $command.ExecuteNonQuery()
 
 Write-Output ('Insert result: {0}' -f $result)
 
 # $sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status, [result] = @result , [guid]  = '@guid' WHERE [id] = @id"
-$sql = "UPDATE [${sheet_name}] SET [status] = @status, [result] = @result WHERE [id] = @id"
-# $command.Parameters.Add("@id",[System.Data.OleDb.OleDbType]::VarChar).Value = '2'
-# $command.Parameters.Add("@guid",[System.Data.OleDb.OleDbType]::VarChar).Value = ("{0}" -f ([guid]'ea370517-8c01-4623-b932-68570c9d84c3').ToString())
-# https://msdn.microsoft.com/en-us/library/system.data.oledb.oledbtype%28v=vs.110%29.aspx
-$command.Parameters.Add("@server",[System.Data.OleDb.OleDbType]::VarChar).Value = 'sergueik9'
-$command.Parameters.Add("@status",[System.Data.OleDb.OleDbType]::Boolean).Value = $true
-$command.Parameters.Add("@result",[System.Data.OleDb.OleDbType]::Numeric).Value = 42
-$command.CommandText = $sql
-$result = $command.ExecuteNonQuery()
-Write-Output ('Update result: {0}' -f $result)
+# $sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status, [result] = @result WHERE [server] = @server"
+
+update_fields -connection $connection -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" -update_column_name '@guid' -update_column_value (([guid]::NewGuid()).ToString()) -where_column_name '@id' -where_column_value 1 
+update_fields -connection $connection -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" -update_column_name '@guid' -update_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' -where_column_name '@id' -where_column_value 2 
+update_fields -connection $connection -sql "UPDATE [${sheet_name}] SET [status] = @status WHERE [id] = @id" -update_column_name "@status" -update_column_value $false -update_column_type_ref ([ref] [System.Data.OleDb.OleDbType]::Boolean ) -where_column_name '@id' -where_column_value 2
+
+
+update_fields  -connection $connection -sql "UPDATE [${sheet_name}] SET [id] = @id WHERE [server] = @server" -where_column_name '@server' -where_column_value 'sergueik11' -update_column_name '@id' -update_column_value 11  -where_column_type_ref  ([ref] [System.Data.OleDb.OleDbType]::VarChar) 
+
+
+
+update_fields -connection $connection `
+-sql "UPDATE [${sheet_name}] SET [id] = @id WHERE [guid] = @guid" `
+-where_column_name '@guid' `
+-where_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' `
+-where_column_type_ref  ([ref] [System.Data.OleDb.OleDbType]::VarChar)  `
+-update_column_name '@id' `
+-update_column_value 2 `
 
 $command.Dispose()
+
 $connection.close()
 <#
 
@@ -114,3 +172,5 @@ for($row_num = 2 ; $row_num -le $rows_count ; $row_num++)
 $com_object.quit()
 
 #>
+
+
