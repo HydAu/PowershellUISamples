@@ -1,6 +1,7 @@
 param(
   [string]$target_host = '',
   [switch]$test,
+  [switch]$local,
   [switch]$debug
 )
 
@@ -30,7 +31,7 @@ else {
 }
 
 function remote_get_foldersize {
-
+  # TODO : enforce position
   param(
     [string]$drive_name = 'C:',
     [string[]]$folders,
@@ -54,19 +55,27 @@ function remote_get_foldersize {
     }
 
   }
+  $result = @()
+  $result_ref = ([ref]$result)
 
-
-  Write-Output 'Measuring:'
+  $result_ref.Value = @()
+  Write-Host 'Measuring:'
   $folders | Format-Table
   $folders | ForEach-Object {
-
+    <#
     Get-ChildItem -LiteralPath $_ -Directory -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
       $path = $_; # TODO assert 
       if ($true) { Write-Output $path | Get-FolderSize-Embedded } }
   } | Set-Variable -Name 'result_local'
-
-
+#>
+    $result_local = Get-ChildItem -LiteralPath $_ -Directory -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+      $path = $_; # TODO assert 
+      if ($true) { Write-Host $path | Get-FolderSize-Embedded } }
+  }
+  Write-Host 'Exporting results'
+  $result_local.GetType()
   $result_ref.Value = $result_local
+  return $result_local
 }
 # 
 function Get-FolderSize
@@ -115,19 +124,24 @@ function get_level1_directories
 $drive_name = 'C:'
 $level1 = @()
 get_level1_directories -result_ref ([ref]$level1) -drive_name $drive_name
-Write-Output 'Measuring:'
-<#
-$level1 | Format-Table
-$level1 | ForEach-Object {
 
-  Get-ChildItem -LiteralPath $_ -Directory -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
-    $path = $_; # TODO assert 
-    if ($true) { Write-Output $path | Get-FolderSize } }
-} | sort size -Descending | Out-GridView
-#>
+if ($PSBoundParameters["local"]) {
 
-[object[]]$result = @();
-remote_get_foldersize -drive_name $drive_name -folders $level1 -result_ref ([ref]$result)
+  Write-Output 'Measuring:'
 
-$result | sort size -Descending | Out-GridView
-# $remote_run_step1 = Invoke-Command -computer $target_host -ScriptBlock ${function:fix_json_file} -ArgumentList $json_template,$result_json,$test
+  $level1 | Format-Table
+  $level1 | ForEach-Object {
+
+    Get-ChildItem -LiteralPath $_ -Directory -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+      $path = $_; # TODO assert 
+      if ($true) { Write-Output $path | Get-FolderSize } }
+  } | sort size -Descending | Out-GridView
+} else {
+  $result = @();
+  # remote_get_foldersize -drive_name $drive_name -folders $level1 -result_ref ([ref]$result)
+  $result_ref = ([ref]$result)
+  # $remote_run_step1 = Invoke-Command -computer $target_host -ScriptBlock ${function:remote_get_foldersize} -ArgumentList $drive_name,$level1,$result_ref
+  $result = Invoke-Command -computer $target_host -ScriptBlock ${function:remote_get_foldersize} -ArgumentList $drive_name,$level1
+  $result | sort size -Descending | Out-GridView
+
+}
