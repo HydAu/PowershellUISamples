@@ -2,14 +2,14 @@
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Date>2014-09-29T16:26:03.5773877</Date>
-    <Author>CARNIVAL\_AutomatedTest</Author>
+    <Author>%DOMAIN%\%USER%</Author>
     <Description>Example from 	
 http://stackoverflow.com/questions/25315365/running-hub-and-nodes-remotely-on-windows-without-a-user-logged-into-the-machine but with different options</Description>
   </RegistrationInfo>
   <Triggers>
     <LogonTrigger>
       <Enabled>true</Enabled>
-      <UserId>CARNIVAL\_AutomatedTest</UserId>
+      <UserId>%DOMAIN%\%USER%/UserId>
     </LogonTrigger>
   </Triggers>
   <Principals>
