@@ -1,4 +1,4 @@
-# this example does not work because the class has to implement
+# This example does not work because the class has to implement IWin32Window and it is uclear if this is possible with MemberDefinition 
 $guid = [guid]::NewGuid()
 $helper_classname = 'win32_window_helper'
 $helper_namespace = ("Util_{0}" -f ($guid -replace '-',''))
