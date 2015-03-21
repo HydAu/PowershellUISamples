@@ -18,39 +18,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-Add-Type -TypeDefinition @"
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private int _numeric;
-    private string _timestr;
 
-    public int Numeric
-    {
-        get { return _numeric; }
-        set { _numeric = value; }
-    }
-
-    public string TimeStr
-    {
-        get { return _timestr; }
-        set { _timestr = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
-}
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 # http://stackoverflow.com/questions/16789399/looking-for-time-picker-control-with-half-hourly-up-down
 
 Add-Type -TypeDefinition @"
@@ -74,6 +42,13 @@ public class CustomTimePicker : System.Windows.Forms.DomainUpDown
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
+
+$form_onload = {
+   $script:numeric_value = 0
+   $script:time_value = ''
+   $script:custom_value= ''
+}
+
 function UpDownsPrompt
 {
   param(
@@ -105,15 +80,15 @@ function UpDownsPrompt
   $n.ReadOnly = $false
   $n.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Right
 
-  $handler = {
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs)
-    $caller.Numeric = $n.Value
-  }
+  ($n.add_ValueChanged).Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
 
-  $eventMethod = $n.add_ValueChanged
-  $eventMethod.Invoke($handler)
+      $script:numeric_value = $n.Value
+    }
+  )
 
   $c = New-Object CustomTimePicker
   $c.Parent = $f
@@ -122,15 +97,14 @@ function UpDownsPrompt
   $c.TextAlign = [System.Windows.Forms.HorizontalAlignment]::Left
   $c.ReadOnly = $true
 
-  $handler = {
-    param(
-      [object]$sender,
-      [System.EventArgs]$eventargs)
-    $caller.TimeStr = $c.SelectedItem.ToString()
-  }
-
-  $eventMethod = $c.add_TextChanged
-  $eventMethod.Invoke($handler)
+  ($c.add_TextChanged).Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+        $script:custom_value = $c.SelectedItem.ToString()
+    }
+  )
 
   $c.SuspendLayout()
 
@@ -153,7 +127,7 @@ function UpDownsPrompt
       param(
         [object]$sender,
         [System.EventArgs]$eventargs)
-      $caller.TimeStr = $s.Value
+      $script:datetime_value = $s.Value
 
     })
 
@@ -176,14 +150,15 @@ function UpDownsPrompt
   $f.Topmost = $True
   $f.Add_Shown({ $f.Activate() })
 
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog()
+  $f.add_Load($form_onload)
+
   $f.Dispose()
 }
 
 $DebugPreference = 'Continue'
-$caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-UpDownsPrompt -caller $caller
+UpDownsPrompt
 
-Write-Debug ('Time Selection is : {0}' -f $caller.TimeStr)
-Write-Debug ('Numeric Value is : {0}' -f $caller.Numeric)
-$caller = $null
+Write-Debug ('Time Selection is : {0}' -f $script:datetime_value )
+Write-Debug ('Numeric Value is : {0}' -f $script:numeric_value)
+Write-Debug ('Custom contol Value is : {0}' -f $script:custom_value)
