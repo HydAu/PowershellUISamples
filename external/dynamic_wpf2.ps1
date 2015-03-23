@@ -5,96 +5,69 @@
 # this script uses type accelerators to shorten the progam
 # http://blogs.technet.com/b/heyscriptingguy/archive/2013/07/08/use-powershell-to-find-powershell-type-accelerators.aspx
 # connect.microsoft.com/PowerShell/feedback/details/721443/system-management-automation-typeaccelerators-broken-in-v3-ctp2
-$ta = [psobject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
+$ta = [PSObject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
 
-Add-Type -AssemblyName 'PresentationCore','PresentationFramework' -PassThru |
+Add-Type -AssemblyName 'PresentationCore','PresentationFramework' -Passthru |
 Where-Object IsPublic |
 ForEach-Object {
-  $Class = $_
+  $_class = $_
   try {
-    $ta::Add($Class.Name,$Class)
+    $ta::Add($_class.Name,$_class)
   } catch {
-    "Failed to add $($Class.Name) accelerator pointing to $($Class.FullName)"
+    ( 'Failed to add {0} accelerator resolving to {1}' -f $_class.Name ,   $_class.FullName )
   }
 }
 
-[window]@{
-  Width = 400
-  Height = 150
-  WindowStyle = 'None'
-  AllowsTransparency = $true
-  Effect = [dropshadoweffect]@{
-    BlurRadius = 10
-  }
+[Window]@{
+  Width = 310
+  Height = 110
+  WindowStyle = 'SingleBorderWindow'
+  AllowsTransparency = $false
   TopMost = $true
   Content = & {
-    $Stos = [stackpanel]@{
+    $c1 = [StackPanel]@{
+      Margin = '5'
       VerticalAlignment = 'Center'
       HorizontalAlignment = 'Center'
+      Orientation='Horizontal' 
+    }
+    $t = [textblock]@{
+
     }
 
-    $Stos.AddChild(
-      [label]@{
-        Content = 'Label'
-        FontSize = 11
-        FontFamily = 'Consolas'
+    $t.AddChild([label]@{
+        Margin = '5'
+        VerticalAlignment = 'Center'
+        HorizontalAlignment = 'Center'
+        FontSize = '11'
+        FontFamily = 'Calibri'
         Foreground = 'Black'
-      }
-    )
-    $Stos.AddChild(
-      [checkbox]@{
-        Content = 'Normal'
-        Margin = "8"
-        IsChecked = $null
+
+        Content = 'Enter Password:'
       }
     )
 
-    $Stos.AddChild(
-      [checkbox]@{
-        Content = 'Checked'
-        IsChecked = 'ischecked'
-        Margin = "8"
+    $c1.AddChild($t)
+    $c1.AddChild(
+      [passwordbox]@{
+        Name = 'passwordBox'
+        PasswordChar = '*'
+        VerticalAlignment = 'Center'
+        Width = '120'
       }
     )
 
-    $Stos.AddChild(
-      [checkbox]@{
-        Content = 'Three'
-        Margin = "8"
+    $c1.AddChild(
+      [button]@{
+        Content = 'OK'
+        IsDefault = 'True'
+        Margin = '5'
+        Name = 'button1'
+        Width='50'
+        VerticalAlignment = 'Center'
       }
     )
-    $x = new-object System.Windows.Controls.Checkbox
-    $x.Content = 'Three'
-    $x.Margin = "8"
-    $Stos.AddChild($x)
-
-$cb =  [ComboBox]@{
-        Name="comboBox"
-        IsEditable="True"
-         Margin="5"
-    } 
-    $cb.AddChild(
-      [ComboBoxItem]@{
-        Content = 'Item 1'
-        Margin = "8"
-      }
-    )
-    $cb.AddChild(
-      [ComboBoxItem]@{
-        Content = 'Item 2'
-        Margin = "8"
-        IsSelected = 'True'
-      }
-    )
-    $cb.AddChild(
-      [ComboBoxItem]@{
-        Content = 'Item 3'
-        Margin = "8"
-      }
-    )
-
-    $Stos.AddChild($cb)
-    ,$Stos
+    ,$c1
   }
 } | ForEach-Object {
   $_.Add_MouseLeftButtonDown({
