@@ -1,4 +1,4 @@
-#Copyright (c) 2015 Serguei Kouzmine
+#Copyright (c) 2014, 2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -31,41 +31,23 @@ $Readable = @{
 }
 
 
+# http://www.cosmonautdreams.com/2013/09/06/Parse-Excel-Quickly-With-Powershell.html
+# for singlee column spreadsheets see also
+# http://blogs.technet.com/b/heyscriptingguy/archive/2008/09/11/how-can-i-read-from-excel-without-using-excel.aspx
 
-Add-Type -TypeDefinition @"
-
-// "
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
 {
-    private IntPtr _hWnd;
-    private int _data;
-    private string _message;
-
-    public int Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-    public string Message
-    {
-        get { return _message; }
-        set { _message = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
 }
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
 function PromptGrid (
@@ -93,7 +75,7 @@ function PromptGrid (
   $grid.DataBindings.DefaultDataSourceUpdateMode = 0
   $grid.HeaderForeColor = [System.Drawing.Color]::FromArgb(255,0,0,0)
 
-  $grid.Name = "dataGrid1"
+  $grid.Name = 'dataGrid1'
   $grid.DataMember = ''
   $grid.TabIndex = 0
   $System_Drawing_Point = New-Object System.Drawing.Point
@@ -108,44 +90,34 @@ function PromptGrid (
 
   $f.Controls.Add($button)
   $f.Controls.Add($grid)
-
-
   $button.add_click({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
       # http://msdn.microsoft.com/en-us/library/system.windows.forms.datagridviewrow.cells%28v=vs.110%29.aspx
+      # TODO:
       # [System.Windows.Forms.DataGridViewSelectedRowCollection]$rows = $grid.SelectedRows
-      # $str = ''
-      #[System.Windows.Forms.DataGridViewRow]$row = $null 
-      # 
-      #[System.Windows.Forms.DataGridViewSelectedCellCollection] $selected_cells = $grid.SelectedCells; 
-      $caller.Data = 0
-
-      # for ($counter = 0; $counter -lt ($grid.Rows.Count);$counter++) { 
-
-      $caller.Data = $caller.Data + 10
-      # }
-      #foreach ($row in $rows) { 
-      #$str +=  $row.Cells[0].Value
-      #
-      #}
-      if ($grid.IsSelected(0)) {
-        $caller.Data = 11;
-      } else {
-        $caller.Data = 42;
-
+      # [System.Windows.Forms.DataGridViewRow]$row = $null 
+      # [System.Windows.Forms.DataGridViewSelectedCellCollection] $selected_cells = $grid.SelectedCells; 
+      $script:Data = 0
+      $script:Status = $RESULT_CANCEL
+      # $last_row = ($grid.Rows.Count)
+      $last_row =  $data.Count
+      for ($counter = 0; $counter -lt $last_row;$counter++) { 
+        if ($grid.IsSelected($counter)) {
+          $row =  $data[$counter]
+          $script:Data = $row.Guid
+          $script:Status = $RESULT_OK
+         }
       }
-      $caller.Data = $str
       $f.Close()
 
     })
 
-
-
   $grid.DataSource = $data
-  $f.ShowDialog([win32window ]($caller)) | Out-Null
-
+  $f.ShowDialog() | Out-Null
   $f.Topmost = $True
-
-
   $f.Refresh()
 
 }
@@ -153,7 +125,7 @@ function PromptGrid (
 
 function display_result {
   param([object[]]$result)
-
+  $script:Data = 0 
   $array = New-Object System.Collections.ArrayList
   foreach ($row_data in $result) {
     $o = New-Object PSObject
@@ -162,32 +134,17 @@ function display_result {
 
       $o | Add-Member Noteproperty $row_data_key $row_data_value
     }
-    $array.Add($o)
+    [void]$array.Add($o)
   }
 
   $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
   $ret = (PromptGrid $array $process_window)
-  Write-Output @( '->',$process_window.Data)
-}
-
-
-# http://www.cosmonautdreams.com/2013/09/06/Parse-Excel-Quickly-With-Powershell.html
-# for singlee column spreadsheets see also
-# http://blogs.technet.com/b/heyscriptingguy/archive/2008/09/11/how-can-i-read-from-excel-without-using-excel.aspx
-
-# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory
-{
-  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
-  if ($Invocation.PSScriptRoot) {
-    $Invocation.PSScriptRoot
-  }
-  elseif ($Invocation.MyCommand.Path) {
-    Split-Path $Invocation.MyCommand.Path
-  } else {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  if ($script:Status -eq $RESULT_OK ) { 
+    Write-Output @( 'Rerun ->', $script:Data )
   }
 }
+
+
 $data_name = 'Servers.xls'
 [string]$filename = ('{0}\{1}' -f (Get-ScriptDirectory),$data_name)
 
@@ -256,7 +213,5 @@ if ($PSBoundParameters["show"]) {
 
   $DebugPreference = 'Continue'
   display_result $plain_data
-
-
 
 }
