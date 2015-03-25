@@ -1,3 +1,28 @@
+#Copyright (c) 2015 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+param(
+  [switch]$show,
+  [switch]$debug
+)
+
+
 $RESULT_OK = 0
 $RESULT_CANCEL = 2
 $Readable = @{
@@ -127,15 +152,16 @@ function PromptGrid (
 
 
 function display_result {
-  param([object]$result)
+  param([object[]]$result)
 
   $array = New-Object System.Collections.ArrayList
-
-  foreach ($key in $result.Keys) {
-    $value = $result[$key]
+  foreach ($row_data in $result) {
     $o = New-Object PSObject
-    $o | Add-Member Noteproperty 'Substance' $value[0]
-    $o | Add-Member Noteproperty 'Action' $value[1]
+    foreach ($row_data_key in $row_data.Keys) {
+      $row_data_value = $row_data[$row_data_key]
+
+      $o | Add-Member Noteproperty $row_data_key $row_data_value
+    }
     $array.Add($o)
   }
 
@@ -144,12 +170,91 @@ function display_result {
   Write-Output @( '->',$process_window.Data)
 }
 
-$data = @{ 1 = @( 'wind','blows...');
-  2 = @( 'fire','burns...');
-  3 = @( 'water','falls...')
+
+# http://www.cosmonautdreams.com/2013/09/06/Parse-Excel-Quickly-With-Powershell.html
+# for singlee column spreadsheets see also
+# http://blogs.technet.com/b/heyscriptingguy/archive/2008/09/11/how-can-i-read-from-excel-without-using-excel.aspx
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
+}
+$data_name = 'Servers.xls'
+[string]$filename = ('{0}\{1}' -f (Get-ScriptDirectory),$data_name)
+
+$sheet_name = 'ServerList$'
+[string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
+$data_source = "Data Source = $filename"
+$ext_arg = "Extended Properties=Excel 8.0"
+# TODO: hard coded id
+[string]$query = "Select * from [${sheet_name}] where [id] <> 0"
+[System.Data.OleDb.OleDbConnection]$connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
+[System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand ($query)
+
+
+[System.Data.DataTable]$data_table = New-Object System.Data.DataTable
+[System.Data.OleDb.OleDbDataAdapter]$ole_db_adapter = New-Object System.Data.OleDb.OleDbDataAdapter
+$ole_db_adapter.SelectCommand = $command
+
+$command.Connection = $connection
+($rows = $ole_db_adapter.Fill($data_table)) | Out-Null
+$connection.open()
+$data_reader = $command.ExecuteReader()
+$plain_data = @()
+$row_num = 1
+[System.Data.DataRow]$data_record = $null
+if ($data_table -eq $null) {}
+else {
+
+  foreach ($data_record in $data_table) {
+    $data_record | Out-Null
+    # Reading the columns of the current row
+
+    $row_data = @{
+      'id' = $null;
+      'server' = $null;
+      'status' = $null;
+      'date' = $null;
+      'result' = $null;
+      'guid' = $null;
+    }
+
+    [string[]]($row_data.Keys) | ForEach-Object {
+      # An error occurred while enumerating through a collection: Collection was
+      # modified; enumeration operation may not execute..
+      $cell_name = $_
+      $cell_value = $data_record."${cell_name}"
+      $row_data[$cell_name] = $cell_value
+    }
+    Write-Output ("row[{0}]" -f $row_num)
+    $row_data
+    Write-Output "`n"
+    # format needs to be different 
+    $plain_data += $row_data
+    $row_num++
+  }
 }
 
-$DebugPreference = 'Continue'
+$data_reader.Close()
+$command.Dispose()
+$connection.Close()
+if ($PSBoundParameters["show"]) {
+  # $plain_data | Sort-Object -Property 'Id' | Out-GridView
+  # Does not have the correct schema yet  
 
-display_result $data
+  $DebugPreference = 'Continue'
+  display_result $plain_data
+
+
+
+}
 
