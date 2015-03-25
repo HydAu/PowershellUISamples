@@ -84,7 +84,7 @@ function PromptGrid (
 
 
   $f = New-Object System.Windows.Forms.Form
-  $f.Text = 'how do we open these stones? '
+  $f.Text = 'Test suite'
   $f.AutoSize = $true
   $grid = New-Object System.Windows.Forms.DataGrid
   $grid.PreferredColumnWidth = 100
@@ -221,11 +221,14 @@ else {
 
     $row_data = @{
       'id' = $null;
-      'server' = $null;
+      'baseUrl' = $null;
       'status' = $null;
       'date' = $null;
       'result' = $null;
       'guid' = $null;
+      'environment' = $null ;
+      'testName' = $null;
+
     }
 
     [string[]]($row_data.Keys) | ForEach-Object {
@@ -257,4 +260,3 @@ if ($PSBoundParameters["show"]) {
 
 
 }
-
