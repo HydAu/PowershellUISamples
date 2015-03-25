@@ -125,29 +125,48 @@ highlight ([ref]$selenium) ([ref]$target_text_field)
 
 <#
 # Some OpenQA.Selenium.Keys do not work with C# client ?
-$input_email.SendKeys(([OpenQA.Selenium.Keys]::Control +  [OpenQA.Selenium.Keys]::Substract))
+$target_text.SendKeys(([OpenQA.Selenium.Keys]::Control +  [OpenQA.Selenium.Keys]::Substract))
 start-sleep -milliseconds 300
 #>
 
 
-Write-Output 'zoom in'
+Write-Output 'Zoom in'
 # zoom in does not seem to work on Chrome or Firefox
 (1,2,3,4,5) | ForEach-Object {
-  [void]$actions.SendKeys($target_text,[System.Windows.Forms.SendKeys]::SendWait('^+'))
+  try{
+  # https://msdn.microsoft.com/en-us/library/system.windows.forms.sendkeys.send%28v=vs.110%29.aspx
+  # + is a mnemonic for SHIFT
+  # '^(+)' does not work
+  #  "SendKeys string '^++' is not valid
+  # OpenQA.Selenium.IKeyboard.SendKeys ? 
+  [void]$actions.SendKeys($target_text_field,[System.Windows.Forms.SendKeys]::SendWait("^+`0"))
+  # [void]$actions.SendKeys($target_text_field,([OpenQA.Selenium.Keys]::Control +  [OpenQA.Selenium.Keys]::Add + [OpenQA.Selenium.Keys]::Null  ))
+  # $target_text_field.SendKeys(([OpenQA.Selenium.Keys]::Control + [OpenQA.Selenium.Keys]::Add))
+  # $selenium.Keyboard.SendKeys(([OpenQA.Selenium.Keys]::Control +  [OpenQA.Selenium.Keys]::Add + [OpenQA.Selenium.Keys]::Null  ))
+  # $selenium.Keyboard.SendKeys([System.Windows.Forms.SendKeys]::SendWait('^+'))
+  # $selenium.Keyboard.SendKeys([System.Windows.Forms.SendKeys]::SendWait('^(+)'))
+  # key sequence to send must not be null
+  # Parameter name: keySequence
+  
   Start-Sleep -Milliseconds 500
-
+  } catch [Exception] { 
+write-output $_.Exception.Message
+  }
 }
-[void]$actions.SendKeys($target_text,[System.Windows.Forms.SendKeys]::SendWait('^0'))
+[void]$actions.SendKeys($target_text_field,[System.Windows.Forms.SendKeys]::SendWait('^0'))
+Start-Sleep -Seconds 3
+Write-Output 'Reload'
+
+[void]$actions.SendKeys($target_text_field,[System.Windows.Forms.SendKeys]::SendWait('^R'))
 Start-Sleep -Seconds 3
 
-
-Write-Output 'zoom out'
+Write-Output 'Zoom out'
 (1,2,3) | ForEach-Object {
-  [void]$actions.SendKeys($target_text,[System.Windows.Forms.SendKeys]::SendWait('^-'))
+  [void]$actions.SendKeys($target_text_field,[System.Windows.Forms.SendKeys]::SendWait('^-'))
   Start-Sleep -Milliseconds 500
 }
 Start-Sleep -Seconds 3
-[void]$actions.SendKeys($target_text,[System.Windows.Forms.SendKeys]::SendWait('^0'))
+[void]$actions.SendKeys($target_text_field,[System.Windows.Forms.SendKeys]::SendWait('^0'))
 Start-Sleep -Milliseconds 500
 
 
