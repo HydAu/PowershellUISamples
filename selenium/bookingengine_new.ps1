@@ -475,20 +475,19 @@ function count_cruises {
 
 # TODO :finish parameters
 $fullstop = (($PSBoundParameters['pause']) -ne $null)
+# Do not care 
 
-# do not care 
-# select_criteria -choice 'numGuests' -Value '"2"' -label 'TRAVELERS'
 select_criteria -choice 'dest' -label 'Sail To' -Option 'Canada/New England' -choice_value_ref ([ref]$destinations)
 select_criteria -choice 'port' -label 'Sail from' -Option 'New York, NY' -choice_value_ref ([ref]$ports)
 
-# do not care 
-# find first avail
-# select_first_option -choice 'dat' -label 'Date'
 search_cruises
+
 Start-Sleep -Milliseconds 10000
+
 $cruises_count_text = $null
 count_cruises -result_ref ([ref]$cruises_count_text)
 Write-Output $cruises_count_text
+
 $result = 1
 extract_match -Source $cruises_count_text -capturing_match_expression '\b(?<media>\d+)\b' -label 'media' -result_ref ([ref]$result)
 Write-Output ('Found # itinearies: {0}' -f $result)
@@ -500,78 +499,85 @@ $select_choice = 1
 # }
 # write-output ("Will try {0}th" -f $select_choice)
 
-$element5 = $null
-$css_selector1 = 'div[class*=search-result] a.itin-select'
+#---
+<# 
+Cannot overwrite variable actions because the variable has been optimized. Try
+using the New-Variable or Set-Variable cmdlet (without any aliases) or dot the
+command trying to set the variable.
+#>
+function select_one_seailing {
 
-Write-Output $css_selector1
-try {
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$elements1 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
-$learn_more_cnt = 0
-$elements1 | ForEach-Object {
-  $element3 = $_
+  # param ([]) 
 
-  if (($element5 -eq $null)) {
-    if ($element3.Text -match '\S') {
+  $element5 = $null
+  $css_selector1 = 'div[class*=search-result] a.itin-select'
 
-      if (-not ($element3.Text -match 'LEARN MORE')) {
-        $element5  = $element3
-        Write-Output ('Found: {0} count = {1}' -f $element3.Text,$learn_more_cnt)
-        [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-        $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
-        Start-Sleep -Milliseconds 100
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
-      }
-      # removed LEARN MORE processing 
-      # 
-    }
+  Write-Output $css_selector1
+  try {
+    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector1))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
   }
 
-}
+  if ($true )  {
 
-# ---
+    $elements1 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector1))
+    $learn_more_cnt = 0
 
+    $elements1 | ForEach-Object {
+      $element3 = $_
 
-$element6 = $null
+      if (($element5 -eq $null)) {
+        if ($element3.Text -match '\S') {
 
-$css_selector2 = 'div[class*=search-result]  li.action-col a[class*=btn-red]'
-<#
+          if (-not ($element3.Text -match 'LEARN MORE')) {
+            $element5 = $element3
+            Write-Output ('Found: {0} count = {1}' -f $element3.Text,$learn_more_cnt)
+            [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+            $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element3).Build().Perform()
+            [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'color: yellow; border: 4px solid yellow;')
+            Start-Sleep -Milliseconds 100
+            [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element3,'')
+          }
+        }
+      }
 
-<a class="btn btn-red" href="/BookingEngine/Booking/Book/?embkCode=NYC&itinCode=CAC&durDays=4&shipCode=SL&subRegionCode=NN&sailDate=06252015&sailingID=68468&numGuests=2&showDbl=False&isOver55=N&isPastGuest=N&stateCode=&isMilitary=N&evsel=" style="font-size: 14px;">Book Now</a>
-</li>
+    }
 
-#>
-$result = ''
-Write-Output $css_selector2
-
-try {
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$elements2 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector2))
-$learn_more_cnt2 = 0
-$elements2 | ForEach-Object {
-  $element4 = $_
-
-  if (($element6 -eq $null)) {
-    if ($element4.Text -match '\S') {
-
-      if ($element4.Text -match 'Book Now') {
-      $element6 = $element4
-        Write-Output ('Found: {0} count = {1}' -f $element4.Text,($learn_more_cnt2 + 1))
-        [OpenQA.Selenium.Interactions.Actions]$actions3 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-        $actions3.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
-        Start-Sleep -Milliseconds 100
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
+    # ---
 
 
-        [string]$script = @"
+    $element6 = $null
+
+    $css_selector2 = 'div[class*=search-result]  li.action-col a[class*=btn-red]'
+
+    $result = ''
+    Write-Output $css_selector2
+
+    try {
+      [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+    } catch [exception]{
+      Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+    }
+    $elements2 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector2))
+    $learn_more_cnt2 = 0
+    $elements2 | ForEach-Object {
+      $element4 = $_
+
+      if (($element6 -eq $null)) {
+        if ($element4.Text -match '\S') {
+
+          if ($element4.Text -match 'Book Now') {
+            $element6 = $element4
+            Write-Output ('Found: {0} count = {1}' -f $element4.Text,($learn_more_cnt2 + 1))
+            [OpenQA.Selenium.Interactions.Actions]$local:actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+            $local:actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
+            [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
+            Start-Sleep -Milliseconds 100
+            [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
+
+
+            [string]$script = @"
 function getPathTo(element) {
     if (element.id!=='')
         return '*[@id="'+element.id+'"]';
@@ -590,88 +596,45 @@ function getPathTo(element) {
 }
 return getPathTo(arguments[0]);
 "@
-        $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element4,'')).ToString()
+            $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element4,'')).ToString()
 
-        Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element4.Text,$result)
+            Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element4.Text,$result)
 
 
 
+          }
+
+
+
+          # Temporarily removed LEARN MORE processing  and iterations 
+          # 
+        }
       }
 
-
-      # Temporarily removed LEARN MORE processing  and iterations 
-      # 
     }
-  }
+  } else {
 
-}
+    $css_selector2 = 'div[class*=search-result]  li.action-col a[class*=btn-red]'
+    $learn_more_cnt = 0
 
-
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-$xpath = ('//{0}' -f $result)
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-[OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-
-Write-Output ('Found: {0} {1}' -f $element4.Text,$cnt)
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
-Start-Sleep -Milliseconds 3000
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
-Start-Sleep -Milliseconds 3000
-
-$element4.Click()
-
-        Start-Sleep -Milliseconds 3000
-
-
-#        [NUnit.Framework.StringAssert]::Contains('http://www.carnival.com/itinerary/',$selenium.url,{})
-        Write-Output ("Redirected to url: `n`t'{0}'" -f $selenium.url )
-
-<#
-# 
-###--
-$element6 = $null
-
-# $css_selector2 = 'div.number-rooms a[data-tag-page-suffix*=":number of rooms"]'
-$css_selector2 = 'a[data-tag-page-suffix*=":number of rooms"]'
-$Text2 = 'Continue'
-#         'http://www3.uatcarnival.com/BookingEngine/Booking/Book/?embkCode=NYC&itinCode=CAC&durDays=4&shipCode=SL&subRegionCode=NN&sailDate=06252015&sailingID=68468&numGuests=2&showDbl=False&isOver55=N&isPastGuest=N&stateCode=&isMilitary=N&evsel=#/number-of-staterooms'
-$result = ''
-Write-Output $css_selector2
-
-try {
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$elements2 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector2))
-$learn_more_cnt2 = 0
-$elements2 | ForEach-Object {
-  $element4 = $_
-
-  if (($element6 -eq $null)) {
-    if ($element4.Text -match '\S') {
+    try {
+      [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+    } catch [exception]{
+      Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+    }
+    $elements2 = $selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
+    $learn_more_cnt2 = 0
+    if ($element4.Text -match 'Book Now') {
       $element6 = $element4
-      if ($element4.Text -match $Text2) {
-
-        Write-Output ('Found: {0} count = {1}' -f $element4.Text,($learn_more_cnt2 + 1))
-        [OpenQA.Selenium.Interactions.Actions]$actions3 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-        $actions3.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
-        Start-Sleep -Milliseconds 100
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
+      Write-Output ('Found: {0} count = {1}' -f $element4.Text,($learn_more_cnt2 + 1))
+      [OpenQA.Selenium.Interactions.Actions]$local:actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+      $local:actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
+      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
+      Start-Sleep -Milliseconds 100
+      [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
 
 
-        [string]$script = @"
+      [string]$script = @"
 function getPathTo(element) {
     if (element.id!=='')
         return '*[@id="'+element.id+'"]';
@@ -690,247 +653,165 @@ function getPathTo(element) {
 }
 return getPathTo(arguments[0]);
 "@
-        $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element4,'')).ToString()
+      $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element4,'')).ToString()
 
-        Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element4.Text,$result)
-
-
-
-      }
+      Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element4.Text,$result)
 
 
-      # Temporarily removed LEARN MORE processing  and iterations 
-      # 
+
     }
+
+
   }
 
+
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  $xpath = ('//{0}' -f $result)
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
+  } catch [exception]{
+    Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  }
+
+  [OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
+
+  Write-Output ('Found: {0} {1}' -f $element4.Text,$cnt)
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep -Milliseconds 3000
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
+  Start-Sleep -Milliseconds 3000
+
+  $element4.Click()
+
+
 }
 
+#---
+
+select_one_seailing
+
+Start-Sleep -Milliseconds 3000
+
+[NUnit.Framework.StringAssert]::Contains('/BookingEngine/Booking/Book/',$selenium.url,{})
+[NUnit.Framework.StringAssert]::Contains('evsel=$',$selenium.url,{})
+
+Write-Output ("Redirected to url: `n`t'{0}'" -f $selenium.url)
+
+function be2_button_process {
+  param(
+    [string]$data_tag_page_suffix = ':number of travelers',
+    [string]$button_text = 'Continue'
+  )
+
+  ###--
+  $local:click_button = $null
 
 
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-$xpath = ('//{0}' -f $result)
+  $local:css_selector1 = ('a[data-tag-page-suffix*="{0}"]' -f $data_tag_page_suffix)
 
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  $local:xpath_selector1 = ''
+  Write-Output $local:css_selector1
+
+  try {
+    [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($local:css_selector1))
+  } catch [exception]{
+    Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
+  }
+  # TODO : cleanup !
+  $local:buttons = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($local:css_selector1))
+  $local:button_count = 0
+  $local:buttons | ForEach-Object {
+    $local:button = $_
+
+    if (($local:click_button -eq $null)) {
+      if ($local:button.Text -match '\S') {
+        $local:click_button = $local:button
+        if ($local:button.Text -match $button_text) {
+
+          Write-Output ('Found: {0} count = {1}' -f $local:button.Text,($local:button_count + 1))
+          [OpenQA.Selenium.Interactions.Actions]$local:action = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+          $local:action.MoveToElement([OpenQA.Selenium.IWebElement]$local:button).Build().Perform()
+          [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'color: yellow; border: 4px solid yellow;')
+          Start-Sleep -Milliseconds 100
+          [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'')
+
+
+          [string]$script = @"
+function getPathTo(element) {
+    if (element.id!=='')
+        return '*[@id="'+element.id+'"]';
+    if (element===document.body)
+        return element.tagName;
+
+    var ix= 0;
+    var siblings= element.parentNode.childNodes;
+    for (var i= 0; i<siblings.length; i++) {
+        var sibling= siblings[i];
+        if (sibling===element)
+            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
+        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
+            ix++;
+    }
+}
+return getPathTo(arguments[0]);
+"@
+          $local:xpath_selector1 = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$local:button,'')).ToString()
+
+          Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $local:button.Text,$local:xpath_selector1)
+
+
+
+        }
+
+
+        # Temporarily removed LEARN MORE processing  and iterations 
+        # 
+      }
+    }
+
+  }
+
+
+
+  [OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
+  $wait.PollingInterval = 100
+  $local:button_xpath = ('//{0}' -f $local:xpath_selector1)
+
+  try {
+    [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($local:button_xpath)))
+  } catch [exception]{
+    Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
+  }
+
+  [OpenQA.Selenium.IWebElement]$local:button = $selenium.FindElement([OpenQA.Selenium.By]::XPath($local:button_xpath))
+
+  Write-Output ('Found: {0} {1}' -f $local:button.Text,$cnt)
+  [OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
+  $actions.MoveToElement([OpenQA.Selenium.IWebElement]$local:button).Build().Perform()
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'color: yellow; border: 4px solid yellow;')
+  Start-Sleep -Milliseconds 3000
+  [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'')
+  Start-Sleep -Milliseconds 3000
+
+  $local:button.Click()
+
 }
 
-[OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-
-Write-Output ('Found: {0} {1}' -f $element4.Text,$cnt)
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
-Start-Sleep -Milliseconds 3000
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
-Start-Sleep -Milliseconds 3000
-
-$element4.Click()
-#>
 be2_button_process -data_tag_page_suffix ":number of rooms"
 be2_button_process -data_tag_page_suffix ':number of travelers'
-function be2_button_process {
-param(
-  [string]$data_tag_page_suffix = ':number of travelers',
-  [string]$button_text = 'Continue'
-)
-
-###--
-$local:click_button= $null
-
-
-$local:css_selector1 = (  'a[data-tag-page-suffix*="{0}"]'  -f $data_tag_page_suffix )
-
-$local:xpath_selector1 = ''
-Write-Output $local:css_selector1
-
-try {
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($local:css_selector1))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-# TODO : cleanup !
-$local:buttons = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($local:css_selector1))
-$local:button_count = 0
-$local:buttons | ForEach-Object {
-  $local:button = $_
-
-  if (($local:click_button-eq $null)) {
-    if ($local:button.Text -match '\S') {
-      $local:click_button= $local:button
-      if ($local:button.Text -match $button_text) {
-
-        Write-Output ('Found: {0} count = {1}' -f $local:button.Text,($local:button_count + 1))
-        [OpenQA.Selenium.Interactions.Actions]$local:action = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-        $local:action.MoveToElement([OpenQA.Selenium.IWebElement]$local:button).Build().Perform()
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'color: yellow; border: 4px solid yellow;')
-        Start-Sleep -Milliseconds 100
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'')
-
-
-        [string]$script = @"
-function getPathTo(element) {
-    if (element.id!=='')
-        return '*[@id="'+element.id+'"]';
-    if (element===document.body)
-        return element.tagName;
-
-    var ix= 0;
-    var siblings= element.parentNode.childNodes;
-    for (var i= 0; i<siblings.length; i++) {
-        var sibling= siblings[i];
-        if (sibling===element)
-            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
-        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
-            ix++;
-    }
-}
-return getPathTo(arguments[0]);
-"@
-        $local:xpath_selector1 = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$local:button,'')).ToString()
-
-        Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $local:button.Text,$local:xpath_selector1)
-
-
-
-      }
-
-
-      # Temporarily removed LEARN MORE processing  and iterations 
-      # 
-    }
-  }
-
-}
-
-
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-$local:button_xpath = ('//{0}' -f $local:xpath_selector1)
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($local:button_xpath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-[OpenQA.Selenium.IWebElement]$local:button = $selenium.FindElement([OpenQA.Selenium.By]::XPath($local:button_xpath))
-
-Write-Output ('Found: {0} {1}' -f $local:button.Text,$cnt)
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$local:button).Build().Perform()
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'color: yellow; border: 4px solid yellow;')
-Start-Sleep -Milliseconds 3000
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$local:button,'')
-Start-Sleep -Milliseconds 3000
-
-$local:button.Click()
-
-
-
-}
-
-###--
-
-$tag_page_suffix = ':number of travelers'
-###--
-$element6 = $null
-
-# $css_selector2 =  'div.number-rooms a[data-tag-page-suffix*=":number of rooms"]'
-$css_selector2 = (  'a[data-tag-page-suffix*="{0}"]'  -f $tag_page_suffix )
-$Text2 = 'Continue'
-#         'http://www3.uatcarnival.com/BookingEngine/Booking/Book/?embkCode=NYC&itinCode=CAC&durDays=4&shipCode=SL&subRegionCode=NN&sailDate=06252015&sailingID=68468&numGuests=2&showDbl=False&isOver55=N&isPastGuest=N&stateCode=&isMilitary=N&evsel=#/number-of-staterooms'
-$result = ''
-Write-Output $css_selector2
-
-try {
-  [void]$selenium.FindElement([OpenQA.Selenium.By]::CssSelector($css_selector2))
-} catch [exception]{
-  Write-Output ("Exception : {0} ...`n" -f (($_.Exception.Message) -split "`n")[0])
-}
-$elements2 = $selenium.FindElements([OpenQA.Selenium.By]::CssSelector($css_selector2))
-$learn_more_cnt2 = 0
-$elements2 | ForEach-Object {
-  $element4 = $_
-
-  if (($element6 -eq $null)) {
-    if ($element4.Text -match '\S') {
-      $element6 = $element4
-      if ($element4.Text -match $Text2) {
-
-        Write-Output ('Found: {0} count = {1}' -f $element4.Text,($learn_more_cnt2 + 1))
-        [OpenQA.Selenium.Interactions.Actions]$actions3 = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-        $actions3.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
-        Start-Sleep -Milliseconds 100
-        [OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
-
-
-        [string]$script = @"
-function getPathTo(element) {
-    if (element.id!=='')
-        return '*[@id="'+element.id+'"]';
-    if (element===document.body)
-        return element.tagName;
-
-    var ix= 0;
-    var siblings= element.parentNode.childNodes;
-    for (var i= 0; i<siblings.length; i++) {
-        var sibling= siblings[i];
-        if (sibling===element)
-            return getPathTo(element.parentNode)+'/'+element.tagName+'['+(ix+1)+']';
-        if (sibling.nodeType===1 && sibling.tagName===element.tagName)
-            ix++;
-    }
-}
-return getPathTo(arguments[0]);
-"@
-        $result = (([OpenQA.Selenium.IJavaScriptExecutor]$selenium).ExecuteScript($script,$element4,'')).ToString()
-
-        Write-Output ('Saving  XPATH for {0} = "{1}" ' -f $element4.Text,$result)
-
-
-
-      }
-
-
-      # Temporarily removed LEARN MORE processing  and iterations 
-      # 
-    }
-  }
-
-}
-
-
-
-[OpenQA.Selenium.Support.UI.WebDriverWait]$wait = New-Object OpenQA.Selenium.Support.UI.WebDriverWait ($selenium,[System.TimeSpan]::FromSeconds(1))
-$wait.PollingInterval = 100
-$xpath = ('//{0}' -f $result)
-
-try {
-  [void]$wait.Until([OpenQA.Selenium.Support.UI.ExpectedConditions]::ElementExists([OpenQA.Selenium.By]::XPath($xpath)))
-} catch [exception]{
-  Write-Output ("Exception with {0}: {1} ...`n(ignored)" -f $id1,(($_.Exception.Message) -split "`n")[0])
-}
-
-[OpenQA.Selenium.IWebElement]$element4 = $selenium.FindElement([OpenQA.Selenium.By]::XPath($xpath))
-
-Write-Output ('Found: {0} {1}' -f $element4.Text,$cnt)
-[OpenQA.Selenium.Interactions.Actions]$actions = New-Object OpenQA.Selenium.Interactions.Actions ($selenium)
-$actions.MoveToElement([OpenQA.Selenium.IWebElement]$element4).Build().Perform()
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'color: yellow; border: 4px solid yellow;')
-Start-Sleep -Milliseconds 3000
-[OpenQA.Selenium.IJavaScriptExecutor]$selenium.ExecuteScript("arguments[0].setAttribute('style', arguments[1]);",$element4,'')
-Start-Sleep -Milliseconds 3000
-
-$element4.Click()
-
-
-
+be2_button_process -data_tag_page_suffix ':check for deals'
+Start-Sleep -Seconds 10
+be2_button_process -data_tag_page_suffix ':stateroom category selection'
+<#
+Exception : Unable to locate element: {"method":"css selector","selector":"a[da
+ta-tag-page-suffix*=\":stateroom category selection\"]"} ...
+#>
+be2_button_process -data_tag_page_suffix ':stateroom type selection'
 custom_pause -fullstop $fullstop
 
 # At the end of the run - do not close Browser / Selenium when executing from Powershell ISE
@@ -992,7 +873,7 @@ input class="radio ng-pristine ng-untouched ng-valid ng-isolate-scope" type="rad
 R52
 
 
-
+'Error getting Prices' 
 h2>
 We're
 <span class="accent"> almost done </span>
