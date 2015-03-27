@@ -1,7 +1,36 @@
+#Copyright (c) 2015 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
+# http://tech.pro/tutorial/803/csharp-tutorial-using-the-built-in-oledb-csv-parser
+# http://www.codeproject.com/Articles/27802/Using-OleDb-to-Import-Text-Files-tab-CSV-custom
 # http://www.cosmonautdreams.com/2013/09/06/Parse-Excel-Quickly-With-Powershell.html
 # for singlee column spreadsheets see also
 # http://blogs.technet.com/b/heyscriptingguy/archive/2008/09/11/how-can-i-read-from-excel-without-using-excel.aspx
 
+param(
+[string]$format = 'excel',
+  [switch]$pause,
+  [switch]$show
+
+)
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -15,75 +44,112 @@ function Get-ScriptDirectory
     $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
   }
 }
-$data_name = 'Servers.xls'
+
+
+function initialize_data_reader {
+  param(
+
+    [string]$data_name,
+    [string]$sheet_name,
+    [string]$query ,
+    [System.Management.Automation.PSReference]$connection_ref,
+    [System.Management.Automation.PSReference]$command_ref,
+    [System.Management.Automation.PSReference]$data_table_ref,
+    [System.Management.Automation.PSReference]$data_reader_ref,
+    [bool]$debug
+
+)
+
+
 [string]$filename = ('{0}\{1}' -f (Get-ScriptDirectory),$data_name)
 
-$sheet_name = 'ServerList$'
+
 [string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
 $data_source = "Data Source = $filename"
 $ext_arg = "Extended Properties=Excel 8.0"
-[string]$query = "Select * from [${sheet_name}] where [id] = 15"
-[System.Data.OleDb.OleDbConnection]$connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
-[System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand ($query)
+
+if ($false) {
+# $ext_arg = "Extended Properties='text;HDR=Yes;FMT=Delimited(,)';"
+# $sheet_name = $data_name
+}
+[string]$query = "Select * from [${sheet_name}] WHERE ISNULL(guid)"
+# $x = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=`"C:\developer\sergueik\powershell_ui_samples\external`";Extended Properties='text;HDR=Yes;FMT=Delimited(,)';"
+# [System.Data.OleDb.OleDbConnection]$local:connection = New-Object System.Data.OleDb.OleDbConnection ($x)
+
+[System.Data.OleDb.OleDbConnection]$local:connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
+[System.Data.OleDb.OleDbCommand]$local:command = New-Object System.Data.OleDb.OleDbCommand ($query)
 
 
-[System.Data.DataTable]$data_table = New-Object System.Data.DataTable
+[System.Data.DataTable]$local:data_table = New-Object System.Data.DataTable
 [System.Data.OleDb.OleDbDataAdapter]$ole_db_adapter = New-Object System.Data.OleDb.OleDbDataAdapter
-$ole_db_adapter.SelectCommand = $command
+$ole_db_adapter.SelectCommand = $local:command
 
-$command.Connection = $connection
-$rows = $ole_db_adapter.Fill($data_table)
+$local:command.Connection = $connection
+
+$rows = $ole_db_adapter.Fill($local:data_table)
+
+<#
+Exception calling "Fill" with "1" argument(s): "The connection for viewing your linked Microsoft Excel worksheet was lost."
+#>
+
 $rows | Out-Null
-$connection.open()
-$data_reader = $command.ExecuteReader()
+$local:connection.open()
+$local:data_reader = $local:command.ExecuteReader()
+
+  $data_reader_ref.value =  ([System.Data.OleDb.OleDbDataReader]$local:data_reader)
+  $data_table_ref.value = $local:data_table
+  $connection_ref.value = $local:connection 
+  $command_ref.value = $local:command
+
+} 
+
+$command = New-Object System.Data.OleDb.OleDbCommand
+$conection =  New-Object System.Data.OleDb.OleDbConnection 
+$data_reader  = [Object]
+
+$data_name = 'TestConfiguration.xls'
+# $data_name = 'Servers.csv'
+$sheet_name = 'TestConfiguration$'
+$data_table = New-Object System.Data.DataTable
+initialize_data_reader -data_name $data_name -sheet_name $sheet_name -connection_ref ([ref]$connection) -data_reade_ref ([ref]$data_reade) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
+
+
+
 
 $row_num = 1
 [System.Data.DataRow]$data_record = $null
 foreach ($data_record in $data_table) {
-  $data_record
+
   # Reading the columns of the current row
   Write-Host ("row:{0}" -f $row_num)
   $row_data = @{
     'id' = $null;
     'server' = $null;
-    'status' = $null;
     'date' = $null;
-    'result' = $null;
+    'done' = $null;
+    'route' = $null;
+    'booking_url' = $null;
+    'port' = $null;
+    'destination' = $null; 
     'guid' = $null;
   }
-  #
-  # $row_data_keys = New-Object object[] ($row_data.Keys.Count)
-  # [System.Array]::copy(($row_data.Keys),$row_data_keys,$row_data.Keys.Count)
-  # Cannot find an overload for "Copy" and the argument count: "3".
-  # 
-  # $row_data_keys = ($row_data.Keys).Clone()
+
   # Method invocation failed because [System.Collections.Hashtable+KeyCollection] doesn't contain a method named 'Clone'.
-  $row_data_keys = [string[]]($row_data.Keys)
-  $row_data_keys | ForEach-Object {
-    # An error occurred while enumerating through a collection: Collection was
-    # modified; enumeration operation may not execute..
+
+  [string[]]($row_data.Keys) | ForEach-Object {
     $cell_name = $_
     $cell_value = $data_record."${cell_name}"
     $row_data[$cell_name] = $cell_value
   }
   Write-Output ("row:{0}" -f $row)
-  $row_data
-  <#
- $result = @()
- $row_data_keys | foreach-object {
- $key_name = $_
- $result += ( '{0}="{1}"' -f $key_name, $row_data[$key_name] )
- }
 
- Write-Output ("row:{0}`n{1}`n" -f $row,[System.String]::Join("`r`n", $result))
- #>
+  $row_data | format-table -autosize 
   Write-Output "`n"
   $row_num++
 }
 
-
-
-$data_reader.close()
+([System.Data.OleDb.OleDbDataReader]$data_reader).close()
+return
 
 function insert_row_new {
   param(
@@ -200,7 +266,7 @@ update_single_field `
    -connection $connection `
    -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" `
    -update_column_name '@guid' `
-   -update_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' `
+   -update_column_value ([guid]::NewGuid()).ToString()`
    -where_column_name '@id' `
    -where_column_value 2
 
@@ -280,7 +346,7 @@ $command.Dispose()
 
 $connection.close()
 <#
-# If Office is present on the computer the following may be tested. 
+# If Office is present on the computer the following may be tested.
 $com_object=New-Object -ComObject Excel.Application
 $com_object.Visible=$false
 $workbook=$com_object.Workbooks.Open($data_name)
@@ -297,3 +363,59 @@ $com_object.quit()
 
 #>
 
+<#
+
+using System;
+using System.Data;
+using System.IO;
+using System.Data.OleDb;
+public class Excel_Data
+{
+
+    public static void Main(string[] args)
+    {
+        ImportCsvFile(args[0]);
+    }
+
+    public static void ImportCsvFile(string filename)
+    {
+        FileInfo file = new FileInfo(filename);
+        String x = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=\"" +
+                file.DirectoryName + "\";" +
+                "Extended Properties='text;HDR=Yes;FMT=Delimited(,)';";
+        Console.WriteLine(x);
+        using (OleDbConnection con =
+               new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=\"" +
+               file.DirectoryName + "\";" +
+               "Extended Properties='text;HDR=Yes;FMT=Delimited(,)';"))
+        {
+            using (OleDbCommand cmd = new OleDbCommand(string.Format
+                                      ("SELECT * FROM [{0}]", file.Name), con))
+            {
+                con.Open();
+
+                // Using a DataReader to process the data
+                using (OleDbDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // Process the current reader entry...
+                    }
+                }
+
+                // Using a DataTable to process the data
+                using (OleDbDataAdapter adp = new OleDbDataAdapter(cmd))
+                {
+                    DataTable tbl = new DataTable("MyTable");
+                    adp.Fill(tbl);
+
+                    foreach (DataRow row in tbl.Rows)
+                    {
+                        // Process the current row...
+                    }
+                }
+            }
+        }
+    }
+}
+#>
