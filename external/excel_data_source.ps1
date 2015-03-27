@@ -26,11 +26,11 @@
 # http://blogs.technet.com/b/heyscriptingguy/archive/2008/09/11/how-can-i-read-from-excel-without-using-excel.aspx
 
 param(
-[string]$format = 'excel',
+  [string]$format = 'excel',
   [switch]$pause,
   [switch]$show
-
 )
+
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -41,115 +41,66 @@ function Get-ScriptDirectory
   elseif ($Invocation.MyCommand.Path) {
     Split-Path $Invocation.MyCommand.Path
   } else {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(''))
   }
 }
 
 
 function initialize_data_reader {
   param(
-
-    [string]$data_name,
+    [string]$format = 'excel',
+    [string]$datafile_filename,
     [string]$sheet_name,
-    [string]$query ,
+    [string]$query,
     [System.Management.Automation.PSReference]$connection_ref,
     [System.Management.Automation.PSReference]$command_ref,
     [System.Management.Automation.PSReference]$data_table_ref,
-    [System.Management.Automation.PSReference]$data_reader_ref,
     [bool]$debug
 
-)
+  )
+
+  [string]$datafile_directory = (Get-ScriptDirectory)
+  [string]$datafile_fullpath = ('{0}\{1}' -f $datafile_directory,$datafile_filename)
 
 
-[string]$filename = ('{0}\{1}' -f (Get-ScriptDirectory),$data_name)
-
-
-[string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
-$data_source = "Data Source = $filename"
-$ext_arg = "Extended Properties=Excel 8.0"
-
-if ($false) {
-# $ext_arg = "Extended Properties='text;HDR=Yes;FMT=Delimited(,)';"
-# $sheet_name = $data_name
-}
-[string]$query = "Select * from [${sheet_name}] WHERE ISNULL(guid)"
-# $x = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=`"C:\developer\sergueik\powershell_ui_samples\external`";Extended Properties='text;HDR=Yes;FMT=Delimited(,)';"
-# [System.Data.OleDb.OleDbConnection]$local:connection = New-Object System.Data.OleDb.OleDbConnection ($x)
-
-[System.Data.OleDb.OleDbConnection]$local:connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
-[System.Data.OleDb.OleDbCommand]$local:command = New-Object System.Data.OleDb.OleDbCommand ($query)
-
-
-[System.Data.DataTable]$local:data_table = New-Object System.Data.DataTable
-[System.Data.OleDb.OleDbDataAdapter]$ole_db_adapter = New-Object System.Data.OleDb.OleDbDataAdapter
-$ole_db_adapter.SelectCommand = $local:command
-
-$local:command.Connection = $connection
-
-$rows = $ole_db_adapter.Fill($local:data_table)
-
-<#
-Exception calling "Fill" with "1" argument(s): "The connection for viewing your linked Microsoft Excel worksheet was lost."
-#>
-
-$rows | Out-Null
-$local:connection.open()
-$local:data_reader = $local:command.ExecuteReader()
-
-  $data_reader_ref.value =  ([System.Data.OleDb.OleDbDataReader]$local:data_reader)
-  $data_table_ref.value = $local:data_table
-  $connection_ref.value = $local:connection 
-  $command_ref.value = $local:command
-
-} 
-
-$command = New-Object System.Data.OleDb.OleDbCommand
-$conection =  New-Object System.Data.OleDb.OleDbConnection 
-$data_reader  = [Object]
-
-$data_name = 'TestConfiguration.xls'
-# $data_name = 'Servers.csv'
-$sheet_name = 'TestConfiguration$'
-$data_table = New-Object System.Data.DataTable
-initialize_data_reader -data_name $data_name -sheet_name $sheet_name -connection_ref ([ref]$connection) -data_reade_ref ([ref]$data_reade) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
-
-
-
-
-$row_num = 1
-[System.Data.DataRow]$data_record = $null
-foreach ($data_record in $data_table) {
-
-  # Reading the columns of the current row
-  Write-Host ("row:{0}" -f $row_num)
-  $row_data = @{
-    'id' = $null;
-    'server' = $null;
-    'date' = $null;
-    'done' = $null;
-    'route' = $null;
-    'booking_url' = $null;
-    'port' = $null;
-    'destination' = $null; 
-    'guid' = $null;
+  switch ($format)
+  {
+    'excel' {
+      [string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
+      [string]$data_source = "Data Source = ${datafile_fullpath}"
+      [string]$ext_arg = "Extended Properties=Excel 8.0"
+      [string]$table = $sheet_name
+    }
+    'csv' {
+      [string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
+      [string]$ext_arg = "Extended Properties='text;HDR=Yes;FMT=Delimited(,)';"
+      [string]$data_source = "Data Source = ${$datafile_directory}"
+      [string]$table = $datafile_filename
+    }
+    default { throw }
   }
+  $connection_string = "$oledb_provider;$data_source;$ext_arg"
+  [string]$query = "Select * from [${table}] WHERE ISNULL(guid)"
 
-  # Method invocation failed because [System.Collections.Hashtable+KeyCollection] doesn't contain a method named 'Clone'.
+  [System.Data.OleDb.OleDbConnection]$local:connection = New-Object System.Data.OleDb.OleDbConnection ($connection_string)
+  [System.Data.OleDb.OleDbCommand]$local:command = New-Object System.Data.OleDb.OleDbCommand ($query)
 
-  [string[]]($row_data.Keys) | ForEach-Object {
-    $cell_name = $_
-    $cell_value = $data_record."${cell_name}"
-    $row_data[$cell_name] = $cell_value
-  }
-  Write-Output ("row:{0}" -f $row)
 
-  $row_data | format-table -autosize 
-  Write-Output "`n"
-  $row_num++
+  [System.Data.DataTable]$local:data_table = New-Object System.Data.DataTable
+  [System.Data.OleDb.OleDbDataAdapter]$ole_db_adapter = New-Object System.Data.OleDb.OleDbDataAdapter
+  $ole_db_adapter.SelectCommand = $local:command
+
+  $local:command.Connection = $connection
+
+  [void]$ole_db_adapter.Fill($local:data_table)
+  $local:connection.open()
+  # http://stackoverflow.com/questions/24648081/error-the-type-system-data-oledb-oledbdatareader-has-no-constructors-defined
+  $global:data_reader = $local:command.ExecuteReader()
+  $data_table_ref.Value = $local:data_table
+  $connection_ref.Value = $local:connection
+  $command_ref.Value = $local:command
+  return $local:data_reader
 }
-
-([System.Data.OleDb.OleDbDataReader]$data_reader).close()
-return
 
 function insert_row_new {
   param(
@@ -211,7 +162,7 @@ function update_single_field {
     [string]$update_column_name,
     [object]$update_column_value,
     [System.Management.Automation.PSReference]$update_column_type_ref = ([ref][System.Data.OleDb.OleDbType]::VarChar),
-    [System.Management.Automation.PSReference]$where_column_type_ref = ([ref][System.Data.OleDb.OleDbType]::Numeric)
+    [System.Management.Automation.PSReference]$where_column_type_ref = ([ref][System.Data.OleDb.OleDbType]::Decimal)
   )
 
   [System.Data.OleDb.OleDbCommand]$local:command = New-Object System.Data.OleDb.OleDbCommand
@@ -225,6 +176,9 @@ function update_single_field {
   # $command.Prepare()
 
   $local:result = $local:command.ExecuteNonQuery()
+  Write-output ('prepare: {0}' -f $sql ) 
+  Write-output ('where column SQL: {0}' -f $where_column_name ) 
+  Write-output ('update column: {0}' -f $update_column_name) 
   Write-Output ('Update query: {0}' -f (($sql -replace $update_column_name,$update_column_value) -replace $where_column_name,$where_column_value))
   Write-Output ('Update result: {0}' -f $local:result)
 
@@ -234,68 +188,93 @@ function update_single_field {
 
 }
 
+
+
+$datafile_filename = 'TestConfiguration.xls'
+# $datafile_filename = 'Servers.csv'
+
+$command = New-Object System.Data.OleDb.OleDbCommand
+$connection = New-Object System.Data.OleDb.OleDbConnection
+
+$sheet_name = 'TestConfiguration$'
+$data_table = New-Object System.Data.DataTable
+
+initialize_data_reader -datafile_filename $datafile_filename -sheet_name $sheet_name -connection_ref ([ref]$connection) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
+initialize_data_reader -datafile_filename $datafile_filename -sheet_name $sheet_name -connection_ref ([ref]$connection) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
+
+$row_num = 1
+[System.Data.DataRow]$data_record = $null
+foreach ($data_record in $data_table) {
+
+  # Reading the columns of the current row
+  Write-Host ("row:{0}" -f $row_num)
+  $row_data = @{
+    'id' = $null;
+    'server' = $null;
+    'date' = $null;
+    'done' = $null;
+    'route' = $null;
+    'booking_url' = $null;
+    'port' = $null;
+    'destination' = $null;
+    'guid' = $null;
+  }
+
+  # Method invocation failed because [System.Collections.Hashtable+KeyCollection] doesn't contain a method named 'Clone'.
+
+  [string[]]($row_data.Keys) | ForEach-Object {
+    $cell_name = $_
+    $cell_value = $data_record."${cell_name}"
+    $row_data[$cell_name] = $cell_value
+  }
+  Write-Output ("row:{0}" -f $row)
+
+  $row_data | Format-Table -AutoSize
+  Write-Output "`n"
+  $row_num++
+}
+
+$global:data_reader.close()
+$target_record_id = 7
+
+$new_guid = ([guid]::NewGuid()).ToString() 
+write-output ('Setting guild to {0} for id = {1}' -f $new_guid,  $target_record_id )
+
 update_single_field `
    -connection $connection `
-   -sql "UPDATE [${sheet_name}] SET [server] = @server WHERE [id] = @id" `
-   -update_column_name '@server' `
-   -update_column_value 'sergueik11' `
+   -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" `
+   -update_column_name '@guid' `
+   -update_column_value $new_guid `
    -where_column_name '@id' `
-   -where_column_value 11
+   -where_column_value $target_record_id
 
-$new_record_id = 11
-$new_guid = $guid = [guid]::NewGuid()
-
-$sql = "Insert into [${sheet_name}] ([id],[server],[status],[result],[date],[guid]) values($new_record_id, 'sergueik9','True',42,'3/8/2015 4:00:00 PM', '${new_guid}')"
-$command.CommandText = $sql
-$result = $command.ExecuteNonQuery()
-
-Write-Output ('Insert result: {0}' -f $result)
+update_single_field `
+   -connection $connection `
+   -sql "UPDATE [${sheet_name}] SET [booking_url] = @booking_url WHERE [guid] = @guid" `
+   -update_column_name '@booking_url' `
+   -update_column_value 'http://www.carnival.com/itinerary/2-day-baja-mexico-cruise/los-angeles/imagination/2-days/la0/?numGuests=2&destination=all-destinations&dest=any&datFrom=032015&datTo=042017' `
+   -where_column_name '@guid' `
+   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Varchar) `
+   -where_column_value $new_guid
 
 # TODO : multiple columns
-# $sql = "UPDATE [${sheet_name}] SET [server] = @server, [status] = @status, [result] = @result , [guid]  = '@guid' WHERE [id] = @id"
+# $sql = "Insert into [${sheet_name}] ([id],[server],[status],[result],[date],[guid]) values($new_record_id, 'sergueik9','True',42,'3/8/2015 4:00:00 PM', '${new_guid}')"
+# $command.CommandText = $sql
+# $result = $command.ExecuteNonQuery()
 
 update_single_field `
    -connection $connection `
-   -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" `
-   -update_column_name '@guid' `
-   -update_column_value ([guid]::NewGuid()).ToString() `
-   -where_column_name '@id' `
-   -where_column_value 1
-
-update_single_field `
-   -connection $connection `
-   -sql "UPDATE [${sheet_name}] SET [guid] = @guid WHERE [id] = @id" `
-   -update_column_name '@guid' `
-   -update_column_value ([guid]::NewGuid()).ToString()`
-   -where_column_name '@id' `
-   -where_column_value 2
-
-
-update_single_field `
-   -connection $connection `
-   -sql "UPDATE [${sheet_name}] SET [status] = @status WHERE [id] = @id" `
-   -update_column_name "@status" `
-   -update_column_value $false `
+   -sql "UPDATE [${sheet_name}] SET [done] = @done WHERE [guid] = @guid" `
+   -update_column_name "@done" `
+   -update_column_value $true `
    -update_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Boolean) `
-   -where_column_name '@id' `
-   -where_column_value 2
-
-
-update_single_field `
-   -connection $connection `
-   -sql "UPDATE [${sheet_name}] SET [id] = @id WHERE [server] = @server" `
-   -where_column_name '@server' -where_column_value 'sergueik11' `
-   -update_column_name '@id' -update_column_value 11 `
-   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::VarChar)
-
-update_single_field `
-   -connection $connection `
-   -sql "UPDATE [${sheet_name}] SET [id] = @id WHERE [guid] = @guid" `
    -where_column_name '@guid' `
-   -where_column_value '86eb4a11-64b9-4f58-aad7-0b82bc984253' `
-   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::VarChar) `
-   -update_column_name '@id' `
-   -update_column_value 2 `
+   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Varchar) `
+   -where_column_value $new_guid
+
+@destinations_ports   = @('Miami, FL' = @('Caribean', 'Bermuda'); ) 
+return 
+# cartesian products
 
 
 $row_num = 14
@@ -328,7 +307,7 @@ $new_row_data = @{
   };
 
 }
-
+# Exception calling "ExecuteNonQuery" with "0" argument(s): "Invalid bracketing of name '[]'."
 insert_row_new `
    -connection $connection `
    -sql "Insert into [${sheet_name}] (@insert_name_part) values (@insert_value_part)" `
@@ -349,7 +328,7 @@ $connection.close()
 # If Office is present on the computer the following may be tested.
 $com_object=New-Object -ComObject Excel.Application
 $com_object.Visible=$false
-$workbook=$com_object.Workbooks.Open($data_name)
+$workbook=$com_object.Workbooks.Open($datafile_filename)
 $sheet_name = 'ServerList$'
 $worksheet = $workbook.sheets.item($sheet_name)
 $rows_count =  ($worksheet.UsedRange.Rows).count
