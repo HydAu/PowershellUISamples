@@ -55,10 +55,6 @@ function PromptGrid (
   [object]$caller = $null
 ) {
 
-  if ($caller -eq $null) {
-    $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  }
-
   [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null
   [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | Out-Null
   [System.Reflection.Assembly]::LoadWithPartialName('System.Data') | Out-Null
@@ -91,10 +87,10 @@ function PromptGrid (
   $f.Controls.Add($button)
   $f.Controls.Add($grid)
   $button.add_click({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
       # http://msdn.microsoft.com/en-us/library/system.windows.forms.datagridviewrow.cells%28v=vs.110%29.aspx
       # TODO:
       # [System.Windows.Forms.DataGridViewSelectedRowCollection]$rows = $grid.SelectedRows
@@ -103,13 +99,13 @@ function PromptGrid (
       $script:Data = 0
       $script:Status = $RESULT_CANCEL
       # $last_row = ($grid.Rows.Count)
-      $last_row =  $data.Count
-      for ($counter = 0; $counter -lt $last_row;$counter++) { 
+      $last_row = $data.Count
+      for ($counter = 0; $counter -lt $last_row; $counter++) {
         if ($grid.IsSelected($counter)) {
-          $row =  $data[$counter]
+          $row = $data[$counter]
           $script:Data = $row.Guid
           $script:Status = $RESULT_OK
-         }
+        }
       }
       $f.Close()
 
@@ -122,10 +118,9 @@ function PromptGrid (
 
 }
 
-
 function display_result {
   param([object[]]$result)
-  $script:Data = 0 
+  $script:Data = 0
   $array = New-Object System.Collections.ArrayList
   foreach ($row_data in $result) {
     $o = New-Object PSObject
@@ -137,10 +132,9 @@ function display_result {
     [void]$array.Add($o)
   }
 
-  $process_window = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-  $ret = (PromptGrid $array $process_window)
-  if ($script:Status -eq $RESULT_OK ) { 
-    Write-Output @( 'Rerun ->', $script:Data )
+  [void](PromptGrid $array $process_window)
+  if ($script:Status -eq $RESULT_OK) {
+    Write-Output @( 'Rerun ->',$script:Data)
   }
 }
 
@@ -183,7 +177,7 @@ else {
       'date' = $null;
       'result' = $null;
       'guid' = $null;
-      'environment' = $null ;
+      'environment' = $null;
       'testName' = $null;
 
     }
@@ -195,10 +189,11 @@ else {
       $cell_value = $data_record."${cell_name}"
       $row_data[$cell_name] = $cell_value
     }
-    Write-Output ("row[{0}]" -f $row_num)
-    $row_data
-    Write-Output "`n"
-    # format needs to be different 
+    if (-not [bool]$PSBoundParameters["show"].IsPresent) {
+      Write-Output ("row[{0}]" -f $row_num)
+      $row_data | Format-Table -AutoSize
+      Write-Output "`n"
+    }
     $plain_data += $row_data
     $row_num++
   }
@@ -207,9 +202,9 @@ else {
 $data_reader.Close()
 $command.Dispose()
 $connection.Close()
-if ($PSBoundParameters["show"]) {
+if ([bool]$PSBoundParameters["show"].IsPresent) {
   # $plain_data | Sort-Object -Property 'Id' | Out-GridView
-  # Does not have the correct schema yet  
+  # $plain_data does not have the correct schema for Out-GridView
 
   $DebugPreference = 'Continue'
   display_result $plain_data
