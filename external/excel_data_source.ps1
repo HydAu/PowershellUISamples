@@ -191,7 +191,6 @@ function update_single_field {
 
 
 $datafile_filename = 'TestConfiguration.xls'
-# $datafile_filename = 'Servers.csv'
 
 $command = New-Object System.Data.OleDb.OleDbCommand
 $connection = New-Object System.Data.OleDb.OleDbConnection
@@ -199,7 +198,6 @@ $connection = New-Object System.Data.OleDb.OleDbConnection
 $sheet_name = 'TestConfiguration$'
 $data_table = New-Object System.Data.DataTable
 
-initialize_data_reader -datafile_filename $datafile_filename -sheet_name $sheet_name -connection_ref ([ref]$connection) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
 initialize_data_reader -datafile_filename $datafile_filename -sheet_name $sheet_name -connection_ref ([ref]$connection) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
 
 $row_num = 1
@@ -219,8 +217,6 @@ foreach ($data_record in $data_table) {
     'destination' = $null;
     'guid' = $null;
   }
-
-  # Method invocation failed because [System.Collections.Hashtable+KeyCollection] doesn't contain a method named 'Clone'.
 
   [string[]]($row_data.Keys) | ForEach-Object {
     $cell_name = $_
