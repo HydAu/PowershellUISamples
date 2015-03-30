@@ -200,10 +200,51 @@ $data_table = New-Object System.Data.DataTable
 
 initialize_data_reader -datafile_filename $datafile_filename -sheet_name $sheet_name -connection_ref ([ref]$connection) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
 
+
+
+$destinations = @{
+  'Alaska' = 'A';
+  'Bahamas' = 'BH';
+  'Bermuda' = 'BM';
+  'Canada/New England' = 'NN';
+  'Caribbean' = 'C';
+  'Cruise To Nowhere' = 'CN';
+  'Europe' = 'E';
+  'Hawaii' = 'H'
+  'Mexico' = 'M'
+  'Transatlantic' = 'ET'
+}
+$ports = @{
+  'Miami, FL' = 'MIA';
+  'New York, NY' = 'NYC';
+  'Seattle, WA' = 'SEA';
+  'Los Angeles, CA' = 'LAX';
+  'Fort Lauderdale, FL' = 'FLL';
+  'Jacksonville, FL' = 'JAX';
+  'Honolulu, HI' = 'HNL';
+  'Galveston, TX' = 'GAL';
+  'Athenes' = 'ATH';
+  'Baltimore, MD' = 'BWI';
+  'Barbados' = 'BDS';
+  'Barcelona, Spain' = 'BCN';
+  'Charleston, SC' = 'CHS';
+  'New Orleans, LA' = 'MSY';
+  'Norfolk, VA' = 'ORF';
+  'Port Canaveral (Orlando), FL' = 'PCV';
+  'San Juan, Puerto Rico' = 'SJU';
+  'Tampa, FL' = 'TPA';
+  'Trieste' = 'TRS';
+  'Vancouver, BC, Canada' = 'YVR';
+}
+
+
 $row_num = 1
+$max_row = 5
 [System.Data.DataRow]$data_record = $null
 foreach ($data_record in $data_table) {
-
+  if ($row_num -ge $max_row) {
+   exit 
+  }
   # Reading the columns of the current row
   Write-Host ("row:{0}" -f $row_num)
   $row_data = @{
@@ -216,6 +257,8 @@ foreach ($data_record in $data_table) {
     'port' = $null;
     'destination' = $null;
     'guid' = $null;
+    'port-id' = $null ;
+    'dest-id' = $null ;
   }
 
   [string[]]($row_data.Keys) | ForEach-Object {
@@ -223,14 +266,32 @@ foreach ($data_record in $data_table) {
     $cell_value = $data_record."${cell_name}"
     $row_data[$cell_name] = $cell_value
   }
-  Write-Output ("row:{0}" -f $row)
-
+  $row_data[ 'port-id'] =  $ports[ $row_data[ 'port'  ]]
+  $row_data[ 'dest-id'] = $destinations[ $row_data[ 'destination' ]]
   $row_data | Format-Table -AutoSize
   Write-Output "`n"
+
+  $dest = $row_data['destination']
+  $port =  $row_data['port']
+  $browser = 'Chrome' 
+  write-output @"
+`$job_object = start-job -FilePath ($(get-location).path + '\' + 'carnival_itinerary_maps_part1.ps1' ) -ArgumentList @($browser,$dest, $port)  
+"@
+  $job_object = start-job -FilePath ($(get-location).path + '\' + 'carnival_itinerary_maps_part1.ps1' ) -ArgumentList @($browser,$dest, $port)
+  start-sleep 10 
+  $jobid = $job_object | select-object -ExpandProperty id  
+  $dummy = wait-Job -Id $jobid   
+  Receive-Job -Id $jobid  -OutVariable $result
+  write-output $result
+  Remove-Job -Id $jobid 
+
+  # invoke-command -computer $master_server  -ScriptBlock ${function:read_registry_cliconfg} -ArgumentList '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/MSSQLServer/Client/ConnectTo', $true 
   $row_num++
 }
 
 $global:data_reader.close()
+
+return 
 $target_record_id = 7
 
 $new_guid = ([guid]::NewGuid()).ToString() 
@@ -268,7 +329,7 @@ update_single_field `
    -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Varchar) `
    -where_column_value $new_guid
 
-@destinations_ports   = @('Miami, FL' = @('Caribean', 'Bermuda'); ) 
+$destinations_ports   = @{'Miami, FL' = @('Caribean', 'Bermuda'); } 
 return 
 # cartesian products
 
