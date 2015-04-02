@@ -21,6 +21,8 @@
 
 param(
   [switch]$use_proxy,
+  [string]$recipient = 'kouzmine_serguei@yahoo.com',
+  [string]$passphrase = 'test',
   [string]$username = 'kouzmine_serguei@yahoo.com',
   [string]$get_service_url = 'https://onetimesecret.com/api/v1/status',
   [string]$post_service_url = 'https://onetimesecret.com/api/v1/share',
@@ -165,7 +167,10 @@ function POST_request {
     $request.useDefaultCredentials = $true
   }
 
-  [string] $postData = 'secret="This is a test."'
+  # [string] $postData = 'secret="This is a test."'
+   if ($postdata -eq $null) {
+     $postdata = ''
+   }
   [byte[]] $byteArray = [System.Text.Encoding]::GetEncoding('ASCII').GetBytes($postData) 
   $request.Method = "POST"
   $request.ContentLength = $byteArray.Length  
@@ -215,14 +220,36 @@ function POST_request {
 
 }
 
+# https://onetimesecret.com/docs/api/secrets
+
+write-host 'Check current status of the system.'
 [bool]$use_proxy = ([bool]$PSBoundParameters['use_proxy'].IsPresent)
-Write-Host "GET_request -username $username -apitoken $apitoken -service_url $get_service_url $use_proxy_arg"
-$res1 = GET_request -username $username -password  $apitoken -service_url $get_service_url -use_proxy $use_proxy
-write-host  $res1 
+Write-Host "GET_request -username $username -apitoken $apitoken -service_url $get_service_url -use_proxy $use_proxy"
+$status_result = GET_request -username $username -password  $apitoken -service_url $get_service_url -use_proxy $use_proxy
+write-host  ('status = {0}' -f $status_result.status )
 
+[int]$ttl = 120
+write-host 'Store a secret value with recipient, passphrase and secret.'
+$recipient =  [System.Web.HttpUtility]::UrlEncode($recipient) 
+[string] $postData = @"
+ttl=${ttl}
+secret=${secret}
+recipient=${recipient}
+passphrase=${passphrase}
+"@
+$postData  = ( $postData  -split "`r`n" ) -join '&'
 
-[string] $postData = 'secret=${secret}'
-Write-Host "POST_request -username $username -apitoken $apitoken -service_url $post_service_url -postData $postData $use_proxy_arg"
-$res2 = POST_request -username $username -password $apitoken -service_url $post_service_url -postData $postData -use_proxy $use_proxy
-write-host $res2
-#>
+Write-Host "POST_request -username $username -apitoken $apitoken -service_url $post_service_url -postData $postData -use_proxy $use_proxy"
+$secret_store_result = POST_request -username $username -password $apitoken -service_url $post_service_url -postData $postData -use_proxy $use_proxy
+write-output $secret_store_result | format-list 
+
+# NOTE: Not receiving a friendly email containing the secret link.
+
+write-host 'Retreive a list of recent metadata.'
+$list_url = 'https://onetimesecret.com/api/v1/private/recent'
+[string] $postData = ''
+Write-Host "POST_request -username $username -apitoken $apitoken -service_url  $list_url  -postData '' -use_proxy $use_proxy"
+$list_result = POST_request -username $username -password $apitoken -service_url $list_url -use_proxy $use_proxy -postData '' 
+write-output $list_result
+
+# NOTE: Oops! Apologies dear citizen! You have been rate limited. 
