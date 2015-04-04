@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2014,2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -17,585 +17,13 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
-# http://www.codeproject.com/Tips/827370/Custom-Message-Box-DLL
 
 param(
   [switch]$debug
 )
 
-# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
-function Get-ScriptDirectory
-{
-  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
-  if ($Invocation.PSScriptRoot) {
-    $Invocation.PSScriptRoot
-  }
-  elseif ($Invocation.MyCommand.Path) {
-    Split-Path $Invocation.MyCommand.Path
-  } else {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
-  }
-}
+@( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
-Add-Type -TypeDefinition @"
-// "
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private string _result;
-
-    public string Result
-    {
-        get { return _result; }
-        set { _result = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
-}
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
-# define constants statically
-$MSGICON = @{
-  'None' = 0;
-  'Error' = 10;
-  'Information' = 20;
-  'Warning' = 30;
-  'Question' = 40;
-}
-
-$MSGBUTTON = @{
-  'None' = 0;
-  'OK' = 1;
-  'YesNo' = 2;
-  'YesNoCancel' = 3;
-  'RetryCancle' = 4;
-  'AbortRetryIgnore' = 5;
-}
-
-# or generate dynamically 
-$MSGRESPONSE = New-Object PSObject
-$MSGRESPONSE | Add-Member -NotePropertyName 'None' -NotePropertyValue 'None'
-$MSGRESPONSE | Add-Member -NotePropertyName 'Yes' -NotePropertyValue 'Yes'
-$MSGRESPONSE | Add-Member -NotePropertyName 'No' -NotePropertyValue 'No'
-$MSGRESPONSE | Add-Member -NotePropertyName 'OK' -NotePropertyValue 'OK'
-$MSGRESPONSE | Add-Member -NotePropertyName 'Abort' -NotePropertyValue 'Abort'
-$MSGRESPONSE | Add-Member -NotePropertyName 'Retry' -NotePropertyValue 'Retry'
-$MSGRESPONSE | Add-Member -NotePropertyName 'Ignore' -NotePropertyValue 'Ignore'
-$MSGRESPONSE | Add-Member -NotePropertyName 'Cancel' -NotePropertyValue 'Cancel'
-
-function Return_Response
-{
-  param(
-    [object]$sender,
-    [System.EventArgs]$eventargs
-  )
-
-  [string ]$button_text = ([System.Windows.Forms.Button]$sender[0]).Text
-
-  switch ($button_text) {
-    ('Yes')
-    {
-      $caller.Result = $MSGRESPONSE.Yes
-    }
-    ('No')
-    {
-      $caller.Result = $MSGRESPONSE.No
-    }
-    ('Cancel')
-    {
-      $caller.Result = $MSGRESPONSE.Cancel
-    }
-    ('OK')
-    {
-      $caller.Result = $MSGRESPONSE.OK
-    }
-    ('Abort')
-    {
-      $caller.Result = $MSGRESPONSE.Abort
-    }
-    ('Retry')
-    {
-      $caller.Result = $MSGRESPONSE.Retry
-    }
-    ('Ignore')
-    {
-      $caller.Result = $MSGRESPONSE.Ignore
-    }
-    default
-    {
-      # $response  =  $response
-    }
-  }
-  $f.Dispose()
-}
-
-function AddButton {
-  param([psobject]$param)
-
-  switch ($param) {
-    ($MSGBUTTON.None) {
-      $btnOK.Width = 80
-      $btnOK.Height = 24
-      $btnOK.Location = New-Object System.Drawing.Point (391,114)
-      $btnOK.Text = 'OK'
-      $formpanel.Controls.Add($btnOK)
-
-      $btnOK_response = $btnOK.add_click
-      $btnOK_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-
-    }
-    ($MSGBUTTON.OK) {
-      $btnOK.Width = 80
-      $btnOK.Height = 24
-      $btnOK.Location = New-Object System.Drawing.Point (391,114)
-      $btnOK.Text = 'OK'
-      $formpanel.Controls.Add($btnOK)
-      $btnOK_response = $btnOK.add_click
-      $btnOK_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-    }
-    ($MSGBUTTON.YesNo) {
-      # btNo
-      $btnNo.Width = 80
-      $btnNo.Height = 24
-      $btnNo.Location = New-Object System.Drawing.Point (391,114)
-      $btnNo.Text = 'No'
-      $formpanel.Controls.Add($btnNo)
-      $btnNo_response = $btnNo.add_click
-      $btnNo_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-      # btnYes
-      $btnYes.Width = 80
-      $btnYes.Height = 24
-      $btnYes.Location = New-Object System.Drawing.Point (($btnNo.Location.X - $btnNo.Width - 2),114)
-      $btnYes.Text = 'Yes'
-      $formpanel.Controls.Add($btnYes)
-      $btnYes_response = $btnYes.add_click
-      $btnYes_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-    }
-    ($MSGBUTTON.YesNoCancel) {
-      # btnCancle
-      $btnCancel.Width = 80
-      $btnCancel.Height = 24
-      $btnCancel.Location = New-Object System.Drawing.Point (391,114)
-      $btnCancel.Text = 'Cancel'
-      $formpanel.Controls.Add($btnCancel)
-      $btnCancel_response = $btnCancel.add_click
-      $btnCancel_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-      # btnNo
-      $btnNo.Width = 80
-      $btnNo.Height = 24
-      $btnNo.Location = New-Object System.Drawing.Point (($btnCancel.Location.X - $btnCancel.Width - 2),114)
-      $btnNo.Text = 'No'
-      $formpanel.Controls.Add($btnNo)
-      $btnNo_response = $btnNo.add_click
-      $btnNo_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-      # btnYes
-      $btnYes.Width = 80
-      $btnYes.Height = 24
-      $btnYes.Location = New-Object System.Drawing.Point (($btnNo.Location.X - $btnNo.Width - 2),114)
-      $btnYes.Text = 'Yes'
-      $formpanel.Controls.Add($btnYes)
-      $btnYes_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-    }
-    ($MSGBUTTON.RetryCancle) {
-      # button cancel
-      $btnCancel.Width = 80
-      $btnCancel.Height = 24
-      $btnCancel.Location = New-Object System.Drawing.Point (391,114)
-      $btnCancel.Text = 'Cancel'
-      $formpanel.Controls.Add($btnCancel)
-      $btnCancel_response = $btnCancel.add_click
-      $btnCancel_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-      #button Retry
-      $btnRetry.Width = 80
-      $btnRetry.Height = 24
-      $btnRetry.Location = New-Object System.Drawing.Point (($btnCancel.Location.X - $btnCancel.Width - 2),114)
-      $btnRetry.Text = 'Retry'
-      $formpanel.Controls.Add($btnRetry)
-      $btnRetry_response = $btnRetry.add_click
-      $btnRetry_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-
-    }
-    ($MSGBUTTON.AbortRetryIgnore) {
-      #button Ignore
-      $btnIgnore.Width = 80
-      $btnIgnore.Height = 24
-      $btnIgnore.Location = New-Object System.Drawing.Point (391,114)
-      $btnIgnore.Text = 'Ignore'
-      $formpanel.Controls.Add($btnIgnore)
-      $btnIgnore_response = $btnIgnore.add_click
-      $btnIgnore_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-      #button Retry
-      $btnRetry.Width = 80
-      $btnRetry.Height = 24
-      $btnRetry.Location = New-Object System.Drawing.Point (($btnIgnore.Location.X - $btnIgnore.Width - 2),114)
-      $btnRetry.Text = 'Retry'
-      $formpanel.Controls.Add($btnRetry)
-      $btnRetry_response = $btnRetry.add_click
-      $btnRetry_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-      #button Abort
-      $btnAbort.Width = 80
-      $btnAbort.Height = 24
-      $btnAbort.Location = New-Object System.Drawing.Point (($btnRetry.Location.X - $btnRetry.Width - 2),114)
-      $btnAbort.Text = 'Abort'
-      $formpanel.Controls.Add($btnAbort)
-      $btnAbort_response = $btnAbort.add_click
-      $btnAbort_Response.Invoke({
-          param(
-            [object]$sender,
-            [System.EventArgs]$eventargs
-          )
-          Return_Response ($sender,$eventargs)
-        })
-    }
-    default {}
-  }
-}
-
-function AddIconImage {
-  param([psobject]$param)
-
-  switch ($param)
-  {
-    ($MSGICON.Error) {
-      $icnPicture.Image = ([System.Drawing.SystemIcons]::Error).ToBitmap()
-    }
-    ($MSGICON.Information) {
-
-      $icnPicture.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
-    }
-    ($MSGICON.Question) {
-      $icnPicture.Image = ([System.Drawing.SystemIcons]::Question).ToBitmap()
-    }
-    ($MSGICON.Warning) {
-      $icnPicture.Image = ([System.Drawing.SystemIcons]::Warning).ToBitmap()
-    }
-    default {
-      $icnPicture.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
-    }
-  }
-}
-
-function btnDetails_click
-{
-
-  param(
-    [object]$sender,
-    [System.EventArgs]$eventArgs
-  )
-  if ($btnDetails.Tag.ToString() -match 'col')
-  {
-    $f.Height = $f.Height + $txtDescription.Height + 6
-    $btnDetails.Tag = 'exp'
-    $btnDetails.Text = 'Hide Details'
-    $txtDescription.WordWrap = true
-    # txtDescription.Focus();
-    # txtDescription.SelectionLength = 0;
-  }
-  elseif ($btnDetails.Tag.ToString() -match 'exp')
-  {
-    $f.Height = $f.Height - $txtDescription.Height - 6
-    $btnDetails.Tag = 'col'
-    $btnDetails.Text = 'Show Details'
-  }
-}
-
-function SetMessageText
-{
-  param(
-    [string]$messageText,
-    [string]$Title,
-    [string]$Description
-  )
-  $lblmessage.Text = $messageText
-  if (($Description -ne $null) -and ($Description -ne ''))
-  {
-    $txtDescription.Text = $Description
-  }
-  else
-  {
-    $btnDetails.Visible = $false
-  }
-  if (($Title -ne $null) -and ($Title -ne ''))
-  {
-    $f.Text = $Title
-  }
-  else
-  {
-    $f.Text = 'Your Message Box'
-  }
-}
-
-function Show1
-{
-  param(
-    [string]$messageText
-  )
-
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-  $f = New-Object System.Windows.Forms.Form
-  $btnDetails = New-Object System.Windows.Forms.Button
-  $btnOK = New-Object System.Windows.Forms.Button
-  $btnYes = New-Object System.Windows.Forms.Button
-  $btnNo = New-Object System.Windows.Forms.Button
-  $btnCancel = New-Object System.Windows.Forms.Button
-  $btnAbort = New-Object System.Windows.Forms.Button
-  $btnRetry = New-Object System.Windows.Forms.Button
-  $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Forms.TextBox
-  $icnPicture = New-Object System.Windows.Forms.PictureBox
-  $formpanel = New-Object System.Windows.Forms.Panel
-  $lblmessage = New-Object System.Windows.Forms.Label
-  SetMessageText $messageText '' $null
-  AddIconImage -param $MSGICON.Information
-  AddButton -param $MSGBUTTON.OK
-  DrawBox
-  [void]$f.ShowDialog([win32window ]($caller))
-  Write-Host ('$caller.Result = ' + $caller.Result)
-  return $caller.Result
-}
-
-function Show2
-{
-  param(
-    [string]$messageText,
-    [string]$messageTitle,
-    [string]$description
-  )
-
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-  $f = New-Object System.Windows.Forms.Form
-  $btnDetails = New-Object System.Windows.Forms.Button
-  $btnOK = New-Object System.Windows.Forms.Button
-  $btnYes = New-Object System.Windows.Forms.Button
-  $btnNo = New-Object System.Windows.Forms.Button
-  $btnCancel = New-Object System.Windows.Forms.Button
-  $btnAbort = New-Object System.Windows.Forms.Button
-  $btnRetry = New-Object System.Windows.Forms.Button
-  $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Forms.TextBox
-  $icnPicture = New-Object System.Windows.Forms.PictureBox
-  $formpanel = New-Object System.Windows.Forms.Panel
-  $lblmessage = New-Object System.Windows.Forms.Label
-  SetMessageText $messageText $messageTitle $description
-  AddIconImage -param $MSGICON.Information
-  AddButton -param $MSGBUTTON.OK
-  DrawBox
-  [void]$f.ShowDialog([win32window ]($caller))
-  Write-Host ('$caller.Result = ' + $caller.Result)
-  return $caller.Result
-}
-
-function Show3
-{
-  param(
-    [string]$messageText,
-    [string]$messageTitle,
-    [string]$description,
-    [object]$IcOn,
-    [object]$btn
-  )
-
-  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-  @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
-  $f = New-Object System.Windows.Forms.Form
-  $btnDetails = New-Object System.Windows.Forms.Button
-  $btnOK = New-Object System.Windows.Forms.Button
-  $btnYes = New-Object System.Windows.Forms.Button
-  $btnNo = New-Object System.Windows.Forms.Button
-  $btnCancel = New-Object System.Windows.Forms.Button
-  $btnAbort = New-Object System.Windows.Forms.Button
-  $btnRetry = New-Object System.Windows.Forms.Button
-  $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Forms.TextBox
-  $icnPicture = New-Object System.Windows.Forms.PictureBox
-  $formpanel = New-Object System.Windows.Forms.Panel
-  $lblmessage = New-Object System.Windows.Forms.Label
-
-  SetMessageText $messageText $messageTitle $description
-  AddIconImage -param $IcOn
-  AddButton -param $btn
-  $caller.Result = $MSGRESPONSE.Cancel
-
-  DrawBox
-  [void]$f.ShowDialog([win32window ]($caller))
-  $f.Dispose()
-  Write-Host ('$caller.Result = ' + $caller.Result)
-  return $caller.Result
-}
-
-function ShowException
-{
-  param([System.Exception]$ex)
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-  [void][System.Reflection.Assembly]::LoadWithPartialName('System.Drawing')
-  $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-  $f = New-Object System.Windows.Forms.Form
-  $btnDetails = New-Object System.Windows.Forms.Button
-  $btnOK = New-Object System.Windows.Forms.Button
-  $btnYes = New-Object System.Windows.Forms.Button
-  $btnNo = New-Object System.Windows.Forms.Button
-  $btnCancel = New-Object System.Windows.Forms.Button
-  $btnAbort = New-Object System.Windows.Forms.Button
-  $btnRetry = New-Object System.Windows.Forms.Button
-  $btnIgnore = New-Object System.Windows.Forms.Button
-  $txtDescription = New-Object System.Windows.Forms.TextBox
-  $icnPicture = New-Object System.Windows.Forms.PictureBox
-  $formpanel = New-Object System.Windows.Forms.Panel
-  $lblmessage = New-Object System.Windows.Forms.Label
-  SetMessageText -Title 'Exception' -messageText $ex.Message -Description $ex.StackTrace
-  AddIconImage -param $MSGICON.Error
-  AddButton -param $MSGBUTTON.YesNo
-  DrawBox
-  [void]$f.ShowDialog([win32window ]($caller))
-  Write-Host ('$caller.Result = ' + $caller.Result)
-  return $caller.Result
-}
-
-function DrawBox
-{
-  # draw panel
-  $f.Controls.Add($formpanel)
-  $formpanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-  # draw picturebox
-  $icnPicture.Height = 36
-  $icnPicture.Width = 40
-  $icnPicture.Location = New-Object System.Drawing.Point (10,11)
-  $formpanel.Controls.Add($icnPicture)
-  # drawing textbox
-  $txtDescription.Multiline = $true
-  $txtDescription.Height = 183
-  $txtDescription.Width = 464
-  $txtDescription.Location = New-Object System.Drawing.Point (6,143)
-  $txtDescription.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
-  $txtDescription.ScrollBars = [System.Windows.Forms.ScrollBars]::Both
-  $txtDescription.ReadOnly = $true
-  $formpanel.Controls.Add($txtDescription)
-
-  # drawing detail button
-  $btnDetails.Height = 24
-  $btnDetails.Width = 80
-  $btnDetails.Location = New-Object System.Drawing.Point (6,114)
-  $btnDetails.Tag = "exp"
-  $btnDetails.Text = "Show Details"
-  $formpanel.Controls.Add($btnDetails)
-  $btnDetails_response = $btnDetails.add_click
-  $btnDetails_Response.Invoke({
-      param(
-        [object]$sender,
-        [System.EventArgs]$eventargs
-      )
-      btnDetails_click ($sender,$eventargs)
-    })
-
-  $lblmessage.Location = New-Object System.Drawing.Point (64,22)
-  $lblmessage.AutoSize = $true
-  $formpanel.Controls.Add($lblmessage)
-  $f.Height = 360
-  $f.Width = 483
-
-  # set form layout
-  $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
-  $f.MaximizeBox = $false
-  $f.MinimizeBox = $false
-  ## frm.FormClosing += new FormClosingEventHandler(frm_FormClosing);
-  $f.BackColor = [System.Drawing.SystemColors]::ButtonFace
-
-  ## origin http://www.iconarchive.com/search?q=ico+files&page=7
-  [string]$p = [System.IO.Path]::Combine((Get-ScriptDirectory),"Martz90-Circle-Files.ico")
-  $f.Icon = New-Object System.Drawing.Icon ($p)
-  if ($btnDetails.Tag.ToString() -match "exp")
-  {
-    $f.Height = $f.Height - $txtDescription.Height - 6
-    $btnDetails.Tag = "col"
-    $btnDetails.Text = "Show Details"
-  }
-}
 
 # http://poshcode.org/1942
 function assert {
@@ -628,17 +56,475 @@ function assert {
     }
   }
 
-  # ShowException
+  # show_exception
 
   if (!$success) {
     $action = Show3 -messageText $message `
        -messageTitle 'Assert failed' `
-       -icon $MSGICON.Error `
-       -Btn $MSGBUTTON.RetryCancle `
+       -IcOn 'Error' `
+       -btn 'RetryCancel' `
        -Description ("Try:{0}`r`nScript:{1}`r`nLine:{2}`r`nFunction:{3}" -f $Script,(Get-PSCallStack)[1].ScriptName,(Get-PSCallStack)[1].ScriptLineNumber,(Get-PSCallStack)[1].FunctionName)
-    if ($action -ne $MSGRESPONSE.Ignore) {
+    if ($action -ne 'Ignore') {
       throw $message
     }
+  }
+}
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(""))
+  }
+}
+
+# http://www.codeproject.com/Tips/827370/Custom-Message-Box-DLL
+
+function return_response
+{
+  param(
+    [object]$sender,
+    [System.EventArgs]$eventargs
+  )
+
+  [string ]$button_text = ([System.Windows.Forms.Button]$sender[0]).Text
+
+  if ($button_text -match '(Yes|No|OK|Cancel|Abort|Retry|Ignore)') {
+    $script:Result = $button_text
+  }
+  $f.Dispose()
+}
+
+function add_buttons {
+  param([psobject]$param)
+
+  switch ($param) {
+    ('None') {
+      $button_ok.Width = 80
+      $button_ok.Height = 24
+      $button_ok.Location = New-Object System.Drawing.Point (391,114)
+      $button_ok.Text = 'OK'
+      $panel.Controls.Add($button_ok)
+      $button_ok.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+
+    }
+    ('OK') {
+      $button_ok.Width = 80
+      $button_ok.Height = 24
+      $button_ok.Location = New-Object System.Drawing.Point (391,114)
+      $button_ok.Text = 'OK'
+      $panel.Controls.Add($button_ok)
+      $button_ok.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+    }
+    ('YesNo') {
+      # add No button
+      $button_no.Width = 80
+      $button_no.Height = 24
+      $button_no.Location = New-Object System.Drawing.Point (391,114)
+      $button_no.Text = 'No'
+      $panel.Controls.Add($button_no)
+      $button_no.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+      # add Yes button
+      $button_yes.Width = 80
+      $button_yes.Height = 24
+      $button_yes.Location = New-Object System.Drawing.Point (($button_no.Location.X - $button_no.Width - 2),114)
+      $button_yes.Text = 'Yes'
+      $panel.Controls.Add($button_yes)
+      $button_yes.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+    }
+    ('YesNoCancel') {
+      # add Cancel button
+      $button_cancel.Width = 80
+      $button_cancel.Height = 24
+      $button_cancel.Location = New-Object System.Drawing.Point (391,114)
+      $button_cancel.Text = 'Cancel'
+      $panel.Controls.Add($button_cancel)
+      $button_cancel.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+      # add No button
+      $button_no.Width = 80
+      $button_no.Height = 24
+      $button_no.Location = New-Object System.Drawing.Point (($button_cancel.Location.X - $button_cancel.Width - 2),114)
+      $button_no.Text = 'No'
+      $panel.Controls.Add($button_no)
+      $button_no.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+
+      # add Yes button
+      $button_yes.Width = 80
+      $button_yes.Height = 24
+      $button_yes.Location = New-Object System.Drawing.Point (($button_no.Location.X - $button_no.Width - 2),114)
+      $button_yes.Text = 'Yes'
+      $panel.Controls.Add($button_yes)
+      $button_yes_Response.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+    }
+    ('RetryCancel') {
+      # add Cancel button
+      $button_cancel.Width = 80
+      $button_cancel.Height = 24
+      $button_cancel.Location = New-Object System.Drawing.Point (391,114)
+      $button_cancel.Text = 'Cancel'
+      $panel.Controls.Add($button_cancel)
+      $button_cancel.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+      # add Retry button
+      $button_retry.Width = 80
+      $button_retry.Height = 24
+      $button_retry.Location = New-Object System.Drawing.Point (($button_cancel.Location.X - $button_cancel.Width - 2),114)
+      $button_retry.Text = 'Retry'
+      $panel.Controls.Add($button_retry)
+      $button_retry.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+
+    }
+    ('AbortRetryIgnore') {
+      # add Ignore button
+      $button_ignore.Width = 80
+      $button_ignore.Height = 24
+      $button_ignore.Location = New-Object System.Drawing.Point (391,114)
+      $button_ignore.Text = 'Ignore'
+      $panel.Controls.Add($button_ignore)
+      $button_ignore.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+      # add Retry button
+      $button_retry.Width = 80
+      $button_retry.Height = 24
+      $button_retry.Location = New-Object System.Drawing.Point (($button_ignore.Location.X - $button_ignore.Width - 2),114)
+      $button_retry.Text = 'Retry'
+      $panel.Controls.Add($button_retry)
+      $button_retry.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+      #add Abort button
+      $button_abort.Width = 80
+      $button_abort.Height = 24
+      $button_abort.Location = New-Object System.Drawing.Point (($button_retry.Location.X - $button_retry.Width - 2),114)
+      $button_abort.Text = 'Abort'
+      $panel.Controls.Add($button_abort)
+      $button_abort.add_click.Invoke({
+          param(
+            [object]$sender,
+            [System.EventArgs]$eventargs
+          )
+          return_response ($sender,$eventargs)
+        })
+    }
+    default {}
+  }
+}
+
+function add_icon_bitmap {
+  param([psobject]$param)
+
+  switch ($param)
+  {
+    ('Error') {
+      $icon_bitmap.Image = ([System.Drawing.SystemIcons]::Error).ToBitmap()
+    }
+    ('Information') {
+      $icon_bitmap.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
+    }
+    ('Question') {
+      $icon_bitmap.Image = ([System.Drawing.SystemIcons]::Question).ToBitmap()
+    }
+    ('Warning') {
+      $icon_bitmap.Image = ([System.Drawing.SystemIcons]::Warning).ToBitmap()
+    }
+    default {
+      $icon_bitmap.Image = ([System.Drawing.SystemIcons]::Information).ToBitmap()
+    }
+  }
+}
+
+function click_handler
+{
+
+  param(
+    [object]$sender,
+    [System.EventArgs]$eventArgs
+  )
+  if ($button_details.Tag.ToString() -match 'collapse')
+  {
+    $f.Height = $f.Height + $txtDescription.Height + 6
+    $button_details.Tag = 'expand'
+    $button_details.Text = 'Hide Details'
+    $txtDescription.WordWrap = true
+    # txtDescription.Focus();
+    # txtDescription.SelectionLength = 0;
+  }
+  elseif ($button_details.Tag.ToString() -match 'expand')
+  {
+    $f.Height = $f.Height - $txtDescription.Height - 6
+    $button_details.Tag = 'collapse'
+    $button_details.Text = 'Show Details'
+  }
+}
+
+function set_message_text
+{
+  param(
+    [string]$messageText,
+    [string]$Title,
+    [string]$Description
+  )
+  $label_message.Text = $messageText
+  if (($Description -ne $null) -and ($Description -ne ''))
+  {
+    $txtDescription.Text = $Description
+  }
+  else
+  {
+    $button_details.Visible = $false
+  }
+  if (($Title -ne $null) -and ($Title -ne ''))
+  {
+    $f.Text = $Title
+  }
+  else
+  {
+    $f.Text = 'Your Message Box'
+  }
+}
+
+function Show1
+{
+  param(
+    [string]$messageText
+  )
+
+  $f = New-Object System.Windows.Forms.Form
+  $button_details = New-Object System.Windows.Forms.Button
+  $button_ok = New-Object System.Windows.Forms.Button
+  $button_yes = New-Object System.Windows.Forms.Button
+  $button_no = New-Object System.Windows.Forms.Button
+  $button_cancel = New-Object System.Windows.Forms.Button
+  $button_abort = New-Object System.Windows.Forms.Button
+  $button_retry = New-Object System.Windows.Forms.Button
+  $button_ignore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icon_bitmap = New-Object System.Windows.Forms.PictureBox
+  $panel = New-Object System.Windows.Forms.Panel
+  $label_message = New-Object System.Windows.Forms.Label
+  set_message_text $messageText '' $null
+  add_icon_bitmap -param 'Information'
+  add_buttons -param 'OK'
+  DrawBox
+  [void]$f.ShowDialog()
+  Write-Host ('$script:Result = ' + $script:Result)
+  $script:Result
+}
+
+function Show2
+{
+  param(
+    [string]$messageText,
+    [string]$messageTitle,
+    [string]$description
+  )
+  $f = New-Object System.Windows.Forms.Form
+  $button_details = New-Object System.Windows.Forms.Button
+  $button_ok = New-Object System.Windows.Forms.Button
+  $button_yes = New-Object System.Windows.Forms.Button
+  $button_no = New-Object System.Windows.Forms.Button
+  $button_cancel = New-Object System.Windows.Forms.Button
+  $button_abort = New-Object System.Windows.Forms.Button
+  $button_retry = New-Object System.Windows.Forms.Button
+  $button_ignore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icon_bitmap = New-Object System.Windows.Forms.PictureBox
+  $panel = New-Object System.Windows.Forms.Panel
+  $label_message = New-Object System.Windows.Forms.Label
+  set_message_text $messageText $messageTitle $description
+  add_icon_bitmap -param 'Information'
+  add_buttons -param 'OK'
+  DrawBox
+  [void]$f.ShowDialog()
+  Write-Host ('$script:Result = ' + $script:Result)
+  return $script:Result
+}
+
+function Show3
+{
+  param(
+    [string]$messageText,
+    [string]$messageTitle,
+    [string]$description,
+    [object]$IcOn,
+    [object]$btn
+  )
+
+  $f = New-Object System.Windows.Forms.Form
+  $button_details = New-Object System.Windows.Forms.Button
+  $button_ok = New-Object System.Windows.Forms.Button
+  $button_yes = New-Object System.Windows.Forms.Button
+  $button_no = New-Object System.Windows.Forms.Button
+  $button_cancel = New-Object System.Windows.Forms.Button
+  $button_abort = New-Object System.Windows.Forms.Button
+  $button_retry = New-Object System.Windows.Forms.Button
+  $button_ignore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icon_bitmap = New-Object System.Windows.Forms.PictureBox
+  $panel = New-Object System.Windows.Forms.Panel
+  $label_message = New-Object System.Windows.Forms.Label
+
+  set_message_text $messageText $messageTitle $description
+  add_icon_bitmap -param $IcOn
+  add_buttons -param $btn
+  $script:Result = 'Cancel'
+
+  DrawBox
+  [void]$f.ShowDialog()
+  $f.Dispose()
+  Write-Host ('$script:Result = ' + $script:Result)
+  return $script:Result
+}
+
+function show_exception
+{
+  param([System.Exception]$ex)
+
+  $f = New-Object System.Windows.Forms.Form
+  $button_details = New-Object System.Windows.Forms.Button
+  $button_ok = New-Object System.Windows.Forms.Button
+  $button_yes = New-Object System.Windows.Forms.Button
+  $button_no = New-Object System.Windows.Forms.Button
+  $button_cancel = New-Object System.Windows.Forms.Button
+  $button_abort = New-Object System.Windows.Forms.Button
+  $button_retry = New-Object System.Windows.Forms.Button
+  $button_ignore = New-Object System.Windows.Forms.Button
+  $txtDescription = New-Object System.Windows.Forms.TextBox
+  $icon_bitmap = New-Object System.Windows.Forms.PictureBox
+  $panel = New-Object System.Windows.Forms.Panel
+  $label_message = New-Object System.Windows.Forms.Label
+  set_message_text -Title 'Exception' -messageText $ex.Message -Description $ex.StackTrace
+  add_icon_bitmap -param 'Error'
+  add_buttons -param 'YesNo'
+  DrawBox
+  [void]$f.ShowDialog()
+  Write-Host ('$script:Result = ' + $script:Result)
+  return $script:Result
+}
+
+function DrawBox
+{
+  $f.Controls.Add($panel)
+  $panel.Dock = [System.Windows.Forms.DockStyle]::Fill
+  # draw picturebox
+  $icon_bitmap.Height = 36
+  $icon_bitmap.Width = 40
+  $icon_bitmap.Location = New-Object System.Drawing.Point (10,11)
+  $panel.Controls.Add($icon_bitmap)
+  # add textbox
+  $txtDescription.Multiline = $true
+  $txtDescription.Height = 183
+  $txtDescription.Width = 464
+  $txtDescription.Location = New-Object System.Drawing.Point (6,143)
+  $txtDescription.BorderStyle = [System.Windows.Forms.BorderStyle]::Fixed3D
+  $txtDescription.ScrollBars = [System.Windows.Forms.ScrollBars]::Both
+  $txtDescription.ReadOnly = $true
+  $panel.Controls.Add($txtDescription)
+
+  # add detail button
+  $button_details.Height = 24
+  $button_details.Width = 80
+  $button_details.Location = New-Object System.Drawing.Point (6,114)
+  $button_details.Tag = 'expand'
+  $button_details.Text = 'Show Details'
+  $panel.Controls.Add($button_details)
+  $button_details.add_click.Invoke({
+      param(
+        [object]$sender,
+        [System.EventArgs]$eventargs
+      )
+      click_handler ($sender,$eventargs)
+    })
+
+  $label_message.Location = New-Object System.Drawing.Point (64,22)
+  $label_message.AutoSize = $true
+  $panel.Controls.Add($label_message)
+  $f.Height = 360
+  $f.Width = 483
+
+  # set form layout
+  $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+  $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
+  $f.MaximizeBox = $false
+  $f.MinimizeBox = $false
+  ## frm.FormClosing += new FormClosingEventHandler(frm_FormClosing)
+  $f.BackColor = [System.Drawing.SystemColors]::ButtonFace
+
+  ## origin http://www.iconarchive.com/search?q=ico+files&page=7
+  $f.Icon = New-Object System.Drawing.Icon ([System.IO.Path]::Combine((Get-ScriptDirectory),"Martz90-Circle-Files.ico"))
+  if ($button_details.Tag.ToString() -match 'expand')
+  {
+    $f.Height = $f.Height - $txtDescription.Height - 6
+    $button_details.Tag = 'collapse'
+    $button_details.Text = 'Show Details'
   }
 }
 
@@ -650,22 +536,25 @@ function test_assert {
 $text = 'This is a Lorem Ipsum test'
 $description = "This is is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout."
 
+$script:Result = ''
 #  Show1 -Message 'This is a test'
-# return
-# Show2 -messageText "test" -messageTitle "title" -Description "description"
+Show2 -messageText "test" -messageTitle "title" -Description "description"
 
-# Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Information -Description $description -Btn $MSGBUTTON.AbortRetryIgnore # $MSGBUTTON.RetryCancle # $MSGBUTTON.YesNoCancel # $MSGBUTTON.YesNo 
-Show3 -messageText $text -messageTitle "title" -icon $MSGICON.Error -Description $description -Btn $MSGBUTTON.RetryCancle
+# Show3 -messageText $text -messageTitle "title" -icon 'Information' -Description $description -Btn 'AbortRetryIgnore' # 'RetryCancel' # 'YesNoCancel' # 'YesNo' 
+
+
+Show3 -messageText $text -messageTitle "title" -IcOn 'Error' -Description $description -btn 'RetryCancel'
 # test_assert
-return
+
 
 try {
   Get-Item -Path 'C:\NONE' -ErrorAction STOP
 
 } catch [exception]{
-  $action = ShowException -ex $_.Exception
-  if ($action -ne $MSGRESPONSE.Ignore) {
+  $action = show_exception -ex $_.Exception
+  if ($action -ne 'Ignore') {
     throw $_.Exception
   }
 
 }
+return
