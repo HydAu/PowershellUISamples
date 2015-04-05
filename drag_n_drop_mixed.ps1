@@ -408,7 +408,7 @@ function PromptWithDragDropNish {
 
   $f.Add_Shown({ $f.Activate() })
 
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog([win32window]($caller))
   $result = $panel.Message
   $panel.Dispose()
   $f.Dispose()

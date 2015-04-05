@@ -146,7 +146,7 @@ function PromptCheckedList
 
   $f.Add_Shown( { $f.Activate() } )
 
-  [Void] $f.ShowDialog([Win32Window ] ($caller) )
+  [Void] $f.ShowDialog([Win32Window] ($caller) )
   $f.Dispose()
   $result = $caller.Message
   $caller = $null

@@ -102,7 +102,7 @@ function PromptAuto (
       $f.Activate()
     })
 
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog([win32window]($caller))
 
   $f.Dispose()
 }
