@@ -49,7 +49,8 @@ public class Win32Window : IWin32Window
     }
 }
 "@ -ReferencedAssemblies "System.Windows.Forms.dll"
-#  http://ideone.com/HFiIa7
+# http://ideone.com/HFiIa7
+# http://www.pinvoke.net/default.aspx/ntdll/NtSuspendProcess.html 
 Add-Type -TypeDefinition @"
 
 // "
@@ -302,7 +303,6 @@ public class ListViewItemComparer : System.Collections.IComparer
     }
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms','System.Drawing'
-
   $lv.Add_ColumnClick({
       $lv.ListViewItemSorter = New-Object ListViewItemComparer ($_.Column,$owner.IsAscending)
       $owner.IsAscending = !$owner.IsAscending
@@ -310,7 +310,7 @@ public class ListViewItemComparer : System.Collections.IComparer
 
   $f.Topmost = $True
   $owner = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
+  $owner.IsAscending = $false
   $f.Add_Shown({ $f.Activate() })
   $x = $f.ShowDialog($owner)
 
