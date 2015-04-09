@@ -213,43 +213,11 @@ namespace Ribbon
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
 
-
-Add-Type -TypeDefinition @"
-
-// "
-using System;
-using System.Windows.Forms;
-public class Win32Window : IWin32Window
-{
-    private IntPtr _hWnd;
-    private string _data;
-
-    public String Data
-    {
-        get { return _data; }
-        set { _data = value; }
-    }
-
-    public Win32Window(IntPtr handle)
-    {
-        _hWnd = handle;
-    }
-
-    public IntPtr Handle
-    {
-        get { return _hWnd; }
-    }
-}
-
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
-
 function PromptRibbon {
 
   param(
     [string]$title,
-    [string]$message,
-    [object]$caller
+    [string]$message
   )
 
 
@@ -433,7 +401,7 @@ function PromptRibbon {
             [object]$sender,
             [System.EventArgs]$eventargs
           )
-          $caller.Data = $sender.Text
+          $script:Data = $sender.Text
           button_click -Sender $sender -eventargs $eventargs
 
         })
@@ -472,11 +440,9 @@ function PromptRibbon {
 
   $f.Add_Shown({ $f.Activate() })
 
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog()
   $f.Dispose()
 }
-
-$caller = New-Object -TypeName 'Win32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-PromptRibbon -Title 'Floating Menu Sample Project' -caller $caller
-Write-Output $caller.Data
+$script:Data = $null 
+PromptRibbon -Title 'Floating Menu Sample Project'
+Write-Output $script:Data

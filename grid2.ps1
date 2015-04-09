@@ -69,7 +69,7 @@ function PromptGrid {
 
 
   $grid.DataSource = $data
-  $f.ShowDialog([win32window ]($caller)) | Out-Null
+  $f.ShowDialog([win32window]($caller)) | Out-Null
 
   $f.Topmost = $True
 

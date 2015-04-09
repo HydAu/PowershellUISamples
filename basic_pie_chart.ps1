@@ -167,7 +167,7 @@ function PieChart {
   $panel.ResumeLayout($false)
   $panel.PerformLayout()
   $f.ResumeLayout($false)
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog([win32window]($caller))
   $f.Dispose()
 
 

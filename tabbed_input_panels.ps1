@@ -123,7 +123,7 @@ function PromptWithTabs (
   $f.Topmost = $true
   $f.Add_Shown({ $f.Activate() })
   $f.KeyPreview = $True
-  [void]$f.ShowDialog([win32window ]($caller))
+  [void]$f.ShowDialog([win32window]($caller))
 
   $f.Dispose()
 }
