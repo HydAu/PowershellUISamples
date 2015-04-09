@@ -18,32 +18,59 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-param ([string]$dirname , 
-       [string]$filename  )
+param([string]$dirname,
+  [string]$filename,
+  # The algorithm to use for hash computation
+  [ValidateSet('MD5','SHA1')]
+  $hash_algorithm = 'MD5',
 
-function checksum_file { 
+  [switch]$pause
+)
+function checksum_file {
   param(
-    [string]$unc_path )
-return  [System.BitConverter]::ToString((New-Object -TypeName 'System.Security.Cryptography.MD5CryptoServiceProvider').ComputeHash([System.IO.File]::ReadAllBytes((Get-Item -Path  $unc_path  ).FullName)))
+    [string]$unc_path)
+  # TODO: refactor 
+  return [System.BitConverter]::ToString((New-Object -TypeName 'System.Security.Cryptography.MD5CryptoServiceProvider').ComputeHash([System.IO.File]::ReadAllBytes((Get-Item -Path $unc_path).FullName)))
 }
+
+
 
 function checksum_dir {
   param(
     $unc_path,
+    [string]$hash_algorithm = 'MD5',
     [System.Management.Automation.PSReference]$result_ref
   )
+
+  $hashproviderclasses = @{
+    'MD5' = 'MD5CryptoServiceProvider';
+    # https://msdn.microsoft.com/en-us/library/system.security.cryptography.md5cryptoserviceprovider%28v=vs.110%29.aspx
+    'SHA1' = 'SHA1CryptoServiceProvider';
+    # https://msdn.microsoft.com/en-us/library/system.security.cryptography.sha1cryptoserviceprovider%28v=vs.110%29.aspx
+  }
+
   $local:result = @{}
-  try { 
-    Push-Location "${unc_path}" -ErrorAction Stop  
-  } catch [Exception] { 
-    throw ('Argument has to be a directory path: {0}'  -f $unc_path )
+  try {
+    Push-Location "${unc_path}" -ErrorAction Stop
+  } catch [exception]{
+    throw ('Argument has to be a directory path: {0}' -f $unc_path)
   }
   Write-Host ('Generating chesksums for directory {0}' -f $unc_path)
-  $md5 = New-Object -TypeName 'System.Security.Cryptography.MD5CryptoServiceProvider'
+  # http://poshcode.org/5815
+  $md5 = New-Object -TypeName ('System.Security.Cryptography.{0}' -f $hashproviderclasses[$hash_algorithm])
   $files = Get-ChildItem -Recurse | Where-Object { -not ($_.Attributes -match 'Directory') }
   $files | Where-Object { -not ($_.Fulname -match 'Directory') } | ForEach-Object {
     $target_file = $_
-    $local:result[$target_file.Name] = [System.BitConverter]::ToString($md5.ComputeHash([System.IO.File]::ReadAllBytes($target_file.FullName)))
+    $file_hash = $md5.ComputeHash([System.IO.File]::ReadAllBytes($target_file.FullName))
+
+    $format_builder = New-Object System.Text.StringBuilder
+    $file_hash | ForEach-Object { [void]$format_builder.Append($_.ToString('X2')) }
+
+    $local:result[$target_file.Name] = @{
+      'bitconverter' = ([System.BitConverter]::ToString($file_hash));
+      'shell' = ($format_builder.ToString());
+    }
+    #    $local:result[$target_file.Name] =  ( $format_builder.ToString() );
   }
 
   popd
@@ -53,10 +80,13 @@ function checksum_dir {
 }
 
 $source_md5 = @{}
-if ($dirname) { 
-  [void](checksum_dir -unc_path $dirname -result_ref ([ref]$source_md5)) 
-  $source_md5 | out-table -autosize
+if ($dirname) {
+  [void](checksum_dir -unc_path $dirname -result_ref ([ref]$source_md5))
+  #   $source_md5 | format-table -autosize
+  $source_md5 | ConvertTo-Json
 }
-if ($filename) { 
-  write-output  ($filename  , ( checksum_file -unc_path $filename ))
+if ($filename) {
+  Write-Output ($filename,(checksum_file -unc_path $filename -hash_algorithm $hash_algorithm))
 }
+
+#     if ($PSBoundParameters['pause'].IsPresent) 
