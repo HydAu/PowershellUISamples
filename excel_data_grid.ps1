@@ -55,12 +55,8 @@ function PromptGrid (
   [object]$caller = $null
 ) {
 
-  [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null
-  [System.Reflection.Assembly]::LoadWithPartialName('System.ComponentModel') | Out-Null
-  [System.Reflection.Assembly]::LoadWithPartialName('System.Data') | Out-Null
-  [System.Reflection.Assembly]::LoadWithPartialName('System.Drawing') | Out-Null
-
-
+  @( 'System.Drawing','System.Windows.Forms','System.ComponentModel','System.Data') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+  
   $f = New-Object System.Windows.Forms.Form
   $f.Text = 'Test suite'
   $f.AutoSize = $true
@@ -80,6 +76,7 @@ function PromptGrid (
   $grid.Location = $System_Drawing_Point
   $grid.Dock = [System.Windows.Forms.DockStyle]::Fill
 
+  # TODO : To sort items in a DataGrid https://msdn.microsoft.com/en-us/library/dd833072%28v=vs.95%29.aspx
   $button = New-Object System.Windows.Forms.Button
   $button.Text = 'Open'
   $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
@@ -144,9 +141,9 @@ $data_name = 'Servers.xls'
 
 $sheet_name = 'ServerList$'
 [string]$oledb_provider = 'Provider=Microsoft.Jet.OLEDB.4.0'
-$data_source = "Data Source = $filename"
+$data_source = ('Data Source = {0}' -f $filename )
 $ext_arg = "Extended Properties=Excel 8.0"
-# TODO: hard coded id
+# TODO: sample queries
 [string]$query = "Select * from [${sheet_name}] where [id] <> 0"
 [System.Data.OleDb.OleDbConnection]$connection = New-Object System.Data.OleDb.OleDbConnection ("$oledb_provider;$data_source;$ext_arg")
 [System.Data.OleDb.OleDbCommand]$command = New-Object System.Data.OleDb.OleDbCommand ($query)
