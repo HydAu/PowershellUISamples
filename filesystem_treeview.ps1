@@ -476,7 +476,7 @@ $f.Add_KeyDown({
     $f.Close()
   })
 
-[void]$f.ShowDialog([win32window ]($caller))
+[void]$f.ShowDialog([win32window]($caller))
 
 $f.Dispose()
 Write-Output $caller.Data

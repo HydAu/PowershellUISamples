@@ -28,6 +28,7 @@
 param(
   [string]$format = 'excel',
   [switch]$pause,
+  [switch]$noop,
   [switch]$show
 )
 
@@ -91,12 +92,13 @@ function initialize_data_reader {
   $ole_db_adapter.SelectCommand = $local:command
 
   $local:command.Connection = $connection
-
   [void]$ole_db_adapter.Fill($local:data_table)
+  # Exception calling "Fill" with "1" argument(s): "The connection for viewing your linked Microsoft Excel worksheet was lost."
   $local:connection.open()
   # http://stackoverflow.com/questions/24648081/error-the-type-system-data-oledb-oledbdatareader-has-no-constructors-defined
   $global:data_reader = $local:command.ExecuteReader()
   $data_table_ref.Value = $local:data_table
+  #  Exception calling "ExecuteReader" with "0" argument(s): "The connection for viewing your linked Microsoft Excel worksheet was lost."
   $connection_ref.Value = $local:connection
   $command_ref.Value = $local:command
   return $local:data_reader
@@ -176,9 +178,9 @@ function update_single_field {
   # $command.Prepare()
 
   $local:result = $local:command.ExecuteNonQuery()
-  Write-output ('prepare: {0}' -f $sql ) 
-  Write-output ('where column SQL: {0}' -f $where_column_name ) 
-  Write-output ('update column: {0}' -f $update_column_name) 
+  Write-Output ('prepare: {0}' -f $sql)
+  Write-Output ('where column SQL: {0}' -f $where_column_name)
+  Write-Output ('update column: {0}' -f $update_column_name)
   Write-Output ('Update query: {0}' -f (($sql -replace $update_column_name,$update_column_value) -replace $where_column_name,$where_column_value))
   Write-Output ('Update result: {0}' -f $local:result)
 
@@ -200,65 +202,25 @@ $data_table = New-Object System.Data.DataTable
 
 initialize_data_reader -datafile_filename $datafile_filename -sheet_name $sheet_name -connection_ref ([ref]$connection) -command_ref ([ref]$command) -data_table_ref ([ref]$data_table)
 
-
-
-$destinations = @{
-  'Alaska' = 'A';
-  'Bahamas' = 'BH';
-  'Bermuda' = 'BM';
-  'Canada/New England' = 'NN';
-  'Caribbean' = 'C';
-  'Cruise To Nowhere' = 'CN';
-  'Europe' = 'E';
-  'Hawaii' = 'H'
-  'Mexico' = 'M'
-  'Transatlantic' = 'ET'
-}
-$ports = @{
-  'Miami, FL' = 'MIA';
-  'New York, NY' = 'NYC';
-  'Seattle, WA' = 'SEA';
-  'Los Angeles, CA' = 'LAX';
-  'Fort Lauderdale, FL' = 'FLL';
-  'Jacksonville, FL' = 'JAX';
-  'Honolulu, HI' = 'HNL';
-  'Galveston, TX' = 'GAL';
-  'Athenes' = 'ATH';
-  'Baltimore, MD' = 'BWI';
-  'Barbados' = 'BDS';
-  'Barcelona, Spain' = 'BCN';
-  'Charleston, SC' = 'CHS';
-  'New Orleans, LA' = 'MSY';
-  'Norfolk, VA' = 'ORF';
-  'Port Canaveral (Orlando), FL' = 'PCV';
-  'San Juan, Puerto Rico' = 'SJU';
-  'Tampa, FL' = 'TPA';
-  'Trieste' = 'TRS';
-  'Vancouver, BC, Canada' = 'YVR';
-}
-
-
 $row_num = 1
-$max_row = 5
+$min_row = 1
+$max_row = 36
 [System.Data.DataRow]$data_record = $null
 foreach ($data_record in $data_table) {
+  if ($row_num -le $min_row) {
+    $row_num++
+    continue
+  }
   if ($row_num -ge $max_row) {
-   exit 
+    exit
   }
   # Reading the columns of the current row
-  Write-Host ("row:{0}" -f $row_num)
+  Write-Host ("row # {0}" -f $row_num)
   $row_data = @{
     'id' = $null;
-    'server' = $null;
-    'date' = $null;
-    'done' = $null;
-    'route' = $null;
-    'booking_url' = $null;
     'port' = $null;
     'destination' = $null;
     'guid' = $null;
-    'port-id' = $null ;
-    'dest-id' = $null ;
   }
 
   [string[]]($row_data.Keys) | ForEach-Object {
@@ -266,36 +228,39 @@ foreach ($data_record in $data_table) {
     $cell_value = $data_record."${cell_name}"
     $row_data[$cell_name] = $cell_value
   }
-  $row_data[ 'port-id'] =  $ports[ $row_data[ 'port'  ]]
-  $row_data[ 'dest-id'] = $destinations[ $row_data[ 'destination' ]]
   $row_data | Format-Table -AutoSize
   Write-Output "`n"
 
-  $dest = $row_data['destination']
-  $port =  $row_data['port']
-  $browser = 'Chrome' 
-  write-output @"
-`$job_object = start-job -FilePath ($(get-location).path + '\' + 'carnival_itinerary_maps_part1.ps1' ) -ArgumentList @($browser,$dest, $port)  
-"@
-  $job_object = start-job -FilePath ($(get-location).path + '\' + 'carnival_itinerary_maps_part1.ps1' ) -ArgumentList @($browser,$dest, $port)
-  start-sleep 10 
-  $jobid = $job_object | select-object -ExpandProperty id  
-  $dummy = wait-Job -Id $jobid   
-  Receive-Job -Id $jobid  -OutVariable $result
-  write-output $result
-  Remove-Job -Id $jobid 
+  if (-not ($PSBoundParameters['noop'].IsPresent)) {
 
-  # invoke-command -computer $master_server  -ScriptBlock ${function:read_registry_cliconfg} -ArgumentList '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/MSSQLServer/Client/ConnectTo', $true 
+    $dest = $row_data['destination']
+    $port = $row_data['port']
+    if (($port -ne $null) -and ($dest -ne $null)) {
+      $browser = 'Chrome'
+      Write-Host @"
+`$job_object = start-job -FilePath ($(get-location).path + '\' + 'carnival_itinerary_maps_part4.ps1' ) -ArgumentList @($browser,$dest, $port)  
+"@
+
+      $job_object = Start-Job -FilePath ($(Get-Location).Path + '\' + 'carnival_itinerary_maps_part4.ps1') -ArgumentList @( $browser,$dest,$port)
+      Start-Sleep 10
+      $jobid = $job_object | Select-Object -ExpandProperty id
+      $dummy = Wait-Job -Id $jobid
+      Receive-Job -Id $jobid -OutVariable $result
+      Write-Output $result
+      Remove-Job -Id $jobid
+      # invoke-command -computer $master_server  -ScriptBlock ${function:read_registry_cliconfg} -ArgumentList '/HKEY_LOCAL_MACHINE/SOFTWARE/Microsoft/MSSQLServer/Client/ConnectTo', $true 
+    }
+  }
   $row_num++
 }
 
 $global:data_reader.close()
 
-return 
+return
 $target_record_id = 7
 
-$new_guid = ([guid]::NewGuid()).ToString() 
-write-output ('Setting guild to {0} for id = {1}' -f $new_guid,  $target_record_id )
+$new_guid = ([guid]::NewGuid()).ToString()
+Write-Output ('Setting guild to {0} for id = {1}' -f $new_guid,$target_record_id)
 
 update_single_field `
    -connection $connection `
@@ -311,7 +276,7 @@ update_single_field `
    -update_column_name '@booking_url' `
    -update_column_value 'http://www.carnival.com/itinerary/2-day-baja-mexico-cruise/los-angeles/imagination/2-days/la0/?numGuests=2&destination=all-destinations&dest=any&datFrom=032015&datTo=042017' `
    -where_column_name '@guid' `
-   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Varchar) `
+   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::VarChar) `
    -where_column_value $new_guid
 
 # TODO : multiple columns
@@ -326,11 +291,11 @@ update_single_field `
    -update_column_value $true `
    -update_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Boolean) `
    -where_column_name '@guid' `
-   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::Varchar) `
+   -where_column_type_ref ([ref][System.Data.OleDb.OleDbType]::VarChar) `
    -where_column_value $new_guid
 
-$destinations_ports   = @{'Miami, FL' = @('Caribean', 'Bermuda'); } 
-return 
+$destinations_ports = @{ 'Miami, FL' = @( 'Caribean','Bermuda'); }
+return
 # cartesian products
 
 
