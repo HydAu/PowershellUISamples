@@ -49,7 +49,6 @@ using System.Windows.Forms;
             this.txtBxRandomNo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.txtBxDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.txtBxTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            // ((System.ComponentModel.ISupportInitialize)(this.dgvSelectAll)).BeginInit();
             this.SuspendLayout();
             // 
             // dgvSelectAll
@@ -96,18 +95,14 @@ using System.Windows.Forms;
             this.txtBxTime.Name = "txtBxTime";
             this.txtBxTime.ReadOnly = true;
             // 
-            // frmSelectAll
+            // GridSelectAll
             // 
-            // this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            // this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+
             this.ClientSize = new System.Drawing.Size(469, 267);
             this.Controls.Add(this.dgvSelectAll);
             this.Name = "frmSelectAll";
             this.Text = "Select All Demo";
             // https://msdn.microsoft.com/en-us/library/system.windows.forms.panel_events%28v=vs.110%29.aspx
-            // this.Load += new System.EventHandler(this.SelectAllGrid_Load);
-
-            // --
             AddHeaderCheckBox();
 
             HeaderCheckBox.KeyUp += new KeyEventHandler(HeaderCheckBox_KeyUp);
@@ -118,23 +113,8 @@ using System.Windows.Forms;
 
             BindGridView();
 
-            // --
- 
-            // ((System.ComponentModel.ISupportInitialize)(this.dgvSelectAll)).EndInit();
             this.ResumeLayout(false);
 
-        }
-        private void SelectAllGrid_Load(object sender, EventArgs e)
-        {
-            AddHeaderCheckBox();
-
-            HeaderCheckBox.KeyUp += new KeyEventHandler(HeaderCheckBox_KeyUp);
-            HeaderCheckBox.MouseClick += new MouseEventHandler(HeaderCheckBox_MouseClick);
-            dgvSelectAll.CellValueChanged += new DataGridViewCellEventHandler(dgvSelectAll_CellValueChanged);
-            dgvSelectAll.CurrentCellDirtyStateChanged += new EventHandler(dgvSelectAll_CurrentCellDirtyStateChanged);
-            dgvSelectAll.CellPainting += new DataGridViewCellPaintingEventHandler(dgvSelectAll_CellPainting);
-
-            BindGridView();
         }
 
         private void BindGridView()
@@ -144,7 +124,7 @@ using System.Windows.Forms;
             TotalCheckBoxes = dgvSelectAll.RowCount;
             TotalCheckedCheckBoxes = 0;
         }
-
+        // http://www.codeproject.com/Articles/20733/How-to-Populate-a-DataGridView-Control-using-OleDb
         private DataTable GetDataSource()
         {
             DataTable dTable = new DataTable();
@@ -278,6 +258,7 @@ function SelectAllGrid {
   $f.Text = $title
 
   $f.Size = New-Object System.Drawing.Size (470,235)
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF(6.0, 13.0)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
   $f.StartPosition = 'CenterScreen'
