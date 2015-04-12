@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2014,2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -32,184 +32,178 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
-namespace Ribbon
+public class RibbonPanel : Panel
 {
 
-    public class Panel : System.Windows.Forms.Panel
+    private System.Windows.Forms.Panel panel1;
+    private System.Windows.Forms.Panel panel2;
+    private System.Windows.Forms.Button button2;
+    private System.Windows.Forms.Button button1;
+    private System.Windows.Forms.Panel panel3;
+    private System.Windows.Forms.Timer timer1;
+    private System.Windows.Forms.Timer timer2;
+    private System.Windows.Forms.UserControl _usrCtrl;
+    private System.ComponentModel.IContainer components = null;
+    protected override void Dispose(bool disposing)
     {
-
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.Timer timer2;
-        private System.Windows.Forms.UserControl _usrCtrl;
-        private System.ComponentModel.IContainer components = null;
-        protected override void Dispose(bool disposing)
+        if (disposing && (components != null))
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
+            components.Dispose();
         }
+        base.Dispose(disposing);
+    }
 
-        private void InitializeComponent()
-        {
-            this.components = new System.ComponentModel.Container();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.timer2 = new System.Windows.Forms.Timer(this.components);
-            this.panel1.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // panel1
-            // 
-            this.panel1.BackColor = System.Drawing.Color.DimGray;
-            this.panel1.Controls.Add(this.panel2);
-            this.panel1.Controls.Add(this.button2);
-            this.panel1.Controls.Add(this.button1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(5, 5);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(464, 100);
-            this.panel1.TabIndex = 0;
-            // 
-            // panel2
-            // 
+    private void InitializeComponent()
+    {
+        this.components = new System.ComponentModel.Container();
+        this.panel1 = new System.Windows.Forms.Panel();
+        this.panel2 = new System.Windows.Forms.Panel();
+        this.button2 = new System.Windows.Forms.Button();
+        this.button1 = new System.Windows.Forms.Button();
+        this.panel3 = new System.Windows.Forms.Panel();
+        this.timer1 = new System.Windows.Forms.Timer(this.components);
+        this.timer2 = new System.Windows.Forms.Timer(this.components);
+        this.panel1.SuspendLayout();
+        this.SuspendLayout();
+        // 
+        // panel1
+        // 
+        this.panel1.BackColor = System.Drawing.Color.DimGray;
+        this.panel1.Controls.Add(this.panel2);
+        this.panel1.Controls.Add(this.button2);
+        this.panel1.Controls.Add(this.button1);
+        this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+        this.panel1.Location = new System.Drawing.Point(5, 5);
+        this.panel1.Name = "panel1";
+        this.panel1.Size = new System.Drawing.Size(464, 100);
+        this.panel1.TabIndex = 0;
+        // 
+        // panel2
+        // 
 
-            this.panel2.BackColor = System.Drawing.Color.DarkGray;
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(20, 0);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(424, 100);
-            this.panel2.TabIndex = 2;
-            this._usrCtrl.Left = this._usrCtrl.Top = 0;
-            panel2.Controls.Add(this._usrCtrl);
-            this._usrCtrl.Show();
+        this.panel2.BackColor = System.Drawing.Color.DarkGray;
+        this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+        this.panel2.Location = new System.Drawing.Point(20, 0);
+        this.panel2.Name = "panel2";
+        this.panel2.Size = new System.Drawing.Size(424, 100);
+        this.panel2.TabIndex = 2;
+        this._usrCtrl.Left = this._usrCtrl.Top = 0;
+        panel2.Controls.Add(this._usrCtrl);
+        this._usrCtrl.Show();
 
-            // 
-            // button2
-            // 
-            this.button2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.button2.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button2.ForeColor = System.Drawing.Color.Silver;
-            this.button2.Location = new System.Drawing.Point(444, 0);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(20, 100);
-            this.button2.TabIndex = 1;
-            this.button2.Text = ">";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.button2_MouseDown);
-            this.button2.MouseUp += new System.Windows.Forms.MouseEventHandler(this.button2_MouseUp);
-            // 
-            // button1
-            // 
-            this.button1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
-            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.ForeColor = System.Drawing.Color.Silver;
-            this.button1.Location = new System.Drawing.Point(0, 0);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(20, 100);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "<";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.button1_MouseDown);
-            this.button1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.button1_MouseUp);
-            // 
-            // panel3
-            // 
-            this.panel3.BackColor = System.Drawing.Color.Gray;
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(5, 105);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(464, 202);
-            this.panel3.TabIndex = 1;
-            // 
-            // timer1
-            // 
-            this.timer1.Interval = 5;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // timer2
-            // 
-            this.timer2.Interval = 5;
-            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
-            // 
+        // 
+        // button2
+        // 
+        this.button2.Dock = System.Windows.Forms.DockStyle.Right;
+        this.button2.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
+        this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+        this.button2.ForeColor = System.Drawing.Color.Silver;
+        this.button2.Location = new System.Drawing.Point(444, 0);
+        this.button2.Name = "button2";
+        this.button2.Size = new System.Drawing.Size(20, 100);
+        this.button2.TabIndex = 1;
+        this.button2.Text = ">";
+        this.button2.UseVisualStyleBackColor = true;
+        this.button2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.button2_MouseDown);
+        this.button2.MouseUp += new System.Windows.Forms.MouseEventHandler(this.button2_MouseUp);
+        // 
+        // button1
+        // 
+        this.button1.Dock = System.Windows.Forms.DockStyle.Left;
+        this.button1.FlatAppearance.BorderColor = System.Drawing.Color.Gray;
+        this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+        this.button1.ForeColor = System.Drawing.Color.Silver;
+        this.button1.Location = new System.Drawing.Point(0, 0);
+        this.button1.Name = "button1";
+        this.button1.Size = new System.Drawing.Size(20, 100);
+        this.button1.TabIndex = 0;
+        this.button1.Text = "<";
+        this.button1.UseVisualStyleBackColor = true;
+        this.button1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.button1_MouseDown);
+        this.button1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.button1_MouseUp);
+        // 
+        // panel3
+        // 
+        this.panel3.BackColor = System.Drawing.Color.Gray;
+        this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+        this.panel3.Location = new System.Drawing.Point(5, 105);
+        this.panel3.Name = "panel3";
+        this.panel3.Size = new System.Drawing.Size(464, 202);
+        this.panel3.TabIndex = 1;
+        // 
+        // timer1
+        // 
+        this.timer1.Interval = 5;
+        this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+        // 
+        // timer2
+        // 
+        this.timer2.Interval = 5;
+        this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+        // 
 
-            // Panel
-            // 
-            this.BackColor = System.Drawing.Color.LightGray;
-            this.ClientSize = new System.Drawing.Size(474, 312);
-            this.Controls.Add(this.panel3);
-            this.Controls.Add(this.panel1);
-            this.Name = "Panel";
-            this.Padding = new System.Windows.Forms.Padding(5);
-            this.Text = "Floating Menu Sample Project";
- 
+        // Panel
+        // 
+        this.BackColor = System.Drawing.Color.LightGray;
+        this.ClientSize = new System.Drawing.Size(474, 312);
+        this.Controls.Add(this.panel3);
+        this.Controls.Add(this.panel1);
+        this.Name = "Panel";
+        this.Padding = new System.Windows.Forms.Padding(5);
+        this.Text = "Floating Menu Sample Project";
 
-            this.panel1.ResumeLayout(false);
-            this.ResumeLayout(false);
 
-        }
+        this.panel1.ResumeLayout(false);
+        this.ResumeLayout(false);
 
-        public Panel(System.Windows.Forms.UserControl u)
-        {
-         if (u == null)
+    }
+
+    public RibbonPanel(System.Windows.Forms.UserControl u)
+    {
+        if (u == null)
             throw new ArgumentNullException("Usercontrol required");
-          this._usrCtrl = u; 
-          InitializeComponent();
-        }
-
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (this._usrCtrl.Left < 0)
-            {
-                this._usrCtrl.Left = this._usrCtrl.Left + 5;
-            }
-        }
-
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            if (this._usrCtrl.Right >= panel2.Left + panel2.Width)
-            {
-                this._usrCtrl.Left = this._usrCtrl.Left - 5;
-            }
-        }
-
-        private void button1_MouseDown(object sender, MouseEventArgs e)
-        {
-            timer1.Start();
-        }
-
-        private void button1_MouseUp(object sender, MouseEventArgs e)
-        {
-            timer1.Stop();
-        }
-
-        private void button2_MouseDown(object sender, MouseEventArgs e)
-        {
-            timer2.Start();
-        }
-
-        private void button2_MouseUp(object sender, MouseEventArgs e)
-        {
-            timer2.Stop();
-        }
+        this._usrCtrl = u;
+        InitializeComponent();
     }
 
 
+    private void timer1_Tick(object sender, EventArgs e)
+    {
+        if (this._usrCtrl.Left < 0)
+        {
+            this._usrCtrl.Left = this._usrCtrl.Left + 5;
+        }
+    }
+
+    private void timer2_Tick(object sender, EventArgs e)
+    {
+        if (this._usrCtrl.Right >= panel2.Left + panel2.Width)
+        {
+            this._usrCtrl.Left = this._usrCtrl.Left - 5;
+        }
+    }
+
+    private void button1_MouseDown(object sender, MouseEventArgs e)
+    {
+        timer1.Start();
+    }
+
+    private void button1_MouseUp(object sender, MouseEventArgs e)
+    {
+        timer1.Stop();
+    }
+
+    private void button2_MouseDown(object sender, MouseEventArgs e)
+    {
+        timer2.Start();
+    }
+
+    private void button2_MouseUp(object sender, MouseEventArgs e)
+    {
+        timer2.Stop();
+    }
 }
+
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
 
@@ -432,7 +426,7 @@ function PromptRibbon {
   $p2.ResumeLayout($false)
   $u.ResumeLayout($false)
 
-  $r = New-Object -TypeName 'Ribbon.Panel' -ArgumentList ([System.Windows.Forms.UserControl]$u)
+  $r = New-Object -TypeName 'RibbonPanel' -ArgumentList ([System.Windows.Forms.UserControl]$u)
   $r.Size = $f.Size
 
   $f.Controls.Add($r)
