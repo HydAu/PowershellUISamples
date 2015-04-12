@@ -24,6 +24,7 @@
 Add-Type @"
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Data;
@@ -31,215 +32,244 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-    public class SelectAllGrid : Panel
-    {
-        int TotalCheckBoxes = 0;
-        int TotalCheckedCheckBoxes = 0;
-        CheckBox HeaderCheckBox = null;
-        bool IsHeaderCheckBoxClicked = false;
-        private System.Windows.Forms.DataGridView dgvSelectAll;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn chkBxSelect;
-        private System.Windows.Forms.DataGridViewTextBoxColumn txtBxRandomNo;
-        private System.Windows.Forms.DataGridViewTextBoxColumn txtBxDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn txtBxTime;
+public class SelectAllGrid : Panel
+{
+    int TotalCheckBoxes = 0;
+    int TotalCheckedCheckBoxes = 0;
+    CheckBox HeaderCheckBox = null;
+    bool IsHeaderCheckBoxClicked = false;
+    private System.Windows.Forms.DataGridView dgvSelectAll;
+    private System.Windows.Forms.DataGridViewCheckBoxColumn chkBxSelect;
+    private System.Windows.Forms.DataGridViewTextBoxColumn txtBxRandomNo;
+    private System.Windows.Forms.DataGridViewTextBoxColumn txtBxDate;
+    private System.Windows.Forms.DataGridViewTextBoxColumn txtBxTime;
 
-        public SelectAllGrid(){
-            this.dgvSelectAll = new System.Windows.Forms.DataGridView();
-            this.chkBxSelect = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.txtBxRandomNo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.txtBxDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.txtBxTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SuspendLayout();
-            // 
-            // dgvSelectAll
-            // 
-            this.dgvSelectAll.AllowUserToAddRows = false;
-            this.dgvSelectAll.AllowUserToDeleteRows = false;
-            this.dgvSelectAll.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvSelectAll.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+    public SelectAllGrid()
+    {
+        this.dgvSelectAll = new System.Windows.Forms.DataGridView();
+        this.chkBxSelect = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+        this.txtBxRandomNo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.txtBxDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.txtBxTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+        this.SuspendLayout();
+        // 
+        // dgvSelectAll
+        // 
+        this.dgvSelectAll.AllowUserToAddRows = false;
+        this.dgvSelectAll.AllowUserToDeleteRows = false;
+        this.dgvSelectAll.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        this.dgvSelectAll.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.chkBxSelect,
             this.txtBxRandomNo,
             this.txtBxDate,
             this.txtBxTime});
-            this.dgvSelectAll.Location = new System.Drawing.Point(12, 12);
-            this.dgvSelectAll.Name = "dgvSelectAll";
-            this.dgvSelectAll.Size = new System.Drawing.Size(443, 245);
-            this.dgvSelectAll.TabIndex = 0;
-            // 
-            // chkBxSelect
-            // 
-            this.chkBxSelect.DataPropertyName = "IsChecked";
-            this.chkBxSelect.HeaderText = "";
-            this.chkBxSelect.Name = "chkBxSelect";
-            this.chkBxSelect.Width = 50;
-            // 
-            // txtBxRandomNo
-            // 
-            this.txtBxRandomNo.DataPropertyName = "RandomNo";
-            this.txtBxRandomNo.HeaderText = "Random No";
-            this.txtBxRandomNo.Name = "txtBxRandomNo";
-            this.txtBxRandomNo.ReadOnly = true;
-            this.txtBxRandomNo.Width = 150;
-            // 
-            // txtBxDate
-            // 
-            this.txtBxDate.DataPropertyName = "Date";
-            this.txtBxDate.HeaderText = "Date";
-            this.txtBxDate.Name = "txtBxDate";
-            this.txtBxDate.ReadOnly = true;
-            // 
-            // txtBxTime
-            // 
-            this.txtBxTime.DataPropertyName = "Time";
-            this.txtBxTime.HeaderText = "Time";
-            this.txtBxTime.Name = "txtBxTime";
-            this.txtBxTime.ReadOnly = true;
-            // 
-            // GridSelectAll
-            // 
+        this.dgvSelectAll.Location = new System.Drawing.Point(12, 12);
+        this.dgvSelectAll.Name = "dgvSelectAll";
+        this.dgvSelectAll.Size = new System.Drawing.Size(443, 245);
+        this.dgvSelectAll.TabIndex = 0;
+        // 
+        // chkBxSelect
+        // 
+        this.chkBxSelect.DataPropertyName = "IsChecked";
+        this.chkBxSelect.HeaderText = "";
+        this.chkBxSelect.Name = "chkBxSelect";
+        this.chkBxSelect.Width = 50;
+        // 
+        // txtBxRandomNo
+        // 
+        this.txtBxRandomNo.DataPropertyName = "RandomNo";
+        this.txtBxRandomNo.HeaderText = "Random No";
+        this.txtBxRandomNo.Name = "txtBxRandomNo";
+        this.txtBxRandomNo.ReadOnly = true;
+        this.txtBxRandomNo.Width = 150;
+        // 
+        // txtBxDate
+        // 
+        this.txtBxDate.DataPropertyName = "Date";
+        this.txtBxDate.HeaderText = "Date";
+        this.txtBxDate.Name = "txtBxDate";
+        this.txtBxDate.ReadOnly = true;
+        // 
+        // txtBxTime
+        // 
+        this.txtBxTime.DataPropertyName = "url";
+        this.txtBxTime.HeaderText = "url";
+        this.txtBxTime.Name = "txtBxTime";
+        this.txtBxTime.ReadOnly = true;
+        // 
+        // GridSelectAll
+        // 
 
-            this.ClientSize = new System.Drawing.Size(469, 267);
-            this.Controls.Add(this.dgvSelectAll);
-            this.Name = "frmSelectAll";
-            this.Text = "Select All Demo";
-            // https://msdn.microsoft.com/en-us/library/system.windows.forms.panel_events%28v=vs.110%29.aspx
-            AddHeaderCheckBox();
+        this.ClientSize = new System.Drawing.Size(469, 267);
+        this.Controls.Add(this.dgvSelectAll);
+        this.Name = "frmSelectAll";
+        this.Text = "Select All Demo";
+        // https://msdn.microsoft.com/en-us/library/system.windows.forms.panel_events%28v=vs.110%29.aspx
+        AddHeaderCheckBox();
 
-            HeaderCheckBox.KeyUp += new KeyEventHandler(HeaderCheckBox_KeyUp);
-            HeaderCheckBox.MouseClick += new MouseEventHandler(HeaderCheckBox_MouseClick);
-            dgvSelectAll.CellValueChanged += new DataGridViewCellEventHandler(dgvSelectAll_CellValueChanged);
-            dgvSelectAll.CurrentCellDirtyStateChanged += new EventHandler(dgvSelectAll_CurrentCellDirtyStateChanged);
-            dgvSelectAll.CellPainting += new DataGridViewCellPaintingEventHandler(dgvSelectAll_CellPainting);
+        HeaderCheckBox.KeyUp += new KeyEventHandler(HeaderCheckBox_KeyUp);
+        HeaderCheckBox.MouseClick += new MouseEventHandler(HeaderCheckBox_MouseClick);
+        dgvSelectAll.CellValueChanged += new DataGridViewCellEventHandler(dgvSelectAll_CellValueChanged);
+        dgvSelectAll.CurrentCellDirtyStateChanged += new EventHandler(dgvSelectAll_CurrentCellDirtyStateChanged);
+        dgvSelectAll.CellPainting += new DataGridViewCellPaintingEventHandler(dgvSelectAll_CellPainting);
 
-            BindGridView();
+        BindGridView();
 
-            this.ResumeLayout(false);
+        this.ResumeLayout(false);
 
+    }
+
+    private void BindGridView()
+    {
+        dgvSelectAll.DataSource = GetDataSource();
+
+        TotalCheckBoxes = dgvSelectAll.RowCount;
+        TotalCheckedCheckBoxes = 0;
+    }
+    // http://www.codeproject.com/Articles/20733/How-to-Populate-a-DataGridView-Control-using-OleDb
+    private DataTable GetDataSource()
+    {
+        DataTable dTable = new DataTable();
+
+        DataRow dRow = null;
+        DateTime dTime;
+        Random rnd = new Random();
+
+        List<Dictionary<string, object>> sampleData = new List<Dictionary<string, object>> {
+
+   new Dictionary<string, object> { { "RandomNo", rnd.NextDouble()}, { "Date", DateTime.Now.ToString("MM/dd/yyyy") }, { "url", "www.facebook.com"}} ,
+   new Dictionary<string, object> { { "RandomNo", rnd.NextDouble()}, { "Date", DateTime.Now.ToString("MM/dd/yyyy") }, { "url", "www.linkedin.com"}} ,
+   new Dictionary<string, object> { { "RandomNo", rnd.NextDouble()}, { "Date", DateTime.Now.ToString("MM/dd/yyyy") }, { "url", "www.odesk.com"}}  
+};
+
+
+        Dictionary<string, object> openWith = sampleData[0];
+
+        Dictionary<string, object>.KeyCollection keyColl = openWith.Keys;
+
+        dTable.Columns.Add("IsChecked", System.Type.GetType("System.Boolean"));
+        foreach (string s in keyColl)
+        {
+            dTable.Columns.Add(s);
+            // Console.WriteLine("Key = {0}", s);
         }
 
-        private void BindGridView()
+        foreach (Dictionary<string, object> objitem in sampleData)
         {
-            dgvSelectAll.DataSource = GetDataSource();
-
-            TotalCheckBoxes = dgvSelectAll.RowCount;
-            TotalCheckedCheckBoxes = 0;
-        }
-        // http://www.codeproject.com/Articles/20733/How-to-Populate-a-DataGridView-Control-using-OleDb
-        private DataTable GetDataSource()
-        {
-            DataTable dTable = new DataTable();
-
-            DataRow dRow = null;
-            DateTime dTime;
-            Random rnd = new Random();
-
-            dTable.Columns.Add("IsChecked", System.Type.GetType("System.Boolean"));
-            dTable.Columns.Add("RandomNo");
-            dTable.Columns.Add("Date");
-            dTable.Columns.Add("Time");
-
-            for (int n = 0; n < 10; ++n)
+            dRow = dTable.NewRow();
+            dTime = DateTime.Now;
+            foreach (KeyValuePair<string, object> kvp in objitem)
             {
-                dRow = dTable.NewRow();
-                dTime = DateTime.Now;
-
-                dRow["IsChecked"] = "false";
-                dRow["RandomNo"] = rnd.NextDouble();
-                dRow["Date"] = dTime.ToString("MM/dd/yyyy");
-                dRow["Time"] = dTime.ToString("hh:mm:ss tt");
-
-                dTable.Rows.Add(dRow);
-                dTable.AcceptChanges();
+                dRow[kvp.Key] = kvp.Value.ToString();
+                // Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
             }
+            dTable.Rows.Add(dRow);
+            dTable.AcceptChanges();
 
-            return dTable;
         }
 
-        private void dgvSelectAll_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        /*
+        for (int n = 0; n < 10; ++n)
         {
-            if (!IsHeaderCheckBoxClicked)
-                RowCheckBoxClick((DataGridViewCheckBoxCell)dgvSelectAll[e.ColumnIndex, e.RowIndex]);
-        }
+            dRow = dTable.NewRow();
+            dTime = DateTime.Now;
 
-        private void dgvSelectAll_CurrentCellDirtyStateChanged(object sender, EventArgs e)
-        {
-            if (dgvSelectAll.CurrentCell is DataGridViewCheckBoxCell)
-                dgvSelectAll.CommitEdit(DataGridViewDataErrorContexts.Commit);
-        }
+            dRow["IsChecked"] = "false";
+            dRow["RandomNo"] = rnd.NextDouble();
+            dRow["Date"] = dTime.ToString("MM/dd/yyyy");
+            dRow["url"] = dTime.ToString("hh:mm:ss tt");
 
-        private void HeaderCheckBox_MouseClick(object sender, MouseEventArgs e)
-        {
+            dTable.Rows.Add(dRow);
+            dTable.AcceptChanges();
+        }
+*/
+        return dTable;
+    }
+
+    private void dgvSelectAll_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+    {
+        if (!IsHeaderCheckBoxClicked)
+            RowCheckBoxClick((DataGridViewCheckBoxCell)dgvSelectAll[e.ColumnIndex, e.RowIndex]);
+    }
+
+    private void dgvSelectAll_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+    {
+        if (dgvSelectAll.CurrentCell is DataGridViewCheckBoxCell)
+            dgvSelectAll.CommitEdit(DataGridViewDataErrorContexts.Commit);
+    }
+
+    private void HeaderCheckBox_MouseClick(object sender, MouseEventArgs e)
+    {
+        HeaderCheckBoxClick((CheckBox)sender);
+    }
+
+    private void HeaderCheckBox_KeyUp(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.Space)
             HeaderCheckBoxClick((CheckBox)sender);
-        }
+    }
 
-        private void HeaderCheckBox_KeyUp(object sender, KeyEventArgs e)
+    private void dgvSelectAll_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex == -1 && e.ColumnIndex == 0)
+            ResetHeaderCheckBoxLocation(e.ColumnIndex, e.RowIndex);
+    }
+
+    private void AddHeaderCheckBox()
+    {
+        HeaderCheckBox = new CheckBox();
+
+        HeaderCheckBox.Size = new Size(15, 15);
+
+        //Add the CheckBox into the DataGridView
+        this.dgvSelectAll.Controls.Add(HeaderCheckBox);
+    }
+
+    private void ResetHeaderCheckBoxLocation(int ColumnIndex, int RowIndex)
+    {
+        //Get the column header cell bounds
+        Rectangle oRectangle = this.dgvSelectAll.GetCellDisplayRectangle(ColumnIndex, RowIndex, true);
+
+        Point oPoint = new Point();
+
+        oPoint.X = oRectangle.Location.X + (oRectangle.Width - HeaderCheckBox.Width) / 2 + 1;
+        oPoint.Y = oRectangle.Location.Y + (oRectangle.Height - HeaderCheckBox.Height) / 2 + 1;
+
+        //Change the location of the CheckBox to make it stay on the header
+        HeaderCheckBox.Location = oPoint;
+    }
+
+    private void HeaderCheckBoxClick(CheckBox HCheckBox)
+    {
+        IsHeaderCheckBoxClicked = true;
+
+        foreach (DataGridViewRow Row in dgvSelectAll.Rows)
+            ((DataGridViewCheckBoxCell)Row.Cells["chkBxSelect"]).Value = HCheckBox.Checked;
+
+        dgvSelectAll.RefreshEdit();
+
+        TotalCheckedCheckBoxes = HCheckBox.Checked ? TotalCheckBoxes : 0;
+
+        IsHeaderCheckBoxClicked = false;
+    }
+private void RowCheckBoxClick(DataGridViewCheckBoxCell RCheckBox)
+    {
+        if (RCheckBox != null)
         {
-            if(e.KeyCode == Keys.Space)
-                HeaderCheckBoxClick((CheckBox)sender);
-        }
+            //Modifiy Counter;            
+            if ((bool)RCheckBox.Value && TotalCheckedCheckBoxes < TotalCheckBoxes)
+                TotalCheckedCheckBoxes++;
+            else if (TotalCheckedCheckBoxes > 0)
+                TotalCheckedCheckBoxes--;
 
-        private void dgvSelectAll_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
-        {
-            if (e.RowIndex == -1 && e.ColumnIndex == 0)
-                    ResetHeaderCheckBoxLocation(e.ColumnIndex, e.RowIndex);
-        }
-
-        private void AddHeaderCheckBox()
-        {
-            HeaderCheckBox = new CheckBox();
-
-            HeaderCheckBox.Size = new Size(15, 15);
-
-            //Add the CheckBox into the DataGridView
-            this.dgvSelectAll.Controls.Add(HeaderCheckBox);
-        }
-
-        private void ResetHeaderCheckBoxLocation(int ColumnIndex, int RowIndex)
-        {
-            //Get the column header cell bounds
-            Rectangle oRectangle = this.dgvSelectAll.GetCellDisplayRectangle(ColumnIndex, RowIndex, true);
-
-            Point oPoint = new Point();
-
-            oPoint.X = oRectangle.Location.X + (oRectangle.Width - HeaderCheckBox.Width) / 2 + 1;
-            oPoint.Y = oRectangle.Location.Y + (oRectangle.Height - HeaderCheckBox.Height) / 2 + 1;
-
-            //Change the location of the CheckBox to make it stay on the header
-            HeaderCheckBox.Location = oPoint;
-        }
-
-        private void HeaderCheckBoxClick(CheckBox HCheckBox)
-        {
-            IsHeaderCheckBoxClicked = true;
-
-            foreach (DataGridViewRow Row in dgvSelectAll.Rows)
-                ((DataGridViewCheckBoxCell)Row.Cells["chkBxSelect"]).Value = HCheckBox.Checked;
-
-            dgvSelectAll.RefreshEdit();
-
-            TotalCheckedCheckBoxes = HCheckBox.Checked ? TotalCheckBoxes : 0;
-
-            IsHeaderCheckBoxClicked = false;
-        }
-
-        private void RowCheckBoxClick(DataGridViewCheckBoxCell RCheckBox)
-        {
-            if (RCheckBox != null)
-            {
-                //Modifiy Counter;            
-                if ((bool)RCheckBox.Value && TotalCheckedCheckBoxes < TotalCheckBoxes)
-                    TotalCheckedCheckBoxes++;
-                else if (TotalCheckedCheckBoxes > 0)
-                    TotalCheckedCheckBoxes--;
-
-                //Change state of the header CheckBox.
-                if (TotalCheckedCheckBoxes < TotalCheckBoxes)
-                    HeaderCheckBox.Checked = false;
-                else if (TotalCheckedCheckBoxes == TotalCheckBoxes)
-                    HeaderCheckBox.Checked = true;
-            }
+            //Change state of the header CheckBox.
+            if (TotalCheckedCheckBoxes < TotalCheckBoxes)
+                HeaderCheckBox.Checked = false;
+            else if (TotalCheckedCheckBoxes == TotalCheckBoxes)
+                HeaderCheckBox.Checked = true;
         }
     }
+}
 
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
