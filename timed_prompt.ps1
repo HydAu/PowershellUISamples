@@ -24,7 +24,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-public class TimerPanel : System.Windows.Forms.Panel
+public class TimerPanel : Panel
 {
     private System.Timers.Timer _timer;
     private System.ComponentModel.Container components = null;
