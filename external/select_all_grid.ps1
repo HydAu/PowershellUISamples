@@ -43,7 +43,7 @@ public class SelectAllGrid : Panel
     private System.Windows.Forms.DataGridViewTextBoxColumn txtBxRandomNo;
     private System.Windows.Forms.DataGridViewTextBoxColumn txtBxDate;
     private System.Windows.Forms.DataGridViewTextBoxColumn txtBxTime;
-
+    List<Dictionary<string, object>> userData  = null ;
     public SelectAllGrid()
     {
         this.dgvSelectAll = new System.Windows.Forms.DataGridView();
@@ -113,21 +113,59 @@ public class SelectAllGrid : Panel
         dgvSelectAll.CurrentCellDirtyStateChanged += new EventHandler(dgvSelectAll_CurrentCellDirtyStateChanged);
         dgvSelectAll.CellPainting += new DataGridViewCellPaintingEventHandler(dgvSelectAll_CellPainting);
 
-        BindGridView();
+        dgvSelectAll.DataSource = GetDataSource(userData );
+        TotalCheckBoxes = dgvSelectAll.RowCount;
+        TotalCheckedCheckBoxes = 0;
 
         this.ResumeLayout(false);
 
     }
-
-    private void BindGridView()
-    {
-        dgvSelectAll.DataSource = GetDataSource();
-
-        TotalCheckBoxes = dgvSelectAll.RowCount;
-        TotalCheckedCheckBoxes = 0;
-    }
     // http://www.codeproject.com/Articles/20733/How-to-Populate-a-DataGridView-Control-using-OleDb
-    private DataTable GetDataSource()
+
+    public DataTable GetDataSource(List<Dictionary<string, object>> userData = null  ){
+        DataTable dTable = new DataTable();
+
+        DataRow dRow = null;
+         List<Dictionary<string, object>> sampleData ;
+        if (userData == null) {
+
+
+        Random rnd = new Random();
+        sampleData = new List<Dictionary<string, object>> {
+
+   new Dictionary<string, object> { { "RandomNo", rnd.NextDouble()}, { "Date", DateTime.Now.ToString("MM/dd/yyyy") }, { "url", "www.facebook.com"}} ,
+   new Dictionary<string, object> { { "RandomNo", rnd.NextDouble()}, { "Date", DateTime.Now.ToString("MM/dd/yyyy") }, { "url", "www.linkedin.com"}} ,
+   new Dictionary<string, object> { { "RandomNo", rnd.NextDouble()}, { "Date", DateTime.Now.ToString("MM/dd/yyyy") }, { "url", "www.odesk.com"}}  
+};
+} else {
+sampleData = userData  ;
+}
+        Dictionary<string, object> openWith = sampleData[0];
+
+        Dictionary<string, object>.KeyCollection keyColl = openWith.Keys;
+
+        dTable.Columns.Add("IsChecked", System.Type.GetType("System.Boolean"));
+        foreach (string s in keyColl)
+        {
+            dTable.Columns.Add(s);
+        }
+
+        foreach (Dictionary<string, object> objitem in sampleData)
+        {
+            dRow = dTable.NewRow();
+            foreach (KeyValuePair<string, object> kvp in objitem)
+            {
+                dRow[kvp.Key] = kvp.Value.ToString();
+            }
+            dTable.Rows.Add(dRow);
+            dTable.AcceptChanges();
+
+        }
+
+        return dTable;
+
+    }
+    public  DataTable GetDataSource()
     {
         DataTable dTable = new DataTable();
 
@@ -288,13 +326,25 @@ function SelectAllGrid {
   $f.Text = $title
 
   $f.Size = New-Object System.Drawing.Size (470,235)
-  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF(6.0, 13.0)
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
   $f.StartPosition = 'CenterScreen'
 
 
-  $r = New-Object -TypeName 'SelectAllGrid' -ArgumentList ([System.Windows.Forms.UserControl]$u)
+  # https://groups.google.com/forum/#!topic/microsoft.public.windows.powershell/Ta9NyFPovgI 
+  $array = New-Object 'System.Collections.Generic.List[System.Collections.Generic.Dictionary[String,Object]]'
+  for ($cnt = 0; $cnt -ne 10; $cnt++) {
+    $item = New-Object 'System.Collections.Generic.Dictionary[String,Object]'
+    $item.Add('RandomNo',$cnt)
+    $item.Add('date',(Date))
+    $item.Add('url','http://www.google.com/')
+    $array.Add($item)
+  }
+  $array.GetType()
+
+  $r = New-Object -TypeName 'SelectAllGrid'
+  #  $r = New-Object -TypeName 'SelectAllGrid' -ArgumentList [System.Collections.Generic.List[System.Collections.Generic.Dictionary[String,Object]]]$array
   $r.Size = $f.Size
 
   $f.Controls.Add($r)
