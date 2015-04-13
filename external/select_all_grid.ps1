@@ -44,8 +44,11 @@ public class SelectAllGrid : Panel
     private System.Windows.Forms.DataGridViewTextBoxColumn txtBxDate;
     private System.Windows.Forms.DataGridViewTextBoxColumn txtBxTime;
     List<Dictionary<string, object>> userData  = null ;
-    public SelectAllGrid()
+    public SelectAllGrid(System.Management.Automation.PSReference data = null )
     {
+        var result = data.Value;
+        Console.WriteLine("Result Type = {0}\n", result.GetType());
+        Console.WriteLine("Result = {0}", result);
         this.dgvSelectAll = new System.Windows.Forms.DataGridView();
         this.chkBxSelect = new System.Windows.Forms.DataGridViewCheckBoxColumn();
         this.txtBxRandomNo = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -326,25 +329,31 @@ function SelectAllGrid {
   $f.Text = $title
 
   $f.Size = New-Object System.Drawing.Size (470,235)
-  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
+  $f.AutoScaleDimensions = New-Object System.Drawing.SizeF(6.0, 13.0)
   $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
   $f.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedToolWindow
   $f.StartPosition = 'CenterScreen'
 
 
-  # https://groups.google.com/forum/#!topic/microsoft.public.windows.powershell/Ta9NyFPovgI 
-  $array = New-Object 'System.Collections.Generic.List[System.Collections.Generic.Dictionary[String,Object]]'
-  for ($cnt = 0; $cnt -ne 10; $cnt++) {
-    $item = New-Object 'System.Collections.Generic.Dictionary[String,Object]'
-    $item.Add('RandomNo',$cnt)
-    $item.Add('date',(Date))
-    $item.Add('url','http://www.google.com/')
-    $array.Add($item)
-  }
-  $array.GetType()
+# https://groups.google.com/forum/#!topic/microsoft.public.windows.powershell/Ta9NyFPovgI 
+$array = New-Object 'System.Collections.Generic.List[System.Collections.Generic.Dictionary[String,Object]]'
+for ($cnt = 0 ; $cnt -ne 10  ; $cnt ++  ) {
+$item = New-Object 'System.Collections.Generic.Dictionary[String,Object]'
+$item.Add('RandomNo', $cnt) 
+$item.Add('date', ( Date )) 
+$item.Add('url',  'http://www.google.com/' ) 
+$array.add($item)
+}
+$array.GetType()
+$array_ref = [ref]$array
+$array_ref
+$null_value = $null 
+$null_ref = [ref]$null_value 
+$r = New-Object -TypeName 'SelectAllGrid' -ArgumentList $null_ref 
+# [System.Collections.Generic.List[System.Collections.Generic.Dictionary[String,Object]]]
+# New-Object : Argument: '1' should not be a System.Management.Automation.PSReference. Do not use [ref].
 
-  $r = New-Object -TypeName 'SelectAllGrid'
-  #  $r = New-Object -TypeName 'SelectAllGrid' -ArgumentList [System.Collections.Generic.List[System.Collections.Generic.Dictionary[String,Object]]]$array
+#   $r = New-Object -TypeName 'SelectAllGrid' -ArgumentList $array_ref
   $r.Size = $f.Size
 
   $f.Controls.Add($r)
