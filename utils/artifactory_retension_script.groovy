@@ -291,22 +291,22 @@ required_params.each {setting ->
  def timeStart = new Date()
 
  def config = [
- rootfolder: std_env['ARTIFACTORY_APPLICATIONS_ROOTFOLDER'],
- application_folder: std_env['APPLICATION_FOLDER'],
- powerless: std_env['POWERLESS'],
+ rootfolder: all_env['ARTIFACTORY_APPLICATIONS_ROOTFOLDER'],
+ application_folder: all_env['APPLICATION_FOLDER'],
+ powerless: all_env['POWERLESS'],
 
- keep_builds: std_env['RECENT_BUILDS_KEEP'],
- server: std_env['ARTIFACTORY_URL'],
- user: std_env['ARTIFACTORY_USER'],
- password: std_env['ARTIFACTORY_PASSWORD'],
- repository: std_env['ARTIFACTORY_REPOSITORY'],
+ keep_builds: all_env['RECENT_BUILDS_KEEP'],
+ server: all_env['ARTIFACTORY_URL'],
+ user: all_env['ARTIFACTORY_USER'],
+ password: all_env['ARTIFACTORY_PASSWORD'],
+ repository: all_env['ARTIFACTORY_REPOSITORY'],
  versionsToRemove: ['/1.1-SNAPSHOT'], // unused 
  dryRun: true]
  // TODO: 
  println 'Started.'
  def artifactory = new Artifactory(config)
 
-if ( std_env['LIST_APPLICATIONS_ROOTFOLDERS'].toBoolean() ) {
+if (( !!std_env['LIST_APPLICATIONS_ROOTFOLDERS']).toBoolean() ) {
    artifactory.printRepositories() 
 }
  
@@ -319,10 +319,13 @@ if ( std_env['LIST_APPLICATIONS_ROOTFOLDERS'].toBoolean() ) {
 println ('Enumerating artifacts in ' + artifactory.findfolder_result )
  start_folder = artifactory.findfolder_result
  // artifactory.print_entries()
- def numberRemoved = artifactory.cleanArtifactsRecursive(start_folder)
- artifactory.print_entries()
+
+// this is currently broken iin SCRIPLTER
+def numberRemoved = artifactory.cleanArtifactsRecursive(start_folder)
+artifactory.print_entries()
 
 
  def timeStop = new Date()
  TimeDuration duration = TimeCategory.minus(timeStop, timeStart)
  println duration
+ 
