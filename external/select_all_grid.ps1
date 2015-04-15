@@ -27,7 +27,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Data;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 namespace Custom
@@ -259,8 +258,13 @@ namespace Custom
         }
     }
 }
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
-
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll', 'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'
+<#
+Add-Type : c:\Documents and Settings\Administrator\Local Settings\Temp\ypffadcb.0.cs(90) : 
+The type 'System.Xml.Serialization.IXmlSerializable' is defined in an assembly that is not referenced. 
+You must add a reference to assembly 
+'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.
+#>
 
 function SelectAllGrid {
 
