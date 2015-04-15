@@ -254,6 +254,40 @@ private def removeItem(path, child) {
 
  @Field std_env = System.getenv()
 
+
+assert[a: true, b: false] << [a: false] == [a: false, b: false]
+// workaround the perceived difference scriptler and core handle parameters
+
+def required_params = ['ARTIFACTORY_URL', 'ARTIFACTORY_USER', 'ARTIFACTORY_PASSWORD', 'APPLICATION_FOLDER', 'RECENT_BUILDS_KEEP', 'ARTIFACTORY_REPOSITORY', 'ARTIFACTORY_APPLICATIONS_ROOTFOLDER' ,'POWERLESS']
+def default_env = [
+'ARTIFACTORY_URL' : 'http://localhost:8080',
+'ARTIFACTORY_USER' : 'sergueik',
+'ARTIFACTORY_PASSWORD' : 'i011155',
+'APPLICATION_FOLDER' : 'app',
+'RECENT_BUILDS_KEEP' : '3',
+'ARTIFACTORY_REPOSITORY' : 'libs-snapshot-local',
+'ARTIFACTORY_APPLICATIONS_ROOTFOLDER' : '/com',
+'POWERLESS' : 'true'
+]
+def all_env = [:]
+std_env = System.getenv()
+all_env <<= std_env
+all_env <<= default_env
+
+// Lock to Windows OS, just for fun
+assert all_env.containsKey('USERPROFILE')
+
+// assert all required parameters are present 
+required_params.each {
+	setting -> assert all_env.containsKey(setting)
+
+}
+
+required_params.each {setting ->
+  
+	println(sprintf("'%s' : '%s'\r\n", setting, all_env.get(setting)))
+}
+
  def timeStart = new Date()
 
  def config = [
