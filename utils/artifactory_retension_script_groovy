@@ -18,13 +18,14 @@ private class Artifactory {
 def printErr = System.err.&println  
 def engine = new SimpleTemplateEngine()
 def config
-def artifact_entries = [] 
+def browse_max_level = 5
+def artifactory_entries = [] 
 def Artifactory(config) {
 	this.config = config
 }
   
  /**
- * wrapper around Artifactory File Statistics REST API returning 
+ * TODO: wrapper around Artifactory File Statistics REST API returning 
  * {
  *   "uri": "http://localhost:8080/artifactory/api/storage/libs-release-local/org/acme/foo/1.0/foo-1.0.jar",
  *   "lastDownloaded": Timestamp (ms),
@@ -39,13 +40,13 @@ def Artifactory(config) {
  */
     def print_entries() {
       /*
-  	artifact_entries.each {
+  	artifactory_entries.each {
   		println it.repo
   		println it.uri
   		println it.created
   	}
 */
-  	artifact_entries.sort{a,b -> a.created <=> b.created}.each {
+  	artifactory_entries.sort{a,b -> a.created <=> b.created}.each {
   		println it.repo
   		println it.uri
   		println it.created
@@ -125,14 +126,45 @@ def JSON fileInfo(path) {
 	return resp.data
 }
   
+  
+def   findFolders(String target_folder_name, String path, Integer browse_level) {
+  def result 
+  printErr 'testing ' + path 
+  if (browse_level  > browse_max_level ) {
+     return ; // empty
+  }
+
+  if (path =~ /${target_folder_name}/  ) {
+     printErr 'Matched ' + target_folder_name
+    result = path 
+          printErr 'Return ' + result
+     return result;
+  }
+
+  
+	JSON json = folderInfo(path)
+    
+	json.children.each {
+		child ->
+        
+		if ( child.folder.toBoolean() ) {
+      
+            // build folder logic 
+          printErr 'descend into' + child.uri
+          result = findFolders(target_folder_name, path + child.uri, browse_level + 1) 
+          printErr 'Return ' + result
+          return result 
+        }
+    }}
 /**
 * Recursively removes all folders containing builds that start with the configured paths.
 *
 * @param path String containing the folder to check and use the childs to recursively check as well.
 * @return Number with the amount of folders that were removed.
 */
+  
 def cleanArtifactsRecursive(path) {
-
+    // TODO : browse_max_level ?
 	def deleteCounter = 0
 	JSON json = folderInfo(path)
     
@@ -167,7 +199,7 @@ def cleanArtifactsRecursive(path) {
             JSON fileinfo_json = fileInfo(path + child.uri)
             
             def artifact_entry = ['repo' : fileinfo_json.repo,'uri' : fileinfo_json.uri, 'created' : fileinfo_json.created ]
-            artifact_entries.push ( artifact_entry )
+            artifactory_entries.push ( artifact_entry )
           } catch(all){}
           removeItem(path,  child )
         }
@@ -222,12 +254,14 @@ private def removeItem(path, child) {
  server: std_env['ARTIFACTORY_URL'],
  user:  std_env['ARTIFACTORY_USER'],
  password:  std_env['ARTIFACTORY_PASSWORD'],
- repository: 'libs-snapshot-local',
+ repository: std_env['ARTIFACTORY_REPOSITORY'],
  versionsToRemove: ['/1.1-SNAPSHOT'],
  dryRun: true]
 
 
  def artifactory = new Artifactory(config)
- artifactory.printRepositories() 
-  def numberRemoved = artifactory.cleanArtifactsRecursive('')
-//artifactory.print_entries()
+ // artifactory.printRepositories() 
+ // def numberRemoved = artifactory.cleanArtifactsRecursive('')
+ // artifactory.print_entries()
+  result = artifactory.findFolders('mycompany','',0)
+println('result=' + result)
