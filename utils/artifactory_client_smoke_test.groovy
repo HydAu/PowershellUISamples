@@ -1,3 +1,5 @@
+// download http-builder and dependency jars from  http://snapshots.repository.codehaus.org/org/codehaus/groovy/modules/htxtp-builder/http-builder/0.5.2-SNAPSHOT/
+// and populate $GROOVY_HOME/lib
 package artifactory
 
 import groovy.text.SimpleTemplateEngine
@@ -9,7 +11,7 @@ import groovy.time.*
 
 
 /**
- * Minimal version ofJettro Coenradie's  artifactory REST Client groovy class
+ * Minimal version of Jettro Coenradie's  artifactory REST Client groovy class
  */
 public class Artifactory {
 
@@ -70,6 +72,8 @@ public class Artifactory {
 	}
 }
 
- def config = ['user':'sergueik','password':'i011155','server':'http://localhost:8080']
+ def config = ['user':'sergueik','password':'i011155','server':'http://172.28.128.3:8080']
  def artifactory = new Artifactory(config)
-artifactory.printRepositories()
+ artifactory.printRepositories()
+// start artifactory on 8080 and get some repositories output 
+// start groovy on 8080 and get Your application is not available
