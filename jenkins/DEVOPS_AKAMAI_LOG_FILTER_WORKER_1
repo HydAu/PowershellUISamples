@@ -1,10 +1,9 @@
-
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>Processes specified Akamai logs for specified HTTP Status codes &#xd;
-This version requires Perl&#xd;
-The results are available in Splunk</description>
+  <description>Processes specified Akamai logs for HTTP Status codes &#xd;
+Requires Perl&#xd;
+Overwritten</description>
   <logRotator class="hudson.tasks.LogRotator">
     <daysToKeep>-1</daysToKeep>
     <numToKeep>3</numToKeep>
@@ -20,6 +19,7 @@ The results are available in Splunk</description>
           <description>Leave 0  to do all files. Note it takes approx. 1 hour to process 100 files.</description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
+              <string>1</string>
               <string>20</string>
               <string>30</string>
               <string>40</string>
@@ -36,7 +36,6 @@ The results are available in Splunk</description>
               <string>carnival</string>
               <string>goccl</string>
               <string>secure_carnival</string>
-              <string>carnival_au</string>
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
@@ -145,6 +144,42 @@ del /q logs.db
 copy /Y NUL dummy.filtered.log.gz</command>
     </hudson.tasks.BatchFile>
     <hudson.plugins.powershell.PowerShell plugin="powershell@1.2">
+      <command># Process TEXTAREA  input 
+# Patch the inputs 
+[string]$escape_flag = &apos;&apos; 
+
+return 
+
+# Patch the inputs 
+[string]$debug_flag = &apos;&apos; 
+if (($env:DEBUG -ne &apos;&apos;) -and ($env:DEBUG -ne $null) -and ($env:DEBUG -match &apos;true&apos;))  {
+$debug_flag = &apos;-debug&apos;
+}
+write-output &quot;Processing STATUS_CODES build parameter (raw):`n`n-------`n${env:STATUS_CODES}`n-------`n&quot;
+
+# NOTE double quotes.
+$status_codes_formatted = ($env:STATUS_CODES -replace &quot;`n&quot;, &apos;,&apos;) 
+write-output &quot;[1]Extracted Status Codes:`n`n-------`n${status_codes_formatted}`n-------`n&quot;
+
+&lt;#  this is not working 
+if ($status_codes_formatted -match  &quot;STATUS_CODES=&apos;(.+)&apos;&quot;) {
+$status_codes_formatted = $status_codes_formatted -replace &quot;STATUS_CODES=&apos;(.+)&apos;&quot;, &quot;$1&quot;
+}
+#&gt; 
+if ($status_codes_formatted -match  &quot;STATUS_CODES=&apos;(.+)&apos;&quot;) {
+$regex = new-object System.Text.RegularExpressions.Regex(&quot;(STATUS_CODES)=`&apos;(.+)`&apos;&quot;)
+# 
+# $regex.Replace($status_codes_formatted, &quot;$2&quot;)
+$result = ($regex.Match($status_codes_formatted)).Groups[2]
+$status_codes_formatted = $result.Value
+}
+
+write-output &quot;[2]Extracted Status Codes:`n`n-------`n${status_codes_formatted}`n-------`n&quot;
+
+
+</command>
+    </hudson.plugins.powershell.PowerShell>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.2">
       <command>&lt;# 
 pushd env:
 dir 
@@ -203,7 +238,6 @@ write-output &quot;[2]Extracted Status Codes:`n`n-------`n${status_codes_formatt
    )
 write-output (&quot;Executing:`n  $command {0}&quot; -f $command ) 
 invoke-expression -command $command 
-
 </command>
     </hudson.plugins.powershell.PowerShell>
     <hudson.plugins.powershell.PowerShell plugin="powershell@1.2">
@@ -215,8 +249,16 @@ exit 0
 } 
 
 $dest_path = &quot;${env:DEST_LOG_SHARE}\${env:APPLICATION}&quot;
+
+if  ( -not (get-item -path $dest_path -erroraction &apos;SilentlyContinue&apos; | where-object {$_.Attributes -match &apos;Directory&apos; } ) ) { 
+ New-Item -ItemType directory -Path $dest_path
+}
+
+
+
 write-output (&apos;Copying new logs to {0}&apos; -f  $dest_path )
-$logs_to_copy |select-object -Property Name,Length | format-table -autosize 
+
+$logs_to_copy | format-list 
 
 write-output @&quot;
 Copy-item -Path &apos;*filtered.log*&apos; -Destination  &quot;${dest_path}&quot; -force -ErrorAction &apos;SilentlyContinue&apos;  
