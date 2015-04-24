@@ -22,6 +22,12 @@
 # origin http://windowsitpro.com/powershell/how-use-powershell-report-scheduled-tasks
 # Get-ScheduledTask.ps1
 
+
+# TODO assert  registry contains 
+# [HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{0f87369f-a4e5-4cfc-bd3e-73e6154572dd}]
+# @="TaskScheduler class"
+
+
 $TaskService = New-Object -ComObject 'Schedule.Service'
 $TaskService.Connect()
 $rootFolder = $TaskService.GetFolder('\')
@@ -51,15 +57,33 @@ Completed
 Failed to start
 Did not launch
 "@
-$message_status_keywords = ('(?:{0})' -f ($message_status_keywords -replace "`r`n",'|'))
-Write-Output $message_status_keywords
+$message_status_keywords = ('({0})' -f ($message_status_keywords -replace "`r`n",'|'))
+Write-Debug $message_status_keywords
 
-$data = Get-WinEvent -LogName 'Microsoft-Windows-TaskScheduler/Operational' -ErrorAction silentlycontinue `
-   | 
-   Where-Object { $_.ProviderName -eq 'Microsoft-Windows-TaskScheduler' -and $_.Message -match '^Task Scheduler' } `
+$log_data = @( @{ 'status' = $null; 'time_created' = $null; 'message' = $null })
+
+Get-WinEvent -LogName 'Microsoft-Windows-TaskScheduler/Operational' -ErrorAction silentlycontinue `
    |
-Where-Object { $_.Message -match $message_status_keywords }
+Where-Object { $_.ProviderName -eq 'Microsoft-Windows-TaskScheduler' -and $_.Message -match '^Task Scheduler' } `
+   |
+ForEach-Object { $eventlog_record = $_;
+  if ($eventlog_record.Message -match $message_status_keywords) { $record = @{ 'status' = $null; 'time_created' = $null; 'message' = $null }
+    $record['status'] = $matches[1]
+    $record['time_created'] = $eventlog_record.TimeCreated
+    $record['message'] = $eventlog_record.Message
+    $log_data += $record
+  } }
 
+$log_data.Count
+$log_data
 
-$data.Count
+# To purge
+# [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\eventlog\System\Microsoft-Windows-TaskScheduler]
+# "ProviderGuid"="{de7b24ea-73c8-4a09-985d-5bdadcfa9017}"
+# "EventMessageFile"=hex(2):25,53,79,73,74,65,6d,52,6f,6f,74,25,5c,73,79,73,74,65,6d,33,32,5c,73,63,68,65,64,73,76,63,2e,64,6c,6c,00
+# that is %SystemRoot%\system32\schedsvc.dll 
 
+# Note also 
+# [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Fusion\References\TaskScheduler, Version=6.1.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=msil]
+# C:\Windows\winsxs\msil_taskscheduler_31bf3856ad364e35_6.1.7601.17514_none_170487c39d98ec89\TaskScheduler.dll
+# Need c# API
