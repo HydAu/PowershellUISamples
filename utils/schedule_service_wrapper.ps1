@@ -87,3 +87,59 @@ $log_data
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Fusion\References\TaskScheduler, Version=6.1.0.0, Culture=Neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=msil]
 # C:\Windows\winsxs\msil_taskscheduler_31bf3856ad364e35_6.1.7601.17514_none_170487c39d98ec89\TaskScheduler.dll
 # Need c# API
+
+# https://msdn.microsoft.com/en-us/library/system.diagnostics.eventlog_methods(v=vs.110).aspx
+Add-Type -TypeDefinition @"
+using System;
+using System.Diagnostics;
+using System.Threading;
+
+public class EventLogAccessSample
+{
+    public EventLogAccessSample()
+    {
+
+    }
+    public void Change()
+    {
+
+
+        string logName;
+
+        if (EventLog.SourceExists("Microsoft-Windows-TaskScheduler"))
+        {
+
+
+            // Find the log associated with this source.    
+            logName = EventLog.LogNameFromSourceName("Microsoft-Windows-TaskScheduler", ".");
+            // Make sure the source is in the log we believe it to be in. 
+            if (logName != "Microsoft-Windows-TaskScheduler")
+            {
+                // EventLog.DeleteEventSource("Microsoft-Windows-TaskScheduler");
+                return;
+            }
+            // Delete the source and the log.
+            EventLog.DeleteEventSource("Microsoft-Windows-TaskScheduler");
+            EventLog.Delete(logName);
+
+            Console.WriteLine(logName + " deleted.");
+        }
+        else
+        {
+
+            Console.WriteLine(" not found  -  creating deleted.");
+            // Create the event source to make next try successful.
+            EventLog.CreateEventSource("Microsoft-Windows-TaskScheduler", "MyLog");
+        }
+    }
+}
+
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll', 'System.Diagnostics.Tools'
+
+$o = new-object -typename 'EventLogAccessSample'
+# $o.Change()
+
+# stop task scheduler and event log
+# remove / truncate %SystemRoot%\System32\Winevt\Logs\Microsoft-Windows-TaskScheduler%4Operational.evtx
+# stat services 
+# this requires admin access
