@@ -1333,22 +1333,9 @@ Public Class MyWin32Window
 Implements System.Windows.Forms.IWin32Window
 
     Dim _hWnd As System.IntPtr
-    Dim _vbdate as Date
-
     Public Sub New(ByVal handle As System.IntPtr)
        _hWnd = handle
-       _vbdate = New Date(2009, 1, 1, 0, 0, 0)
     End Sub
-
-    Public Sub SetVbDate(ByVal value as System.DateTime )
-        _vbdate = New Date(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second)
-    End Sub
-
-    Public ReadOnly  Property VbDate() As Date
-        Get
-            VbDate = _vbdate
-        End Get
-    End Property
 
     Public ReadOnly Property Handle() As System.IntPtr Implements System.Windows.Forms.IWin32Window.Handle
         Get
@@ -1359,6 +1346,31 @@ Implements System.Windows.Forms.IWin32Window
 End Class
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
+
+Add-Type -Language 'VisualBasic' -TypeDefinition @"
+
+Imports System 
+
+Public Class MyVbDateWrapper 
+
+    Dim _vbdate as Date
+
+    Public Sub New(ByVal value as System.DateTime )
+       _vbdate = New Date(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second)
+    End Sub
+
+    Public ReadOnly  Property VbDate() As Date
+        Get
+            VbDate = _vbdate
+        End Get
+    End Property
+
+End Class
+
+"@
+
+
 
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
@@ -1371,32 +1383,39 @@ $c = New-Object -TypeName 'GanttChart'
 # http://stackoverflow.com/questions/5314309/a-type-for-date-only-in-c-sharp-why-is-there-no-date-type
 # https://msdn.microsoft.com/en-us/library/47zceaw7.aspx
 $z1 = New-Object System.DateTime (2009,1,1)
-$dc1 = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$dc1.SetVbDate($z1)
+$dc1 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($z1)
 
 $z2 = New-Object System.DateTime (2009,5,1)
-$dc2 = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$dc2.SetVbDate($z2)
+$dc2 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($z2)
 
-$b = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 1",$dc1.VbDate,$dc2.VbDate,[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
+$b1 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 1",$dc1.VbDate,$dc2.VbDate,[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
+$b2 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 2",(Invoke-Command -ScriptBlock {
+      $local:z = New-Object System.DateTime (2009,5,1)
+      $local:dc = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($local:z)
+      $local:dc.VbDate
+    }),(Invoke-Command -ScriptBlock {
+      $local:z = New-Object System.DateTime (2009,8,1)
+      $local:dc = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($local:z)
+      $local:dc.VbDate
+    }),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
 
+$b3 = New-Object -TypeName 'BarInformation' -ArgumentList  ("Row 3", (New-Object System.DateTime (2009, 10, 1)), (New-Object System.DateTime (2009, 12, 1)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
+$c.AddChartBar($b1.RowText,$b1,$b1.FromTime,$b1.ToTime,$b1.Color,$b1.HoverColor,$b1.Index)
+$c.AddChartBar($b2.RowText,$b2,$b2.FromTime,$b2.ToTime,$b2.Color,$b2.HoverColor,$b2.Index)
+$c.AddChartBar($b3.RowText,$b3,$b3.FromTime,$b3.ToTime,$b3.Color,$b3.HoverColor,$b3.Index)
 
-$c.AddChartBar($b.RowText,$b,$b.FromTime,$b.ToTime,$b.Color,$b.HoverColor,$b.Index)
 $y1 = New-Object System.DateTime (2009,1,1,0,0,0)
-$dy1 = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$dy1.SetVbDate($y1)
+$dy1 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($y1)
 
 $y2 = New-Object System.DateTime (2009,12,31,0,0,0)
-$dy2 = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$dy2.SetVbDate($y2)
-
+$dy2 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($y2)
 
 $c.FromDate = $dy1.VbDate
 $c.ToDate = $dy2.VbDate
 
 
-$c.AllowManualEditBar = $false
-$c.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left  -bor [System.Windows.Forms.AnchorStyles]::Right
+$c.AllowManualEditBar = $true
+$c.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
 $c.BackColor = [System.Drawing.Color]::White
 $c.ContextMenuStrip = $null
 $c.DateFont = New-Object System.Drawing.Font ('Verdana',8.0)
