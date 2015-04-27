@@ -1348,30 +1348,6 @@ End Class
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
 
-Add-Type -Language 'VisualBasic' -TypeDefinition @"
-
-Imports System 
-
-Public Class MyVbDateWrapper 
-
-    Dim _vbdate as Date
-
-    Public Sub New(ByVal value as System.DateTime )
-       _vbdate = New Date(value.Year, value.Month, value.Day, value.Hour, value.Minute, value.Second)
-    End Sub
-
-    Public ReadOnly  Property VbDate() As Date
-        Get
-            VbDate = _vbdate
-        End Get
-    End Property
-
-End Class
-
-"@
-
-
-
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
 $f = New-Object System.Windows.Forms.Form
@@ -1380,54 +1356,43 @@ $f.MinimizeBox = $false
 
 $c = New-Object -TypeName 'GanttChart'
 
-# http://stackoverflow.com/questions/5314309/a-type-for-date-only-in-c-sharp-why-is-there-no-date-type
-# https://msdn.microsoft.com/en-us/library/47zceaw7.aspx
-$z1 = New-Object System.DateTime (2009,1,1)
-$dc1 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($z1)
-
-$z2 = New-Object System.DateTime (2009,5,1)
-$dc2 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($z2)
-
-$b1 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 1",$dc1.VbDate,$dc2.VbDate,[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
-$b2 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 2",(Invoke-Command -ScriptBlock {
-      $local:z = New-Object System.DateTime (2009,5,1)
-      $local:dc = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($local:z)
-      $local:dc.VbDate
-    }),(Invoke-Command -ScriptBlock {
-      $local:z = New-Object System.DateTime (2009,8,1)
-      $local:dc = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($local:z)
-      $local:dc.VbDate
-    }),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
-
-$b3 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 3",(New-Object System.DateTime (2009,10,1)),(New-Object System.DateTime (2009,12,1)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
-$c.AddChartBar($b1.RowText,$b1,$b1.FromTime,$b1.ToTime,$b1.Color,$b1.HoverColor,$b1.Index)
-$c.AddChartBar($b2.RowText,$b2,$b2.FromTime,$b2.ToTime,$b2.Color,$b2.HoverColor,$b2.Index)
-$c.AddChartBar($b3.RowText,$b3,$b3.FromTime,$b3.ToTime,$b3.Color,$b3.HoverColor,$b3.Index)
-
-$y1 = New-Object System.DateTime (2009,1,1,0,0,0)
-$dy1 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($y1)
-
-$y2 = New-Object System.DateTime (2009,12,31,0,0,0)
-$dy2 = New-Object -TypeName 'MyVbDateWrapper' -ArgumentList ($y2)
-
-$c.FromDate = $dy1.VbDate
-$c.ToDate = $dy2.VbDate
-
-
 $c.AllowManualEditBar = $true
 $c.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
 $c.BackColor = [System.Drawing.Color]::White
 $c.ContextMenuStrip = $null
 $c.DateFont = New-Object System.Drawing.Font ('Verdana',8.0)
-# TODO: VisualBasic Date initialization
-# $c.FromDate = New-Object  Date(CType(0, Long))
 $c.Location = New-Object System.Drawing.Point (12,12)
 $c.Name = "GanttChart3"
 $c.RowFont = New-Object System.Drawing.Font ('Verdana',8.0)
-$c.Size = New-Object System.Drawing.Size (933,123)
+$c.Size = New-Object System.Drawing.Size (933,223)
 $c.TabIndex = 3
 $c.Text = "GanttChart3"
 $c.TimeFont = New-Object System.Drawing.Font ('Verdana',8.0)
+
+$b1 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime(2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
+$b2 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 2',(New-Object System.DateTime (2015,4,27,8,7,0)),(New-Object System.DateTime (2015,4,27,8,9,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
+$b3 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 3',(New-Object System.DateTime (2015,4,27,8,9,0)),(New-Object System.DateTime (2015,4,27,8,11,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
+$b4 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 4',(New-Object System.DateTime (2015,4,27,8,14,0)),(New-Object System.DateTime (2015,4,27,8,15,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,3)
+$b5 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 5',(New-Object System.DateTime (2015,4,27,8,16,0)),(New-Object System.DateTime (2015,4,27,8,19,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,4)
+$b6 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 6',(New-Object System.DateTime (2015,4,27,8,20,0)),(New-Object System.DateTime (2015,4,27,8,23,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,5)
+$b7 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,28,0)),(New-Object System.DateTime (2015,4,27,8,40,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,6)
+$b8 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,40,0)),(New-Object System.DateTime (2015,4,27,8,43,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,7)
+$b9 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,43,0)),(New-Object System.DateTime (2015,4,27,8,55,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,8)
+
+$c.AddChartBar($b1.RowText,$b1,$b1.FromTime,$b1.ToTime,$b1.Color,$b1.HoverColor,$b1.Index)
+$c.AddChartBar($b2.RowText,$b2,$b2.FromTime,$b2.ToTime,$b2.Color,$b2.HoverColor,$b2.Index)
+$c.AddChartBar($b3.RowText,$b3,$b3.FromTime,$b3.ToTime,$b3.Color,$b3.HoverColor,$b3.Index)
+$c.AddChartBar($b4.RowText,$b4,$b4.FromTime,$b4.ToTime,$b4.Color,$b4.HoverColor,$b4.Index)
+$c.AddChartBar($b5.RowText,$b5,$b5.FromTime,$b5.ToTime,$b5.Color,$b5.HoverColor,$b5.Index)
+$c.AddChartBar($b6.RowText,$b6,$b6.FromTime,$b6.ToTime,$b6.Color,$b6.HoverColor,$b6.Index)
+$c.AddChartBar($b7.RowText,$b7,$b7.FromTime,$b7.ToTime,$b7.Color,$b7.HoverColor,$b7.Index)
+$c.AddChartBar($b8.RowText,$b8,$b8.FromTime,$b8.ToTime,$b8.Color,$b8.HoverColor,$b8.Index)
+$c.AddChartBar($b9.RowText,$b9,$b9.FromTime,$b9.ToTime,$b9.Color,$b9.HoverColor,$b9.Index)
+
+
+$c.FromDate = New-Object System.DateTime (2015,4,27,8,5,0)
+$c.ToDate   = New-Object System.DateTime (2015,4,27,8,40,0)
+
 $t = New-Object System.Windows.Forms.TextBox
 $t.Anchor = [System.Windows.Forms.AnchorStyles](`
      [System.Windows.Forms.AnchorStyles]::Bottom `
