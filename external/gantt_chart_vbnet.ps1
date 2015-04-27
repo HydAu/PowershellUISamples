@@ -1399,7 +1399,7 @@ $b2 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 2",(Invoke-Comma
       $local:dc.VbDate
     }),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
 
-$b3 = New-Object -TypeName 'BarInformation' -ArgumentList  ("Row 3", (New-Object System.DateTime (2009, 10, 1)), (New-Object System.DateTime (2009, 12, 1)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
+$b3 = New-Object -TypeName 'BarInformation' -ArgumentList ("Row 3",(New-Object System.DateTime (2009,10,1)),(New-Object System.DateTime (2009,12,1)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
 $c.AddChartBar($b1.RowText,$b1,$b1.FromTime,$b1.ToTime,$b1.Color,$b1.HoverColor,$b1.Index)
 $c.AddChartBar($b2.RowText,$b2,$b2.FromTime,$b2.ToTime,$b2.Color,$b2.HoverColor,$b2.Index)
 $c.AddChartBar($b3.RowText,$b3,$b3.FromTime,$b3.ToTime,$b3.Color,$b3.HoverColor,$b3.Index)
@@ -1428,14 +1428,41 @@ $c.Size = New-Object System.Drawing.Size (933,123)
 $c.TabIndex = 3
 $c.Text = "GanttChart3"
 $c.TimeFont = New-Object System.Drawing.Font ('Verdana',8.0)
+$t = New-Object System.Windows.Forms.TextBox
+$t.Anchor = [System.Windows.Forms.AnchorStyles](`
+     [System.Windows.Forms.AnchorStyles]::Bottom `
+     -bor `
+     [System.Windows.Forms.AnchorStyles]::Left `
+     -bor `
+     [System.Windows.Forms.AnchorStyles]::Right `
+  )
+$t.Enabled = $false
+$t.Location = New-Object System.Drawing.Point (12,395)
+$t.Multiline = $true
+$t.Name = "txtLog"
+$t.ScrollBars = [System.Windows.Forms.ScrollBars]::Horizontal
+$t.Size = New-Object System.Drawing.Size (933,89)
+$t.TabIndex = 2
+
 # $c.ToDate = New-Object  Date(CType(0, Long))
 # $c.ToolTipText = CType(resources.GetObject("GanttChart3.ToolTipText"), System.Collections.Generic.List(Of String))
 $c.ToolTipTextTitle = ""
+$co = New-Object System.ComponentModel.Container
+$me = New-Object System.Windows.Forms.ContextMenuStrip ($co)
+$me.Name = "ContextMenuGanttChart1"
+$me.Size = New-Object System.Drawing.Size (141,26)
+
+$mes = New-Object System.Windows.Forms.ToolStripMenuItem
+$mes.Name = "SaveImageToolStripMenuItem"
+$mes.Size = New-Object System.Drawing.Size (140,22)
+$mes.Text = "Save image"
+
+$me.Items.AddRange([System.Windows.Forms.ToolStripItem[]]@( $mes))
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (957,487)
 $f.Controls.Add($c)
-# $f.Controls.Add($f.txtLog)
+$f.Controls.Add($t)
 $f.MinimumSize = New-Object System.Drawing.Size (300,277)
 $f.Name = "Form1"
 $f.Text = "Gantt Chart Tester"
@@ -1444,8 +1471,38 @@ $f.ResumeLayout($false)
 $f.PerformLayout()
 
 $f.Topmost = $true
+$c.Add_MouseMove({
+    param(
+      [System.Object]$sender,
+      [System.Windows.Forms.MouseEventArgs]$e
+    )
+    [GanttChart]$b = [GanttChart]($sender)
+    $toolTipText = @()
+    if ($b.MouseOverRowText.Length -gt 0) {
 
+      [barinformation]$val = [barinformation]($b.MouseOverRowValue)
+      $toolTipText += "[b]Date:"
+      $toolTipText += "From "
+      $toolTipText += ($val.FromTime.ToLongDateString() + " - " + $val.FromTime.ToString("HH:mm"))
+      $toolTipText += "To "
+      $toolTipText += ($val.ToTime.ToLongDateString() + " - " + $val.ToTime.ToString("HH:mm"))
 
+    } else {
+      $toolTipText += ""
+    }
+    $b.ToolTipTextTitle = $b.MouseOverRowText
+    $b.ToolTipText = $toolTipText
+
+  })
+$c.Add_BarChanged({
+    param(
+      [System.Object]$sender,
+      [System.Object]$value
+    )
+    [barinformation]$b = [barinformation]($value)
+    [string]$lineToAdd = ($b.RowText + " has changed")
+    $t.Text = ($lineToAdd + "`r`n" + $t.Text)
+  })
 $f.Add_Shown({ $f.Activate() })
 $f.KeyPreview = $True
 $caller = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
