@@ -1,3 +1,7 @@
+param(
+  [switch]$configure,
+  [switch]$debug
+)
 # http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
 function Get-ScriptDirectory
 {
@@ -55,10 +59,9 @@ $logger_name = 'Example'
 $logger  = [NLog.LogManager]::GetLogger($logger_name)
 $i = [NLog.LogManager]::IsLoggingEnabled()
 [NLog.LogManager]::EnableLogging()
-
 # For full functionality use the Powershell Modules 
 # origin https://pslog.codeplex.com/SourceControl/latest#trunk/examples/FileSimple.ps1
-
+  if ($PSBoundParameters['configure']) {
 $target = New-Object NLog.Targets.FileTarget
 # NOTE precision limitation. 
 $target.Layout       = '${date:format=HH\:mm\:ss}|${level}|${message}|${stacktrace}'
@@ -67,8 +70,13 @@ $target.KeepFileOpen = $false
 $target.Encoding     = [System.Text.Encoding]::ascii
 
 [NLog.Config.SimpleConfigurator]::ConfigureForTargetLogging($target, [NLog.LogLevel]::Debug)
+  } else {
+# TODO: assert that the 'nlog.config' is present
+}
+<#
 
-$logger.Debug(['Hello World!');
-$logger.Trace(['Hello World!');
-$logger.Warn(['Hello World!');
-$logger.Fatal(['Hello World!');
+#>
+$logger.Debug('Hello World!');
+$logger.Trace('Hello World!');
+$logger.Warn('Hello World!');
+$logger.Fatal('Hello World!');
