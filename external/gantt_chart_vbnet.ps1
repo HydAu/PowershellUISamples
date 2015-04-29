@@ -1,4 +1,4 @@
-﻿#Copyright (c) 2015 Serguei Kouzmine
+#Copyright (c) 2015 Serguei Kouzmine
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
 #in the Software without restriction, including without limitation the rights
@@ -171,6 +171,20 @@ Public Class GanttChart
         End If
     End Sub
 
+    Public Sub AddChartBar(ByVal barInformation As BarInformation)
+        Dim bar As New ChartBarDate
+        bar.Text = barInformation.RowText
+        bar.Value = barInformation
+        bar.StartValue = barInformation.FromTime
+        bar.EndValue = barInformation.ToTime
+        bar.Color = barInformation.Color
+        bar.HoverColor = barInformation.HoverColor
+        bar.RowIndex = barInformation.Index
+        bars.Add(bar)
+
+        SetBarStartLeft(bar.Text)
+    End Sub
+ 
     Public Sub AddChartBar(ByVal rowText As String, ByVal barValue As Object, ByVal fromTime As Date, ByVal toTime As Date, ByVal color As Color, ByVal hoverColor As Color, ByVal rowIndex As Integer)
         Dim bar As New ChartBarDate
         bar.Text = rowText
@@ -1379,15 +1393,15 @@ $b7 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object 
 $b8 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,40,0)),(New-Object System.DateTime (2015,4,27,8,43,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,7)
 $b9 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,43,0)),(New-Object System.DateTime (2015,4,27,8,55,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,8)
 
-$c.AddChartBar($b1.RowText,$b1,$b1.FromTime,$b1.ToTime,$b1.Color,$b1.HoverColor,$b1.Index)
-$c.AddChartBar($b2.RowText,$b2,$b2.FromTime,$b2.ToTime,$b2.Color,$b2.HoverColor,$b2.Index)
-$c.AddChartBar($b3.RowText,$b3,$b3.FromTime,$b3.ToTime,$b3.Color,$b3.HoverColor,$b3.Index)
-$c.AddChartBar($b4.RowText,$b4,$b4.FromTime,$b4.ToTime,$b4.Color,$b4.HoverColor,$b4.Index)
-$c.AddChartBar($b5.RowText,$b5,$b5.FromTime,$b5.ToTime,$b5.Color,$b5.HoverColor,$b5.Index)
-$c.AddChartBar($b6.RowText,$b6,$b6.FromTime,$b6.ToTime,$b6.Color,$b6.HoverColor,$b6.Index)
-$c.AddChartBar($b7.RowText,$b7,$b7.FromTime,$b7.ToTime,$b7.Color,$b7.HoverColor,$b7.Index)
-$c.AddChartBar($b8.RowText,$b8,$b8.FromTime,$b8.ToTime,$b8.Color,$b8.HoverColor,$b8.Index)
-$c.AddChartBar($b9.RowText,$b9,$b9.FromTime,$b9.ToTime,$b9.Color,$b9.HoverColor,$b9.Index)
+$c.AddChartBar($b1)
+$c.AddChartBar($b2)
+$c.AddChartBar($b3)
+$c.AddChartBar($b4)
+$c.AddChartBar($b5)
+$c.AddChartBar($b6)
+$c.AddChartBar($b7)
+$c.AddChartBar($b8)
+$c.AddChartBar($b9)
 
 
 $c.FromDate = New-Object System.DateTime (2015,4,27,8,5,0)
