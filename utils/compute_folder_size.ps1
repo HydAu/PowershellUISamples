@@ -40,7 +40,7 @@ function remote_get_foldersize {
   )
 
 
-
+  # http://poshcode.org/5647
   function Embedded-Get-FolderSize
   {
 
@@ -117,7 +117,7 @@ function remote_get_foldersize {
 
 
 }
-# 
+# http://poshcode.org/5647
 function Get-FolderSize
 {
 
@@ -144,13 +144,36 @@ function get_level1_directories
   )
 
 
+$skip_folders = @'
+Program Files
+Program Files (x86)
+ProgramData
+windows
+sxs
+Users
+Bitnami
+buildagent
+Chef
+cygwin
+tools
+java
+vagrant.*
+octopus
+Perl
+Ruby.*
+RubyDev
+wix
+'@
+$skip_folders_pattern = ('\b({0})\b' -f ($skip_folders -replace "\(", '\(' -replace "\)", '\)' -replace "`r`n", '|'))
+
+
   pushd $drive_name
   cd '\'
   $local:result = @()
   Get-ChildItem -Directory -ErrorAction SilentlyContinue | ForEach-Object { 
      $path = $_.fullname;
 
-    if (-not ($path -match '\b(Users|Program Files|Program Files \(x86\)|windows|vagrant.*|ruby.*|chef|opscode|java|sxs|Octopus|developer|cygwin|perl|buildagent|.m2)\b')) {
+    if (-not ($path -match $skip_folders_pattern )) {
       $local:result += $path
       Write-Debug ('added {0} to $local:result ' -f $path)
     }
@@ -210,10 +233,11 @@ if ($PSBoundParameters["local"]) {
 
 } else {
 
-  $result = @();
+  
 
-  $result_ref = ([ref]$result)
-  # TODO - make the following call work.
+  
+  # TODO - investigate why the following code fragment does not work.
+  # $result = @(); $result_ref = ([ref]$result) 
   # $remote_run_step1 = Invoke-Command -computer $target_host -ScriptBlock ${function:remote_get_foldersize} -ArgumentList $drive_name,$level1,$result_ref
   $result = Invoke-Command -computer $target_host -ScriptBlock ${function:remote_get_foldersize} -ArgumentList $drive_name,$level1
 
