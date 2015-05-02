@@ -1339,7 +1339,7 @@ Public Class BarInformation
     End Sub
 
 End Class
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Drawing.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 
 # http://msdn.microsoft.com/en-us/library/system.windows.forms.iwin32window%28v=vs.110%29.aspx
 Add-Type -Language 'VisualBasic' -TypeDefinition @"
@@ -1359,7 +1359,7 @@ Implements System.Windows.Forms.IWin32Window
  
 End Class
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll' 
 
 #--  added a c# version of the same. Source output of dot used
 
@@ -1367,9 +1367,10 @@ Add-Type @"
 // Decompiled with JetBrains decompiler
 
 using System;
+using System.Windows.Forms;
 using System.Drawing;
 
-namespace TestApplication
+namespace JetBrainsDecompiledApplication
 {
   public class BarInformation
   {
@@ -1464,22 +1465,22 @@ namespace TestApplication
   }
 }
 
-"@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+"@ -ReferencedAssemblies 'System.Windows.Forms.dll', 'System.Drawing.dll'
 
 Add-Type @"
 // Decompiled with JetBrains decompiler
 
-using Microsoft.VisualBasic.CompilerServices;
+// using Microsoft.VisualBasic.CompilerServices;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Runtime.CompilerServices;
+// using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
-namespace TestApplication
+namespace JetBrainsDecompiledApplication
 {
   public class GanttChart : Control
   {
@@ -1504,7 +1505,6 @@ namespace TestApplication
     private Font dateTextFont;
     private Font timeTextFont;
     private Font rowTextFont;
-    [AccessedThroughProperty("ToolTip")]
     private ToolTip _ToolTip;
     private bool _allowEditBarWithMouse;
     private Bitmap objBmp;
@@ -1526,11 +1526,11 @@ namespace TestApplication
 
     internal virtual ToolTip ToolTip
     {
-      [DebuggerNonUserCode] get
+    get
       {
         return this._ToolTip;
       }
-      [DebuggerNonUserCode, MethodImpl(MethodImplOptions.Synchronized)] set
+ set
       {
         PopupEventHandler popupEventHandler = new PopupEventHandler(this.ToolTipText_Popup);
         DrawToolTipEventHandler toolTipEventHandler = new DrawToolTipEventHandler(this.ToolTipText_Draw);
@@ -1689,8 +1689,8 @@ namespace TestApplication
     {
       get
       {
-        Rectangle rectangle;
-        if (this.scroll == rectangle)
+
+        if (this.scroll == null)
           return -1;
         return checked ((int) Math.Round(unchecked ((double) this.scroll.Height / 2.0 + (double) this.scroll.Location.Y + 19.0)));
       }
@@ -1701,20 +1701,20 @@ namespace TestApplication
         Decimal num2 = new Decimal((double) num1 / (double) indexChartBar * (double) this.barsViewable);
         Decimal d2 = Decimal.Divide(Decimal.Subtract(new Decimal(num1), num2), new Decimal(checked (indexChartBar - this.barsViewable)));
         int num3 = 0;
-        object obj = (object) 9999;
+        int obj =  9999;
         while (num3 < indexChartBar)
         {
-          object Left = (object) checked ((int) Math.Round(unchecked (Convert.ToDouble(Decimal.Add(Decimal.Multiply(new Decimal(num3), d2), Decimal.Divide(num2, new Decimal(2L)))) + 15.0)) - value);
-          if (Operators.ConditionalCompareObjectLess(obj, (object) 0, false))
+          int Left = (int) Math.Round(Convert.ToDouble(Decimal.Add(Decimal.Multiply(new Decimal(num3), d2), Decimal.Divide(num2, new Decimal(2L)))) + 15.0) - value;
+          if (obj  < 0)
           {
-            if (Operators.ConditionalCompareObjectLess(Left, obj, false))
+            if( Left <  obj )
             {
               this.scrollPosition = checked (num3 - 1);
               this.PaintChart();
               break;
             }
           }
-          else if (Operators.ConditionalCompareObjectGreater(Left, obj, false))
+          else if ( Left < obj)
           {
             this.scrollPosition = checked (num3 - 1);
             if (checked (this.scrollPosition + this.barsViewable) > this.GetIndexChartBar("QQQWWW"))
@@ -1722,7 +1722,8 @@ namespace TestApplication
             this.PaintChart();
             break;
           }
-          obj = RuntimeHelpers.GetObjectValue(Left);
+          // obj = RuntimeHelpers.GetObjectValue(Left);
+          obj = Left;
           checked { ++num3; }
         }
       }
@@ -1795,7 +1796,7 @@ namespace TestApplication
       this.bars.Add(new GanttChart.ChartBarDate()
       {
         Text = rowText,
-        Value = RuntimeHelpers.GetObjectValue(barValue),
+        Value  = barValue,
         StartValue = fromTime,
         EndValue = toTime,
         Color = color,
@@ -1810,7 +1811,8 @@ namespace TestApplication
       this.bars.Add(new GanttChart.ChartBarDate()
       {
         Text = rowText,
-        Value = RuntimeHelpers.GetObjectValue(barValue),
+        /*  Value = RuntimeHelpers.GetObjectValue(barValue), */
+        Value  = barValue,
         StartValue = fromTime,
         EndValue = toTime,
         Color = color,
@@ -1839,7 +1841,7 @@ namespace TestApplication
       }
       finally
       {
-        enumerator.Dispose();
+       /*  enumerator.Dispose(); */
       }
       return checked (num + 1);
     }
@@ -1881,7 +1883,7 @@ namespace TestApplication
         headerList = this.GetFullHeaderList();
       if (headerList.Count == 0)
         return;
-      this.widthPerItem = Conversions.ToInteger(Operators.DivideObject((object) checked (this.Width - 10 - this.barStartLeft - this.barStartRight), (object) headerList.Count));
+      this.widthPerItem = (this.Width - 10 - this.barStartLeft - this.barStartRight) /  headerList.Count;
       if (this.widthPerItem < 40)
       {
         List<GanttChart.Header> headerList1 = new List<GanttChart.Header>();
@@ -1904,7 +1906,7 @@ namespace TestApplication
         }
         finally
         {
-          enumerator.Dispose();
+         // enumerator.Dispose();
         }
         this.DrawHeader(gfx, headerList1);
       }
@@ -1940,7 +1942,7 @@ namespace TestApplication
         }
         finally
         {
-          enumerator.Dispose();
+         // enumerator.Dispose();
         }
         this.shownHeaderList = headerList;
         this.widthPerItem = checked ((int) Math.Round(unchecked ((double) checked (this.Width - 10 - this.barStartLeft - this.barStartRight) / (double) this.shownHeaderList.Count)));
@@ -1951,7 +1953,8 @@ namespace TestApplication
     {
       if (this.shownHeaderList == null || this.shownHeaderList.Count == 0)
         return;
-      Decimal d1 = Conversions.ToDecimal(Operators.DivideObject((object) checked (this.shownHeaderList[1].StartLocation - this.shownHeaderList[0].StartLocation), (object) checked ((int) Math.Round((this.shownHeaderList[1].Time - this.shownHeaderList[0].Time).TotalMinutes))));
+      Decimal d1 = (this.shownHeaderList[1].StartLocation - this.shownHeaderList[0].StartLocation)/ 
+                    (int)(Math.Round((this.shownHeaderList[1].Time - this.shownHeaderList[0].Time).TotalMinutes));
       List<GanttChart.ChartBarDate>.Enumerator enumerator;
       try
       {
@@ -1964,7 +1967,7 @@ namespace TestApplication
           if (!ignoreScrollAndMousePosition)
             num1 = this.scrollPosition;
           TimeSpan timeSpan1 = current.StartValue - this.FromDate;
-          int num2 = checked (timeSpan1.Days * 1440 + timeSpan1.Hours * 60 + timeSpan1.Minutes);
+          int num2 = timeSpan1.Days * 1440 + timeSpan1.Hours * 60 + timeSpan1.Minutes;
           int num3 = Convert.ToInt32(Decimal.Multiply(d1, new Decimal(num2)));
           DateTime t1 = current.EndValue;
           if (DateTime.Compare(t1, DateTime.MinValue) == 0)
@@ -1972,8 +1975,8 @@ namespace TestApplication
           TimeSpan timeSpan2 = t1 - current.StartValue;
           int num4 = checked (timeSpan2.Days * 1440 + timeSpan2.Hours * 60 + timeSpan2.Minutes);
           int num5 = Convert.ToInt32(Decimal.Multiply(d1, new Decimal(num4)));
-          int x = checked (this.barStartLeft + num3);
-          int y = checked (this.barStartTop + this.barHeight * (rowIndex - num1) + this.barSpace * (rowIndex - num1) + 2);
+          int x = this.barStartLeft + num3;
+          int y = this.barStartTop + this.barHeight * (rowIndex - num1) + this.barSpace * (rowIndex - num1) + 2;
           int width = num5;
           int height = this.barHeight;
           if (width == 0)
@@ -2013,7 +2016,7 @@ namespace TestApplication
       }
       finally
       {
-        enumerator.Dispose();
+     //   enumerator.Dispose();
       }
     }
 
@@ -2039,7 +2042,7 @@ namespace TestApplication
       }
       finally
       {
-        enumerator.Dispose();
+       // enumerator.Dispose();
       }
       grfx.DrawLine(this.lineColor, checked (this.barStartLeft + num1 * this.widthPerItem), this.headerTimeStartTop, checked (this.barStartLeft + num1 * this.widthPerItem), this.lastLineStop);
     }
@@ -2066,7 +2069,7 @@ namespace TestApplication
         }
         finally
         {
-          enumerator.Dispose();
+         // enumerator.Dispose();
         }
         checked { ++num2; }
       }
@@ -2156,6 +2159,8 @@ namespace TestApplication
             GanttChart.BarChangedEventHandler changedEventHandler2 = changedEventHandler1;
             GanttChart.ChartBarDate chartBarDate = this.bars[this.barIsChanging];
             object objectValue = RuntimeHelpers.GetObjectValue(chartBarDate.Value);
+
+            object objectValue = chartBarDate.Value;
             // ISSUE: explicit reference operation
             // ISSUE: variable of a reference type
             object& barValue = @objectValue;
@@ -2231,6 +2236,8 @@ namespace TestApplication
               {
                 str = current.Text;
                 obj = RuntimeHelpers.GetObjectValue(current.Value);
+                obj = current.Value;
+
                 this.mouseHoverBarIndex = num1;
                 if (this.mouseHoverPart != GanttChart.MouseOverPart.BarLeftSide & this.mouseHoverPart != GanttChart.MouseOverPart.BarRightSide)
                   this.mouseHoverPart = GanttChart.MouseOverPart.Bar;
@@ -2262,15 +2269,19 @@ namespace TestApplication
       }
       finally
       {
-        enumerator.Dispose();
+       // enumerator.Dispose();
       }
       this._mouseOverRowText = str;
       this._mouseOverRowValue = RuntimeHelpers.GetObjectValue(obj);
+      this._mouseOverRowValue = obj ;
+
       if (e.Button == MouseButtons.Left)
       {
         GanttChart.MouseDraggedEventHandler draggedEventHandler = this.MouseDraggedEvent;
         if (draggedEventHandler != null)
           draggedEventHandler(RuntimeHelpers.GetObjectValue(sender), e);
+          draggedEventHandler(sender, e);
+
       }
       else if (this._mouseOverRowValue == null & obj != null | this._mouseOverRowValue != null & obj == null | flag)
         this.PaintChart();
@@ -2351,7 +2362,7 @@ namespace TestApplication
         }
         finally
         {
-          enumerator.Dispose();
+  //        enumerator.Dispose();
         }
       }
     }
@@ -2557,6 +2568,7 @@ namespace TestApplication
         set
         {
           this._value = RuntimeHelpers.GetObjectValue(value);
+ this._value = value;
         }
       }
 
@@ -2724,7 +2736,7 @@ namespace TestApplication
   }
 }
 
-"@  -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Drawing.dll'
+"@  -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll'
 #--
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 
@@ -2732,6 +2744,7 @@ $f = New-Object System.Windows.Forms.Form
 $f.MaximizeBox = $false
 $f.MinimizeBox = $false
 
+# $c = New-Object -TypeName 'JetBrainsDecompiledApplication.GanttChart'
 $c = New-Object -TypeName 'GanttChart'
 
 $c.AllowManualEditBar = $true
@@ -2747,16 +2760,16 @@ $c.TabIndex = 3
 $c.Text = "GanttChart3"
 $c.TimeFont = New-Object System.Drawing.Font ('Verdana',8.0)
 
-$b1 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime(2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
-$bc1 = new-object -Type 'TestApplication.BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime(2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
-$b2 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 2',(New-Object System.DateTime (2015,4,27,8,7,0)),(New-Object System.DateTime (2015,4,27,8,9,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
-$b3 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 3',(New-Object System.DateTime (2015,4,27,8,9,0)),(New-Object System.DateTime (2015,4,27,8,11,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
-$b4 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 4',(New-Object System.DateTime (2015,4,27,8,14,0)),(New-Object System.DateTime (2015,4,27,8,15,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,3)
-$b5 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 5',(New-Object System.DateTime (2015,4,27,8,16,0)),(New-Object System.DateTime (2015,4,27,8,19,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,4)
-$b6 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 6',(New-Object System.DateTime (2015,4,27,8,20,0)),(New-Object System.DateTime (2015,4,27,8,23,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,5)
-$b7 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,28,0)),(New-Object System.DateTime (2015,4,27,8,40,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,6)
-$b8 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,40,0)),(New-Object System.DateTime (2015,4,27,8,43,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,7)
-$b9 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,43,0)),(New-Object System.DateTime (2015,4,27,8,55,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,8)
+$b1 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime(2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
+$bc1 = new-object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime(2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
+$b2 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 2',(New-Object System.DateTime (2015,4,27,8,7,0)),(New-Object System.DateTime (2015,4,27,8,9,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
+$b3 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 3',(New-Object System.DateTime (2015,4,27,8,9,0)),(New-Object System.DateTime (2015,4,27,8,11,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
+$b4 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 4',(New-Object System.DateTime (2015,4,27,8,14,0)),(New-Object System.DateTime (2015,4,27,8,15,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,3)
+$b5 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 5',(New-Object System.DateTime (2015,4,27,8,16,0)),(New-Object System.DateTime (2015,4,27,8,19,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,4)
+$b6 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 6',(New-Object System.DateTime (2015,4,27,8,20,0)),(New-Object System.DateTime (2015,4,27,8,23,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,5)
+$b7 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,28,0)),(New-Object System.DateTime (2015,4,27,8,40,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,6)
+$b8 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,40,0)),(New-Object System.DateTime (2015,4,27,8,43,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,7)
+$b9 = New-Object -TypeName 'JetBrainsDecompiledApplication.BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,43,0)),(New-Object System.DateTime (2015,4,27,8,55,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,8)
 
 $c.AddChartBar($b1)
 $c.AddChartBar($b2)
@@ -2854,4 +2867,3 @@ $caller = New-Object -TypeName 'MyWin32Window' -ArgumentList ([System.Diagnostic
 [void]$f.ShowDialog([mywin32window]($caller))
 
 $f.Dispose()
-
