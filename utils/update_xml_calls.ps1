@@ -4,10 +4,10 @@
 param([switch]$preview)
 
 $attributes_prod = @{
-  'core' = "user id=sitecore;password=St104z4U!;Data Source=cclprdecodb1\cclprdecodb1;Database=CarnivalSitecore_Core";
-  'master' = "user id=sitecore;password=St104z4U!;Data Source=cclprdecodb1\cclprdecodb1;Database=CarnivalSitecore_Master";
-  'web' = "user id=sitecore;password=St104z4U!;Data Source=cclprdecodb1\cclprdecodb1;Database=CarnivalSitecore_Web";
-  'pub' = "user id=sitecore;password=St104z4U!;Data Source=cclprdecodb2\cclprdecodb2;Database=CarnivalSitecore_Pub";
+  'core' = "user id=USER;password=PASSWORD;Data Source=DB_SERVER;Database=CORE";
+  'master' = "user id=USER;password=PASSWORD;Data Source=DB_SERVER;Database=MASTER";
+  'web' = "user id=USER;password=PASSWORD;Data Source=DB_SERVER;Database=WEB";
+  'pub' = "user id=USER;password=PASSWORD;Data Source=DB_SERVER;Database=PUB";
 
 }
 
