@@ -11,7 +11,7 @@ $events |foreach {
 
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader%28v=vs.100%29.aspx
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader.eventrecord_properties%28v=vs.110%29.aspx
-
+# http://stackoverflow.com/questions/8567368/eventlogquery-time-format-expected/8575390#8575390
 Add-Type @"
 using System;
 using System.Diagnostics.Eventing.Reader;
@@ -79,4 +79,5 @@ namespace EventQuery
 
 $o = new-object 'EventQuery.EventQueryExample'
 $o.QueryActiveLog()
-
+# http://blogs.msdn.com/b/davethompson/archive/2011/10/25/running-a-scheduled-task-after-another.aspx
+# http://michal.is/blog/query-the-event-log-with-c-net/
