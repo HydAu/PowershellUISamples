@@ -1,3 +1,23 @@
+#Copyright (c) 2015 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
 
 # origin: http://www.codeproject.com/Articles/14455/Eventlog-Viewer
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
@@ -165,10 +185,10 @@ $dgv.ReadOnly = $true
 $dgv.RowHeadersVisible = $false
 $dgv.Size = New-Object System.Drawing.Size (728,320)
 $dgv.TabIndex = 5
-$logname = "Application"
-$e = New-Object System.Diagnostics.EventLog ($logname)
-$e.EnableRaisingEvents = $true
-$e.Add_EntryWritten({
+$logname = "System"
+$e_set = New-Object System.Diagnostics.EventLog ($logname)
+$e_set.EnableRaisingEvents = $true
+$e_set.Add_EntryWritten({
     param(
 
       [object]$sender,
@@ -179,36 +199,74 @@ $e.Add_EntryWritten({
 
   })
 
-$ds = New-Object System.Data.DataSet ("EventLog Entries")
-[void]$ds.Tables.Add("Events")
-$t = $ds.Tables["Events"]
+$ds = New-Object System.Data.DataSet ('EventLog Entries')
+[void]$ds.Tables.Add('Events')
+$t = $ds.Tables['Events']
 
-[void]$t.Columns.Add("Type")
-[void]$t.Columns.Add("Date/Time")
-$t.Columns["Date/Time"].DataType = [System.DateTime]
-[void]$t.Columns.Add("Message")
-[void]$t.Columns.Add("Source")
-[void]$t.Columns.Add("Category")
-[void]$t.Columns.Add("EventID")
-# write-host $e.Entries.Count
-0..($e.Entries.Count - 1) | ForEach-Object {
+[void]$t.Columns.Add('EventType')
+[void]$t.Columns.Add('Date/Time')
+# $t.Columns["Date/Time"].DataType = [System.DateTime]
+[void]$t.Columns.Add('Message')
+[void]$t.Columns.Add('Source')
+[void]$t.Columns.Add('Category')
+[void]$t.Columns.Add('EventID')
+<#
+$e_set_mock = @(
+
+  @{
+    'Index' = '32607';
+    'EntryType' = 'Information';
+    'InstanceId' = '0';
+    'Message' = 'PowerEvent handled successfully by the service.';
+    'Category' = '(0)';
+    'CategoryNumber' = '0';
+    'ReplacementStrings' = '{PowerEvent handled successfully by the service.}';
+    'Source' = 'winws';
+    'TimeGenerated' = '5/14/2015 7:27:48 PM';
+    'TimeWritten' = '5/14/2015 7:27:48 PM';
+    'UserName' = '';
+
+  })
+
+ 0..($e_set_mock.Count - 1) | ForEach-Object {
+#>
+0..($e_set.Entries.Count - 1) | ForEach-Object {
+
+
   $cnt = $_
-  $p = $e.Entries[$cnt]
-  $p = @{ 'EntryType' = $p.EntryType;
-    'TimeGenerated' = $p.TimeGenerated;
-    'Message' = $p.Message;
-    'Source' = $p.Source;
-    'Category' = $p.Category;
-    'InstanceId' = $p.EventID; }
+  $e_item = $e_set.Entries[$cnt]
 
-  [void]$ds.Tables["Events"].Rows.Add($p)
+  [void]$ds.Tables['Events'].Rows.Add(
+    @(
+      $e_item.EntryType,
+      $e_item.TimeGenerated,
+      $e_item.Message,
+      $e_item.Source,
+      $e_item.Category,
+      $e_item.Index
+    )
+  )
+  [void]$ds.Tables['Events'].Rows.Add(
+    @(
+      $e_item['EventType'],
+      $e_item['TimeGenerated'],
+      $e_item['Message'],
+      $e_item['Source'],
+      $e_item['Category'],
+      $e_item['Index']
+    )
+  )
 
 }
+[System.Windows.Forms.BindingSource]$bs = New-Object System.Windows.Forms.BindingSource ($ds,'Events')
+
+# Bind the datagridview
+$dgv.DataSource = $bs
 #
 # EventImage
 #
-$img_event.HeaderText = ""
-$img_event.Name = "EventImage"
+$img_event.HeaderText = ''
+$img_event.Name = 'EventImage'
 $img_event.ReadOnly = $true
 $img_event.Resizable = [System.Windows.Forms.DataGridViewTriState]::True
 $img_event.SortMode = [System.Windows.Forms.DataGridViewColumnSortMode]::Automatic
@@ -219,7 +277,7 @@ $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.Controls.Add($dgv)
 $f.Controls.Add($ts1)
-$f.Name = "EventLogViewer"
+$f.Name = 'EventLogViewer'
 $f.Size = New-Object System.Drawing.Size (728,346)
 $ts1.ResumeLayout($false)
 $ts1.PerformLayout()
