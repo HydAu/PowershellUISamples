@@ -19,16 +19,38 @@
 #THE SOFTWARE.
 
 
-# origin: http://www.codeproject.com/Articles/14455/Eventlog-Viewer
+
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed
+function Get-ScriptDirectory
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot)
+  {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path)
+  {
+    Split-Path $Invocation.MyCommand.Path
+  }
+  else
+  {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"))
+  }
+}
+
+
 [void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
 
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 $f = New-Object System.Windows.Forms.Form
 
+
+# http://www.codeproject.com/Articles/14455/Eventlog-Viewer
+
 $ts1 = New-Object System.Windows.Forms.ToolStrip
-$be = New-Object System.Windows.Forms.ToolStripButton
+$button_error = New-Object System.Windows.Forms.ToolStripButton
 $bsep1 = New-Object System.Windows.Forms.ToolStripSeparator
-$bw = New-Object System.Windows.Forms.ToolStripButton
+$button_warning = New-Object System.Windows.Forms.ToolStripButton
 $bsep2 = New-Object System.Windows.Forms.ToolStripSeparator
 $bm = New-Object System.Windows.Forms.ToolStripButton
 $bsep4 = New-Object System.Windows.Forms.ToolStripSeparator
@@ -38,7 +60,7 @@ $bsep5 = New-Object System.Windows.Forms.ToolStripSeparator
 $fla = New-Object System.Windows.Forms.ToolStripLabel
 $find_text = New-Object System.Windows.Forms.ToolStripTextBox
 $nothing_found = New-Object System.Windows.Forms.ToolStripLabel
-$dgv = New-Object System.Windows.Forms.DataGridView
+$data_gridview = New-Object System.Windows.Forms.DataGridView
 $img_event = New-Object System.Windows.Forms.DataGridViewImageColumn
 $ts1.SuspendLayout()
 $f.SuspendLayout()
@@ -46,7 +68,7 @@ $f.SuspendLayout()
 # ToolStrip1
 #
 $ts1.GripStyle = [System.Windows.Forms.ToolStripGripStyle]::Hidden
-$ts1.Items.AddRange(@( $be,$bsep1,$bw,$bsep2,$bm,$bsep4,$sla,$slo,$bsep5,$fla,$find_text,$nothing_found))
+$ts1.Items.AddRange(@( $button_error,$bsep1,$button_warning,$bsep2,$bm,$bsep4,$sla,$slo,$bsep5,$fla,$find_text,$nothing_found))
 $ts1.Location = New-Object System.Drawing.Point (0,0)
 $ts1.Name = "ToolStrip1"
 $ts1.Padding = New-Object System.Windows.Forms.Padding (4,1,1,1)
@@ -56,18 +78,18 @@ $ts1.Text = "ToolStrip1"
 # 
 # btnErrors
 # 
-$be.Checked = $true
-$be.CheckOnClick = $true
-$be.CheckState = [System.Windows.Forms.CheckState]::Checked
-$be.Image = [System.Drawing.Image]::FromFile("C:\developer\sergueik\csharp\eventlogviewer\EventLogViewer\Images\Error.gif")
+$button_error.Checked = $true
+$button_error.CheckOnClick = $true
+$button_error.CheckState = [System.Windows.Forms.CheckState]::Checked
+$button_error.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'Error.gif'))
 
 # Global.autoFocus.Components.My.Resources.Resources.ErrorGif
-$be.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
-$be.ImageTransparentColor = [System.Drawing.Color]::Magenta
-$be.Name = "btnErrors"
-$be.Size = New-Object System.Drawing.Size (63,20)
-$be.Text = "0 Errors"
-$be.ToolTipText = "0 Errors"
+$button_error.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
+$button_error.ImageTransparentColor = [System.Drawing.Color]::Magenta
+$button_error.Name = "btnErrors"
+$button_error.Size = New-Object System.Drawing.Size (63,20)
+$button_error.Text = "0 Errors"
+$button_error.ToolTipText = "0 Errors"
 # 
 # ButtonSeparator1
 # 
@@ -77,16 +99,16 @@ $bsep1.Size = New-Object System.Drawing.Size (6,23)
 # 
 # btnWarnings
 # 
-$bw.Checked = $true
-$bw.CheckOnClick = $true
-$bw.CheckState = [System.Windows.Forms.CheckState]::Checked
-$bw.Image = [System.Drawing.Image]::FromFile("C:\developer\sergueik\csharp\eventlogviewer\EventLogViewer\Images\Warning.gif")
-$bw.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
-$bw.ImageTransparentColor = [System.Drawing.Color]::Magenta
-$bw.Name = "btnWarnings"
-$bw.Size = New-Object System.Drawing.Size (81,20)
-$bw.Text = "0 Warnings"
-$bw.ToolTipText = "0 Warnings"
+$button_warning.Checked = $true
+$button_warning.CheckOnClick = $true
+$button_warning.CheckState = [System.Windows.Forms.CheckState]::Checked
+$button_warning.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'Warning.gif'))
+$button_warning.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
+$button_warning.ImageTransparentColor = [System.Drawing.Color]::Magenta
+$button_warning.Name = "btnWarnings"
+$button_warning.Size = New-Object System.Drawing.Size (81,20)
+$button_warning.Text = "0 Warnings"
+$button_warning.ToolTipText = "0 Warnings"
 #
 # ButtonSeparator2
 # 
@@ -99,7 +121,7 @@ $bsep2.Size = New-Object System.Drawing.Size (6,23)
 $bm.Checked = $true
 $bm.CheckOnClick = $true
 $bm.CheckState = [System.Windows.Forms.CheckState]::Checked
-$bm.Image = [System.Drawing.Image]::FromFile("C:\developer\sergueik\csharp\eventlogviewer\EventLogViewer\Images\Message.gif")
+$bm.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'Message.gif'))
 $bm.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
 $bm.ImageTransparentColor = [System.Drawing.Color]::Magenta
 $bm.Name = "btnMessages"
@@ -152,7 +174,7 @@ $find_text.Size = New-Object System.Drawing.Size (86,23)
 #
 #NotFoundLabel
 #
-$nothing_found.Image = [System.Drawing.Image]::FromFile("C:\developer\sergueik\csharp\eventlogviewer\EventLogViewer\Images\NotFound.gif")
+$nothing_found.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'NotFound.gif'))
 $nothing_found.Margin = New-Object System.Windows.Forms.Padding (5,1,0,2)
 $nothing_found.Name = "NotFoundLabel"
 $nothing_found.Size = New-Object System.Drawing.Size (103,20)
@@ -162,30 +184,30 @@ $nothing_found.Visible = $false
 #
 # DataGridView1
 #
-$dgv.AllowUserToAddRows = $false
-$dgv.AllowUserToDeleteRows = $false
-$dgv.AllowUserToResizeColumns = $false
-$dgv.AllowUserToResizeRows = $false
-$dgv.Anchor = [System.Windows.Forms.AnchorStyles]::Top `
+$data_gridview.AllowUserToAddRows = $false
+$data_gridview.AllowUserToDeleteRows = $false
+$data_gridview.AllowUserToResizeColumns = $false
+$data_gridview.AllowUserToResizeRows = $false
+$data_gridview.Anchor = [System.Windows.Forms.AnchorStyles]::Top `
    -bor [System.Windows.Forms.AnchorStyles]::Bottom `
    -bor [System.Windows.Forms.AnchorStyles]::Left `
    -bor [System.Windows.Forms.AnchorStyles]::Right
-$dgv.AutoSizeColumnsMode = [System.Windows.Forms.DataGridViewAutoSizeColumnsMode]::Fill
-$dgv.BorderStyle = [System.Windows.Forms.BorderStyle]::None
-$dgv.CellBorderStyle = [System.Windows.Forms.DataGridViewCellBorderStyle]::None
-$dgv.ColumnHeadersHeightSizeMode = [System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode]::AutoSize
-$dgv.SelectionMode = [System.Windows.Forms.DataGridViewSelectionMode]::FullRowSelect
-$dgv.RowTemplate.DefaultCellStyle.SelectionBackColor = [System.Drawing.Color]::Transparent
-$dgv.AutoResizeRows([System.Windows.Forms.DataGridViewAutoSizeRowsMode]::AllCellsExceptHeaders)
-$dgv.Columns.Add([System.Windows.Forms.DataGridViewColumn]$img_event)
-$dgv.Location = New-Object System.Drawing.Point (0,26)
-$dgv.MultiSelect = $false
-$dgv.Name = "DataGridView1"
-$dgv.ReadOnly = $true
-$dgv.RowHeadersVisible = $false
-$dgv.Size = New-Object System.Drawing.Size (728,320)
-$dgv.TabIndex = 5
-$dgv.Add_RowPrePaint({
+$data_gridview.AutoSizeColumnsMode = [System.Windows.Forms.DataGridViewAutoSizeColumnsMode]::Fill
+$data_gridview.BorderStyle = [System.Windows.Forms.BorderStyle]::None
+$data_gridview.CellBorderStyle = [System.Windows.Forms.DataGridViewCellBorderStyle]::None
+$data_gridview.ColumnHeadersHeightSizeMode = [System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode]::AutoSize
+$data_gridview.SelectionMode = [System.Windows.Forms.DataGridViewSelectionMode]::FullRowSelect
+$data_gridview.RowTemplate.DefaultCellStyle.SelectionBackColor = [System.Drawing.Color]::Transparent
+$data_gridview.AutoResizeRows([System.Windows.Forms.DataGridViewAutoSizeRowsMode]::AllCellsExceptHeaders)
+$data_gridview.Columns.Add([System.Windows.Forms.DataGridViewColumn]$img_event)
+$data_gridview.Location = New-Object System.Drawing.Point (0,26)
+$data_gridview.MultiSelect = $false
+$data_gridview.Name = "DataGridView1"
+$data_gridview.ReadOnly = $true
+$data_gridview.RowHeadersVisible = $false
+$data_gridview.Size = New-Object System.Drawing.Size (728,320)
+$data_gridview.TabIndex = 5
+$data_gridview.Add_RowPrePaint({
     param(
       [object]$sender,
       [System.Windows.Forms.DataGridViewRowPrePaintEventArgs]$e
@@ -194,10 +216,10 @@ $dgv.Add_RowPrePaint({
     if (($e.State -band [System.Windows.Forms.DataGridViewElementStates]::Selected) -eq [System.Windows.Forms.DataGridViewElementStates]::Selected) {
 
       $row_bounds = New-Object System.Drawing.Rectangle (0,$e.RowBounds.Top,
-        ($dgv.Columns.GetColumnsWidth([System.Windows.Forms.DataGridViewElementStates]::Visible) -
-          $dgv.HorizontalScrollingOffset + 1),
+        ($data_gridview.Columns.GetColumnsWidth([System.Windows.Forms.DataGridViewElementStates]::Visible) -
+          $data_gridview.HorizontalScrollingOffset + 1),
         $e.RowBounds.Height)
-      $back_brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush ($row_bounds,$dgv.DefaultCellStyle.SelectionBackColor,$e.InheritedRowStyle.ForeColor,[System.Drawing.Drawing2D.LinearGradientMode]::Horizontal)
+      $back_brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush ($row_bounds,$data_gridview.DefaultCellStyle.SelectionBackColor,$e.InheritedRowStyle.ForeColor,[System.Drawing.Drawing2D.LinearGradientMode]::Horizontal)
       $back_brush_solid = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::Blue)
       try {
         $e.Graphics.FillRectangle($back_brush,$row_bounds)
@@ -208,18 +230,18 @@ $dgv.Add_RowPrePaint({
 
   })
 $logname = 'Application'
-$e_set = New-Object System.Diagnostics.EventLog ($logname)
-$e_set.EnableRaisingEvents = $true
-$e_set.Add_EntryWritten({
+$event_set = New-Object System.Diagnostics.EventLog ($logname)
+$event_set.EnableRaisingEvents = $true
+$event_set.Add_EntryWritten({
     param(
       [object]$sender,
       [System.Diagnostics.EntryWrittenEventArgs]$e
     )
     #  does not work
   })
-$ds = New-Object System.Data.DataSet ('EventLog Entries')
-[void]$ds.Tables.Add('Events')
-$t = $ds.Tables['Events']
+$data_source = New-Object System.Data.DataSet ('EventLog Entries')
+[void]$data_source.Tables.Add('Events')
+$t = $data_source.Tables['Events']
 [void]$t.Columns.Add('EventType')
 [void]$t.Columns.Add('Date/Time')
 
@@ -228,57 +250,78 @@ $t = $ds.Tables['Events']
 [void]$t.Columns.Add('Source')
 [void]$t.Columns.Add('Category')
 [void]$t.Columns.Add('EventID')
-<#
-$e_set_mock = @(
-  @{
-    'Index' = '32607';
-    'EntryType' = 'Information';
-    'InstanceId' = '0';
-    'Message' = 'PowerEvent handled successfully by the service.';
-    'Category' = '(0)';
-    'CategoryNumber' = '0';
-    'ReplacementStrings' = '{PowerEvent handled successfully by the service.}';
-    'Source' = 'winws';
-    'TimeGenerated' = '5/14/2015 7:27:48 PM';
-    'TimeWritten' = '5/14/2015 7:27:48 PM';
-    'UserName' = '';
-  })
-0..($e_set_mock.Count - 1) | ForEach-Object {
-#>
-
+$event_set_mock = @{ 'Entries' = @(
+    @{
+      'Index' = '32607';
+      'EntryType' = 'Information';
+      'InstanceId' = '0';
+      'Message' = 'PowerEvent handled successfully by the service.';
+      'Category' = '(0)';
+      'CategoryNumber' = '0';
+      'ReplacementStrings' = '{PowerEvent handled successfully by the service.}';
+      'Source' = 'winws';
+      'TimeGenerated' = '5/14/2015 7:27:48 PM';
+      'TimeWritten' = '5/14/2015 7:27:48 PM';
+      'UserName' = '';
+    })
+}
+# $event_set = $event_set_mock
 $MAX_EVENTLOG_ENTRIES = 10
-$max_cnt  = $e_set.Entries.Count - 1
-if ($max_cnt -gt $MAX_EVENTLOG_ENTRIES)  { 
+$max_cnt = $event_set.Entries.Count - 1
+if ($max_cnt -gt $MAX_EVENTLOG_ENTRIES) {
   $max_cnt = $MAX_EVENTLOG_ENTRIES
 }
 
 0..$max_cnt | ForEach-Object {
   $cnt = $_
-  $e_item = $e_set.Entries[$cnt]
-  [void]$ds.Tables['Events'].Rows.Add(
+  $event_item = $event_set.Entries[$cnt]
+
+  # Two calls below are equivalent for mock, only 
+
+  [void]$data_source.Tables['Events'].Rows.Add(
     @(
-      $e_item.EntryType,
-      $e_item.TimeGenerated,
-      $e_item.Message,
-      $e_item.Source,
-      $e_item.Category,
-      $e_item.Index
+      $event_item.EntryType,
+      $event_item.TimeGenerated,
+      $event_item.Message,
+      $event_item.Source,
+      $event_item.Category,
+      $event_item.Index
     )
   )
-  [void]$ds.Tables['Events'].Rows.Add(
+<#
+  [void]$data_source.Tables['Events'].Rows.Add(
     @(
-      $e_item['EventType'],
-      $e_item['TimeGenerated'],
-      $e_item['Message'],
-      $e_item['Source'],
-      $e_item['Category'],
-      $e_item['Index']
+      $event_item['EntryType'],
+      $event_item['TimeGenerated'],
+      $event_item['Message'],
+      $event_item['Source'],
+      $event_item['Category'],
+      $event_item['Index']
     )
   )
+#>
+
+<#
+                    ' Increment the event type counts
+                    If .EntryType = EventLogEntryType.Error Then
+                        numErrors += 1
+                        Continue For
+                    End If
+
+                    If .EntryType = EventLogEntryType.Warning Then
+                        numWarnings += 1
+                        Continue For
+                    End If
+
+                    If .EntryType = EventLogEntryType.Information Then
+                        numMessages += 1
+                        Continue For
+                    End If
+
+#>
 }
-[System.Windows.Forms.BindingSource]$bs = New-Object System.Windows.Forms.BindingSource ($ds,'Events')
-# Bind the datagridview
-$dgv.DataSource = $bs
+[System.Windows.Forms.BindingSource]$bs = New-Object System.Windows.Forms.BindingSource ($data_source,'Events')
+$data_gridview.DataSource = $bs
 #
 # EventImage
 #
@@ -293,7 +336,7 @@ $img_event.SortMode = [System.Windows.Forms.DataGridViewColumnSortMode]::Automat
 #
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
-$f.Controls.Add($dgv)
+$f.Controls.Add($data_gridview)
 $f.Controls.Add($ts1)
 $f.Name = 'EventLogViewer'
 $f.Size = New-Object System.Drawing.Size (728,346)
