@@ -185,26 +185,44 @@ $dgv.ReadOnly = $true
 $dgv.RowHeadersVisible = $false
 $dgv.Size = New-Object System.Drawing.Size (728,320)
 $dgv.TabIndex = 5
-$logname = "System"
+$dgv.Add_RowPrePaint({
+    param(
+      [object]$sender,
+      [System.Windows.Forms.DataGridViewRowPrePaintEventArgs]$e
+    )
+    $e.PaintParts = $e.PaintParts -band (-bnot [System.Windows.Forms.DataGridViewPaintParts]::Focus)
+    if (($e.State -band [System.Windows.Forms.DataGridViewElementStates]::Selected) -eq [System.Windows.Forms.DataGridViewElementStates]::Selected) {
+
+      $row_bounds = New-Object System.Drawing.Rectangle (0,$e.RowBounds.Top,
+        ($dgv.Columns.GetColumnsWidth([System.Windows.Forms.DataGridViewElementStates]::Visible) -
+          $dgv.HorizontalScrollingOffset + 1),
+        $e.RowBounds.Height)
+      $back_brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush ($row_bounds,$dgv.DefaultCellStyle.SelectionBackColor,$e.InheritedRowStyle.ForeColor,[System.Drawing.Drawing2D.LinearGradientMode]::Horizontal)
+      $back_brush_solid = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::Blue)
+      try {
+        $e.Graphics.FillRectangle($back_brush,$row_bounds)
+      } finally {
+        $back_brush.Dispose()
+      }
+    }
+
+  })
+$logname = 'Application'
 $e_set = New-Object System.Diagnostics.EventLog ($logname)
 $e_set.EnableRaisingEvents = $true
 $e_set.Add_EntryWritten({
     param(
-
       [object]$sender,
       [System.Diagnostics.EntryWrittenEventArgs]$e
     )
-
     #  does not work
-
   })
-
 $ds = New-Object System.Data.DataSet ('EventLog Entries')
 [void]$ds.Tables.Add('Events')
 $t = $ds.Tables['Events']
-
 [void]$t.Columns.Add('EventType')
 [void]$t.Columns.Add('Date/Time')
+
 # $t.Columns["Date/Time"].DataType = [System.DateTime]
 [void]$t.Columns.Add('Message')
 [void]$t.Columns.Add('Source')
@@ -212,7 +230,6 @@ $t = $ds.Tables['Events']
 [void]$t.Columns.Add('EventID')
 <#
 $e_set_mock = @(
-
   @{
     'Index' = '32607';
     'EntryType' = 'Information';
@@ -225,17 +242,19 @@ $e_set_mock = @(
     'TimeGenerated' = '5/14/2015 7:27:48 PM';
     'TimeWritten' = '5/14/2015 7:27:48 PM';
     'UserName' = '';
-
   })
-
- 0..($e_set_mock.Count - 1) | ForEach-Object {
+0..($e_set_mock.Count - 1) | ForEach-Object {
 #>
-0..($e_set.Entries.Count - 1) | ForEach-Object {
 
+$MAX_EVENTLOG_ENTRIES = 10
+$max_cnt  = $e_set.Entries.Count - 1
+if ($max_cnt -gt $MAX_EVENTLOG_ENTRIES)  { 
+  $max_cnt = $MAX_EVENTLOG_ENTRIES
+}
 
+0..$max_cnt | ForEach-Object {
   $cnt = $_
   $e_item = $e_set.Entries[$cnt]
-
   [void]$ds.Tables['Events'].Rows.Add(
     @(
       $e_item.EntryType,
@@ -256,10 +275,8 @@ $e_set_mock = @(
       $e_item['Index']
     )
   )
-
 }
 [System.Windows.Forms.BindingSource]$bs = New-Object System.Windows.Forms.BindingSource ($ds,'Events')
-
 # Bind the datagridview
 $dgv.DataSource = $bs
 #
@@ -270,6 +287,7 @@ $img_event.Name = 'EventImage'
 $img_event.ReadOnly = $true
 $img_event.Resizable = [System.Windows.Forms.DataGridViewTriState]::True
 $img_event.SortMode = [System.Windows.Forms.DataGridViewColumnSortMode]::Automatic
+
 #
 #EventLogViewer
 #
@@ -281,13 +299,10 @@ $f.Name = 'EventLogViewer'
 $f.Size = New-Object System.Drawing.Size (728,346)
 $ts1.ResumeLayout($false)
 $ts1.PerformLayout()
-# CType($dgv, System.ComponentModel.ISupportInitialize).EndInit()
 $f.ResumeLayout($false)
 $f.PerformLayout()
-
 $f.Topmost = $True
-
 $f.Add_Shown({ $f.Activate() })
-
 [void]$f.ShowDialog()
+
 $f.Dispose()
