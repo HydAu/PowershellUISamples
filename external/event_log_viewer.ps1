@@ -34,30 +34,27 @@ function Get-ScriptDirectory
   }
   else
   {
-    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"))
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf('\'))
   }
 }
 
 
-[void][System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
-
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
 $f = New-Object System.Windows.Forms.Form
-
 
 # http://www.codeproject.com/Articles/14455/Eventlog-Viewer
 
 $ts1 = New-Object System.Windows.Forms.ToolStrip
-$button_error = New-Object System.Windows.Forms.ToolStripButton
+$button_errors = New-Object System.Windows.Forms.ToolStripButton
 $bsep1 = New-Object System.Windows.Forms.ToolStripSeparator
-$button_warning = New-Object System.Windows.Forms.ToolStripButton
+$button_warnings = New-Object System.Windows.Forms.ToolStripButton
 $bsep2 = New-Object System.Windows.Forms.ToolStripSeparator
-$bm = New-Object System.Windows.Forms.ToolStripButton
+$button_messages = New-Object System.Windows.Forms.ToolStripButton
 $bsep4 = New-Object System.Windows.Forms.ToolStripSeparator
 $sla = New-Object System.Windows.Forms.ToolStripLabel
 $slo = New-Object System.Windows.Forms.ToolStripComboBox
 $bsep5 = New-Object System.Windows.Forms.ToolStripSeparator
-$fla = New-Object System.Windows.Forms.ToolStripLabel
+$find_label = New-Object System.Windows.Forms.ToolStripLabel
 $find_text = New-Object System.Windows.Forms.ToolStripTextBox
 $nothing_found = New-Object System.Windows.Forms.ToolStripLabel
 $data_gridview = New-Object System.Windows.Forms.DataGridView
@@ -68,7 +65,7 @@ $f.SuspendLayout()
 # ToolStrip1
 #
 $ts1.GripStyle = [System.Windows.Forms.ToolStripGripStyle]::Hidden
-$ts1.Items.AddRange(@( $button_error,$bsep1,$button_warning,$bsep2,$bm,$bsep4,$sla,$slo,$bsep5,$fla,$find_text,$nothing_found))
+$ts1.Items.AddRange(@( $button_errors,$bsep1,$button_warnings,$bsep2,$button_messages,$bsep4,$sla,$slo,$bsep5,$find_label,$find_text,$nothing_found))
 $ts1.Location = New-Object System.Drawing.Point (0,0)
 $ts1.Name = "ToolStrip1"
 $ts1.Padding = New-Object System.Windows.Forms.Padding (4,1,1,1)
@@ -78,18 +75,18 @@ $ts1.Text = "ToolStrip1"
 # 
 # btnErrors
 # 
-$button_error.Checked = $true
-$button_error.CheckOnClick = $true
-$button_error.CheckState = [System.Windows.Forms.CheckState]::Checked
-$button_error.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'Error.gif'))
+$button_errors.Checked = $true
+$button_errors.CheckOnClick = $true
+$button_errors.CheckState = [System.Windows.Forms.CheckState]::Checked
+$button_errors.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Error.gif'))
 
 # Global.autoFocus.Components.My.Resources.Resources.ErrorGif
-$button_error.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
-$button_error.ImageTransparentColor = [System.Drawing.Color]::Magenta
-$button_error.Name = "btnErrors"
-$button_error.Size = New-Object System.Drawing.Size (63,20)
-$button_error.Text = "0 Errors"
-$button_error.ToolTipText = "0 Errors"
+$button_errors.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
+$button_errors.ImageTransparentColor = [System.Drawing.Color]::Magenta
+$button_errors.Name = 'btnErrors'
+$button_errors.Size = New-Object System.Drawing.Size (63,20)
+$button_errors.Text = '0 Errors'
+$button_errors.ToolTipText = '0 Errors'
 # 
 # ButtonSeparator1
 # 
@@ -99,16 +96,16 @@ $bsep1.Size = New-Object System.Drawing.Size (6,23)
 # 
 # btnWarnings
 # 
-$button_warning.Checked = $true
-$button_warning.CheckOnClick = $true
-$button_warning.CheckState = [System.Windows.Forms.CheckState]::Checked
-$button_warning.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'Warning.gif'))
-$button_warning.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
-$button_warning.ImageTransparentColor = [System.Drawing.Color]::Magenta
-$button_warning.Name = "btnWarnings"
-$button_warning.Size = New-Object System.Drawing.Size (81,20)
-$button_warning.Text = "0 Warnings"
-$button_warning.ToolTipText = "0 Warnings"
+$button_warnings.Checked = $true
+$button_warnings.CheckOnClick = $true
+$button_warnings.CheckState = [System.Windows.Forms.CheckState]::Checked
+$button_warnings.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Warning.gif'))
+$button_warnings.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
+$button_warnings.ImageTransparentColor = [System.Drawing.Color]::Magenta
+$button_warnings.Name = "btnWarnings"
+$button_warnings.Size = New-Object System.Drawing.Size (81,20)
+$button_warnings.Text = "0 Warnings"
+$button_warnings.ToolTipText = "0 Warnings"
 #
 # ButtonSeparator2
 # 
@@ -118,16 +115,16 @@ $bsep2.Size = New-Object System.Drawing.Size (6,23)
 # 
 # btnMessages
 # 
-$bm.Checked = $true
-$bm.CheckOnClick = $true
-$bm.CheckState = [System.Windows.Forms.CheckState]::Checked
-$bm.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'Message.gif'))
-$bm.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
-$bm.ImageTransparentColor = [System.Drawing.Color]::Magenta
-$bm.Name = "btnMessages"
-$bm.Size = New-Object System.Drawing.Size (82,20)
-$bm.Text = "0 Messages"
-$bm.ToolTipText = "0 Messages"
+$button_messages.Checked = $true
+$button_messages.CheckOnClick = $true
+$button_messages.CheckState = [System.Windows.Forms.CheckState]::Checked
+$button_messages.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Message.gif'))
+$button_messages.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
+$button_messages.ImageTransparentColor = [System.Drawing.Color]::Magenta
+$button_messages.Name = "btnMessages"
+$button_messages.Size = New-Object System.Drawing.Size (82,20)
+$button_messages.Text = "0 Messages"
+$button_messages.ToolTipText = "0 Messages"
 #
 # SourceSeparator
 # 
@@ -160,26 +157,26 @@ $bsep5.Size = New-Object System.Drawing.Size (6,23)
 #
 # FindLabel
 #
-$fla.Name = "FindLabel"
-$fla.Size = New-Object System.Drawing.Size (31,20)
-$fla.Text = "Find:"
+$find_label.Name = 'FindLabel'
+$find_label.Size = New-Object System.Drawing.Size (31,20)
+$find_label.Text = 'Find:'
 #
 # FindText
 #
 $find_text.BorderStyle = [System.Windows.Forms.BorderStyle]::FixedSingle
 $find_text.ForeColor = [System.Drawing.SystemColors]::WindowText
-$find_text.Name = "FindText"
+$find_text.Name = 'FindText'
 $find_text.Padding = New-Object System.Windows.Forms.Padding (2,0,0,0)
 $find_text.Size = New-Object System.Drawing.Size (86,23)
 #
 #NotFoundLabel
 #
-$nothing_found.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory) , 'NotFound.gif'))
+$nothing_found.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'NotFound.gif'))
 $nothing_found.Margin = New-Object System.Windows.Forms.Padding (5,1,0,2)
-$nothing_found.Name = "NotFoundLabel"
+$nothing_found.Name = 'NotFoundLabel'
 $nothing_found.Size = New-Object System.Drawing.Size (103,20)
-$nothing_found.Text = "No events found"
-$nothing_found.ToolTipText = "There are no events that match the defined filter."
+$nothing_found.Text = 'No events found'
+$nothing_found.ToolTipText = 'There are no events that match the defined filter.'
 $nothing_found.Visible = $false
 #
 # DataGridView1
@@ -229,6 +226,9 @@ $data_gridview.Add_RowPrePaint({
     }
 
   })
+
+# For a realistic data feed see https://github.com/lgarcia2/CraigslistScraper
+# EventLog data feed.
 $logname = 'Application'
 $event_set = New-Object System.Diagnostics.EventLog ($logname)
 $event_set.EnableRaisingEvents = $true
@@ -245,7 +245,7 @@ $t = $data_source.Tables['Events']
 [void]$t.Columns.Add('EventType')
 [void]$t.Columns.Add('Date/Time')
 
-# $t.Columns["Date/Time"].DataType = [System.DateTime]
+$t.Columns['Date/Time'].DataType = [System.DateTime]
 [void]$t.Columns.Add('Message')
 [void]$t.Columns.Add('Source')
 [void]$t.Columns.Add('Category')
@@ -266,6 +266,13 @@ $event_set_mock = @{ 'Entries' = @(
     })
 }
 # $event_set = $event_set_mock
+
+$counts = @{
+  'Error' = 0;
+  'Warning' = 0;
+  'Information' = 0;
+}
+
 $MAX_EVENTLOG_ENTRIES = 10
 $max_cnt = $event_set.Entries.Count - 1
 if ($max_cnt -gt $MAX_EVENTLOG_ENTRIES) {
@@ -288,7 +295,7 @@ if ($max_cnt -gt $MAX_EVENTLOG_ENTRIES) {
       $event_item.Index
     )
   )
-<#
+  <#
   [void]$data_source.Tables['Events'].Rows.Add(
     @(
       $event_item['EntryType'],
@@ -300,28 +307,65 @@ if ($max_cnt -gt $MAX_EVENTLOG_ENTRIES) {
     )
   )
 #>
+  # Increment the event type counts
+  switch ($event_item.EntryType)
+  {
+    'Error' {
+      $counts['Error']++
+    }
+    'Warning' {
+      $counts['Warning']++
+    }
+    'Information' {
+      $counts['Information']++
+    }
+    default {
+    }
+  }
 
-<#
-                    ' Increment the event type counts
-                    If .EntryType = EventLogEntryType.Error Then
-                        numErrors += 1
-                        Continue For
-                    End If
+  # Update the buttons text
+  $button_errors.ToolTipText = $button_errors.Text = ('{0} Errors' -f $counts['Error'])
+  $button_warnings.ToolTipText = $button_warnings.Text = ('{0} Warnings' -f $counts['Warning'])
+  $button_messages.ToolTipText = $button_messages.Text = ('{0} Messages' -f $counts['Information'])
 
-                    If .EntryType = EventLogEntryType.Warning Then
-                        numWarnings += 1
-                        Continue For
-                    End If
-
-                    If .EntryType = EventLogEntryType.Information Then
-                        numMessages += 1
-                        Continue For
-                    End If
-
-#>
 }
 [System.Windows.Forms.BindingSource]$bs = New-Object System.Windows.Forms.BindingSource ($data_source,'Events')
 $data_gridview.DataSource = $bs
+
+$data_gridview.add_CellFormatting({
+    param(
+      [object]$sender,
+      [System.Windows.Forms.DataGridViewCellFormattingEventArgs]$e
+    )
+    $columns = $data_gridview.Columns
+
+    # Convert Event Type to matching image 
+    if ($columns[$e.ColumnIndex].Name.Equals('EventImage') -and $data_gridview.Columns.Contains('EventType')) {
+
+
+      $EventType = $data_gridview.Item("EventType",$e.RowIndex).Value.ToString()
+
+      switch ($EventType)
+      {
+        'Error' {
+          $e.Value = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Error.gif'))
+
+        }
+
+        'Warning' {
+          $e.Value = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Warning.gif'))
+        }
+
+
+        'Information' {
+          $e.Value = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Message.gif'))
+        }
+        default {
+        }
+      }
+    }
+  })
+
 #
 # EventImage
 #
