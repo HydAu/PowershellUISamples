@@ -39,7 +39,44 @@ function Get-ScriptDirectory
 }
 
 
+
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+
+function generate_event_filter {
+  [string]$display_filter = ''
+  [string[]]$display_filters = @()
+
+  # Compose filter on event types
+  if ($button_errors.Checked) {
+    $display_filters += "(EventType='Error')"
+  }
+  if ($button_warnings.Checked) {
+    $display_filters += "(EventType='Warning')"
+  }
+  if ($button_messages.Checked) {
+    $display_filters += "(EventType='Information')"
+  }
+  <# TODO:
+        ' If none of the buttons are pressed, this means they want none of these displayed
+        If String.IsNullOrEmpty(displayFilter) Then
+            displayFilter = "EventType=''"
+         ...
+#>
+  $display_filter = $display_filters -join ' OR '
+
+  #  Add a filter for the source
+  if ($slo.Text -ne $null -and $slo.Text.Trim() -ne '') {
+    $display_filter += (" AND Source='{0}'" -f $slo.Text.Trim())
+  }
+  # Add a filter for the typed message filter
+  if ($find_text.Text -ne $null -and $find_text.Text.Trim() -ne '') {
+    $display_filter += ("  AND Message LIKE '*{0}*'" -f $find_text.Text.Trim())
+  }
+  Write-Debug $display_filter
+  $bs.Filter = $display_filter
+}
+
+
 $f = New-Object System.Windows.Forms.Form
 
 # http://www.codeproject.com/Articles/14455/Eventlog-Viewer
@@ -79,7 +116,12 @@ $button_errors.Checked = $true
 $button_errors.CheckOnClick = $true
 $button_errors.CheckState = [System.Windows.Forms.CheckState]::Checked
 $button_errors.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Error.gif'))
-
+$button_errors.Add_Click({
+    param(
+      [System.Object]$sender,[System.EventArgs]$e
+    )
+    generate_event_filter
+  })
 # Global.autoFocus.Components.My.Resources.Resources.ErrorGif
 $button_errors.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
 $button_errors.ImageTransparentColor = [System.Drawing.Color]::Magenta
@@ -106,6 +148,13 @@ $button_warnings.Name = "btnWarnings"
 $button_warnings.Size = New-Object System.Drawing.Size (81,20)
 $button_warnings.Text = "0 Warnings"
 $button_warnings.ToolTipText = "0 Warnings"
+$button_warnings.Add_Click({
+    param(
+      [System.Object]$sender,[System.EventArgs]$e
+    )
+    generate_event_filter
+  })
+
 #
 # ButtonSeparator2
 # 
@@ -121,10 +170,17 @@ $button_messages.CheckState = [System.Windows.Forms.CheckState]::Checked
 $button_messages.Image = [System.Drawing.Image]::FromFile(('{0}\{1}' -f (Get-ScriptDirectory),'Message.gif'))
 $button_messages.ImageScaling = [System.Windows.Forms.ToolStripItemImageScaling]::None
 $button_messages.ImageTransparentColor = [System.Drawing.Color]::Magenta
-$button_messages.Name = "btnMessages"
+$button_messages.Name = 'btnMessages'
 $button_messages.Size = New-Object System.Drawing.Size (82,20)
-$button_messages.Text = "0 Messages"
-$button_messages.ToolTipText = "0 Messages"
+$button_messages.Text = '0 Messages'
+$button_messages.ToolTipText = '0 Messages'
+$button_messages.Add_Click({
+    param(
+      [System.Object]$sender,[System.EventArgs]$e
+    )
+    generate_event_filter
+  })
+
 #
 # SourceSeparator
 # 
@@ -134,25 +190,25 @@ $bsep4.Size = New-Object System.Drawing.Size (6,23)
 #
 # SourceLabel
 # 
-$sla.Name = "SourceLabel"
+$sla.Name = 'SourceLabel'
 $sla.Size = New-Object System.Drawing.Size (44,20)
-$sla.Text = "Source:"
+$sla.Text = 'Source:'
 #
 # SourceCombo
 # 
 $slo.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 $slo.FlatStyle = [System.Windows.Forms.FlatStyle]::Standard
-$slo.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,([byte]0))
-$slo.Items.AddRange(@( " "))
+$slo.Font = New-Object System.Drawing.Font ('Tahoma',8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,([byte]0))
+$slo.Items.AddRange(@( ' '))
 $slo.Margin = New-Object System.Windows.Forms.Padding (1,0,2,0)
-$slo.Name = "SourceCombo"
+$slo.Name = 'SourceCombo'
 $slo.Size = New-Object System.Drawing.Size (100,23)
 $slo.Sorted = $true
 #
 # FindSeparator
 #
 $bsep5.Margin = New-Object System.Windows.Forms.Padding (0,0,1,0)
-$bsep5.Name = "FindSeparator"
+$bsep5.Name = 'FindSeparator'
 $bsep5.Size = New-Object System.Drawing.Size (6,23)
 #
 # FindLabel
@@ -343,7 +399,7 @@ $data_gridview.add_CellFormatting({
     if ($columns[$e.ColumnIndex].Name.Equals('EventImage') -and $data_gridview.Columns.Contains('EventType')) {
 
 
-      $EventType = $data_gridview.Item("EventType",$e.RowIndex).Value.ToString()
+      $EventType = $data_gridview.Item('EventType',$e.RowIndex).Value.ToString()
 
       switch ($EventType)
       {
@@ -414,7 +470,7 @@ $client.Add_DownloadStringCompleted({
     [System.Xml.XmlDocument]$xml_document = New-Object System.Xml.XmlDocument
     $xml_document.LoadXml($result)
 
-<#
+    <#
 
     write-host $result: 
 <rdf:RDF> 
@@ -436,7 +492,7 @@ n&#x3E;&#x3C;span class="mobile"&#x3E;CL&#x3C;/span&#x3E;</dc:rights>
 <dc:title><![CDATA['90 Mazda Miata MX-5 (Elzabeth) &#x0024;3500]]></dc:title>
 <dc:type>text</dc:type>
 <enc:enclosure resource="http://images.craigslist.org/00h0h_ijv9klFNaBJ_300x300.
-jpg" type="image/jpeg"/>
+jpg" EventType="image/jpeg"/>
 <dcterms:issued>2015-05-14T09:44:45-06:00</dcterms:issued>
 </item>
 </rdf:RDF>
