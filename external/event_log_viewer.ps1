@@ -390,6 +390,64 @@ $f.ResumeLayout($false)
 $f.PerformLayout()
 $f.Topmost = $True
 $f.Add_Shown({ $f.Activate() })
+$city = "denver"
+$currentSearchTerm = "miata"
+$URL = ("http://" + $city + ".craigslist.org/search/cta?query=" + $currentSearchTerm + "&format=rss")
+
+
+[System.Net.WebClient]$client = New-Object System.Net.WebClient
+$client.Add_DownloadStringCompleted({
+    param(
+      [object]$sender,[System.Net.DownloadStringCompletedEventArgs]$e
+    )
+
+    [string]$result = $null
+    if ((-not $e.Cancelled) -and ($e.Error -eq $null))
+    {
+      $result = $e.Result
+    }
+    if ($result -eq $null) {
+      [System.Windows.Forms.MessageBox]::Show('Failed to Connect to website.')
+      return
+    }
+
+    [System.Xml.XmlDocument]$xml_document = New-Object System.Xml.XmlDocument
+    $xml_document.LoadXml($result)
+
+<#
+
+    write-host $result: 
+<rdf:RDF> 
+<item rdf:about="http://denver.craigslist.org/cto/5017639313.html">
+<title><![CDATA['90 Mazda Miata MX-5 (Elzabeth) &#x0024;3500]]></title>
+<link>http://denver.craigslist.org/cto/5017639313.html</link>
+<description><![CDATA[1990 Mazda Miata MX-5
+- Clean
+- 5 speed manual
+- 136k original miles
+- Runs and drives excellent
+- Always maintained
+$3500]]></description>
+<dc:date>2015-05-14T09:44:45-06:00</dc:date>
+<dc:language>en-us</dc:language>
+<dc:rights>&#x26;copy; 2015 &#x3C;span class="desktop"&#x3E;craigslist&#x3C;/spa
+n&#x3E;&#x3C;span class="mobile"&#x3E;CL&#x3C;/span&#x3E;</dc:rights>
+<dc:source>http://denver.craigslist.org/cto/5017639313.html</dc:source>
+<dc:title><![CDATA['90 Mazda Miata MX-5 (Elzabeth) &#x0024;3500]]></dc:title>
+<dc:type>text</dc:type>
+<enc:enclosure resource="http://images.craigslist.org/00h0h_ijv9klFNaBJ_300x300.
+jpg" type="image/jpeg"/>
+<dcterms:issued>2015-05-14T09:44:45-06:00</dcterms:issued>
+</item>
+</rdf:RDF>
+#>
+  })
+$client.DownloadStringAsync((New-Object System.Uri ($URL)))
+
+
+
 [void]$f.ShowDialog()
 
+
 $f.Dispose()
+
