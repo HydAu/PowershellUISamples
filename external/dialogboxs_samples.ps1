@@ -29,35 +29,20 @@ namespace DialogBoxs
     public class TextInputBox
     {
         private static Form frmInputDialog;
-
         private static Label lblPrompt;
-
         private static Button btnOK;
-
         private static Button btnCancel;
-
         private static TextBox txtInput;
-
         private static string _formCaption;
-
         private static string _formPrompt;
-
         private static DialogResult _outputResponse;
-
         private static string _defaultValue;
-
         private static int _ParentFormWidth;
-
         private static int _ParentFormHeight;
-
         private static int _ParentFormXPosition;
-
         private static int _ParentFormYPosition;
-
         private static int _XPos;
-
         private static int _YPos;
-
         private static string _Text;
 
         private static string DefaultValue
@@ -1028,9 +1013,9 @@ using System.Windows.Forms;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
-    private int _data;
+    private string _data;
 
-    public int Data
+    public string Data
     {
         get { return _data; }
         set { _data = value; }
@@ -1089,60 +1074,64 @@ $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (610,440)
 
-  $b1 = New-Object System.Windows.Forms.Button
-  $b1.Location = New-Object System.Drawing.Size (130,10)
-  $b1.Size = New-Object System.Drawing.Size (75,23)
-  $b1.Text = 'Test 1'
-  $b1.add_click({
-$countries=@(
-"India",
-"USA",
-"UK",
-"Russia",
-"Bulgaria",
-"Singapore",
-"Malayasia",
-"Japan",
-"Thailand"
-)
+$b1 = New-Object System.Windows.Forms.Button
+$b1.Location = New-Object System.Drawing.Size (130,10)
+$b1.Size = New-Object System.Drawing.Size (75,23)
+$b1.Text = 'Test 1'
+$b1.add_click({
+    $countries = @(
+      "India",
+      "USA",
+      "UK",
+      "Russia",
+      "Bulgaria",
+      "Singapore",
+      "Malayasia",
+      "Japan",
+      "Thailand"
+    )
 
-$o = new-object -typeName 'DialogBoxs.ComboInputBox'
-
-$o.Show("Select or Enter the Country",'Text',$countries)
+    $o = New-Object -TypeName 'DialogBoxs.ComboInputBox'
+    $prompt_message = 'Select or Enter the Country'
+    $caption = 'combo test'
+    [void]$o.Show($prompt_message,$caption,$countries)
+    $caller.Data = $o.Text
     #  $f.Close()
-    })
-  $f.Controls.Add($b1)
+  })
+$f.Controls.Add($b1)
 
-  $b2 = New-Object System.Windows.Forms.Button
-  $b2.Location = New-Object System.Drawing.Size (130,40)
-  $b2.Size = New-Object System.Drawing.Size (75,23)
-  $b2.Text = 'Test 2'
-  $b2.add_click({
-$o = new-object -typeName 'DialogBoxs.ChangePasswordDialogBox'
-$Prompt = 'Enter the Details to Change Password'
-$Title = 'test'
-$Password = "123456"
+$b2 = New-Object System.Windows.Forms.Button
+$b2.Location = New-Object System.Drawing.Size (130,40)
+$b2.Size = New-Object System.Drawing.Size (75,23)
+$b2.Text = 'Test 2'
+$b2.add_click({
+    $o = New-Object -TypeName 'DialogBoxs.ChangePasswordDialogBox'
+    $prompt_message = 'Enter the Details to Change Password'
+    $caption = 'password test'
+    $old_password = '123'
 
-      $caller.Data = $o.Show($Prompt, $Title,$Password )
-     # $f.Close()
-    })
-  $f.Controls.Add($b2)
+    [void]$o.Show($prompt_message,$caption,$old_password)
+    $caller.Data = $o.Text
+    # $f.Close()
+  })
+$f.Controls.Add($b2)
 
 
 
-  $b3 = New-Object System.Windows.Forms.Button
-  $b3.Location = New-Object System.Drawing.Size (130,70)
-  $b3.Size = New-Object System.Drawing.Size (75,23)
-  $b3.Text = 'Test 3'
-  $b3.add_click({
-$o = new-object -typeName 'DialogBoxs.TextInputBox'
-$Prompt = 'Enter the Value'
-$Title = 'test'
+$b3 = New-Object System.Windows.Forms.Button
+$b3.Location = New-Object System.Drawing.Size (130,70)
+$b3.Size = New-Object System.Drawing.Size (75,23)
+$b3.Text = 'Test 3'
+$b3.add_click({
+    $o = New-Object -TypeName 'DialogBoxs.TextInputBox'
+    $prompt_message = 'Enter the Value'
+    $caption = 'inputbox test'
 
-      $caller.Data = $o.Show($Prompt, $Title )
-     # $f.Close()
-    })
-  $f.Controls.Add($b3)
+    [void]$o.Show($prompt_message,$caption)
+    $caller.Data = $o.Text
+    # $f.Close()
+  })
+$f.Controls.Add($b3)
 
 
 
@@ -1157,5 +1146,5 @@ $f.Add_Shown({ $f.Activate() })
 [void]$f.ShowDialog($caller)
 
 $f.Dispose()
-
+write-output     $caller.Data 
 
