@@ -1,13 +1,25 @@
+
+
 # https://github.com/rlipscombe/paged-options-dialog
 Add-Type -TypeDefinition @"
-
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.IO;
+
 namespace PagedOptionsDialog
 {
+
+    // Does not suppress 
+    // Warning as Error:
+    // The variable 'ex' is declared but never used
+
+#pragma warning disable 0168
+#pragma warning disable 0169
+#pragma warning disable 0649
+
     public partial class OptionsDialog : Form
     {
         private System.ComponentModel.IContainer components = null;
@@ -152,8 +164,12 @@ namespace PagedOptionsDialog
         {
 
             // var defaultImage = new Bitmap(GetType(), "Bitmaps.DefaultOptionsPage.bmp");
-            var defaultImage = new Bitmap( Path.Combine(imgFolderPath, @"DefaultOptionsPage.bmp"));
-            imageList.Images.Add(defaultImage);
+            try
+            {
+                var defaultImage = new Bitmap(Path.Combine(imgFolderPath, @"DefaultOptionsPage.bmp"));
+                imageList.Images.Add(defaultImage);
+            }
+            catch (Exception) { }
 
             AddPageControls();
             SelectFirstListItem();
@@ -255,6 +271,7 @@ namespace PagedOptionsDialog
         public virtual string Title
         {
             get { return GetType().Name; }
+            set { }
         }
 
         public virtual Image Image
@@ -264,31 +281,40 @@ namespace PagedOptionsDialog
 
         public virtual void OnSetActive()
         {
-            // Nothing by default.
+
         }
 
         public virtual void OnApply()
         {
-            // Nothing by default.
+            
         }
     }
 
-    /* internal partial*/ public class AdvancedOptionsPage : PropertyPage
+    // TODO: collapse the inheritance 
+    public class AdvancedOptionsPage : PropertyPage
     {
-
         private System.ComponentModel.IContainer components = null;
         private string imgFolderPath = Directory.GetCurrentDirectory();
+        private string _imageFile = @"AdvancedOptionsPage.bmp";
+
+        private string _title = "Options Page";
+        public override string Title
+        {
+            get { return _title; }
+            set { _title = value; }
+        }
+
+        public string ImageFile
+        {
+            get { return _imageFile; }
+            set { _imageFile = value; }
+        }
 
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            // 
-            // AdvancedOptionsPage
-            // 
-            this.Name = "AdvancedOptionsPage";
             this.Size = new System.Drawing.Size(338, 150);
             this.ResumeLayout(false);
-
         }
 
         protected override void Dispose(bool disposing)
@@ -305,22 +331,24 @@ namespace PagedOptionsDialog
             InitializeComponent();
         }
 
-        public override string Title
-        {
-            get { return "Advanced"; }
-        }
-
         public override Image Image
         {
-            get { 
+            get
+            {
+                string imageFilePath = null;
+                try
+                {
+                    imageFilePath = Path.Combine(imgFolderPath, _imageFile);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
 
-
-//  return new Bitmap(GetType(), "Bitmaps.AdvancedOptionsPage.bmp"); 
-return new Bitmap( Path.Combine(imgFolderPath, @"AdvancedOptionsPage.bmp"));
-
-}
+                return new Bitmap(imageFilePath);
+            }
         }
-   }
+    }
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
 
@@ -361,6 +389,22 @@ public class Win32Window : IWin32Window
 
 
 $o = New-Object 'PagedOptionsDialog.OptionsDialog'
-$d = New-Object 'PagedOptionsDialog.AdvancedOptionsPage'
-$o.Pages.Add($d)
+
+$d1 = New-Object 'PagedOptionsDialog.AdvancedOptionsPage'
+$o.Pages.Add($d1)
+
+
+$d2 = New-Object 'PagedOptionsDialog.AdvancedOptionsPage'
+$d1.Title = 'More Options Page'  
+$o.Pages.Add($d2)
+
+$d3 = New-Object 'PagedOptionsDialog.AdvancedOptionsPage'
+$o.Pages.Add($d3)
+
+$d4 = New-Object 'PagedOptionsDialog.AdvancedOptionsPage'
+$d4.ImageFile = 'GenericSettingsConfig.bmp'
+$d4.Title = 'Configuration'  
+
+$o.Pages.Add($d4)
+
 $o.ShowDialog()
