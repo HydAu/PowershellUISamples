@@ -166,8 +166,9 @@ namespace PagedOptionsDialog
             // var defaultImage = new Bitmap(GetType(), "Bitmaps.DefaultOptionsPage.bmp");
             try
             {
-                var defaultImage = new Bitmap(Path.Combine(imgFolderPath, @"DefaultOptionsPage.bmp"));
-                imageList.Images.Add(defaultImage);
+                Console.WriteLine(Path.Combine(imgFolderPath, @"DefaultOptionsPage.bmp"));
+                // var defaultImage = new Bitmap(Path.Combine(imgFolderPath, @"DefaultOptionsPage.bmp"));
+                // imageList.Images.Add(defaultImage);
             }
             catch (Exception) { }
 
@@ -312,9 +313,9 @@ namespace PagedOptionsDialog
 
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            this.Size = new System.Drawing.Size(338, 150);
-            this.ResumeLayout(false);
+            this.SuspendLayout(  );
+            this.Size = new System.Drawing.Size( 338, 150 );
+            this.ResumeLayout( false );
         }
 
         protected override void Dispose(bool disposing)
@@ -336,16 +337,20 @@ namespace PagedOptionsDialog
             get
             {
                 string imageFilePath = null;
+                Image _image;
                 try
                 {
                     imageFilePath = Path.Combine(imgFolderPath, _imageFile);
+                    // the path will vary
+                    Console.Error.WriteLine(imageFilePath);
+                    _image = new Bitmap(imageFilePath);
                 }
                 catch (Exception)
                 {
                     return null;
                 }
 
-                return new Bitmap(imageFilePath);
+                return _image ;
             }
         }
     }
@@ -408,3 +413,5 @@ $d4.Title = 'Configuration'
 $o.Pages.Add($d4)
 
 $o.ShowDialog()
+
+ 
