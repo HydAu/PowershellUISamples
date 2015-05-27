@@ -180,7 +180,7 @@ namespace DialogBoxs
             TextInputBox.frmInputDialog.Dispose();
         }
 
-        private static void btnOK_Click(object sender, EventArgs e)
+        private static void btnOK_Click(object sender, System.EventArgs e)
         {
             TextInputBox.OutputResponse = DialogResult.OK;
             TextInputBox._Text = TextInputBox.txtInput.Text;
@@ -1148,3 +1148,100 @@ $f.Add_Shown({ $f.Activate() })
 $f.Dispose()
 write-output     $caller.Data 
 
+
+<# 
+
+
+
+@( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
+
+$form = New-Object System.Windows.Forms.Form
+$label_prompt = New-Object System.Windows.Forms.Label
+$button_ok = New-Object System.Windows.Forms.Button
+$button_cancel = New-Object System.Windows.Forms.Button
+$text_input = New-Object System.Windows.Forms.TextBox
+$form.SuspendLayout()
+$label_prompt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+$label_prompt.BackColor = [System.Drawing.SystemColors]::Control
+$label_prompt.Font = New-Object System.Drawing.Font ("Microsoft Sans Serif",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+$label_prompt.Location = New-Object System.Drawing.Point (12,9)
+$label_prompt.Name = "lblPrompt"
+$label_prompt.Size = New-Object System.Drawing.Size (302,82)
+$label_prompt.TabIndex = 3
+$label_prompt.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+$button_ok.DialogResult = [System.Windows.Forms.DialogResult]::OK
+$button_ok.FlatStyle = [System.Windows.Forms.FlatStyle]::Standard
+$button_ok.Location = New-Object System.Drawing.Point (326,8)
+$button_ok.Name = "btnOK"
+$button_ok.Size = New-Object System.Drawing.Size (64,24)
+$button_ok.TabIndex = 1
+$button_ok.Text = "&OK"
+$button_ok.Add_Click({
+param([object] $sender, [System.EventArgs] $e)
+            $response  = [System.Windows.Forms.DialogResult]::OK
+            $result = $text_input.Text
+            $form.Dispose()
+  })
+$button_ok.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+$button_cancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+$button_cancel.FlatStyle = [System.Windows.Forms.FlatStyle]::Standard
+$button_cancel.Location = New-Object System.Drawing.Point (326,40)
+$button_cancel.Name = "btnCancel"
+$button_cancel.Size = New-Object System.Drawing.Size (64,24)
+$button_cancel.TabIndex = 2
+$button_cancel.Text = "&Cancel"
+$button_cancel.Add_Click({
+param([object] $sender, [System.EventArgs] $e)
+            $response  = [System.Windows.Forms.DialogResult]::Cancel
+            $text_input.Text = ''
+            $result = ''
+            $form.Dispose()
+
+  })
+
+$button_cancel.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+$text_input.Location = New-Object System.Drawing.Point (8,100)
+$text_input.Name = "txtInput"
+$text_input.Size = New-Object System.Drawing.Size (379,20)
+$text_input.TabIndex = 0
+$text_input.Text = ''
+$text_input.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+$form.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
+$form.ClientSize = New-Object System.Drawing.Size (398,128)
+$form.Controls.Add($text_input)
+$form.Controls.Add($button_cancel)
+$form.Controls.Add($button_ok)
+$form.Controls.Add($label_prompt)
+$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+$form.MaximizeBox = $false
+$form.MinimizeBox = $false
+$form.Name = "InputBoxDialog"
+$form.ResumeLayout($false)
+$form.AcceptButton = $button_ok
+$form.ShowInTaskbar = $false
+
+$response = [System.Windows.Forms.DialogResult]::Ignore
+$result = ''
+$text_input.Text = ''
+$label_prompt.Text = '_formPrompt'
+$form.Text = '_formCaption'
+$form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+
+$text_input.SelectionStart = 0;
+$text_input.SelectionLength = $text_input.Text.Length
+$text_input.Focus()
+
+
+
+$form.Name = "Form1"
+$form.ResumeLayout($false)
+
+$form.Topmost = $Trues
+
+$form.Add_Shown({ $form.Activate() })
+
+[void]$form.ShowDialog()
+
+$form.Dispose()
+
+#>
