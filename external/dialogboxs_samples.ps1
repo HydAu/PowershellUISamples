@@ -21,7 +21,7 @@
 # http://www.codeproject.com/Articles/16186/DialogBoxes
 
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
-function TextInputBox () {
+function TextInputBox {
   param(
     $prompt_message = 'Enter the Value',
     $caption = 'Inputbox test'
@@ -125,7 +125,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
 namespace DialogBoxs
 {
     public class TextInputBox
@@ -146,7 +145,6 @@ namespace DialogBoxs
         private static int _XPos;
         private static int _YPos;
         private static string _Text;
-
         private static string DefaultValue
         {
             set
@@ -154,7 +152,6 @@ namespace DialogBoxs
                 TextInputBox._defaultValue = value;
             }
         }
-
         private static string FormCaption
         {
             set
@@ -162,7 +159,6 @@ namespace DialogBoxs
                 TextInputBox._formCaption = value;
             }
         }
-
         private static string FormPrompt
         {
             set
@@ -170,7 +166,6 @@ namespace DialogBoxs
                 TextInputBox._formPrompt = value;
             }
         }
-
         private static DialogResult OutputResponse
         {
             get
@@ -182,7 +177,6 @@ namespace DialogBoxs
                 TextInputBox._outputResponse = value;
             }
         }
-
         private static int ParentFrmHeight
         {
             set
@@ -193,7 +187,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int ParentFrmWidth
         {
             set
@@ -204,7 +197,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int ParentFrmXPosition
         {
             set
@@ -215,7 +207,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int ParentFrmYPosition
         {
             set
@@ -226,7 +217,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         public string Text
         {
             get
@@ -234,7 +224,6 @@ namespace DialogBoxs
                 return TextInputBox._Text;
             }
         }
-
         private static int XPosition
         {
             set
@@ -245,7 +234,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int YPosition
         {
             set
@@ -256,7 +244,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         static TextInputBox()
         {
             TextInputBox._formCaption = string.Empty;
@@ -270,25 +257,21 @@ namespace DialogBoxs
             TextInputBox._YPos = -1;
             TextInputBox._Text = string.Empty;
         }
-
         public TextInputBox()
         {
         }
-
         private static void btnCancel_Click(object sender, EventArgs e)
         {
             TextInputBox.OutputResponse = DialogResult.Cancel;
             TextInputBox._Text = string.Empty;
             TextInputBox.frmInputDialog.Dispose();
         }
-
         private static void btnOK_Click(object sender, System.EventArgs e)
         {
             TextInputBox.OutputResponse = DialogResult.OK;
             TextInputBox._Text = TextInputBox.txtInput.Text;
             TextInputBox.frmInputDialog.Dispose();
         }
-
         private static void InitializeComponent()
         {
             TextInputBox.frmInputDialog = new Form();
@@ -343,7 +326,6 @@ namespace DialogBoxs
             TextInputBox.frmInputDialog.AcceptButton = TextInputBox.btnOK;
             TextInputBox.frmInputDialog.ShowInTaskbar = false;
         }
-
         private static void LoadForm()
         {
             TextInputBox.OutputResponse = DialogResult.Ignore;
@@ -390,7 +372,6 @@ namespace DialogBoxs
             TextInputBox.txtInput.SelectionLength = TextInputBox.txtInput.Text.Length;
             TextInputBox.txtInput.Focus();
         }
-
         public DialogResult Show(string Prompt)
         {
             TextInputBox.InitializeComponent();
@@ -398,7 +379,6 @@ namespace DialogBoxs
             this.ShowForm();
             return TextInputBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title)
         {
             TextInputBox.InitializeComponent();
@@ -407,7 +387,6 @@ namespace DialogBoxs
             this.ShowForm();
             return TextInputBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title, string Default)
         {
             TextInputBox.InitializeComponent();
@@ -417,7 +396,6 @@ namespace DialogBoxs
             this.ShowForm();
             return TextInputBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title, string Default, int DialogBoxXPosition, int DialogBoxYPosition)
         {
             TextInputBox.InitializeComponent();
@@ -429,7 +407,6 @@ namespace DialogBoxs
             this.ShowForm();
             return TextInputBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title, string Default, int ParentFormWidth, int ParentFormHeight, int ParentFormXPosition, int ParentFormYPosition)
         {
             TextInputBox.InitializeComponent();
@@ -443,7 +420,6 @@ namespace DialogBoxs
             this.ShowForm();
             return TextInputBox.OutputResponse;
         }
-
         private void ShowForm()
         {
             TextInputBox.LoadForm();
@@ -461,7 +437,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
 namespace DialogBoxs
 {
     public class ComboInputBox
@@ -479,7 +454,6 @@ namespace DialogBoxs
         private static int _yPos;
         private bool _AutoSearch;
         private static string _Text;
-
         public bool AutoSearch
         {
             get
@@ -491,7 +465,6 @@ namespace DialogBoxs
                 this._AutoSearch = value;
             }
         }
-
         private static string[] ComboBoxItems
         {
             get
@@ -503,7 +476,6 @@ namespace DialogBoxs
                 ComboInputBox._CmBxItems = value;
             }
         }
-
         private static string FormCaption
         {
             set
@@ -511,7 +483,6 @@ namespace DialogBoxs
                 ComboInputBox._formCaption = value;
             }
         }
-
         private static string FormPrompt
         {
             set
@@ -519,7 +490,6 @@ namespace DialogBoxs
                 ComboInputBox._formPrompt = value;
             }
         }
-
         private static DialogResult OutputResponse
         {
             get
@@ -531,7 +501,6 @@ namespace DialogBoxs
                 ComboInputBox._outputResponse = value;
             }
         }
-
         public string Text
         {
             get
@@ -539,7 +508,6 @@ namespace DialogBoxs
                 return ComboInputBox._Text;
             }
         }
-
         private static int XPosition
         {
             set
@@ -550,7 +518,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int YPosition
         {
             set
@@ -561,7 +528,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         static ComboInputBox()
         {
             ComboInputBox._formCaption = string.Empty;
@@ -573,33 +539,27 @@ namespace DialogBoxs
             // ComboInputBox._AutoSearch = false;
             ComboInputBox._Text = string.Empty;
         }
-
         public ComboInputBox()
         {
         }
-
         private static void btnCancel_Click(object sender, EventArgs e)
         {
             ComboInputBox.OutputResponse = DialogResult.Cancel;
             ComboInputBox._Text = string.Empty;
             ComboInputBox.frmComboDialog.Dispose();
         }
-
         private static void btnOK_Click(object sender, EventArgs e)
         {
             ComboInputBox.OutputResponse = DialogResult.OK;
             ComboInputBox._Text = ComboInputBox.CmBxComboBox.Text;
             ComboInputBox.frmComboDialog.Dispose();
         }
-
         private static void CmBxComboBox_KeyPress(object sender, KeyPressEventArgs e)
         {
         }
-
         private static void CmBxComboBox_TextChanged(object sender, EventArgs e)
         {
         }
-
         private static void InitializeComponent()
         {
             ComboInputBox.frmComboDialog = new Form();
@@ -655,7 +615,6 @@ namespace DialogBoxs
             ComboInputBox.frmComboDialog.ResumeLayout(false);
             ComboInputBox.frmComboDialog.AcceptButton = ComboInputBox.btnOK;
         }
-
         private static void LoadForm()
         {
             ComboInputBox.OutputResponse = DialogResult.Ignore;
@@ -695,7 +654,6 @@ namespace DialogBoxs
             ComboInputBox.CmBxComboBox.SelectionLength = ComboInputBox.CmBxComboBox.Text.Length;
             ComboInputBox.CmBxComboBox.Focus();
         }
-
         private static void PopulateCombo()
         {
             string[] comboBoxItems = ComboInputBox.ComboBoxItems;
@@ -708,7 +666,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         public DialogResult Show(string Prompt, string Title, string[] ComboBoxItems)
         {
             ComboInputBox.InitializeComponent();
@@ -719,7 +676,6 @@ namespace DialogBoxs
             ComboInputBox.frmComboDialog.ShowDialog();
             return ComboInputBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title, string[] ComboBoxItems, int XPos, int YPos)
         {
             ComboInputBox.InitializeComponent();
@@ -739,8 +695,10 @@ namespace DialogBoxs
 function ChangePasswordDialogBox {
 
   param(
-    $prompt_message = 'Change the password',
-    $caption = 'Change Password Dialog test'
+    [string]$prompt_message = 'Change the password',
+    [string]$caption = 'Default Caption',
+    [string]$old_password = 'password'
+
   )
   $script:result = @{ 'text' = ''; 'status' = $null; }
 
@@ -761,27 +719,27 @@ function ChangePasswordDialogBox {
   $label_old_password.Size = New-Object System.Drawing.Size (168,24)
   $label_old_password.TabIndex = 1
   $label_old_password.Text = "Old Password"
-  $label_old_password.TextAlign = [ System.Drawing.ContentAlignment]::MiddleLeft
+  $label_old_password.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $label_new_password.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
   $label_new_password.Location = New-Object System.Drawing.Point (16,112)
   $label_new_password.Name = "lblNewPassword"
   $label_new_password.Size = New-Object System.Drawing.Size (168,24)
   $label_new_password.TabIndex = 2
   $label_new_password.Text = "New Password"
-  $label_new_password.TextAlign = [ System.Drawing.ContentAlignment]::MiddleLeft
+  $label_new_password.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $label_confirm_password.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
   $label_confirm_password.Location = New-Object System.Drawing.Point (16,136)
   $label_confirm_password.Name = "lblConfirmPassword"
   $label_confirm_password.Size = New-Object System.Drawing.Size (168,24)
   $label_confirm_password.TabIndex = 3
   $label_confirm_password.Text = "Confirm New Password";
-  $label_confirm_password.TextAlign = [ System.Drawing.ContentAlignment]::MiddleLeft
+  $label_confirm_password.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $label_prompt.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
   $label_prompt.Location = New-Object System.Drawing.Point (16,8)
   $label_prompt.Name = "lblPrompt"
   $label_prompt.Size = New-Object System.Drawing.Size (280,72)
   $label_prompt.TabIndex = 9
-  $label_prompt.TextAlign = [ System.Drawing.ContentAlignment]::MiddleLeft
+  $label_prompt.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
   $label_prompt.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
   $text_old_password.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
   $text_old_password.Location = New-Object System.Drawing.Point (192,88)
@@ -812,9 +770,26 @@ function ChangePasswordDialogBox {
   $button_ok.Text = "Ok"
   $button_ok.Add_Click({
       param([object]$sender,[System.EventArgs]$e)
-      $script:result.status = [System.Windows.Forms.DialogResult]::Cancel
-      $script:result.Text = ''
-      $form.Dispose()
+      if ($text_old_password.Text.Trim() -ne $old_password) {
+        # MessageBox.Show(ChangePasswordDialogBox.frmInputDialog, "Incorrect Old Password", "LinkSys", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        $text_old_password.SelectionStart = 0
+        $text_old_password.SelectionLength = $text_old_password.Text.Length
+        $text_old_password.Focus()
+      } else {
+
+        if ($text_new_password.Text.Trim() -ne $text_confirm_password.Text.Trim()) {
+
+          $text_confirm_password.SelectionStart = 0
+          $text_confirm_passwordSelectionLength = $text_confirm_password.Text.Length
+          $text_confirm_password.Focus()
+
+        } else {
+
+          $script:result.status = [System.Windows.Forms.DialogResult]::OK
+          $script:result.Text = $text_new_password.Text
+          $form.Dispose()
+        } }
+
 
     })
   $button_cancel.Font = New-Object System.Drawing.Font ("Tahoma",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
@@ -825,7 +800,9 @@ function ChangePasswordDialogBox {
   $button_cancel.Text = "Cancel"
   $button_cancel.Add_Click({
       param([object]$sender,[System.EventArgs]$e)
+      param ([object]$sender,[System.EventArgs]$e)
       $script:result.status = [System.Windows.Forms.DialogResult]::Cancel
+      $text_input.Text = ''
       $script:result.Text = ''
       $form.Dispose()
 
@@ -857,7 +834,7 @@ function ChangePasswordDialogBox {
   $label_old_password.Text = "Old Password"
   $label_new_password.Text = "New Password"
   $label_confirm_password.Text = "Confirm New Password"
-  $text_old_password.Text = ''
+  $text_old_password.Text = $old_password # ''
   $text_new_password.Text = ''
   $text_confirm_password.Text = ''
   $form.Text = $caption
@@ -881,12 +858,10 @@ function ChangePasswordDialogBox {
 }
 
 Add-Type -TypeDefinition @"
-
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
 namespace DialogBoxs
 {
     public class ChangePasswordDialogBox
@@ -919,7 +894,6 @@ namespace DialogBoxs
                 ChangePasswordDialogBox._formCaption = value;
             }
         }
-
         public string NewPassword
         {
             get
@@ -927,7 +901,6 @@ namespace DialogBoxs
                 return ChangePasswordDialogBox._NewPassword;
             }
         }
-
         private static string OldPassword
         {
             get
@@ -939,7 +912,6 @@ namespace DialogBoxs
                 ChangePasswordDialogBox._OldPassword = value;
             }
         }
-
         private static DialogResult OutputResponse
         {
             get
@@ -951,7 +923,6 @@ namespace DialogBoxs
                 ChangePasswordDialogBox._outputResponse = value;
             }
         }
-
         private static int ParentFrmHeight
         {
             set
@@ -962,7 +933,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int ParentFrmWidth
         {
             set
@@ -973,7 +943,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int ParentFrmXPosition
         {
             set
@@ -984,7 +953,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int ParentFrmYPosition
         {
             set
@@ -995,7 +963,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static string PromptMessage
         {
             get
@@ -1007,7 +974,6 @@ namespace DialogBoxs
                 ChangePasswordDialogBox._PromptMessage = value;
             }
         }
-
         private static int XPosition
         {
             set
@@ -1018,7 +984,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         private static int YPosition
         {
             set
@@ -1029,7 +994,6 @@ namespace DialogBoxs
                 }
             }
         }
-
         static ChangePasswordDialogBox()
         {
             ChangePasswordDialogBox._formCaption = string.Empty;
@@ -1043,18 +1007,15 @@ namespace DialogBoxs
             ChangePasswordDialogBox._YPos = -1;
             ChangePasswordDialogBox._NewPassword = string.Empty;
         }
-
         public ChangePasswordDialogBox()
         {
         }
-
         private static void btnCancel_Click(object sender, EventArgs e)
         {
             ChangePasswordDialogBox.OutputResponse = DialogResult.Cancel;
             ChangePasswordDialogBox._NewPassword = string.Empty;
             ChangePasswordDialogBox.frmInputDialog.Dispose();
         }
-
         private static void btnOk_Click(object sender, EventArgs e)
         {
             ChangePasswordDialogBox.OutputResponse = DialogResult.OK;
@@ -1078,7 +1039,6 @@ namespace DialogBoxs
                 ChangePasswordDialogBox.txtbxConfirmPassword.Focus();
             }
         }
-
         private static void InitializeComponent()
         {
             ChangePasswordDialogBox.frmInputDialog = new Form();
@@ -1175,7 +1135,6 @@ namespace DialogBoxs
             ChangePasswordDialogBox.frmInputDialog.StartPosition = FormStartPosition.CenterScreen;
             ChangePasswordDialogBox.frmInputDialog.ShowInTaskbar = false;
         }
-
         private static void LoadForm()
         {
             ChangePasswordDialogBox.OutputResponse = DialogResult.Ignore;
@@ -1207,7 +1166,6 @@ namespace DialogBoxs
             }
             ChangePasswordDialogBox.txtbxOldPassword.Focus();
         }
-
         public DialogResult Show(string Prompt, string Title, string Password)
         {
             ChangePasswordDialogBox.InitializeComponent();
@@ -1217,7 +1175,6 @@ namespace DialogBoxs
             this.ShowForm();
             return ChangePasswordDialogBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title, string Password, int DialogBoxXPosition, int DialogBoxYPosition)
         {
             ChangePasswordDialogBox.InitializeComponent();
@@ -1229,7 +1186,6 @@ namespace DialogBoxs
             this.ShowForm();
             return ChangePasswordDialogBox.OutputResponse;
         }
-
         public DialogResult Show(string Prompt, string Title, string Password, int ParentFormWidth, int ParentFormHeight, int ParentFormXPosition, int ParentFormYPosition)
         {
             ChangePasswordDialogBox.InitializeComponent();
@@ -1243,7 +1199,6 @@ namespace DialogBoxs
             this.ShowForm();
             return ChangePasswordDialogBox.OutputResponse;
         }
-
         private void ShowForm()
         {
             ChangePasswordDialogBox.LoadForm();
@@ -1254,7 +1209,6 @@ namespace DialogBoxs
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
 
 Add-Type -TypeDefinition @" 
-
 // "
 using System;
 using System.Windows.Forms;
@@ -1281,25 +1235,16 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-
-
 @( 'System.Drawing','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
-
-
 $shared_assemblies = @(
   'nunit.framework.dll'
 )
-
 $shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
-
 if (($env:SHARED_ASSEMBLIES_PATH -ne $null) -and ($env:SHARED_ASSEMBLIES_PATH -ne '')) {
   $shared_assemblies_path = $env:SHARED_ASSEMBLIES_PATH
 }
-
 pushd $shared_assemblies_path
-
 $shared_assemblies | ForEach-Object {
-
   if ($host.Version.Major -gt 2) {
     Unblock-File -Path $_;
   }
@@ -1307,25 +1252,14 @@ $shared_assemblies | ForEach-Object {
   Add-Type -Path $_
 }
 popd
-
-
-
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-
-ChangePasswordDialogBox
-return
 $f = New-Object -TypeName 'System.Windows.Forms.Form'
 $f.Text = $title
 $f.SuspendLayout()
-
-
-
-
 #   Form1
 $f.AutoScaleDimensions = New-Object System.Drawing.SizeF (6.0,13.0)
 $f.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font
 $f.ClientSize = New-Object System.Drawing.Size (610,440)
-
 $b1 = New-Object System.Windows.Forms.Button
 $b1.Location = New-Object System.Drawing.Size (130,10)
 $b1.Size = New-Object System.Drawing.Size (75,23)
@@ -1342,7 +1276,6 @@ $b1.Add_Click({
       "Japan",
       "Thailand"
     )
-
     $o = New-Object -TypeName 'DialogBoxs.ComboInputBox'
     $prompt_message = 'Select or Enter the Country'
     $caption = 'combo test'
@@ -1351,27 +1284,27 @@ $b1.Add_Click({
     #  $f.Close()
   })
 $f.Controls.Add($b1)
-
 $b2 = New-Object System.Windows.Forms.Button
 $b2.Location = New-Object System.Drawing.Size (130,40)
 $b2.Size = New-Object System.Drawing.Size (75,23)
 $b2.Text = 'Test 2'
 $b2.Add_Click({
-
-    $prompt_message = 'Enter the Details to Change Password'
-    $caption = 'password test'
-
-    $o = New-Object -TypeName 'DialogBoxs.ChangePasswordDialogBox'
+    $prompt_message = 'Change the Password'
+    $caption = 'Password Dialog Test'
     $old_password = '123'
-
+    $o = ChangePasswordDialogBox -prompt_message $prompt_message -caption $caption -old_password $old_password
+    <#
+    $o = New-Object -TypeName 'DialogBoxs.ChangePasswordDialogBox'
     [void]$o.Show($prompt_message,$caption,$old_password)
-    $caller.Data = $o.Text
-    # $f.Close()
+    #>
+    if ($o.status -match 'OK') {
+      $caller.Data = $o.Text
+      Write-Host ('-->"{0}"' -f $o.status)
+    $f.Close()
+    }
+
   })
 $f.Controls.Add($b2)
-
-
-
 $b3 = New-Object System.Windows.Forms.Button
 $b3.Location = New-Object System.Drawing.Size (130,70)
 $b3.Size = New-Object System.Drawing.Size (75,23)
@@ -1379,34 +1312,23 @@ $b3.Text = 'Test 3'
 $b3.Add_Click({
     $prompt_message = 'Enter the Value'
     $caption = 'inputbox test'
-
     $o = TextInputBox -caption $caption -prompt_message $prompt_message
-    if ($o.status -match 'OK') {
-      $caller.Data = $o.Text
-      Write-Host ('-->"{0}"' -f $o.status)
-    }
-    $f.Close()
     <#  
     $o = New-Object -TypeName 'DialogBoxs.TextInputBox'
     [void]$o.Show($prompt_message,$caption)
-    $caller.Data = $o.Text
+    #>
+    if ($o.status -match 'OK') {
+      $caller.Data = $o.Text
+      Write-Host ('-->"{0}"' -f $o.status)
     $f.Close()
-#>
+    }
   })
 $f.Controls.Add($b3)
-
-
-
 $f.Name = "Form1"
 $f.Text = "XmlTreeView"
 $f.ResumeLayout($false)
-
 $f.Topmost = $Trues
-
 $f.Add_Shown({ $f.Activate() })
-
 [void]$f.ShowDialog($caller)
-
 $f.Dispose()
 Write-Output $caller.Data
-
