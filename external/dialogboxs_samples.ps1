@@ -924,7 +924,6 @@ function ChangePasswordDialogBox {
   $button_cancel.Text = "Cancel"
   $button_cancel.Add_Click({
       param([object]$sender,[System.EventArgs]$e)
-      param ([object]$sender,[System.EventArgs]$e)
       $script:result.status = [System.Windows.Forms.DialogResult]::Cancel
       $text_input.Text = ''
       $script:result.Text = ''
