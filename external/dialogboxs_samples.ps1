@@ -429,9 +429,133 @@ namespace DialogBoxs
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Drawing.dll','System.Data.dll','System.Xml.dll'
 
+function PopulateCombo ()
+{
+  param([string[]]$comboBoxItems)
+  for ($i = 0; $i -lt $comboBoxItems.Length; $i++)
+  {
+    $str = $comboBoxItems[$i]
+    if ($str -ne $null)
+    {
+      [void]$combobox.Items.Add($str)
+    }
+  }
+}
+
 function ComboInputBox {
 
+  param(
+    [string]$prompt_message = 'Select or Enter the Country',
+    [string[]]$items = @(),
+    [string]$caption = 'combo test'
+  )
+
+  $script:result = @{ 'text' = ''; 'status' = $null; }
+  $script:result.status = [System.Windows.Forms.DialogResult]::None;
+
+  $form = New-Object System.Windows.Forms.Form
+  $label_prompt = New-Object System.Windows.Forms.Label
+  $button_ok = New-Object System.Windows.Forms.Button
+  $button_cancel = New-Object System.Windows.Forms.Button
+  $combobox = New-Object System.Windows.Forms.ComboBox
+  $form.SuspendLayout()
+  $label_prompt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+  $label_prompt.BackColor = [System.Drawing.SystemColors]::Control
+  $label_prompt.Font = New-Object System.Drawing.Font ("Microsoft Sans Serif",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+  $label_prompt.Location = New-Object System.Drawing.Point (12,9)
+  $label_prompt.Name = "lblPrompt"
+  $label_prompt.Size = New-Object System.Drawing.Size (302,82)
+  $label_prompt.TabIndex = 3
+  $label_prompt.Font = New-Object System.Drawing.Font ("Verdana",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+  $button_ok.DialogResult = [System.Windows.Forms.DialogResult]::OK
+  $button_ok.FlatStyle = [System.Windows.Forms.FlatStyle]::Standard
+  $button_ok.Location = New-Object System.Drawing.Point (326,8)
+  $button_ok.Name = "btnOK"
+  $button_ok.Size = New-Object System.Drawing.Size (64,24)
+  $button_ok.TabIndex = 1
+  $button_ok.Text = "&OK"
+  $button_ok.Add_Click({
+      param([object]$sender,[System.EventArgs]$e)
+      $script:result.status = [System.Windows.Forms.DialogResult]::OK
+      $script:result.Text = $combobox.Text
+      $form.Dispose()
+
+    })
+  $button_ok.Font = New-Object System.Drawing.Font ("Verdana",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+  $button_cancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+  $button_cancel.FlatStyle = [System.Windows.Forms.FlatStyle]::Standard
+  $button_cancel.Location = New-Object System.Drawing.Point (326,40)
+  $button_cancel.Name = "btnCancel"
+  $button_cancel.Size = New-Object System.Drawing.Size (64,24)
+  $button_cancel.TabIndex = 2
+  $button_cancel.Text = "&Cancel"
+  $button_cancel.Add_Click({
+      param([object]$sender,[System.EventArgs]$e)
+      $script:result.status = [System.Windows.Forms.DialogResult]::Cancel
+      $script:result.Text = ''
+      $form.Dispose()
+
+    })
+  $button_cancel.Font = New-Object System.Drawing.Font ("Verdana",8.25,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+  $combobox.Location = New-Object System.Drawing.Point (8,100)
+  $combobox.Name = "CmBxComboBox"
+  $combobox.Size = New-Object System.Drawing.Size (379,20)
+  $combobox.TabIndex = 0
+  $combobox.Text = ""
+  $combobox.Font = New-Object System.Drawing.Font ("Verdana",8.25,[System.Drawing.FontStyle]::Regular,[System.Drawing.GraphicsUnit]::Point,0)
+  $combobox.Add_TextChanged({
+      param([object]$sender,[System.EventArgs]$e)
+
+    })
+
+  $combobox.Add_KeyPress({
+      param(
+        [object]$sender,[System.Windows.Forms.KeyPressEventArgs]$e
+      )
+
+    })
+  $combobox.Add_TextChanged({
+      param(
+        [object]$sender,[System.EventArgs]$e
+      )
+
+    })
+
+
+  $form.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
+  $form.ClientSize = New-Object System.Drawing.Size (398,128)
+  $form.Controls.AddRange(@($combobox,$button_cancel,$button_ok,$label_prompt))
+  $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+  $form.MaximizeBox = $false
+  $form.MinimizeBox = $false
+  $form.Name = "ComboBoxDialog"
+  $form.ResumeLayout($false)
+  $form.AcceptButton = $button_ok
+  $script:result.status = [System.Windows.Forms.DialogResult]::Ignore
+  $script:result.status = ''
+  PopulateCombo -comboBoxItems $items
+  $label_prompt.Text = $prompt_message
+  $form.Text = $caption
+  $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+  $combobox.SelectionStart = 0
+  $combobox.SelectionLength = $combobox.Text.Length
+  $combobox.Focus()
+  $form.Name = "Form1"
+  $form.ResumeLayout($false)
+
+  $form.Topmost = $True
+
+  $form.Add_Shown({ $form.Activate() })
+
+  [void]$form.ShowDialog($caller)
+
+  $form.Dispose()
+  $form = $null
+  return $script:result
+
 }
+
+
 Add-Type -TypeDefinition @"
 using System;
 using System.ComponentModel;
@@ -1276,12 +1400,18 @@ $b1.Add_Click({
       "Japan",
       "Thailand"
     )
-    $o = New-Object -TypeName 'DialogBoxs.ComboInputBox'
     $prompt_message = 'Select or Enter the Country'
     $caption = 'combo test'
+<#
+    $o = New-Object -TypeName 'DialogBoxs.ComboInputBox'
     [void]$o.Show($prompt_message,$caption,$countries)
-    $caller.Data = $o.Text
-    #  $f.Close()
+#>
+ 
+    $o = ComboInputBox -items $countries -caption  $caption -prompt_message  $prompt_message 
+    if ($o.status -match 'OK') {
+      $caller.Data = $o.Text
+    $f.Close()
+    }
   })
 $f.Controls.Add($b1)
 $b2 = New-Object System.Windows.Forms.Button
@@ -1299,7 +1429,6 @@ $b2.Add_Click({
     #>
     if ($o.status -match 'OK') {
       $caller.Data = $o.Text
-      Write-Host ('-->"{0}"' -f $o.status)
     $f.Close()
     }
 
@@ -1319,7 +1448,6 @@ $b3.Add_Click({
     #>
     if ($o.status -match 'OK') {
       $caller.Data = $o.Text
-      Write-Host ('-->"{0}"' -f $o.status)
     $f.Close()
     }
   })
