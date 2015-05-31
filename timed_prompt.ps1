@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2014,2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -117,28 +117,31 @@ function PromptAuto {
 
     })
 
-  $b1 = New-Object System.Windows.Forms.Button
-  $b1.Location = New-Object System.Drawing.Size (50,40)
-  $b1.Size = New-Object System.Drawing.Size (75,23)
-  $b1.Text = 'OK'
-  $b1.add_click({ $caller.Data = $RESULT_OK; $f.Close(); })
+  $button_ok = New-Object System.Windows.Forms.Button
+  $button_ok.Font = New-Object System.Drawing.Font ('Arial',10,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+  $button_ok.Location = New-Object System.Drawing.Size (50,46)
+  $button_ok.Size = New-Object System.Drawing.Size (75,23)
+  $button_ok.Text = 'OK'
+  $button_ok.add_click({ $caller.Data = $RESULT_OK; $f.Close(); })
   $p = New-Object TimerPanel
   $p.Size = $f.Size
 
-  $p.Controls.Add($b1)
+  $p.Controls.Add($button_ok)
   $end = (Get-Date -UFormat '%s')
   $end = ([int]$end + 60)
-  $b2 = New-Object System.Windows.Forms.Button
-  $b2.Location = New-Object System.Drawing.Size (130,40)
-  $b2.Size = New-Object System.Drawing.Size (75,23)
-  $b2.Text = 'Cancel'
-  $b2.add_click({
+  $button_cancel = New-Object System.Windows.Forms.Button
+  $button_cancel.Font = New-Object System.Drawing.Font ('Arial',10,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+  $button_cancel.Location = New-Object System.Drawing.Size (130,46)
+  $button_cancel.Size = New-Object System.Drawing.Size (75,23)
+  $button_cancel.Text = 'Cancel'
+  $button_cancel.add_click({
       $caller.Data = $RESULT_CANCEL
       $f.Close()
     })
-  $p.Controls.Add($b2)
+  $p.Controls.Add($button_cancel)
 
   $l = New-Object System.Windows.Forms.Label
+  $l.Font = New-Object System.Drawing.Font ('Arial',10,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
   $l.Location = New-Object System.Drawing.Size (10,20)
   $l.Size = New-Object System.Drawing.Size (280,20)
   $l.Text = $message
@@ -148,9 +151,9 @@ function PromptAuto {
   $p.Timer.Interval = 5000
   $p.Timer.Start()
   $p.Timer.add_Elapsed({
-      $start = (Get-Date -UFormat "%s")
+      $start = (Get-Date -UFormat '%s')
 
-      $elapsed = New-TimeSpan -Seconds ($start - $end)
+      $elapsed = New-TimeSpan -Seconds ($end - $start)
       $l.Text = ('Remaining time {0:00}:{1:00}:{2:00}' -f $elapsed.Hours,$elapsed.Minutes,$elapsed.Seconds,($end - $start))
 
       if ($end - $start -lt 0) {
@@ -171,7 +174,6 @@ function PromptAuto {
 
 Add-Type -TypeDefinition @" 
 
-// "
 using System;
 using System.Windows.Forms;
 public class Win32Window : IWin32Window
@@ -197,9 +199,10 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+
 $DebugPreference = 'Continue'
-$title = 'Prompt w/timeout'
-$message = "Continue ?"
+$title = 'Prompt with Timeout'
+$message = 'Continue ?'
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 
 PromptAuto -Title $title -Message $message -caller $caller
