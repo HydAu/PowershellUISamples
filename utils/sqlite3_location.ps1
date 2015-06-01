@@ -18,59 +18,83 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-
-# for Microsoft.VisualStudio.TestTools.UnitTesting.dll
+# For installed producs 
 
 function read_registry {
-  param([string]$registry_path,
+  param(
+    [string]$registry_hive = 'HKLM',
+    [string]$registry_path,
     [string]$package_name,
-    [string]$subfolder
+    [string]$subfolder = '',
+    [bool]$debug = $false
 
   )
 
-$install_location_result = $null
-pushd HKLM:
+  $install_location_result = $null
+  switch ($registry_hive) {
+    'HKLM' {
+      pushd HKLM:
+    }
 
-cd $registry_path
-$apps = Get-ChildItem -Path .
+    'HKCU' {
+      pushd HKCU:
+    }
 
-$apps | ForEach-Object {
-
-  $registry_key = $_
-
-
-  pushd $registry_key.Path
-  $values = $registry_key.GetValueNames()
-
-  if (-not ($values.GetType().BaseType.Name -match 'Array')) {
-    throw 'Unexpected result type'
+    default: {
+      throw ('Unrecognized registry hive: {0}' -f $registry_hive)
+    }
+  }
+  if ($debug) {
+    Get-ChildItem
+    popd
+    return
   }
 
+  cd $registry_path
 
-  $values | Where-Object { $_ -match '^DisplayName$' } | ForEach-Object {
+  $apps = Get-ChildItem -Path .
 
-    try {
-      $displayname_result = $registry_key.GetValue($_).ToString()
+  $apps | ForEach-Object {
 
-    } catch [exception]{
-      Write-Debug $_
+    $registry_key = $_
+
+    pushd $registry_key.Path
+    $values = $registry_key.GetValueNames()
+
+    if (-not ($values.GetType().BaseType.Name -match 'Array')) {
+      throw 'Unexpected result type'
     }
 
 
-    if ($displayname_result -ne $null -and $displayname_result -match "\b${package_name}\b") {
-      $values2 = $registry_key.GetValueNames()
-      $install_location_result = $null
-      $values2 | Where-Object { $_ -match '\bInstallLocation\b' } | ForEach-Object {
-        $install_location_result = $registry_key.GetValue($_).ToString()
-        Write-Host -ForegroundColor 'yellow' (($displayname_result, $registry_key.Name, $install_location_result)  -join "`r`n")
+    $values | Where-Object { $_ -match '^DisplayName$' } | ForEach-Object {
+
+      try {
+        $displayname_result = $registry_key.GetValue($_).ToString()
+
+      } catch [exception]{
+        Write-Debug $_
+      }
+
+
+      if ($displayname_result -ne $null -and $displayname_result -match "\b${package_name}\b") {
+        $values2 = $registry_key.GetValueNames()
+        $install_location_result = $null
+        $values2 | Where-Object { $_ -match '\bInstallLocation\b' } | ForEach-Object {
+          $install_location_result = $registry_key.GetValue($_).ToString()
+          Write-Host -ForegroundColor 'yellow' (($displayname_result,$registry_key.Name,$install_location_result) -join "`r`n")
+        }
       }
     }
+    popd
   }
   popd
-}
-popd
-return ( '{0}{1}' -f  $install_location_result , $subfolder )
+  if ($subfolder -ne '') {
+    return ('{0}{1}' -f $install_location_result,$subfolder)
+  } else {
+    return $install_location_result
+  }
 }
 
-$result = read_registry -subfolder 'bin' -registry_path '/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall/' -package_name 'System.Data.SQLite'
+# SQLite3 
+$result = read_registry -subfolder 'bin' -registry_path '/SOFTWARE/Microsoft/Windows/CurrentVersion/Uninstall/' -package_name 'System.Data.SQLite' -Debug $false
 $result
