@@ -1,4 +1,5 @@
 # http://stackoverflow.com/questions/4897655/create-shortcut-on-desktop-c-sharp
+# http://www.vbaccelerator.com/home/NET/Code/Libraries/Shell_Projects/Creating_and_Modifying_Shortcuts/article.asp
 # please note that
 # https://github.com/guitarrapc/PowerShellUtil/blob/master/SymbolicLink/Set-SynbolicLink.ps1
 # is not acceptable  solution 
@@ -58,7 +59,7 @@ namespace TestShellLink
             link.SetDescription("My Description");
             link.SetPath(_target_path);
 
-            // save it on All Users 
+            // All Users => Environment.SpecialFolder.CommonDesktopDirectory
             IPersistFile file = (IPersistFile)link;
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             string fullPath = Path.Combine(desktopPath, Path.Combine(String.Format(@"{0}\MyLink.lnk", _symbolic_path)));
