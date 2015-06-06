@@ -185,6 +185,15 @@ else {
       $cell_name = $_
       $cell_value = $data_record."${cell_name}"
       $row_data[$cell_name] = $cell_value
+
+<#    foreach ($myPsObject in $psObject) {
+      $myPsObject | Get-Member -MemberType *Property | % {
+        $output.($_.Name) = $myPsObject.($_.Name);
+      }
+      $output;
+    }
+
+#>
     }
     if (-not [bool]$PSBoundParameters["show"].IsPresent) {
       Write-Output ("row[{0}]" -f $row_num)
