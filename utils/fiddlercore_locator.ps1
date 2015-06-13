@@ -1,4 +1,4 @@
-#Copyright (c) 2014 Serguei Kouzmine
+#Copyright (c) 2014,2015 Serguei Kouzmine
 #
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -18,52 +18,31 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
+function fiddlercore_locator {
+  # makecert.exe is installed by FiddlerCode 
+  # TODO: modify package.nuget
+  # another option is to find makecert.exe in Microsoft Windows SDK directory
+  # Program Files\Microsoft SDKs\Windows\v7.0A\bin\makecert.exe
+  if (-not [environment]::Is64BitProcess) {
+    # TODO: verify on 64 bit machine
+    $path = '/Software/Telerik/FiddlerCoreAPI/'
+  } else {
+    $path = '/Software/Telerik/FiddlerCoreAPI/'
+  }
 
-# FiddlerCode 
-
-if (-not [environment]::Is64BitProcess) {
-  # TODO: verify 
-  $path = '/Software/Telerik/FiddlerCoreAPI/'
-} else {
-  $path = '/Software/Telerik/FiddlerCoreAPI/'
-}
-
-$hive = 'HKCU:'
-[string]$name = $null
-pushd $hive
-cd $path
-$fields = @( 'InstallPath')
-$fields | ForEach-Object {
-  $name = $_
-  # write-output $name
-  $result = Get-ItemProperty -Name $name -Path ('{0}/{1}' -f $hive,$path)
-  [string]$DisplayName = $null
-  [string]$Version = $null
   [string]$InstallPath = $null
-
+  $hive = 'HKCU:'
+  [string]$name = $null
+  pushd $hive
+  cd $path
+  $name = 'InstallPath'
+  $result = Get-ItemProperty -Name $name -Path ('{0}/{1}' -f $hive,$path)
   try {
-    $Version = $result.Version
-    $DisplayName = $result.DisplayName
-    $UninstallString = $result.UninstallString
     $InstallPath = $result.InstallPath
-
   } catch [exception]{
 
   }
-  if (($DisplayName -ne $null) -and ($DisplayName -ne '')) {
-    Write-Output ('DisplayName :  {0}' -f $DisplayName)
-  }
-  if (($Version -ne $null) -and ($Version -ne '')) {
-    Write-Output ('Version :  {0}' -f $Version)
-  }
-  if (($UninstallString -ne $null) -and ($UninstallString -ne '')) {
-    Write-Output ('UninstallString :  {0}' -f $UninstallString)
-  }
-  if (($InstallPath -ne $null) -and ($InstallPath -ne '')) {
-    Write-Output ('InstallPath :  {0}' -f $InstallPath)
-  }
-
+  Write-Debug ('InstallPath :  {0}' -f $InstallPath)
+  popd
+  return $InstallPath
 }
-popd
-
-
