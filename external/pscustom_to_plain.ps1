@@ -56,3 +56,11 @@ function ConvertTo-HashtableFromPsCustomObject {
 $x = @{'a' = @(1,2,3); 'b' = @{'e'= 10;};}
 $s = $x | convertto-json
 $z = $s | convertfrom-json
+# http://stackoverflow.com/questions/3740128/pscustomobject-to-hashtable
+# convert hash into PSCustomObject 
+$hash_obj = @{ A = 'a'; B = 'b'; DateTime = Get-Date }
+$pscustom_obj = new-object -typeName 'PSObject' -Property $hash_obj
+
+# Convert the PSCustomObject back to a hashtable
+$hash2_obj = @{}
+$pscustom_obj.psobject.properties | Foreach-Object { $hash2_obj[$_.Name] = $_.Value }
