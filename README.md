@@ -11,10 +11,12 @@ See the article at <a href="http://www.codeproject.com/Articles/799161/Dealing-w
 Individual Scripts
 ==================
 
-There is around 100 individual scripts.
+There is around 100 individual scripts, most of which are practical and can be easily used for common operations tasks. 
 
 Finished Scripts
 ----------------
+
+
 |script|description 
 | -------|:-------------:|
 | accordion_menu.ps1||
@@ -85,10 +87,91 @@ Finished Scripts
 | xaml_tooltip_management.ps1||
 
 
-Note that all Selenium-related scripts are now in separate [powershell_selenium](https://github.com/sergueik/powershell_selenium.git) repository .
+Utility scripts often have no UI,  these are simply common utilities.
+
+| utils/acl_loop.ps1||
+| utils/artifactory_client_smoke_test.groovy||
+| utils/artifactory_retension_script.groovy||
+| utils/autoadmin_logon.ps1||
+| utils/compressed_log.ps1||
+| utils/compute_folder_size.ps1||
+| utils/convert_vs2013_to_vs2010.txt||
+| utils/custom_filterector.ps1||
+| utils/custom_timer.ps1||
+| utils/download_spoon.ps1||
+| utils/download_spoon2.ps1||
+| utils/dumper.psm1||
+| utils/error_codes.ps1||
+| utils/examine_json.groovy||
+| utils/exclude_expr_test.ps1||
+| utils/fix_w2k3.ps1||
+| utils/from_file.ps1||
+| utils/generate_jenkins_xml.ps1||
+| utils/get-delegate.ps1||
+| utils/go_nogo_validators.ps1||
+| utils/hashed_backup.ps1||
+| utils/hash_files.ps1||
+| utils/healthcheck_with_proxy.ps1||
+| utils/hosts_collector.ps1||
+| utils/internals_collector.ps1||
+| utils/invoke_sp.ps1||
+| utils/jar_loader_scriptler.groovy||
+| utils/jenkins.new.xml||
+| utils/job_parameter_loader.groovy||
+| utils/mklink_soft.ps1||
+| utils/mongod.cmd||
+| utils/mongo_client.ps1||
+| utils/networks.ps1||
+| utils/network_addresses.ps1||
+| utils/nlog.config||
+| utils/octopus_api.ps1||
+| utils/onetimesecret_example.ps1||
+| utils/page_with_proxy.ps1||
+| utils/populate_transfer.ps1||
+| utils/probe_dependent_jars.groovy||
+| utils/probe_environment.groovy||
+| utils/redirect_workaround.ps1||
+| utils/role_injector8-1.ps1||
+| utils/role_injector8.ps1||
+| utils/RunScripts_ExitCode_Final.groovy||
+| utils/sample.wsdl||
+| utils/schedule_service_wrapper.ps1||
+| utils/schtashs_wrapper.ps1||
+| utils/screen2_resolution.ps1||
+| utils/set_environment.ps1||
+| utils/set_first_execution_policy.cmd||
+| utils/set_grid_HUB.xml||
+| utils/set_wallpaper.ps1||
+| utils/simplebrowser_webdriver.ps1||
+| utils/simple_nlog.ps1||
+| utils/sqlite3_locator.ps1||
+| utils/step4.ps1||
+| utils/stop_displaying_windows_server_manager.ps1||
+| utils/test-get-delegate.ps1||
+| utils/test.properties||
+| utils/testr.ps1||
+| utils/update_configurations_xml.ps1||
+| utils/update_configurations_xml2.ps1||
+| utils/update_configurations_xml3.ps1||
+| utils/update_json.ps1||
+| utils/update_xml_calls.ps1||
+| utils/user_agent_splunk_stats.ps1||
+| utils/validate_apppools.ps1||
+| utils/validate_smtp_configuration.ps1||
+| utils/verify_site_status.ps1||
+| utils/vnc_check.txt||
+| utils/window_dimension_test.ps1||
+| utils/winrm_configure.ps1||
+| utils/wmi_ping.ps1||
+
+
+Note that most (all?) Selenium-related scripts are now in separate [powershell_selenium](https://github.com/sergueik/powershell_selenium.git) repository .
 
 Unfinished and work in progress
 -------------------------------
+
+Some scripts in this set are pure eye candy or too brittle to be of much practical use 
+
 |script|description 
 | -------|:-------------:|
 | external/animated.ps1||
@@ -211,5 +294,9 @@ Unfinished and work in progress
 | unfinished/warm_server.ps1||
 | unfinished/with_cursor.ps1||
 | unfinished/xaml_datepicker.ps1||
-| -------|:-------------:|
 
+
+
+Author
+------
+[Serguei Kouzmine](kouzmine_serguei@yahoo.com)
