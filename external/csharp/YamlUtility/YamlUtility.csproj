@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0716F257-72DD-41EF-8E79-54BA388E3AB1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QiHe.Yaml</RootNamespace>
+    <AssemblyName>YamlUtility</AssemblyName>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DebugSymbols>true</DebugSymbols>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeLib\FileSelector.cs" />
+    <Compile Include="CodeLib\Pair.cs" />
+    <Compile Include="CodeLib\StringHelper.cs" />
+    <Compile Include="FileFormat\Yaml\Custom\BlockScalarModifier.cs" />
+    <Compile Include="FileFormat\Yaml\Custom\ChompingMethod.cs" />
+    <Compile Include="FileFormat\Yaml\Custom\MappingEntry.cs" />
+    <Compile Include="FileFormat\Yaml\Custom\Scalar.cs" />
+    <Compile Include="FileFormat\Yaml\Custom\YamlDocument.cs" />
+    <Compile Include="FileFormat\Yaml\ParserInput.cs" />
+    <Compile Include="FileFormat\Yaml\Syntax\BlockScalarModifier.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\DataItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\Directive.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\GlobalTagPrefix.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\LocalTagPrefix.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\Mapping.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\MappingEntry.cs" />
+    <Compile Include="FileFormat\Yaml\Syntax\NamedTagHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\NodeProperty.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\NonSpecificTag.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\PrimaryTagHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\ReservedDirective.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\Scalar.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\SecondaryTagHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\Sequence.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\ShorthandTag.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\Tag.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\TagDirective.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\TagHandle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\TagPrefix.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\VerbatimTag.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\YamlDirective.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\YamlDocument.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\YamlStream.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\Syntax\YamlVersion.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileFormat\Yaml\TextInput.cs" />
+    <Compile Include="FileFormat\Yaml\TextParserCommon.cs" />
+    <Compile Include="MiscTools\YamlUtility\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MiscTools\YamlUtility\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MiscTools\YamlUtility\Program.cs" />
+    <Compile Include="MiscTools\YamlUtility\YamlEmittor.cs" />
+    <Compile Include="FileFormat\Yaml\YamlParser.cs" />
+    <Compile Include="FileFormat\Yaml\ParserCustom.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="CodeLib\UI\Controls\FileBrower.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FileFormat\Yaml\YAML.PEG.txt" />
+    <Content Include="FileFormat\Yaml\YAML.txt" />
+    <Content Include="FileFormat\Yaml\YAML_Sample.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MiscTools\YamlUtility\MainForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeLib\UI\Controls\FileBrower.resx">
+      <DependentUpon>FileBrower.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
