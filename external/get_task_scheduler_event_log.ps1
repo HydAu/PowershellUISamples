@@ -17,7 +17,7 @@ $events |foreach {
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader.eventrecord_properties%28v=vs.110%29.aspx
 # http://stackoverflow.com/questions/8567368/eventlogquery-time-format-expected/8575390#8575390
 
-Add-Type @"
+Add-Type -IgnoreWarnings @"
 
 using System;
 using System.Diagnostics.Eventing.Reader;
@@ -141,4 +141,6 @@ load_shared_assemblies -shared_assemblies 'YamlDotNet.dll','YamlDotNet.dll' -sha
   <package id="NUnit" version="2.6.3" targetFramework="net40" />
   <package id="YamlDotNet" version="3.5.0" targetFramework="net40" />
 </packages>
+Add-Type : (0) : Warning as Error: The predefined type 'System.Runtime.CompilerServices.ExtensionAttribute' is defined in multiple assemblies in the global alias; using definition from 'c:\Windows\Microsoft.NET\Framework\v4.0.30319\mscorlib.dll'
+(1) :
 #>
