@@ -3,20 +3,26 @@
 
 
 # slow
+$events_object = @()
 $last_hour = (get-date) - (new-timespan -hour 1)
 $events = get-winevent -FilterHashtable @{logname = "Microsoft-Windows-TaskScheduler/Operational"; level = "4"; StartTime = $last_hour}
 $events |foreach {
-    $_
+    $events_object += $_
 }
+
+# $events_object | convertto-json -depth 10
+# return
 
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader%28v=vs.100%29.aspx
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader.eventrecord_properties%28v=vs.110%29.aspx
 # http://stackoverflow.com/questions/8567368/eventlogquery-time-format-expected/8575390#8575390
+
 Add-Type @"
+
 using System;
 using System.Diagnostics.Eventing.Reader;
 using System.Security;
-
+using Newtonsoft.Json;
 namespace EventQuery
 {
     public class EventQueryExample
@@ -44,6 +50,8 @@ namespace EventQuery
             for (EventRecord eventInstance = logReader.ReadEvent();
                 null != eventInstance; eventInstance = logReader.ReadEvent())
             {
+
+                string eventlog_string = JsonConvert.SerializeObject(eventInstance );
                 Console.WriteLine("-----------------------------------------------------");
                 Console.WriteLine("Event ID: {0}", eventInstance.Id);
                 Console.WriteLine("Level: {0}", eventInstance.Level);
@@ -75,9 +83,62 @@ namespace EventQuery
     }
 }
 
-"@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll'
+"@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll', 'c:\developer\sergueik\csharp\appium-skeleton\packages\Newtonsoft.Json.6.0.8\lib\net20\Newtonsoft.Json.dll' 
+# -CompilerParameters   '/nowarn'
+# You cannot use the CompilerParameters and ReferencedAssemblies parameters in the same command.
 
 $o = new-object 'EventQuery.EventQueryExample'
 $o.QueryActiveLog()
 # http://blogs.msdn.com/b/davethompson/archive/2011/10/25/running-a-scheduled-task-after-another.aspx
 # http://michal.is/blog/query-the-event-log-with-c-net/
+
+
+<#
+.SYNOPSIS
+	Loads calller-provided list of .net assembly dlls or fails with a custom exception
+	
+.DESCRIPTION
+	Loads calller-provided list of .net assembly dlls or fails with a custom exception    
+.EXAMPLE
+	load_shared_assemblies -shared_assemblies_path 'c:\tools' -shared_assemblies @('WebDriver.dll','WebDriver.Support.dll','nunit.framework.dll')
+.LINK 
+	
+	
+.NOTES
+
+	VERSION HISTORY
+	2015/06/22 Initial Version
+#>
+
+function load_shared_assemblies {
+
+  param(
+    [string]$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies',
+
+    [string[]]$shared_assemblies = @(
+      'WebDriver.dll',
+      'WebDriver.Support.dll',
+      'nunit.core.dll',
+      'nunit.framework.dll'
+    )
+  )
+  pushd $shared_assemblies_path
+
+  $shared_assemblies | ForEach-Object {
+    Unblock-File -Path $_;
+    # Write-Debug $_
+    Add-Type -Path $_ }
+  popd
+} 
+
+load_shared_assemblies -shared_assemblies 'Newtonsoft.Json.dll'
+load_shared_assemblies -shared_assemblies 'YamlDotNet.dll','YamlDotNet.dll' -shared_assemblies_path 'C:\developer\sergueik\powershell_ui_samples\external\csharp\YamlUtility\packages\YamlDotNet.3.5.0\lib\net35' 
+
+
+<#
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="NUnit" version="2.6.3" targetFramework="net40" />
+  <package id="YamlDotNet" version="3.5.0" targetFramework="net40" />
+</packages>
+#>
