@@ -1,6 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
+# SharpDevelop 5.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamlUtility", "YamlUtility.csproj", "{0716F257-72DD-41EF-8E79-54BA388E3AB1}"
 EndProject
 Global
