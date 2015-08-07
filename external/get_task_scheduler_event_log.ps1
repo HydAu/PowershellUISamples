@@ -1,21 +1,50 @@
+#Copyright (c) 2015 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 # http://www.adamtheautomator.com/powershell-event-logs/
 # https://powertoe.wordpress.com/2009/1a2/30/powershell-and-scheduled-task-logs/
 
 
-# slow
+# slow version
 $events_object = @()
 $last_hour = (get-date) - (new-timespan -hour 1)
 $events = get-winevent -FilterHashtable @{logname = "Microsoft-Windows-TaskScheduler/Operational"; level = "4"; StartTime = $last_hour}
 $events |foreach {
     $events_object += $_
 }
+write-output ('Result: {0} rows' -f $events_object.count)
+write-output 'Sample entry:'
+$events_object  | select-object -first 1 
+
 
 # $events_object | convertto-json -depth 10
 # return
 
+# fast version
+
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader%28v=vs.100%29.aspx
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader.eventrecord_properties%28v=vs.110%29.aspx
 # http://stackoverflow.com/questions/8567368/eventlogquery-time-format-expected/8575390#8575390
+# http://blogs.msdn.com/b/davethompson/archive/2011/10/25/running-a-scheduled-task-after-another.aspx
+# http://michal.is/blog/query-the-event-log-with-c-net/
 
 # suppress the warning:
 # Add-Type : (0) : Warning as Error: The predefined type 'System.Runtime.CompilerServices.ExtensionAttribute' is defined in multiple assemblies in the global alias; using definition from 'c:\Windows\Microsoft.NET\Framework\v4.0.30319\mscorlib.dll'
@@ -48,6 +77,27 @@ namespace EventQuery
 
         }
 
+        private String _query = @"<QueryList>" +
+                  "<Query Id=\"0\" Path=\"Microsoft-Windows-TaskScheduler/Operational\">" +
+                  "<Select Path=\"Microsoft-Windows-TaskScheduler/Operational\">" +
+                  "*[System[(Level=1  or Level=2 or Level=3 or Level=4) and " +
+                  "TimeCreated[timediff(@SystemTime) &lt;= 14400000]]]" + "</Select>" +
+                  "</Query>" +
+                  "</QueryList>";
+        public String Query
+        {
+            get
+            {
+                return _query;
+            }
+            set
+            {
+                _query = value;
+            }
+
+        }
+
+
         public object[] QueryActiveLog()
         {
             // TODO: Extend structured query to two different event logs.
@@ -60,7 +110,7 @@ namespace EventQuery
                   "</Query>" +
                   "</QueryList>";
 
-            EventLogQuery eventsQuery = new EventLogQuery("Application", PathType.LogName, queryString);
+            EventLogQuery eventsQuery = new EventLogQuery("Application", PathType.LogName, Query);
             EventLogReader logReader = new EventLogReader(eventsQuery);
             return DisplayEventAndLogInformation(logReader);
 
@@ -122,46 +172,19 @@ namespace EventQuery
 "@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll', 'c:\developer\sergueik\csharp\appium-skeleton\packages\Newtonsoft.Json.6.0.8\lib\net20\Newtonsoft.Json.dll' 
 
 $o = new-object 'EventQuery.EventQueryExample'
+$o.Query = @"
+<QueryList>
+<Query Id="0" Path="Microsoft-Windows-TaskScheduler/Operational">
+<Select Path="Microsoft-Windows-TaskScheduler/Operational">*[System[Level=4 and TimeCreated[timediff(@SystemTime) &lt;= 3600000]]]</Select>
+</Query>
+</QueryList>
+"@
 $o.Verbose = $false
+write-output ("Query:`r`n{0}" -f $o.Query)
 $r = $o.QueryActiveLog()
-$r  | select-object -first 1 
-# http://blogs.msdn.com/b/davethompson/archive/2011/10/25/running-a-scheduled-task-after-another.aspx
-# http://michal.is/blog/query-the-event-log-with-c-net/
-
-function load_shared_assemblies {
-
-  param(
-    [string]$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies',
-
-    [string[]]$shared_assemblies = @(
-      'WebDriver.dll',
-      'WebDriver.Support.dll',
-      'nunit.core.dll',
-      'nunit.framework.dll'
-    )
-  )
-  pushd $shared_assemblies_path
-
-  $shared_assemblies | ForEach-Object {
-    Unblock-File -Path $_;
-    # Write-Debug $_
-    Add-Type -Path $_ }
-  popd
-} 
-
-load_shared_assemblies -shared_assemblies 'Newtonsoft.Json.dll'
-load_shared_assemblies -shared_assemblies 'YamlDotNet.dll','YamlDotNet.dll' -shared_assemblies_path 'C:\developer\sergueik\powershell_ui_samples\external\csharp\YamlUtility\packages\YamlDotNet.3.5.0\lib\net35' 
-
-
-<#
-<?xml version="1.0" encoding="utf-8"?>
-<packages>
-  <package id="NUnit" version="2.6.3" targetFramework="net40" />
-  <package id="YamlDotNet" version="3.5.0" targetFramework="net40" />
-</packages>
-(1) :
-#>
-
+write-output ('Result: {0} rows' -f $r.count)
+write-output 'Sample entry:'
+$r  | select-object -first 1  | convertfrom-json
 <#
 {
     "Id": 102,
