@@ -17,20 +17,41 @@ $events |foreach {
 # https://msdn.microsoft.com/en-us/library/system.diagnostics.eventing.reader.eventrecord_properties%28v=vs.110%29.aspx
 # http://stackoverflow.com/questions/8567368/eventlogquery-time-format-expected/8575390#8575390
 
+# suppress the warning:
+# Add-Type : (0) : Warning as Error: The predefined type 'System.Runtime.CompilerServices.ExtensionAttribute' is defined in multiple assemblies in the global alias; using definition from 'c:\Windows\Microsoft.NET\Framework\v4.0.30319\mscorlib.dll'
+# One cannot use the CompilerParameters and ReferencedAssemblies parameters in the same command.
+
 Add-Type -IgnoreWarnings @"
 
 using System;
 using System.Diagnostics.Eventing.Reader;
 using System.Security;
+using System.Collections;
 using Newtonsoft.Json;
+
 namespace EventQuery
 {
     public class EventQueryExample
     {
-        public void QueryActiveLog()
+        // log the entries to console
+        private bool _verbose;
+        public bool Verbose
+        {
+            get
+            {
+                return _verbose;
+            }
+            set
+            {
+                _verbose = value;
+            }
+
+        }
+
+        public object[] QueryActiveLog()
         {
             // TODO: Extend structured query to two different event logs.
-            string queryString = 
+            string queryString =
                  @"<QueryList>" +
                   "<Query Id=\"0\" Path=\"Microsoft-Windows-TaskScheduler/Operational\">" +
                   "<Select Path=\"Microsoft-Windows-TaskScheduler/Operational\">" +
@@ -41,33 +62,41 @@ namespace EventQuery
 
             EventLogQuery eventsQuery = new EventLogQuery("Application", PathType.LogName, queryString);
             EventLogReader logReader = new EventLogReader(eventsQuery);
-            DisplayEventAndLogInformation(logReader);
+            return DisplayEventAndLogInformation(logReader);
 
         }
 
-        private void DisplayEventAndLogInformation(EventLogReader logReader)
+        private object[] DisplayEventAndLogInformation(EventLogReader logReader)
         {
+            ArrayList eventlog_json_array = new ArrayList();
             for (EventRecord eventInstance = logReader.ReadEvent();
                 null != eventInstance; eventInstance = logReader.ReadEvent())
             {
 
-                string eventlog_string = JsonConvert.SerializeObject(eventInstance );
-                Console.WriteLine("-----------------------------------------------------");
-                Console.WriteLine("Event ID: {0}", eventInstance.Id);
-                Console.WriteLine("Level: {0}", eventInstance.Level);
-                Console.WriteLine("LevelDisplayName: {0}", eventInstance.LevelDisplayName);
-                Console.WriteLine("Opcode: {0}", eventInstance.Opcode);
-                Console.WriteLine("OpcodeDisplayName: {0}", eventInstance.OpcodeDisplayName);
-                Console.WriteLine("TimeCreated: {0}", eventInstance.TimeCreated);
+                string eventlog_json = JsonConvert.SerializeObject(eventInstance);
+                eventlog_json_array.Add(eventlog_json);
 
-                Console.WriteLine("Publisher: {0}", eventInstance.ProviderName);
-
+                if (Verbose)
+                {
+                    Console.WriteLine("-----------------------------------------------------");
+                    Console.WriteLine("Event ID: {0}", eventInstance.Id);
+                    Console.WriteLine("Level: {0}", eventInstance.Level);
+                    Console.WriteLine("LevelDisplayName: {0}", eventInstance.LevelDisplayName);
+                    Console.WriteLine("Opcode: {0}", eventInstance.Opcode);
+                    Console.WriteLine("OpcodeDisplayName: {0}", eventInstance.OpcodeDisplayName);
+                    Console.WriteLine("TimeCreated: {0}", eventInstance.TimeCreated);
+                    Console.WriteLine("Publisher: {0}", eventInstance.ProviderName);
+                }
                 try
                 {
-                    Console.WriteLine("Description: {0}", eventInstance.FormatDescription());
+                    if (Verbose)
+                    {
+                        Console.WriteLine("Description: {0}", eventInstance.FormatDescription());
+                    }
                 }
                 catch (EventLogException)
                 {
+
                     // The event description contains parameters, and no parameters were 
                     // passed to the FormatDescription method, so an exception is thrown.
 
@@ -76,39 +105,28 @@ namespace EventQuery
                 // Cast the EventRecord object as an EventLogRecord object to 
                 // access the EventLogRecord class properties
                 EventLogRecord logRecord = (EventLogRecord)eventInstance;
-                Console.WriteLine("Container Event Log: {0}", logRecord.ContainerLog);
+                if (Verbose)
+                {
+
+                    Console.WriteLine("Container Event Log: {0}", logRecord.ContainerLog);
+                }
             }
+            object[] result = eventlog_json_array.ToArray();
+            return result;
         }
+
 
     }
 }
 
 "@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll', 'c:\developer\sergueik\csharp\appium-skeleton\packages\Newtonsoft.Json.6.0.8\lib\net20\Newtonsoft.Json.dll' 
-# -CompilerParameters   '/nowarn'
-# You cannot use the CompilerParameters and ReferencedAssemblies parameters in the same command.
 
 $o = new-object 'EventQuery.EventQueryExample'
-$o.QueryActiveLog()
+$o.Verbose = $false
+$r = $o.QueryActiveLog()
+$r  | select-object -first 1 
 # http://blogs.msdn.com/b/davethompson/archive/2011/10/25/running-a-scheduled-task-after-another.aspx
 # http://michal.is/blog/query-the-event-log-with-c-net/
-
-
-<#
-.SYNOPSIS
-	Loads calller-provided list of .net assembly dlls or fails with a custom exception
-	
-.DESCRIPTION
-	Loads calller-provided list of .net assembly dlls or fails with a custom exception    
-.EXAMPLE
-	load_shared_assemblies -shared_assemblies_path 'c:\tools' -shared_assemblies @('WebDriver.dll','WebDriver.Support.dll','nunit.framework.dll')
-.LINK 
-	
-	
-.NOTES
-
-	VERSION HISTORY
-	2015/06/22 Initial Version
-#>
 
 function load_shared_assemblies {
 
@@ -141,6 +159,48 @@ load_shared_assemblies -shared_assemblies 'YamlDotNet.dll','YamlDotNet.dll' -sha
   <package id="NUnit" version="2.6.3" targetFramework="net40" />
   <package id="YamlDotNet" version="3.5.0" targetFramework="net40" />
 </packages>
-Add-Type : (0) : Warning as Error: The predefined type 'System.Runtime.CompilerServices.ExtensionAttribute' is defined in multiple assemblies in the global alias; using definition from 'c:\Windows\Microsoft.NET\Framework\v4.0.30319\mscorlib.dll'
 (1) :
+#>
+
+<#
+{
+    "Id": 102,
+    "Version": 0,
+    "Qualifiers": null,
+    "Level": 4,
+    "Task": 102,
+    "Opcode": 2,
+    "Keywords": -9223372036854775807,
+    "RecordId": 18359,
+    "ProviderName": "Microsoft-Windows-TaskScheduler",
+    "ProviderId": "de7b24ea-73c8-4a09-985d-5bdadcfa9017",
+    "LogName": "Microsoft-Windows-TaskScheduler/Operational",
+    "ProcessId": 436,
+    "ThreadId": 2692,
+    "MachineName": "sergueik42",
+    "UserId": {
+        "BinaryLength": 12,
+        "AccountDomainSid": null,
+        "Value": "S-1-5-18"
+    },
+    "TimeCreated": "2015-08-06T20:12:25.3151096-04:00",
+    "ActivityId": "bcd9f31f-286e-49e5-8d64-9e398bfe213d",
+    "RelatedActivityId": null,
+    "ContainerLog": "Microsoft-Windows-TaskScheduler/Operational",
+    "MatchedQueryIds": [],
+    "Bookmark": {
+        "BookmarkText": "<BookmarkList>\r\n  <Bookmark Channel='Microsoft-Windows-TaskScheduler/Operational' RecordId='18359' IsCurrent='true'/>\r\n</BookmarkList>"
+    },
+    "LevelDisplayName": "Information",
+    "OpcodeDisplayName": "Stop",
+    "TaskDisplayName": "Task completed",
+    "KeywordsDisplayNames": [],
+    "Properties": [{
+        "Value": "\\Microsoft\\Windows\\RAC\\RacTask"
+    }, {
+        "Value": "NT AUTHORITY\\LOCAL SERVICE"
+    }, {
+        "Value": "bcd931f-286e-49e5-8d64-9e398bfe213d"
+    }]
+}
 #>
