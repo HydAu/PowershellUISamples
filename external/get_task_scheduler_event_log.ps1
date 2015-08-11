@@ -60,7 +60,7 @@ using Newtonsoft.Json;
 
 namespace EventQuery
 {
-    public class EventQueryExample
+    public class EventQueryExampleEmbedded
     {
         // log the entries to console
         private bool _verbose;
@@ -101,30 +101,25 @@ namespace EventQuery
         public object[] QueryActiveLog()
         {
             // TODO: Extend structured query to two different event logs.
-            string queryString =
-                 @"<QueryList>" +
-                  "<Query Id=\"0\" Path=\"Microsoft-Windows-TaskScheduler/Operational\">" +
-                  "<Select Path=\"Microsoft-Windows-TaskScheduler/Operational\">" +
-                  "*[System[(Level=1  or Level=2 or Level=3 or Level=4) and " +
-                  "TimeCreated[timediff(@SystemTime) &lt;= 14400000]]]" + "</Select>" +
-                  "</Query>" +
-                  "</QueryList>";
-
             EventLogQuery eventsQuery = new EventLogQuery("Application", PathType.LogName, Query);
             EventLogReader logReader = new EventLogReader(eventsQuery);
             return DisplayEventAndLogInformation(logReader);
-
         }
 
         private object[] DisplayEventAndLogInformation(EventLogReader logReader)
         {
-            ArrayList eventlog_json_array = new ArrayList();
+            ArrayList eventlog_json_arraylist = new ArrayList();
             for (EventRecord eventInstance = logReader.ReadEvent();
                 null != eventInstance; eventInstance = logReader.ReadEvent())
             {
 
-                string eventlog_json = JsonConvert.SerializeObject(eventInstance);
-                eventlog_json_array.Add(eventlog_json);
+	
+                string eventlog_json = null;
+                try { eventlog_json =  JsonConvert.SerializeObject(eventInstance);
+		} catch (Exception e){
+			// Assert
+		}
+                eventlog_json_arraylist.Add(eventlog_json);
 
                 if (Verbose)
                 {
@@ -157,11 +152,10 @@ namespace EventQuery
                 EventLogRecord logRecord = (EventLogRecord)eventInstance;
                 if (Verbose)
                 {
-
                     Console.WriteLine("Container Event Log: {0}", logRecord.ContainerLog);
                 }
             }
-            object[] result = eventlog_json_array.ToArray();
+            object[] result = eventlog_json_arraylist.ToArray();
             return result;
         }
 
@@ -169,9 +163,17 @@ namespace EventQuery
     }
 }
 
-"@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll', 'c:\developer\sergueik\csharp\appium-skeleton\packages\Newtonsoft.Json.6.0.8\lib\net20\Newtonsoft.Json.dll' 
+"@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll', 'C:\developer\sergueik\csharp\SharedAssemblies\Newtonsoft.Json.dll' 
+# Newtonsoft.Json is extemently brittle
+# http://stackoverflow.com/questions/22685530/could-not-load-file-or-assembly-newtonsoft-json-or-one-of-its-dependencies-ma
+# switch to http://www.codeproject.com/Articles/785293/Json-Parser-Viewer-and-Serializer
 
-$o = new-object 'EventQuery.EventQueryExample'
+write-output 'Running embedded assembly:'
+
+$o = new-object 'EventQuery.EventQueryExampleEmbedded' -erroraction 'SilentlyContinue'
+
+
+
 $o.Query = @"
 <QueryList>
 <Query Id="0" Path="Microsoft-Windows-TaskScheduler/Operational">
@@ -181,10 +183,66 @@ $o.Query = @"
 "@
 $o.Verbose = $false
 write-output ("Query:`r`n{0}" -f $o.Query)
-$r = $o.QueryActiveLog()
+try{
+$r = $o.QueryActiveLog() 
+} catch [Exception] { 
+
+}
+
 write-output ('Result: {0} rows' -f $r.count)
 write-output 'Sample entry:'
 $r  | select-object -first 1  | convertfrom-json
+
+
+function load_shared_assemblies {
+
+  param(
+    [string]$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies',
+
+    [string[]]$shared_assemblies = @(
+      'WebDriver.dll',
+      'WebDriver.Support.dll',
+      'nunit.core.dll',
+      'nunit.framework.dll'
+    )
+  )
+  pushd $shared_assemblies_path
+
+  $shared_assemblies | ForEach-Object {
+    Unblock-File -Path $_;
+    # Write-Debug $_
+    Add-Type -Path $_ }
+  popd
+}
+
+
+
+load_shared_assemblies -shared_assemblies_path 'C:\developer\sergueik\powershell_ui_samples\external\csharp\event_query\Program\bin\Debug' -shared_assemblies  @('EventQuery.dll','Newtonsoft.Json.dll')
+
+write-output 'Running pre-compiled assembly:'
+
+$o = new-object 'EventQuery.EventQueryExample' -erroraction 'SilentlyContinue'
+
+
+$o.Query = @"
+<QueryList>
+<Query Id="0" Path="Microsoft-Windows-TaskScheduler/Operational">
+<Select Path="Microsoft-Windows-TaskScheduler/Operational">*[System[Level=4 and TimeCreated[timediff(@SystemTime) &lt;= 3600000]]]</Select>
+</Query>
+</QueryList>
+"@
+$o.Verbose = $false
+write-output ("Query:`r`n{0}" -f $o.Query)
+try{
+$r = $o.QueryActiveLog() 
+} catch [Exception] { 
+
+}
+
+write-output ('Result: {0} rows' -f $r.count)
+write-output 'Sample entry:'
+$r  | select-object -first 1  | convertfrom-json
+
 <#
 {
     "Id": 102,
