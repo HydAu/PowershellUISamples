@@ -53,10 +53,14 @@ $events_object  | select-object -first 1
 Add-Type -IgnoreWarnings @"
 
 using System;
+using System.IO;
 using System.Diagnostics.Eventing.Reader;
 using System.Security;
 using System.Collections;
-using Newtonsoft.Json;
+// see also
+// https://github.com/ricardotealdi/Simple.Serializer
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
 namespace EventQuery
 {
@@ -64,6 +68,8 @@ namespace EventQuery
     {
         // log the entries to console
         private bool _verbose;
+        private bool _seen_error = false;
+
         public bool Verbose
         {
             get
@@ -108,19 +114,33 @@ namespace EventQuery
 
         private object[] DisplayEventAndLogInformation(EventLogReader logReader)
         {
+            string event_instance_json_string = null;
             ArrayList eventlog_json_arraylist = new ArrayList();
             for (EventRecord eventInstance = logReader.ReadEvent();
                 null != eventInstance; eventInstance = logReader.ReadEvent())
             {
+                try
+                {
+                    event_instance_json_string = null;
+                    MemoryStream event_instance_stream = new MemoryStream();
+                    DataContractJsonSerializer event_instance_serializer =
+                      new DataContractJsonSerializer(typeof(EventRecord));
+                    event_instance_serializer.WriteObject(event_instance_stream, eventInstance);
 
-	
-                string eventlog_json = null;
-                try { eventlog_json =  JsonConvert.SerializeObject(eventInstance);
-		} catch (Exception e){
-			// Assert
-		}
-                eventlog_json_arraylist.Add(eventlog_json);
-
+                    event_instance_stream.Position = 0;
+                    var event_instance_json_streamreader = new StreamReader(event_instance_stream);
+                    event_instance_json_string = event_instance_json_streamreader.ReadToEnd();
+                    Console.WriteLine(event_instance_json_string);
+                }
+                catch (Exception e)
+                {
+                    if (!_seen_error)
+                    {
+                        Console.WriteLine(e.ToString());
+                    }
+                    _seen_error = true;
+                }
+                eventlog_json_arraylist.Add(event_instance_json_string);
                 if (Verbose)
                 {
                     Console.WriteLine("-----------------------------------------------------");
@@ -158,12 +178,10 @@ namespace EventQuery
             object[] result = eventlog_json_arraylist.ToArray();
             return result;
         }
-
-
     }
 }
 
-"@ -ReferencedAssemblies 'System.dll', 'System.Security.dll', 'System.Core.dll', 'C:\developer\sergueik\csharp\SharedAssemblies\Newtonsoft.Json.dll' 
+"@ -ReferencedAssemblies 'System.dll', 'System.Xml.dll', 'System.Security.dll', 'System.Core.dll', 'System.Runtime.Serialization.dll' 
 # Newtonsoft.Json is extemently brittle
 # http://stackoverflow.com/questions/22685530/could-not-load-file-or-assembly-newtonsoft-json-or-one-of-its-dependencies-ma
 # switch to http://www.codeproject.com/Articles/785293/Json-Parser-Viewer-and-Serializer
@@ -185,15 +203,17 @@ $o.Verbose = $false
 write-output ("Query:`r`n{0}" -f $o.Query)
 try{
 $r = $o.QueryActiveLog() 
-} catch [Exception] { 
+  } catch [exception]{
+    # Ignore errors if unable to close the browser
+    Write-Output (($_.Exception.Message) -split "`n")[0]
 
-}
+  }
 
 write-output ('Result: {0} rows' -f $r.count)
 write-output 'Sample entry:'
 $r  | select-object -first 1  | convertfrom-json
 
-
+return
 function load_shared_assemblies {
 
   param(
