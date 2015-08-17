@@ -44,7 +44,7 @@ function run_helper_assembly
 "@,
     [string]$logfile = 'report.log',
     [string]$comment = '',
-    [switch]$debug
+    [switch]$verbose
   )
 
   if ($assembly_name -eq $null -or $assembly_name -eq '') { 
@@ -53,10 +53,12 @@ function run_helper_assembly
   Write-Output $comment
   Write-Output "Loading embedded assembly ${assembly_name}"
 
-  $helper = New-Object $assembly_name -ErrorAction 'SilentlyContinue'
+  $helper = New-Object $assembly_name 
+# -ErrorAction 'SilentlyContinue'
 
   $helper.Query = $query 
-  $helper.Verbose = $false
+  [bool]$helper.Verbose =   [bool]$PSBoundParameters['verbose'].IsPresent
+
   Write-Debug ("Query:`r`n{0}" -f $helper.Query)
   try {
     $result = $helper.QueryActiveLog()
@@ -78,6 +80,11 @@ $report = 'report.log'
 $DebugPreference = 'SilentlyContinue'
 [string]$shared_assemblies_path = 'c:\developer\sergueik\csharp\SharedAssemblies'
 $assembly_name = 'Newtonsoft.Json.dll'
+
+
+
+Write-Debug "Loading external assembly ${assembly_name}"
+add-type -path ([System.IO.Path]::Combine( $shared_assemblies_path  , $assembly_name))
 
 Write-Debug 'Slow version'
 $events_object = @()
@@ -343,49 +350,6 @@ namespace EventQuery
 
 "@ -ReferencedAssemblies 'System.dll','System.Xml.dll','System.Security.dll','System.Core.dll','System.Runtime.Serialization.dll'
 
-run_helper_assembly -assembly_name 'EventQuery.JsonSerializedNonWorkingExample' -logfile 'broken.log' -comment 'Attempting JSON serialization that does not work'
+run_helper_assembly -assembly_name 'EventQuery.JsonSerializedNonWorkingExample' -logfile 'broken.log' -comment 'Attempting JSON serialization that does not work' -verbose
 run_helper_assembly -assembly_name 'EventQuery.JsonSerializedWorkingExample' -logfile 'report.log' -comment 'JSON serialization that works'
 
-
-<#
-{
-    "Id": 102,
-    "Version": 0,
-    "Qualifiers": null,
-    "Level": 4,
-    "Task": 102,
-    "Opcode": 2,
-    "Keywords": -9223372036854775807,
-    "RecordId": 18359,
-    "ProviderName": "Microsoft-Windows-TaskScheduler",
-    "ProviderId": "de7b24ea-73c8-4a09-985d-5bdadcfa9017",
-    "LogName": "Microsoft-Windows-TaskScheduler/Operational",
-    "ProcessId": 436,
-    "ThreadId": 2692,
-    "MachineName": "sergueik42",
-    "UserId": {
-        "BinaryLength": 12,
-        "AccountDomainSid": null,
-        "Value": "S-1-5-18"
-    },
-    "TimeCreated": "2015-08-06T20:12:25.3151096-04:00",
-    "ActivityId": "bcd9f31f-286e-49e5-8d64-9e398bfe213d",
-    "RelatedActivityId": null,
-    "ContainerLog": "Microsoft-Windows-TaskScheduler/Operational",
-    "MatchedQueryIds": [],
-    "Bookmark": {
-        "BookmarkText": "<BookmarkList>\r\n  <Bookmark Channel='Microsoft-Windows-TaskScheduler/Operational' RecordId='18359' IsCurrent='true'/>\r\n</BookmarkList>"
-    },
-    "LevelDisplayName": "Information",
-    "OpcodeDisplayName": "Stop",
-    "TaskDisplayName": "Task completed",
-    "KeywordsDisplayNames": [],
-    "Properties": [{
-        "Value": "\\Microsoft\\Windows\\RAC\\RacTask"
-    }, {
-        "Value": "NT AUTHORITY\\LOCAL SERVICE"
-    }, {
-        "Value": "bcd931f-286e-49e5-8d64-9e398bfe213d"
-    }]
-}
-#>
