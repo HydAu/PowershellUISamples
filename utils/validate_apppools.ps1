@@ -1,6 +1,9 @@
 param([string] $master_server = 'CCLPRDECOBOOK2', [string] $verbose = $false  )
-
-
+# puppet module also uses appcmd.exe
+# https://github.com/simondean/puppet-iis/tree/master/lib/puppet/type
+# puppet module uses WebAdministration 
+# https://github.com/puppet-community/puppet-iis/blob/master/manifests/manage_app_pool.pp
+# get-ItemProperty "IIS:\AppPools\DefaultAppPool"
 # Load the entries from remote 
 function gather{
 
