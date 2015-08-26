@@ -2,14 +2,14 @@ function read_service_state_in_registry {
   param(
     [string]$service_name = 'WSearch',
     [string[]]$display_values = @(
-          'DelayedAutoStart', # 1 for delayed start 
-          'Start', # 4 -Disabled , 2 - Enabled, 2 - Enabled (delayed), 3 - Manual
-          'ImagePath' # optional
-        ),
+      'DelayedAutoStart',# 1 for delayed start 
+      'Start',# 4 -Disabled , 2 - Enabled, 2 - Enabled (delayed), 3 - Manual
+      'ImagePath' # optional
+    ),
     [bool]$debug = $false
 
   )
-
+  $result = @{}
   if (-not $service_name) {
     throw "Need `$service_name"
   }
@@ -58,20 +58,24 @@ function read_service_state_in_registry {
 
       if ($displayname_result -ne $null -and $displayname_result -match "\b${service_display_name}\b") {
 
-        
+
 
         $values2 = $registry_key.GetValueNames()
         $registry_key_value_data = $null
 
         $display_values | ForEach-Object {
+
           $registry_key_value_name = $_
+          $result[$registry_key_value_name] = $null
           $values2 | Where-Object { $_ -match "\b${registry_key_value_name}\b" } | ForEach-Object {
-            $registry_key_value_data = $registry_key.GetValue($_).ToString()
-            Write-Host -ForegroundColor 'yellow' ((
-                $displayname_result,
-                $registry_key.Name,
-                $registry_key_value_name,
-                $registry_key_value_data) -join "`r`n")
+            $result[$registry_key_value_name] = $registry_key_value_data = $registry_key.GetValue($_).ToString()
+            if ($debug) {
+              Write-Host -ForegroundColor 'yellow' ((
+                  $displayname_result,
+                  $registry_key.Name,
+                  $registry_key_value_name,
+                  $registry_key_value_data) -join "`r`n")
+            }
           }
         }
       }
@@ -79,10 +83,13 @@ function read_service_state_in_registry {
     popd
   }
   popd
+  return $result
 }
 
 # Windows Search
-$result = read_service_state_in_registry -serviceName 'WSearch' -Debug $false -service_display_name 'Windows search'
+$service_name = 'WSearch'
+Get-Service -Name $service_name
+$result = read_service_state_in_registry -serviceName $service_name -Debug $false -service_display_name 'Windows search'
 $result
 
 
