@@ -42,8 +42,8 @@ function assert {
 
   if (!$success) {
 
-    $stack =  ("From:{0}`r`nScript:{1}`r`nLine:{2}`r`nFunction:{3}" -f $Script,(Get-PSCallStack)[1].ScriptName,(Get-PSCallStack)[1].ScriptLineNumber,(Get-PSCallStack)[1].FunctionName)
-    Write-Host $message 
+    $stack = ("From:{0}`r`nScript:{1}`r`nLine:{2}`r`nFunction:{3}" -f $Script,(Get-PSCallStack)[1].ScriptName,(Get-PSCallStack)[1].ScriptLineNumber,(Get-PSCallStack)[1].FunctionName)
+    Write-Host $message
     Write-Host $stack
 
     if ($action -ne 'Ignore') {
@@ -56,57 +56,57 @@ function assert {
 
 
 
-$configuration_provider = get-wmiobject -namespace 'root/MicrosoftIISv2' -computername '.' -Query 'Select * from IIsSmtpServerSetting'
+$configuration_provider = Get-WmiObject -Namespace 'root/MicrosoftIISv2' -ComputerName '.' -Query 'Select * from IIsSmtpServerSetting'
 
 #
 # assert -Script { ($configuration_provider.'Name'   -match 'SmtpSvc/1') } -Message "Unexpected moloe ${color}"
-assert -Condition ($configuration_provider.'Name'   -match 'SmtpSvc/1') -Message "Unexpected color: ${color}" 
+assert -Condition ($configuration_provider.'Name' -match 'SmtpSvc/1') -Message "Unexpected color: ${color}"
 # quotes challenge 
 
 
 $actual_value = $configuration_provider.'SmartHost'
 $property = 'SmartHost'
-$expected_value = 'dmz-smtp.carnival.com'
-write-host -foregroundcolor 'green' "Probing ${property} to match ${expected_value}"
-assert -Condition ($actual_value  -eq $expected_value) -Message "Unexpected '${property}': ${actual_value}"
+$expected_value = '<YOUR SMTP SMARTHOST>'
+Write-Host -ForegroundColor 'green' "Probing ${property} to match ${expected_value}"
+assert -Condition ($actual_value -eq $expected_value) -Message "Unexpected '${property}': ${actual_value}"
 
 $property = 'MasqueradeDomain'
 $actual_value = $configuration_provider.'MasqueradeDomain'
-$expected_value  =  'carnival.com'
-write-host -foregroundcolor 'green' "Probing ${property} to match ${expected_value}"
-assert -Condition ($actual_value  -eq $expected_value) -Message "Unexpected '${property}': ${actual_value}"
+$expected_value = 'carnival.com'
+Write-Host -ForegroundColor 'green' "Probing ${property} to match ${expected_value}"
+assert -Condition ($actual_value -eq $expected_value) -Message "Unexpected '${property}': ${actual_value}"
 
 
 $property = "StartMode of 'SMTPSVC'"
-$expected_value  =  'auto'
-$actual_value =  (Get-WmiObject -Query 'Select StartMode From Win32_Service Where Name="SMTPSVC"').'StartMode'
-write-host -foregroundcolor 'green' "Probing ${property} to match ${expected_value}"
-assert -Condition ($actual_value  -eq $expected_value) -Message "Unexpected ${property}: ${actual_value}"
+$expected_value = 'auto'
+$actual_value = (Get-WmiObject -Query 'Select StartMode From Win32_Service Where Name="SMTPSVC"').'StartMode'
+Write-Host -ForegroundColor 'green' "Probing ${property} to match ${expected_value}"
+assert -Condition ($actual_value -eq $expected_value) -Message "Unexpected ${property}: ${actual_value}"
 
 
 $property = 'FullyQualifiedDomainName'
-$expected_value  =  $env:computername
+$expected_value = $env:computername
 $actual_value = $configuration_provider.'FullyQualifiedDomainName'
-write-host -foregroundcolor 'green' "Probing ${property} to match ${expected_value}"
-assert -Condition ($actual_value  -match $expected_value) -Message "Unexpected ${property}: ${actual_value}"
+Write-Host -ForegroundColor 'green' "Probing ${property} to match ${expected_value}"
+assert -Condition ($actual_value -match $expected_value) -Message "Unexpected ${property}: ${actual_value}"
 
 
 
 $property = 'Name'
-$expected_value  =  'SmtpSvc'
+$expected_value = 'SmtpSvc'
 $actual_value = $configuration_provider.'Name'
-write-host -foregroundcolor 'green' "Probing ${property} to match ${expected_value}"
-assert -Condition ($actual_value  -match $expected_value) -Message "Unexpected ${property}: ${actual_value}"
+Write-Host -ForegroundColor 'green' "Probing ${property} to match ${expected_value}"
+assert -Condition ($actual_value -match $expected_value) -Message "Unexpected ${property}: ${actual_value}"
 
-write-host -foregroundcolor 'green'  'Probing ADSI provider'
+Write-Host -ForegroundColor 'green' 'Probing ADSI provider'
 $name = $actual_value
 try {
-$SMTPServer = [ADSI]"IIS://localhost/${name}"
-assert -Condition ($SMTPServer.Name  -ne  $null) -Message "issue with ADSI provider"
-} catch [Exception] {
+  $SMTPServer = [adsi]"IIS://localhost/${name}"
+  assert -Condition ($SMTPServer.Name -ne $null) -Message "issue with ADSI provider"
+} catch [exception]{
 }
-write-host -foregroundcolor 'green'  'All done'
-return 
+Write-Host -ForegroundColor 'green' 'All done'
+return
 
 
 # http://blogs.technet.com/b/bspieth/archive/2013/02/19/configure-the-iis-6-smtp-server-with-wmi-and-powershell.aspx
