@@ -25,10 +25,17 @@ public class Utility
     private const int FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
 
     // http://msdn.microsoft.com/en-us/library/aa364962%28VS.85%29.aspx
+    // http://pinvoke.net/default.aspx/kernel32/GetFileInformationByHandleEx.html
+
+    // http://www.pinvoke.net/default.aspx/shell32/GetFinalPathNameByHandle.html
     [DllImport("kernel32.dll", EntryPoint = "GetFinalPathNameByHandleW", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern int GetFinalPathNameByHandle(IntPtr handle, [In, Out] StringBuilder path, int bufLen, int flags);
 
+    // https://msdn.microsoft.com/en-us/library/aa364953%28VS.85%29.aspx
+
+
     // http://msdn.microsoft.com/en-us/library/aa363858(VS.85).aspx
+    // http://www.pinvoke.net/default.aspx/kernel32.createfile
     [DllImport("kernel32.dll", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, SetLastError = true)]
     public static extern SafeFileHandle CreateFile(string lpFileName, int dwDesiredAccess, int dwShareMode,
     IntPtr SecurityAttributes, int dwCreationDisposition, int dwFlagsAndAttributes, IntPtr hTemplateFile);
@@ -43,8 +50,7 @@ public class Utility
         int size = GetFinalPathNameByHandle(directoryHandle.DangerousGetHandle(), path, path.Capacity, 0);
         if (size < 0)
             throw new Win32Exception(Marshal.GetLastWin32Error());
-        // The remarks section of GetFinalPathNameByHandle mentions the return being prefixed with "\\?\"
-        // More information about "\\?\" here -> http://msdn.microsoft.com/en-us/library/aa365247(v=VS.85).aspx
+        // http://msdn.microsoft.com/en-us/library/aa365247(v=VS.85).aspx
         if (path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\')
             return path.ToString().Substring(4);
         else
@@ -52,6 +58,21 @@ public class Utility
     }
 }
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Runtime.InteropServices.dll','System.Net.dll','System.Data.dll', 'mscorlib.dll'
+$target = 'C:\Wix'
+$symlink_directory = ("${env:TEMP}\{0}" -f (Get-Random -Maximum 1000))
 
-$t = new-object System.IO.DirectoryInfo("c:\temp\test")
-[Utility]::GetSymbolicLinkTarget($t)
+$create_symlink_command = "cmd.exe /C MKLINK ${symlink_directory} ${target}"
+write-output $create_symlink_command
+invoke-expression -command $create_symlink_command
+$show_symlink_command = "cmd.exe /C DIR /L ${env:TEMP}" 
+write-output $create_symlink_command $show_symlink_command
+
+invoke-expression -command $show_symlink_command
+write-output 'Calling P/Invoke'
+
+$symlink_directory_directoryinfo_object = new-object System.IO.DirectoryInfo($symlink_directory)
+$symlink_target = [Utility]::GetSymbolicLinkTarget($symlink_directory_directoryinfo_object)
+write-output ('{0} => {1} ' -f $symlink_directory, $symlink_target)
+$recycle_command = "cmd.exe /c DEL `"${symlink_directory}`""
+write-output $recycle_command
+invoke-expression -command $recycle_command
