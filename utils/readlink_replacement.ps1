@@ -25,13 +25,10 @@ Add-Type -TypeDefinition @"
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.ComponentModel; // for Win32Exception
 using System.Data;
-using System.Drawing;
 using System.Text;
 using System.IO;
-using System.Net;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -124,7 +121,6 @@ Write-Output ('{0} => {1} ' -f $symlink_directory,$symlink_target)
 $recycle_command = "cmd.exe /c RD `"${symlink_directory}`""
 Write-Output $recycle_command
 Invoke-Expression -Command $recycle_command
-# Does not work fordirectories ?
 if (Get-Item -Path $symlink_directory -ErrorAction 'silentlycontinue') {
   Remove-Item -Force $symlink_directory
 }
@@ -150,7 +146,6 @@ Write-Output ('{0} => {1} ' -f $symlink_file,$symlink_target)
 $recycle_command = "cmd.exe /c DEL /Q `"${symlink_file}`""
 Write-Output $recycle_command
 Invoke-Expression -Command $recycle_command
-# Does not work 
 if (Get-Item -Path $symlink_file -ErrorAction 'silentlycontinue') {
   Remove-Item -Force $symlink_file
 }
