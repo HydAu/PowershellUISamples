@@ -17,7 +17,9 @@ REM The command completed successfully.
 
 :TEST
 REM find_p_share.cmd
+
 set SHARE_UNC_PATH_FRAGMENT=SAMPLE_SHARE
+echo Trying to find share with SHARE_UNC_PATH_FRAGMENT=%SHARE_UNC_PATH_FRAGMENT%
 set ANSWER=%TEMP%\answer.txt
 for /F "tokens=1,2,*" %%1 in ('net use ^| findstr /ic:"%SHARE_UNC_PATH_FRAGMENT%" ') do @echo set DRIVELETTER=%%2>%ANSWER%
 type %ANSWER%
