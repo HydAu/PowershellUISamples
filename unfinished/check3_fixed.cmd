@@ -10,17 +10,20 @@ ECHO Setting FILENAME,SOURCEDIR,DESTDIR,DESTFILE
 set SOURCEDIR=1Tech
 set DESTDIR=C:\ProgramData\Imagine
 set FILENAME=client_settings.json
-set HTTPDESTFILE=%DESTDIR%\%FILENAME%
-set HTTPFILETOCOPY=
+REM Full path to the copied file
+set DESTFILE=%DESTDIR%\%FILENAME%
+
+REM full path for the file to copy - not known yet
+set FILETOCOPY=
 
 for %%. in (%DRIVELETTERS%) do @call :READDRIVE %%.
-REM Change to :goto :CHECKFILE
-echo HTTPFILETOCOPY=%HTTPFILETOCOPY%
+echo About to Copy %FILETOCOPY% to %DESTFILE%
+goto :CHECKFILE
 goto :EOF
 
 :READDRIVE
-REM Check if HTTPFILETOCOPY already determined
-if NOT "%HTTPFILETOCOPY%" equ "" goto :EOF
+REM Check if FILETOCOPY already determined
+if NOT "%FILETOCOPY%" equ "" goto :EOF
 set DRIVELETTER=%1
 
 net use | findstr /ic:"%DRIVELETTER%:" > NUL
@@ -34,14 +37,14 @@ goto :EOF
 
 set DRIVELETTER=%1
 echo Found the data on drive %DRIVELETTER%:
-set HTTPFILETOCOPY=%DRIVELETTER%:\%SOURCEDIR%\%FILENAME%
+set FILETOCOPY=%DRIVELETTER%:\%SOURCEDIR%\%FILENAME%
 
 goto :EOF
 
 
 REM File and DIR Exist so let us know then end
 :CHECKFILE
-if EXIST %destFile% GOTO FILEALREADYEXISTS
+if EXIST %DESTFILE% GOTO FILEALREADYEXISTS
 
 REM Check if directory exists
 if NOT EXIST %DESTDIR% GOTO MAKEDIR
@@ -56,7 +59,7 @@ mkdir %DESTDIR%
 GOTO COPYTHEFILE
 
 :COPYTHEFILE
-COPY /B %fileToCopy% %DESTDIR%
+COPY /B %FILETOCOPY% %DESTDIR%
 ECHO.
 ECHO Copying JSON file to destination folder
 ECHO.
@@ -66,7 +69,7 @@ GOTO CHECKFILESTUFF
 ECHO.
 ECHO Checking if file copied properly
 ECHO.
-IF EXIST %destFile% GOTO GOODEND
+IF EXIST %DESTFILE% GOTO GOODEND
 GOTO BADEND
 
 :BADEND
