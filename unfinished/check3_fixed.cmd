@@ -8,6 +8,19 @@ H ^
 I ^
 J ^
 K ^
+L ^
+M ^
+N ^
+O ^
+P ^
+Q ^
+R ^
+s ^
+T ^
+U ^
+V ^
+W ^
+x ^
 Y ^
 Z ^
 
@@ -25,11 +38,12 @@ set HTTPFILETOCOPY=
 
 for %%. in (%DRIVELETTERS%) do @call :READDRIVE %%.
 REM Change to :goto :CHECKFILE
+echo HTTPFILETOCOPY=%HTTPFILETOCOPY%
 goto :EOF
 
 :READDRIVE
-echo HTTPFILETOCOPY=%HTTPFILETOCOPY%
-if NOT "%HTTPFILETOCOPY%" equ "" echo HTTPFILETOCOPY already determined -nothing to do && goto :EOF
+REM Check if HTTPFILETOCOPY already determined
+if NOT "%HTTPFILETOCOPY%" equ "" goto :EOF
 set DRIVELETTER=%1
 
 echo Probing if exist %DRIVELETTER%:\%SOURCEDIR%
