@@ -1,29 +1,6 @@
 @echo OFF 
 set BASEDIR=C:\TEST
-set DRIVELETTERS= ^
-E ^
-F ^
-G ^
-H ^
-I ^
-J ^
-K ^
-L ^
-M ^
-N ^
-O ^
-P ^
-Q ^
-R ^
-s ^
-T ^
-U ^
-V ^
-W ^
-x ^
-Y ^
-Z ^
-
+set DRIVELETTERS=E F G H I J K L M N O P Q R s T U V W x Y Z
 
 REM CLS
 
@@ -46,6 +23,8 @@ REM Check if HTTPFILETOCOPY already determined
 if NOT "%HTTPFILETOCOPY%" equ "" goto :EOF
 set DRIVELETTER=%1
 
+net use | findstr /ic:"%DRIVELETTER%:" > NUL
+if ERRORLEVEL 1 @echo Drive letter %DRIVELETTER%: is not mapped to any share && goto :EOF
 echo Probing if exist %DRIVELETTER%:\%SOURCEDIR%
 if EXIST "%DRIVELETTER%:\%SOURCEDIR%" call :FOUNDIT %DRIVELETTER%
 
