@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 using System.Reflection;
 using System.Text;
 using System.IO;
@@ -14,7 +13,7 @@ using NetOffice.ExcelApi.Enums;
 
 namespace ExcelExamples
 {
-    public class Example01
+    public class Example
     {
 
         public static void Main()

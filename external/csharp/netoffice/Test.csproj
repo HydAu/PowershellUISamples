@@ -59,28 +59,34 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ExcelApi">
-      <HintPath>SharedAssemblies\ExcelApi.dll</HintPath>
+      <HintPath>.\packages\NetOffice.Excel.1.7.2.0\lib\net40\ExcelApi.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="NetOffice">
-      <HintPath>SharedAssemblies\NetOffice.dll</HintPath>
+      <HintPath>.\packages\NetOffice.Core.Net40.1.7.2.0\lib\net40\NetOffice.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="OfficeApi">
-      <HintPath>SharedAssemblies\OfficeApi.dll</HintPath>
+      <HintPath>.\packages\NetOffice.Core.Net40.1.7.2.0\lib\net40\OfficeApi.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="VBIDEApi">
+      <HintPath>.\packages\NetOffice.Core.Net40.1.7.2.0\lib\net40\VBIDEApi.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="VBIDEApi">
-      <HintPath>SharedAssemblies\VBIDEApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Test.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
