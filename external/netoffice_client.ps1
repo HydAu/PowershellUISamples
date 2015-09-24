@@ -100,13 +100,50 @@ function GetDefaultExtension {
 
   [double]$Version = [System.Convert]::ToDouble($application.Version,[System.Globalization.CultureInfo]::InvariantCulture)
   if ($Version -ge 12.00) {
-    return '.xlsx' }
+    return 'xlsx' }
   else {
-    return '.xls'
+    return 'SSxls'
   }
 
 
 }
+
+
+function PutSampleData {
+
+param (
+  [NetOffice.ExcelApi.workSheet]$workSheet 
+)
+
+            $workSheet.Cells[2, 2].Value = "Datum"
+            $workSheet.Cells[3, 2].Value = (Get-Date -format d) # DateTime.Now.ToShortDateString()
+            $workSheet.Cells[4, 2].Value = (Get-Date -format d) 
+            $workSheet.Cells[5, 2].Value = (Get-Date -format d) 
+            $workSheet.Cells[6, 2].Value = (Get-Date -format d) 
+
+            $workSheet.Cells[2, 3].Value = "Columns1"
+            $workSheet.Cells[3, 3].Value = 25
+            $workSheet.Cells[4, 3].Value = 33
+            $workSheet.Cells[5, 3].Value = 30
+            $workSheet.Cells[6, 3].Value = 22
+
+            $workSheet.Cells[2, 4].Value = "Column2"
+            $workSheet.Cells[3, 4].Value = 25
+            $workSheet.Cells[4, 4].Value = 33
+            $workSheet.Cells[5, 4].Value = 30
+            $workSheet.Cells[6, 4].Value = 22
+
+            $workSheet.Cells[2, 5].Value = "Column3"
+            $workSheet.Cells[3, 5].Value = 25
+            $workSheet.Cells[4, 5].Value = 33
+            $workSheet.Cells[5, 5].Value = 30
+            $workSheet.Cells[6, 5].Value = 22
+
+            return [NetOffice.ExcelApi.Range]($workSheet.Range('$B2:$E6'))
+        }
+
+
+
 Write-Output 'Draw back color and perform the BorderAround method'
 $workSheet.Range('$B2:$B5').Interior.Color = [ExcelExamples.Example]::ToDouble([System.Drawing.Color]::DarkGreen)
 $workSheet.Range('$B2:$B5').BorderAround([NetOffice.ExcelApi.Enums.XlLineStyle]::xlContinuous,[NetOffice.ExcelApi.Enums.XlBorderWeight]::xlMedium,[NetOffice.ExcelApi.Enums.XlColorIndex]::xlColorIndexAutomatic)
@@ -118,7 +155,15 @@ $workSheet.Range('$D2:$D5').Borders[[NetOffice.ExcelApi.Enums.XlBordersIndex]::x
 $workSheet.Range('$D2:$D5').Borders[[NetOffice.ExcelApi.Enums.XlBordersIndex]::xlInsideHorizontal].Color = [ExcelExamples.Example]::ToDouble([System.Drawing.Color]::Black)
 
 Write-Output 'Add Cells'
-# $workSheet.Cells(1, 1).Value = "We have 2 simple shapes created."
+# Property 'Value' cannot be found on this object; make sure it exists and is settable.
+$workSheet.Cells[1, 1].Value = "We have 2 simple shapes created."
+
+Write-Output 'Add some data to display'
+# [NetOffice.ExcelApi.Range]$dataRange = PutSampleData $workSheet
+
+Write-Output 'create a nice diagram'
+[NetOffice.ExcelApi.ChartObject]$chart = ([NetOffice.ExcelApi.ChartObjects]($workSheet.ChartObjects())).Add(70, 100, 375, 225)
+# $chart.Chart.SetSourceData($dataRange)
 
 Write-Output 'Save the book'
 [string]$file_extension = GetDefaultExtension -application $excel
