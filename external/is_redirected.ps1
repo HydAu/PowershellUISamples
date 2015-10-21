@@ -1,4 +1,5 @@
 # this uses reflection to discover that there is redirecton and adjusts handles
+# https://social.technet.microsoft.com/Forums/windowsserver/en-US/6c8a9e5d-3103-4f94-af15-75b309fc8360/redirecting-mixed-powershell-pipeline-and-console-object-output
 $rt_field_info1 = $host.GetType().GetField('externalHostRef',[Reflection.BindingFlags]('Instance,NonPublic,GetField'))
 $object_ref = $rt_field_info1.GetValue($host)
 $runtime_property_info1 = $object_ref.GetType().GetProperty('Value',[Reflection.BindingFlags]('Instance,NonPublic,GetProperty'))
