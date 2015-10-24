@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+# SharpDevelop 5.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Program", "Program\Program.csproj", "{23EFEEB7-FE12-4DC1-9CEB-C49CE0857571}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncProgram", "AsyncProgram\AsyncProgram.csproj", "{5BFF1D8A-643A-4736-BD90-03A6E0A7F32C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23EFEEB7-FE12-4DC1-9CEB-C49CE0857571}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23EFEEB7-FE12-4DC1-9CEB-C49CE0857571}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23EFEEB7-FE12-4DC1-9CEB-C49CE0857571}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23EFEEB7-FE12-4DC1-9CEB-C49CE0857571}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BFF1D8A-643A-4736-BD90-03A6E0A7F32C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BFF1D8A-643A-4736-BD90-03A6E0A7F32C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BFF1D8A-643A-4736-BD90-03A6E0A7F32C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BFF1D8A-643A-4736-BD90-03A6E0A7F32C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
