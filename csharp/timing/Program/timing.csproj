@@ -81,6 +81,9 @@
     <Reference Include="mscorlib">
       <Name>mscorlib</Name>
     </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -105,6 +108,9 @@
     <Compile Include="Program.cs" />
     <EmbeddedResource Include="IdleIcon.ico" />
     <EmbeddedResource Include="BusyIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Target Name="Clean">
     <RemoveDir Directories="$(OutDir);$(ObjectPath);obj\$(Configuration)" />
