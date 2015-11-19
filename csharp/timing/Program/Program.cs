@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Windows.Forms;
+using NUnit.Framework;
 
 #region Bootstrap Application
 
@@ -11,86 +12,73 @@ namespace SystemTrayApp
     public class App
     {
         private NotifyIcon appIcon = new NotifyIcon();
-        private int isStateone = 0;
-        private Icon IdleIcon;
-        private Icon BusyIcon;
-        private ContextMenu sysTrayMenu = new ContextMenu();
-        // TODO: offer options?
-        private MenuItem runNowMenuItem = new MenuItem("Run Now");
-        private MenuItem exitApp = new MenuItem("Exit");
-        // private DialogHunter worker = new DialogHunter();
-        // private ArrayList newDialogs = new ArrayList();
-        static System.Windows.Forms.Timer myTimer = new System.Windows.Forms.Timer();
+        private bool is_busy = false;
+        private Icon idle_icon;
+        private Icon busy_icon;
+        private ContextMenu system_tray_menu = new ContextMenu();
+        private MenuItem run_now = new MenuItem("Run Now");
+        private MenuItem exit_app = new MenuItem("Exit");
+        static System.Windows.Forms.Timer action_timer = new System.Windows.Forms.Timer();
         static int nScanCounter = 1;
         const bool exitFlag = false;
-        
+
         private void TimerEventProcessor(Object myObject,
-                         EventArgs myEventArgs) {
-            myTimer.Stop();
+                         EventArgs myEventArgs)
+        {
+            action_timer.Stop();
             nScanCounter++;
-            Console.Write("{0}\r", nScanCounter.ToString());
-            isStateone = 1 - isStateone;
+            is_busy = !is_busy;
             appIcon.Visible = false;
-            if(isStateone == 1)
-                appIcon.Icon = BusyIcon;
-            else
-                appIcon.Icon = IdleIcon;
+            appIcon.Icon = (is_busy) ? busy_icon : idle_icon;
             appIcon.Visible = true;
-            
-            // indicate the worker process is running
-            ProcessTreeScanner Worker = new ProcessTreeScanner();
-            Worker.ParentProcessName = "SharpDevelop.exe";
-            Worker.Perform();
-            // Thread.Sleep (1000);
-            isStateone = 1 - isStateone;
+
+            ProcessTreeScanner.Instance.ParentProcessName = "SharpDevelop.exe";
+            ProcessTreeScanner.Perform();
+            is_busy = !is_busy;
             appIcon.Visible = false;
-            if (isStateone == 1)
-                appIcon.Icon = BusyIcon;
-            else
-                appIcon.Icon = IdleIcon;
+            appIcon.Icon = (is_busy) ? busy_icon : idle_icon;
             appIcon.Visible = true;
-            // restart Timer.
-            myTimer.Start();
+            action_timer.Start();
         }
 
-        public void Start() {
-            IdleIcon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("timing.IdleIcon.ico"));
-            BusyIcon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("timing.BusyIcon.ico"));
+        public void Start()
+        {
+            idle_icon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("timing.IdleIcon.ico"));
+            busy_icon = new Icon(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("timing.BusyIcon.ico"));
 
-            appIcon.Icon = IdleIcon;
-            appIcon.Text = "Popup Hunter Tool";
-            sysTrayMenu.MenuItems.Add(runNowMenuItem);
-            sysTrayMenu.MenuItems.Add(exitApp);
-            appIcon.ContextMenu = sysTrayMenu;
+            appIcon.Icon = idle_icon;
+            appIcon.Text = "Process Tree Scanner Tool";
+            system_tray_menu.MenuItems.Add(run_now);
+            system_tray_menu.MenuItems.Add(exit_app);
+            appIcon.ContextMenu = system_tray_menu;
 
-            myTimer.Tick += new EventHandler(TimerEventProcessor);
+            action_timer.Tick += new EventHandler(TimerEventProcessor);
 
-            // Sets the timer interval to 1 hour.
-            // TODO -  read config file:
-            myTimer.Interval = 3000;
-            myTimer.Start();
+            action_timer.Interval = 3000;
+            action_timer.Start();
 
             appIcon.Visible = true;
 
-            runNowMenuItem.Click += new EventHandler(runNow);
-            exitApp.Click += new EventHandler(ExitApp);
+            run_now.Click += new EventHandler(RunNow);
+            exit_app.Click += new EventHandler(ExitApp);
         }
 
-        private void runNow(object sender, System.EventArgs e) {
+        private void RunNow(object sender, System.EventArgs e)
+        {
             TimerEventProcessor(sender, e);
         }
-        private void ExitApp(object sender, System.EventArgs e) {
-            // No components to dispose:
-            // need to Displose individual resources
-            Debug.Assert(exitFlag != true);
+        private void ExitApp(object sender, System.EventArgs e)
+        {
+            Assert.IsFalse(exitFlag);
             appIcon.Dispose();
-            IdleIcon.Dispose();
-            BusyIcon.Dispose();
+            idle_icon.Dispose();
+            busy_icon.Dispose();
 
             Application.Exit();
         }
 
-        public static void Main() {
+        public static void Main()
+        {
 #if DEBUG
             Console.WriteLine("Debug version.");
 #endif

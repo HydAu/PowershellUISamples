@@ -15,20 +15,32 @@ namespace SystemTrayApp
 
     public class ProcessTreeScanner
     {
-    	private const string s_dummy = @"command";
+        private const string s_dummy = @"command";
         private bool _navigationStatus;
         private bool _discoveryStatus;
         private string _pattern;
         private string _parentProcessName = "puppet";
+
+        private ProcessTreeScanner() { }
+        private static ProcessTreeScanner instance = new ProcessTreeScanner();
+        public static ProcessTreeScanner Instance
+        {
+            get { return instance; }
+        }
+
+        public static void Perform()
+        {
+            Instance.DoWork();
+        }
 
         public bool NavigationStatus { get { return _navigationStatus; } set { _navigationStatus = value; } }
         public bool DiscoveryStatus { get { return _discoveryStatus; } set { _discoveryStatus = value; } }
         public string Pattern { get { return _pattern; } set { _pattern = value; } }
         public string ParentProcessName { get { return _parentProcessName; } set { _parentProcessName = value; } }
 
-        public void Perform()
+        private void DoWork()
         {
-            this.NavigationStatus = true;
+            this.NavigationStatus = true; // for debugging  
             this.DiscoveryStatus = false;
             String logPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
@@ -38,9 +50,16 @@ namespace SystemTrayApp
                 string processes = FindProcessByParentProcessId(parentProcessId);
                 if (this.DiscoveryStatus)
                 {
-                	Console.WriteLine(String.Format("Discovered {0}", processes));
+                    Console.WriteLine(String.Format("Discovered {0} {1}", processes, TimeStamp()));
                 }
             }
+        }
+
+        private static string TimeStamp()
+        {
+            DateTime dt = DateTime.Now;
+            long dt_file_time = dt.ToFileTime();
+            return dt_file_time.ToString();
         }
 
         public string FindProcessByName(string processName)
@@ -83,7 +102,7 @@ namespace SystemTrayApp
                 }
                 catch (System.NullReferenceException e)
                 {
-                	// for debugging
+                    // for debugging
                     Assert.IsNotEmpty(e.Message);
                 }
                 if (s_managed_object_commandline != null)
