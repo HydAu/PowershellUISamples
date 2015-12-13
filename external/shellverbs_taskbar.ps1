@@ -59,6 +59,13 @@ if ($itemVerb -eq $null) {
 
 get-childitem -path "${env:appdata}\Microsoft\Internet Explorer\Quick Launch\User Pinned\Taskbar" -name "${shortcut}.lnk"
 
+$reg_value = (Get-ItemProperty  -path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband' -name 'Favorites').'Favorites'
+# note also: 'FavoritesResolve'
+$enc = [System.Text.Encoding]::Unicode
+$enc.GetString($reg_value)
+# will contain "${shortcut}.lnk"
+# format is MS proprietary
+# for IE, the link is  'Internet Explorer.lnk' @"C:\Windows\System32\ie4uinit.exe,-731"
 return
 
 
