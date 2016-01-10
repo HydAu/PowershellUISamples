@@ -43,8 +43,8 @@ function Get-ScriptDirectory
 
 $guid = [guid]::NewGuid()
 
-$helper_namespace = ("Util_{0}" -f ($guid -replace '-',''))
-$helper_name = 'ScreenshotHelper'
+$helper_type_namespace = ("Util_{0}" -f ($guid -replace '-',''))
+$helper_type_name = 'ScreenshotHelper'
 
 # http://www.codeproject.com/Articles/12850/Capturing-the-Desktop-Screen-with-the-Mouse-Cursor
 # NOTE: few namespaces are already included and should not be present in the invocation agument
@@ -268,7 +268,7 @@ public void Screenshot()
      'System.Drawing.dll',`
      'System.Data.dll',`
      'System.Xml.dll') `
-   -Namespace $helper_namespace -Name $helper_name -ErrorAction Stop
+   -Namespace $helper_type_namespace -Name $helper_type_name -ErrorAction Stop
 
 if ($image_name -eq '') {
   $image_name = $env:IMAGE_NAME
@@ -278,7 +278,7 @@ if (($image_name -eq '') -or ($image_name -eq $null)) {
   $image_name = ($guid.ToString())
 }
 [string]$image_path = ('{0}\{1}.{2}' -f (Get-ScriptDirectory),$image_name,'png')
-$helper = New-Object -TypeName ('{0}.{1}' -f $helper_namespace,$helper_type)
+$helper = New-Object -TypeName ('{0}.{1}' -f $helper_type_namespace,$helper_type_name)
 $helper.ImagePath = $image_path
 [boolean]$cursor = $false
 if ($PSBoundParameters['cursor']) {
