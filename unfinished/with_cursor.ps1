@@ -66,26 +66,26 @@ public const Int32 CURSOR_SHOWING = 0x00000001;
 [StructLayout(LayoutKind.Sequential)]
 public struct ICONINFO
 {
-	public bool fIcon;
-	public Int32 xHotspot;
-	public Int32 yHotspot;
-	public IntPtr hbmMask;
-	public IntPtr hbmColor;
+    public bool fIcon;
+    public Int32 xHotspot;
+    public Int32 yHotspot;
+    public IntPtr hbmMask;
+    public IntPtr hbmColor;
 }
 [StructLayout(LayoutKind.Sequential)]
 public struct POINT
 {
-	public Int32 x;
-	public Int32 y;
+    public Int32 x;
+    public Int32 y;
 }
 
 [StructLayout(LayoutKind.Sequential)]
 public struct CURSORINFO
 {
-	public Int32 cbSize;
-	public Int32 flags;
-	public IntPtr hCursor;
-	public POINT ptScreenPos;
+    public Int32 cbSize;
+    public Int32 flags;
+    public IntPtr hCursor;
+    public POINT ptScreenPos;
 }
 
 [DllImport("user32.dll", EntryPoint = "GetDesktopWindow")]
@@ -126,13 +126,13 @@ public static extern IntPtr DeleteObject(IntPtr hDc);
 
 [DllImport("gdi32.dll", EntryPoint = "BitBlt")]
 public static extern bool BitBlt(IntPtr hdcDest, int xDest,
-								 int yDest, int wDest,
-								 int hDest, IntPtr hdcSource,
-								 int xSrc, int ySrc, int RasterOp);
+                                 int yDest, int wDest,
+                                 int hDest, IntPtr hdcSource,
+                                 int xSrc, int ySrc, int RasterOp);
 
 [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleBitmap")]
 public static extern IntPtr CreateCompatibleBitmap
-							(IntPtr hdc, int nWidth, int nHeight);
+                            (IntPtr hdc, int nWidth, int nHeight);
 
 [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleDC")]
 public static extern IntPtr CreateCompatibleDC(IntPtr hdc);
@@ -144,126 +144,128 @@ public static extern IntPtr SelectObject(IntPtr hdc, IntPtr bmp);
 private Boolean _cursor;
 public Boolean Cursor
 {
-	get { return _cursor; }
-	set { _cursor = value; }
+    get { return _cursor; }
+    set { _cursor = value; }
 }
 private string _imagePath;
 public string ImagePath
 {
-	get { return _imagePath; }
-	set { _imagePath = value; }
+    get { return _imagePath; }
+    set { _imagePath = value; }
 }
 
 public struct SIZE
 {
-	public int cx;
-	public int cy;
+    public int cx;
+    public int cy;
 }
 
 static Bitmap CaptureDesktop()
 {
-	SIZE size;
-	IntPtr hBitmap;
-	IntPtr hDC = GetDC(GetDesktopWindow());
-	IntPtr hMemDC = CreateCompatibleDC(hDC);
+    SIZE size;
+    IntPtr hBitmap;
+    IntPtr hDC = GetDC(GetDesktopWindow());
+    IntPtr hMemDC = CreateCompatibleDC(hDC);
 
-	size.cx = GetSystemMetrics
-			  (SM_CXSCREEN);
+    size.cx = GetSystemMetrics
+              (SM_CXSCREEN);
 
-	size.cy = GetSystemMetrics
-			  (SM_CYSCREEN);
+    size.cy = GetSystemMetrics
+              (SM_CYSCREEN);
 
-	hBitmap = CreateCompatibleBitmap(hDC, size.cx, size.cy);
+    hBitmap = CreateCompatibleBitmap(hDC, size.cx, size.cy);
 
-	if (hBitmap != IntPtr.Zero)
-	{
-		IntPtr hOld = (IntPtr) SelectObject
-							   (hMemDC, hBitmap);
+    if (hBitmap != IntPtr.Zero)
+    {
+        IntPtr hOld = (IntPtr)SelectObject
+                               (hMemDC, hBitmap);
 
-		BitBlt(hMemDC, 0, 0, size.cx, size.cy, hDC,
-									   0, 0, SRCCOPY);
+        BitBlt(hMemDC, 0, 0, size.cx, size.cy, hDC,
+                                       0, 0, SRCCOPY);
 
-		SelectObject(hMemDC, hOld);
-		DeleteDC(hMemDC);
-		ReleaseDC(GetDesktopWindow(), hDC);
-		Bitmap bmp = System.Drawing.Image.FromHbitmap(hBitmap);
-		DeleteObject(hBitmap);
-		GC.Collect();
-		return bmp;
-	}
-	return null;
+        SelectObject(hMemDC, hOld);
+        DeleteDC(hMemDC);
+        ReleaseDC(GetDesktopWindow(), hDC);
+        Bitmap bmp = System.Drawing.Image.FromHbitmap(hBitmap);
+        DeleteObject(hBitmap);
+        GC.Collect();
+        return bmp;
+    }
+    return null;
 
 }
 
 
 static Bitmap CaptureCursor(ref int x, ref int y)
 {
-	Bitmap bmp;
-	IntPtr hicon;
-	CURSORINFO ci = new CURSORINFO();
-	ICONINFO icInfo;
-	ci.cbSize = Marshal.SizeOf(ci);
-	if (GetCursorInfo(out ci))
-	{
-		if (ci.flags == CURSOR_SHOWING)
-		{
-			hicon = CopyIcon(ci.hCursor);
-			if (GetIconInfo(hicon, out icInfo))
-			{
-				x = ci.ptScreenPos.x - ((int)icInfo.xHotspot);
-				y = ci.ptScreenPos.y - ((int)icInfo.yHotspot);
+    Bitmap bmp;
+    IntPtr hicon;
+    CURSORINFO ci = new CURSORINFO();
+    ICONINFO icInfo;
+    ci.cbSize = Marshal.SizeOf(ci);
+    if (GetCursorInfo(out ci))
+    {
+        if (ci.flags == CURSOR_SHOWING)
+        {
+            hicon = CopyIcon(ci.hCursor);
+            if (GetIconInfo(hicon, out icInfo))
+            {
+                x = ci.ptScreenPos.x - ((int)icInfo.xHotspot);
+                y = ci.ptScreenPos.y - ((int)icInfo.yHotspot);
 
-				Icon ic = Icon.FromHandle(hicon);
-				bmp = ic.ToBitmap();
-				return bmp;
-			}
-		}
-	}
+                Icon ic = Icon.FromHandle(hicon);
+                bmp = ic.ToBitmap();
+                return bmp;
+            }
+        }
+    }
 
-	return null;
+    return null;
 }
 
 public static Bitmap CaptureDesktopWithCursor()
 {
-	int cursorX = 0;
-	int cursorY = 0;
-	Bitmap desktopBMP;
-	Bitmap cursorBMP;
-	Graphics g;
-	Rectangle r;
+    int cursorX = 0;
+    int cursorY = 0;
+    Bitmap desktopBMP;
+    Bitmap cursorBMP;
+    Graphics g;
+    Rectangle r;
 
-	desktopBMP = CaptureDesktop();
-	cursorBMP = CaptureCursor(ref cursorX, ref cursorY);
-	if (desktopBMP != null)
-	{
-		if (cursorBMP != null)
-		{
-			r = new Rectangle(cursorX, cursorY, cursorBMP.Width, cursorBMP.Height);
-			g = Graphics.FromImage(desktopBMP);
-			g.DrawImage(cursorBMP, r);
-			g.Flush();
-		}
-		else {
-			 throw( new Exception("!!!"));
-		}
-		return desktopBMP;
-	}
+    desktopBMP = CaptureDesktop();
+    cursorBMP = CaptureCursor(ref cursorX, ref cursorY);
+    if (desktopBMP != null)
+    {
+        if (cursorBMP != null)
+        {
+            r = new Rectangle(cursorX, cursorY, cursorBMP.Width, cursorBMP.Height);
+            g = Graphics.FromImage(desktopBMP);
+            g.DrawImage(cursorBMP, r);
+            g.Flush();
+        }
+        else
+        {
+            throw (new Exception("!!!"));
+        }
+        return desktopBMP;
+    }
 
-	return null;
+    return null;
 
 }
 
 public void Screenshot()
 {
-	Bitmap finalBMP;
-	Graphics graphics;
+    Bitmap finalBMP;
+    Graphics graphics;
 
-	finalBMP = CaptureDesktopWithCursor();
-	graphics = Graphics.FromImage(finalBMP);
-	// graphics.CopyFromScreen(0, 0, 0, 0, finalBMP.Size);
-	finalBMP.Save(_imagePath, ImageFormat.Png);finalBMP.Dispose();
-	graphics.Dispose();
+    finalBMP = CaptureDesktopWithCursor();
+    graphics = Graphics.FromImage(finalBMP);
+    // graphics.CopyFromScreen(0, 0, 0, 0, finalBMP.Size);
+    finalBMP.Save(_imagePath, ImageFormat.Png); finalBMP.Dispose();
+    graphics.Dispose();
 }
+
 "@ -ReferencedAssemblies @( 'System.Windows.Forms.dll',`
      'System.Drawing.dll',`
      'System.Data.dll',`
