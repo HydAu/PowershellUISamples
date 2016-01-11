@@ -67,6 +67,11 @@ namespace RikTheVeggie
 			set { TriStateStyle = value; } 
 		}
 
+
+                /// public System.Windows.Forms.TreeNodeCollection Nodes {
+                //     get {return base.Nodes; }
+                // }
+
 		// <summary>
 		// Constructor.  Create and populate an image list
 		// </summary>
@@ -332,30 +337,31 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-function PopulateTree {
-param (
-[System.Windows.Forms.TreeNodeCollection ] $ParentNodes, 
-[string] $PreText 
-)
-			# Add 5 nodes to the current node.  Every other node will have a child
-			for ($i = 0; $i -lt 5; $i++)
-			{
-				[System.Windows.Forms.TreeNode] $tn = new-object System.Windows.Forms.TreeNode(("{0}{1}" -f $PreText, ($i + 1)))
-				if (($i % 2) -eq 0)
-				{
-					# add a 'dummy' child node which will be replaced at runtime when the parent is expanded
-					$tn.Nodes.Add("")
-				}
-
-				# There is no need to set special properties on the node if adding it at form creation or when expanding a parent node.
-				# Otherwise, set 
-				# tn.StateImageIndex = [int]([RikTheVeggie.TriStateTreeView.CheckedState]::UnChecked)
-				$ParentNodes.Add($tn)
-			}
-		}
+function populateTree {
+  param(
+    [System.Windows.Forms.TreeNodeCollection]$parent_nodes,
+    [string]$text
+  )
+  # Add 5 nodes to the current node.  Every other node will have a child
+
+  for ($i = 0; $i -lt 5; $i++) {
+
+    [System.Windows.Forms.TreeNode]$tn = New-Object System.Windows.Forms.TreeNode (("{0}{1}" -f $text,($i + 1)))
+
+    if (($i % 2) -eq 0) {
+      # add a 'dummy' child node which will be replaced at runtime when the parent is expanded
+      $tn.Nodes.Add("")
+
+    }
+    # There is no need to set special properties on the node if adding it at form creation or when expanding a parent node.
+    # Otherwise, set 
+    # tn.StateImageIndex = [int]([RikTheVeggie.TriStateTreeView.CheckedState]::UnChecked)
+    $parent_nodes.Add($tn)
+  }
+}
 
 
-function PromptTreeView
+function promptTreeView
 {
   param(
     [string]$title,
@@ -365,15 +371,33 @@ function PromptTreeView
   @( 'System.Drawing','System.Collections.Generic','System.Collections','System.ComponentModel','System.Text','System.Data','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
-  $t = New-Object RikTheVeggie.TriStateTreeView
-  $t.Dock = [System.Windows.Forms.DockStyle]::Fill
-  $t.Location = new-object System.Drawing.Point(0, 0)
-  $t.Name = "triStateTreeView1"
-  $t.Size = new-object System.Drawing.Size(284, 262)
-  $t.TabIndex = 0
-  #$t.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler($t_BeforeExpand);
+  $t = New-Object -typeName 'RikTheVeggie.TriStateTreeView'
+  $t.Dock = [System.Windows.Forms.DockStyle]::Fill
+  $t.Location = New-Object System.Drawing.Point (0,0)
+  $t.Name = 'triStateTreeView1'
+  $t.Size = New-Object System.Drawing.Size (284,262)
+  $t.TabIndex = 0
+  # https://msdn.microsoft.com/en-us/library/system.windows.forms.treeview.nodes%28v=vs.110%29.aspx
+  populateTree -parent_nodes $t.Nodes -text ""
+  $treeview_BeforeExpand = $t.add_BeforeExpand
+  $treeview_BeforeExpand.Invoke({
+    param(
+      [object]$sender,
+      [System.Windows.Forms.TreeViewCancelEventArgs]$e
+    )
+    # A node in the tree has been selected
+    [System.Windows.Forms.TreeView]$tv = $sender
+    $tv.UseWaitCursor = $true
+    if (($e.Node.Nodes.Count -eq 1) -and ($e.Node.Nodes[0].Text -eq '')) {
+      # This is a 'dummy' node.  Replace it with actual data
+      $e.Node.Nodes.RemoveAt(0)
+	  populateTree -parent_nodes $e.Node.Nodes -text $e.Node.Text
+    }
+    $tv.UseWaitCursor = $false
+
+  })
+
   $components = New-Object System.ComponentModel.Container
-  $t.Size = New-Object System.Drawing.Size (284,256)
 
   $f.SuspendLayout()
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
@@ -385,19 +409,31 @@ function PromptTreeView
   if ($caller -eq $null) {
     $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
   }
-  # TODO: convert $t_AfterSelect = $t.add_AfterSelect
-  # $caller.Message +=
+ 
+  $treeview_AfterCheck = $t.add_AfterCheck
+  $treeview_AfterCheck.Invoke({
+      param(
+        [object]$sender,
+        [System.Windows.Forms.TreeViewEventArgs]$eventargs
+      )
+        # [System.Windows.Forms.MessageBox]::Show($eventargs.Node.Text);
+		if ( $eventargs.Node.Checked ) {
+		  if ($eventargs.Node.Text -ne '') {
+            $caller.Message += ('{0},' -f $eventargs.Node.Text)
+		  }
+		}  
+    })
   $f.Add_Shown({ $f.Activate() })
 
   [void]$f.ShowDialog([win32window]($caller))
 
   $t.Dispose()
   $f.Dispose()
-  # return $caller.MEssage
-
+  
 }
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$result = PromptTreeView 'Treeview' $caller
+$result = promptTreeView -title 'Treeview' -caller $caller
 
-Write-Debug ('Selection is : {0}' -f $result)
+Write-output ( 'Selection is : {0}' -f $caller.Message )
+
