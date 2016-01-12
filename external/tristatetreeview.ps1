@@ -371,57 +371,70 @@ function promptTreeView
   @( 'System.Drawing','System.Collections.Generic','System.Collections','System.ComponentModel','System.Text','System.Data','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $f = New-Object System.Windows.Forms.Form
   $f.Text = $title
-  $t = New-Object -typeName 'RikTheVeggie.TriStateTreeView'
+  $t = New-Object -TypeName 'RikTheVeggie.TriStateTreeView'
   $t.Dock = [System.Windows.Forms.DockStyle]::Fill
   $t.Location = New-Object System.Drawing.Point (0,0)
   $t.Name = 'triStateTreeView1'
-  $t.Size = New-Object System.Drawing.Size (284,262)
+  $t.Size = New-Object System.Drawing.Size (284,252)
   $t.TabIndex = 0
   # https://msdn.microsoft.com/en-us/library/system.windows.forms.treeview.nodes%28v=vs.110%29.aspx
-  populateTree -parent_nodes $t.Nodes -text ""
+  populateTree -parent_nodes $t.Nodes -Text ""
   $treeview_BeforeExpand = $t.add_BeforeExpand
   $treeview_BeforeExpand.Invoke({
-    param(
-      [object]$sender,
-      [System.Windows.Forms.TreeViewCancelEventArgs]$e
-    )
-    # A node in the tree has been selected
-    [System.Windows.Forms.TreeView]$tv = $sender
-    $tv.UseWaitCursor = $true
-    if (($e.Node.Nodes.Count -eq 1) -and ($e.Node.Nodes[0].Text -eq '')) {
-      # This is a 'dummy' node.  Replace it with actual data
-      $e.Node.Nodes.RemoveAt(0)
-	  populateTree -parent_nodes $e.Node.Nodes -text $e.Node.Text
-    }
-    $tv.UseWaitCursor = $false
+      param(
+        [object]$sender,
+        [System.Windows.Forms.TreeViewCancelEventArgs]$e
+      )
+      # A node in the tree has been selected
+      [System.Windows.Forms.TreeView]$tv = $sender
+      $tv.UseWaitCursor = $true
+      if (($e.Node.Nodes.Count -eq 1) -and ($e.Node.Nodes[0].Text -eq '')) {
+        # This is a 'dummy' node.  Replace it with actual data
+        $e.Node.Nodes.RemoveAt(0)
+        populateTree -parent_nodes $e.Node.Nodes -Text $e.Node.Text
+      }
+      $tv.UseWaitCursor = $false
 
-  })
+    })
 
-  $components = New-Object System.ComponentModel.Container
 
+  $button = New-Object System.Windows.Forms.Button
+  $button.Font = New-Object System.Drawing.Font ('Arial',10,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
+  $button.Location = New-Object System.Drawing.Point (5,260)
+  $button.Size = New-Object System.Drawing.Size (160,23)
+  $button.Text = 'Save Selected Items'
+  $button.Enabled = $false
   $f.SuspendLayout()
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
-  $f.ClientSize = New-Object System.Drawing.Size (292,266)
-  $f.Controls.Add($t)
+  [System.Windows.Forms.Panel]$p = New-Object System.Windows.Forms.Panel
+  $p.SuspendLayout()
+
+  $f.Controls.Add($p)
+  $f.Controls.Add($button)
+
+  $p.ClientSize = New-Object System.Drawing.Size (292,256)
+  $f.ClientSize = New-Object System.Drawing.Size (292,290)
+  $p.Controls.Add($t)
+  $p.ResumeLayout($false)
   $f.ResumeLayout($false)
   $f.Topmost = $True
   if ($caller -eq $null) {
     $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
   }
- 
+
   $treeview_AfterCheck = $t.add_AfterCheck
   $treeview_AfterCheck.Invoke({
       param(
         [object]$sender,
         [System.Windows.Forms.TreeViewEventArgs]$eventargs
       )
-        # [System.Windows.Forms.MessageBox]::Show($eventargs.Node.Text);
-		if ( $eventargs.Node.Checked ) {
-		  if ($eventargs.Node.Text -ne '') {
-            $caller.Message += ('{0},' -f $eventargs.Node.Text)
-		  }
-		}  
+      # [System.Windows.Forms.MessageBox]::Show($eventargs.Node.Text);
+      if ($eventargs.Node.Checked) {
+        if ($eventargs.Node.Text -ne '') {
+          $caller.Message += ('{0},' -f $eventargs.Node.Text)
+        }
+      }
     })
   $f.Add_Shown({ $f.Activate() })
 
@@ -429,11 +442,11 @@ function promptTreeView
 
   $t.Dispose()
   $f.Dispose()
-  
+
 }
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$result = promptTreeView -title 'Treeview' -caller $caller
+$result = promptTreeView -Title 'Treeview' -caller $caller
 
-Write-output ( 'Selection is : {0}' -f $caller.Message )
+Write-Output ('Selection is : {0}' -f $caller.Message)
 
