@@ -336,6 +336,22 @@ public class Win32Window : IWin32Window
 }
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
+function populateTreeNew {
+
+  # Add nodes
+  [System.Windows.Forms.TreeNode]$node
+  for ($x = 0; $x -lt 3; $x++)
+  {
+    # Add a root node.
+    $node = $t.Nodes.Add(("Node{0}" -f ($x * 4)))
+    #  
+    for ($y = 1; $y -lt 4; $y++)
+    {
+      # Add a node as a child of the previously added node.
+      $node = $node.Nodes.Add(("Node{0}" -f ($x * 4 + $y)))
+    }
+  }
+}
 
 function populateTree {
   param(
@@ -359,9 +375,21 @@ function populateTree {
     $parent_nodes.Add($tn)
   }
 }
+# evaluate whether the specified node has checked child nodes.
 
+function has_checked_childnodes {
+  param([System.Windows.Forms.TreeNode]$node)
+  if ($node.Nodes.Count -eq 0) { return $false }
+  $node.Nodes | ForEach-Object {
+    $childNode = $_
+    if ($childNode.Checked) { return $true }
+    #  recursively check the children of the current child node.
+    if ((has_checked_childnodes -node $childNode)) { return $true }
+  }
+  return $false
+}
 
-function promptTreeView
+function PromptTreeView
 {
   param(
     [string]$title,
@@ -378,7 +406,8 @@ function promptTreeView
   $t.Size = New-Object System.Drawing.Size (284,252)
   $t.TabIndex = 0
   # https://msdn.microsoft.com/en-us/library/system.windows.forms.treeview.nodes%28v=vs.110%29.aspx
-  populateTree -parent_nodes $t.Nodes -Text ""
+  # populateTree -parent_nodes $t.Nodes -Text ""
+  populateTreeNew
   $treeview_BeforeExpand = $t.add_BeforeExpand
   $treeview_BeforeExpand.Invoke({
       param(
@@ -397,13 +426,33 @@ function promptTreeView
 
     })
 
-
   $button = New-Object System.Windows.Forms.Button
   $button.Font = New-Object System.Drawing.Font ('Arial',10,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
   $button.Location = New-Object System.Drawing.Point (5,260)
   $button.Size = New-Object System.Drawing.Size (160,23)
   $button.Text = 'Save Selected Items'
   $button.Enabled = $false
+  # https://msdn.microsoft.com/en-us/library/system.windows.forms.treeview.treeview%28v=vs.110%29.aspx
+  # showCheckedNodesButton_Click 
+  $button.Add_Click({
+      $t.BeginUpdate()
+      $t.CollapseAll()
+
+      $treeview_BeforeExpand = $t.add_BeforeExpand
+      $treeview_BeforeExpand.Invoke({
+          param(
+            [object]$sender,
+            [System.Windows.Forms.TreeViewCancelEventArgs]$e
+          )
+          if (-not (has_checked_childnodes -node $e.Node)) { $e.Cancel = true }
+        })
+
+
+      $t.ExpandAll()
+      $t.remove_BeforeExpand
+      $t.EndUpdate()
+    })
+
   $f.SuspendLayout()
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
@@ -446,7 +495,7 @@ function promptTreeView
 }
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$result = promptTreeView -Title 'Treeview' -caller $caller
+$result = PromptTreeView -Title 'Treeview' -caller $caller
 
 Write-Output ('Selection is : {0}' -f $caller.Message)
 
