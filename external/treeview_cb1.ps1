@@ -28,7 +28,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
-public class TreeViewSample: System.Windows.Forms.Panel
+public class TreeViewSample : System.Windows.Forms.Panel
 {
 
     private readonly Hashtable _hash_table = new Hashtable();
@@ -103,7 +103,7 @@ public class TreeViewSample: System.Windows.Forms.Panel
     {
         get { return _hash_table.SyncRoot; }
     }
- 
+
     private void showCheckedNodesButton_Click(object sender, EventArgs e)
     {
         treeView1.BeginUpdate();
@@ -159,242 +159,243 @@ public class TreeViewSample: System.Windows.Forms.Panel
         if (node.Nodes.Count == 0) return false;
         foreach (TreeNode childNode in node.Nodes)
         {
-            if (childNode.Checked) { 
-			Add(childNode.Text);
-			return true; }
+            if (childNode.Checked)
+            {
+                Add(childNode.Text);
+                return true;
+            }
             // Recursively check the children of the current child node.
             if (HasCheckedChildNodes(childNode)) return true;
         }
         return false;
     }
 }
-// Copyright (CPOL) 2011 RikTheVeggie - see http://www.codeproject.com/info/cpol10.aspx
-// Tri-State Tree View http://www.codeproject.com/script/Articles/ViewDownloads.aspx?aid=202435
-// 
 namespace RikTheVeggie
 {
-	public class TriStateTreeView: System.Windows.Forms.TreeView
-	{
-		public enum CheckedState : int { UnInitialised = -1, UnChecked, Checked, Mixed };
+    // Copyright (CPOL) 2011 RikTheVeggie - see http://www.codeproject.com/info/cpol10.aspx
+    // Tri-State Tree View http://www.codeproject.com/script/Articles/ViewDownloads.aspx?aid=202435
+    public class TriStateTreeView : System.Windows.Forms.TreeView
+    {
+        public enum CheckedState : int { UnInitialised = -1, UnChecked, Checked, Mixed };
 
-		int IgnoreClickAction = 0;
+        int IgnoreClickAction = 0;
 
-		public enum TriStateStyles : int { Standard = 0, Installer };
+        public enum TriStateStyles : int { Standard = 0, Installer };
 
-		private TriStateStyles TriStateStyle = TriStateStyles.Standard;
+        private TriStateStyles TriStateStyle = TriStateStyles.Standard;
 
-		[System.ComponentModel.Category("Tri-State Tree View")]
-		[System.ComponentModel.DisplayName("Style")]
-		[System.ComponentModel.Description("Style of the Tri-State Tree View")]
-		public TriStateStyles TriStateStyleProperty
-		{
-			get { return TriStateStyle; }
-			set { TriStateStyle = value; } 
-		}
+        [System.ComponentModel.Category("Tri-State Tree View")]
+        [System.ComponentModel.DisplayName("Style")]
+        [System.ComponentModel.Description("Style of the Tri-State Tree View")]
+        public TriStateStyles TriStateStyleProperty
+        {
+            get { return TriStateStyle; }
+            set { TriStateStyle = value; }
+        }
 
-		public TriStateTreeView() : base()
-		{
-			StateImageList = new System.Windows.Forms.ImageList();
+        public TriStateTreeView()
+            : base()
+        {
+            StateImageList = new System.Windows.Forms.ImageList();
 
-			// populate the image list, using images from the System.Windows.Forms.CheckBoxRenderer class
-			for (int i = 0; i < 3; i++)
-			{
-				// Create a bitmap which holds the relevent check box style
-				// see http://msdn.microsoft.com/en-us/library/ms404307.aspx and http://msdn.microsoft.com/en-us/library/system.windows.forms.checkboxrenderer.aspx
+            // populate the image list, using images from the System.Windows.Forms.CheckBoxRenderer class
+            for (int i = 0; i < 3; i++)
+            {
+                // Create a bitmap which holds the relevent check box style
+                // see http://msdn.microsoft.com/en-us/library/ms404307.aspx and http://msdn.microsoft.com/en-us/library/system.windows.forms.checkboxrenderer.aspx
 
-				System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(16, 16);
-				System.Drawing.Graphics chkGraphics = System.Drawing.Graphics.FromImage(bmp);
-				switch ( i )
-				{
-					// 0,1 - offset the checkbox slightly so it positions in the correct place
-					case 0:
-						System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(chkGraphics, new System.Drawing.Point(0, 1), System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal);
-						break;
-					case 1:
-						System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(chkGraphics, new System.Drawing.Point(0, 1), System.Windows.Forms.VisualStyles.CheckBoxState.CheckedNormal);
-						break;
-					case 2:
-						System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(chkGraphics, new System.Drawing.Point(0, 1), System.Windows.Forms.VisualStyles.CheckBoxState.MixedNormal);
-						break;
-				}
+                System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(16, 16);
+                System.Drawing.Graphics chkGraphics = System.Drawing.Graphics.FromImage(bmp);
+                switch (i)
+                {
+                    // 0,1 - offset the checkbox slightly so it positions in the correct place
+                    case 0:
+                        System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(chkGraphics, new System.Drawing.Point(0, 1), System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal);
+                        break;
+                    case 1:
+                        System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(chkGraphics, new System.Drawing.Point(0, 1), System.Windows.Forms.VisualStyles.CheckBoxState.CheckedNormal);
+                        break;
+                    case 2:
+                        System.Windows.Forms.CheckBoxRenderer.DrawCheckBox(chkGraphics, new System.Drawing.Point(0, 1), System.Windows.Forms.VisualStyles.CheckBoxState.MixedNormal);
+                        break;
+                }
 
-				StateImageList.Images.Add(bmp);
-			}
-		}
+                StateImageList.Images.Add(bmp);
+            }
+        }
 
-		protected override void OnCreateControl()
-		{
-			base.OnCreateControl();
-			CheckBoxes = false;			// Disable default CheckBox functionality if it's been enabled
+        protected override void OnCreateControl()
+        {
+            base.OnCreateControl();
+            CheckBoxes = false;			// Disable default CheckBox functionality if it's been enabled
 
-			// Give every node an initial 'unchecked' image
-			IgnoreClickAction++;	// we're making changes to the tree, ignore any other change requests
-			UpdateChildState(this.Nodes, (int)CheckedState.UnChecked, false, true);
-			IgnoreClickAction--;
-		}
+            // Give every node an initial 'unchecked' image
+            IgnoreClickAction++;	// we're making changes to the tree, ignore any other change requests
+            UpdateChildState(this.Nodes, (int)CheckedState.UnChecked, false, true);
+            IgnoreClickAction--;
+        }
 
-		protected override void OnAfterCheck(System.Windows.Forms.TreeViewEventArgs e)
-		{
-			base.OnAfterCheck(e);
+        protected override void OnAfterCheck(System.Windows.Forms.TreeViewEventArgs e)
+        {
+            base.OnAfterCheck(e);
 
-			if (IgnoreClickAction > 0)
-			{
-				return;
-			}
+            if (IgnoreClickAction > 0)
+            {
+                return;
+            }
 
-			IgnoreClickAction++;	// we're making changes to the tree, ignore any other change requests
+            IgnoreClickAction++;	// we're making changes to the tree, ignore any other change requests
 
-			// the checked state has already been changed, we just need to update the state index
+            // the checked state has already been changed, we just need to update the state index
 
-			// node is either ticked or unticked.  ignore mixed state, as the node is still only ticked or unticked regardless of state of children
-			System.Windows.Forms.TreeNode tn = e.Node;
-			tn.StateImageIndex = tn.Checked ? (int)CheckedState.Checked : (int)CheckedState.UnChecked;
+            // node is either ticked or unticked.  ignore mixed state, as the node is still only ticked or unticked regardless of state of children
+            System.Windows.Forms.TreeNode tn = e.Node;
+            tn.StateImageIndex = tn.Checked ? (int)CheckedState.Checked : (int)CheckedState.UnChecked;
 
-			// force all children to inherit the same state as the current node
-			UpdateChildState(e.Node.Nodes, e.Node.StateImageIndex, e.Node.Checked, false);
+            // force all children to inherit the same state as the current node
+            UpdateChildState(e.Node.Nodes, e.Node.StateImageIndex, e.Node.Checked, false);
 
-			// populate state up the tree, possibly resulting in parents with mixed state
-			UpdateParentState(e.Node.Parent);
+            // populate state up the tree, possibly resulting in parents with mixed state
+            UpdateParentState(e.Node.Parent);
 
-			IgnoreClickAction--;
-		}
+            IgnoreClickAction--;
+        }
 
-		protected override void OnAfterExpand(System.Windows.Forms.TreeViewEventArgs e)
-		{
-			// If any child node is new, give it the same check state as the current node
-			// So if current node is ticked, child nodes will also be ticked
-			base.OnAfterExpand(e);
+        protected override void OnAfterExpand(System.Windows.Forms.TreeViewEventArgs e)
+        {
+            // If any child node is new, give it the same check state as the current node
+            // So if current node is ticked, child nodes will also be ticked
+            base.OnAfterExpand(e);
 
-			IgnoreClickAction++;	// we're making changes to the tree, ignore any other change requests
-			UpdateChildState(e.Node.Nodes, e.Node.StateImageIndex, e.Node.Checked, true);
-			IgnoreClickAction--;
-		}
+            IgnoreClickAction++;	// we're making changes to the tree, ignore any other change requests
+            UpdateChildState(e.Node.Nodes, e.Node.StateImageIndex, e.Node.Checked, true);
+            IgnoreClickAction--;
+        }
 
-		protected void UpdateChildState(System.Windows.Forms.TreeNodeCollection Nodes, int StateImageIndex, bool Checked, bool ChangeUninitialisedNodesOnly)
-		{
-			foreach (System.Windows.Forms.TreeNode tnChild in Nodes)
-			{
-				if (!ChangeUninitialisedNodesOnly || tnChild.StateImageIndex == -1)
-				{
-					tnChild.StateImageIndex = StateImageIndex;
-					tnChild.Checked = Checked;	// override 'checked' state of child with that of parent
+        protected void UpdateChildState(System.Windows.Forms.TreeNodeCollection Nodes, int StateImageIndex, bool Checked, bool ChangeUninitialisedNodesOnly)
+        {
+            foreach (System.Windows.Forms.TreeNode tnChild in Nodes)
+            {
+                if (!ChangeUninitialisedNodesOnly || tnChild.StateImageIndex == -1)
+                {
+                    tnChild.StateImageIndex = StateImageIndex;
+                    tnChild.Checked = Checked;	// override 'checked' state of child with that of parent
 
-					if (tnChild.Nodes.Count > 0)
-					{
-						UpdateChildState(tnChild.Nodes, StateImageIndex, Checked, ChangeUninitialisedNodesOnly);
-					}
-				}
-			}
-		}
+                    if (tnChild.Nodes.Count > 0)
+                    {
+                        UpdateChildState(tnChild.Nodes, StateImageIndex, Checked, ChangeUninitialisedNodesOnly);
+                    }
+                }
+            }
+        }
 
-		protected void UpdateParentState(System.Windows.Forms.TreeNode tn)
-		{
-			// Node needs to check all of it's children to see if any of them are ticked or mixed
-			if (tn == null)
-				return;
+        protected void UpdateParentState(System.Windows.Forms.TreeNode tn)
+        {
+            // Node needs to check all of it's children to see if any of them are ticked or mixed
+            if (tn == null)
+                return;
 
-			int OrigStateImageIndex = tn.StateImageIndex;
+            int OrigStateImageIndex = tn.StateImageIndex;
 
-			int UnCheckedNodes = 0, CheckedNodes = 0, MixedNodes = 0;
+            int UnCheckedNodes = 0, CheckedNodes = 0, MixedNodes = 0;
 
-			// The parent needs to know how many of it's children are Checked or Mixed
-			foreach (System.Windows.Forms.TreeNode tnChild in tn.Nodes)
-			{
-				if (tnChild.StateImageIndex == (int)CheckedState.Checked)
-					CheckedNodes++;
-				else if (tnChild.StateImageIndex == (int)CheckedState.Mixed)
-				{
-					MixedNodes++;
-					break;
-				}
-				else
-					UnCheckedNodes++;
-			}
+            // The parent needs to know how many of it's children are Checked or Mixed
+            foreach (System.Windows.Forms.TreeNode tnChild in tn.Nodes)
+            {
+                if (tnChild.StateImageIndex == (int)CheckedState.Checked)
+                    CheckedNodes++;
+                else if (tnChild.StateImageIndex == (int)CheckedState.Mixed)
+                {
+                    MixedNodes++;
+                    break;
+                }
+                else
+                    UnCheckedNodes++;
+            }
 
-			if (TriStateStyle == TriStateStyles.Installer)
-			{
-				// In Installer mode, if all child nodes are checked then parent is checked
-				// If at least one child is unchecked, then parent is unchecked
-				if (MixedNodes == 0)
-				{
-					if (UnCheckedNodes == 0)
-					{
-						// all children are checked, so parent must be checked
-						tn.Checked = true;
-					}
-					else
-					{
-						// at least one child is unchecked, so parent must be unchecked
-						tn.Checked = false;
-					}
-				}
-			}
+            if (TriStateStyle == TriStateStyles.Installer)
+            {
+                // In Installer mode, if all child nodes are checked then parent is checked
+                // If at least one child is unchecked, then parent is unchecked
+                if (MixedNodes == 0)
+                {
+                    if (UnCheckedNodes == 0)
+                    {
+                        // all children are checked, so parent must be checked
+                        tn.Checked = true;
+                    }
+                    else
+                    {
+                        // at least one child is unchecked, so parent must be unchecked
+                        tn.Checked = false;
+                    }
+                }
+            }
 
-			// Determine the parent's new Image State
-			if (MixedNodes > 0)
-			{
-				// at least one child is mixed, so parent must be mixed
-				tn.StateImageIndex = (int)CheckedState.Mixed;
-			}
-			else if (CheckedNodes > 0 && UnCheckedNodes == 0)
-			{
-				// all children are checked
-				if (tn.Checked)
-					tn.StateImageIndex = (int)CheckedState.Checked;
-				else
-					tn.StateImageIndex = (int)CheckedState.Mixed;
-			}
-			else if (CheckedNodes > 0)
-			{
-				// some children are checked, the rest are unchecked
-				tn.StateImageIndex = (int)CheckedState.Mixed;
-			}
-			else
-			{
-				// all children are unchecked
-				if (tn.Checked)
-					tn.StateImageIndex = (int)CheckedState.Mixed;
-				else
-					tn.StateImageIndex = (int)CheckedState.UnChecked;
-			}
+            // Determine the parent's new Image State
+            if (MixedNodes > 0)
+            {
+                // at least one child is mixed, so parent must be mixed
+                tn.StateImageIndex = (int)CheckedState.Mixed;
+            }
+            else if (CheckedNodes > 0 && UnCheckedNodes == 0)
+            {
+                // all children are checked
+                if (tn.Checked)
+                    tn.StateImageIndex = (int)CheckedState.Checked;
+                else
+                    tn.StateImageIndex = (int)CheckedState.Mixed;
+            }
+            else if (CheckedNodes > 0)
+            {
+                // some children are checked, the rest are unchecked
+                tn.StateImageIndex = (int)CheckedState.Mixed;
+            }
+            else
+            {
+                // all children are unchecked
+                if (tn.Checked)
+                    tn.StateImageIndex = (int)CheckedState.Mixed;
+                else
+                    tn.StateImageIndex = (int)CheckedState.UnChecked;
+            }
 
-			if (OrigStateImageIndex != tn.StateImageIndex && tn.Parent != null)
-			{
-				// Parent's state has changed, notify the parent's parent
-				UpdateParentState(tn.Parent);
-			}
-		}
+            if (OrigStateImageIndex != tn.StateImageIndex && tn.Parent != null)
+            {
+                // Parent's state has changed, notify the parent's parent
+                UpdateParentState(tn.Parent);
+            }
+        }
 
-		protected override void OnKeyDown(System.Windows.Forms.KeyEventArgs e)
-		{
-			base.OnKeyDown(e);
+        protected override void OnKeyDown(System.Windows.Forms.KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
 
-			// is the keypress a space?  If not, discard it
-			if (e.KeyCode == System.Windows.Forms.Keys.Space)
-			{
-				// toggle the node's checked status.  This will then fire OnAfterCheck
-				SelectedNode.Checked = !SelectedNode.Checked;
-			}
-		}
+            // is the keypress a space?  If not, discard it
+            if (e.KeyCode == System.Windows.Forms.Keys.Space)
+            {
+                // toggle the node's checked status.  This will then fire OnAfterCheck
+                SelectedNode.Checked = !SelectedNode.Checked;
+            }
+        }
 
-		protected override void OnNodeMouseClick(System.Windows.Forms.TreeNodeMouseClickEventArgs e)
-		{
-			base.OnNodeMouseClick(e);
+        protected override void OnNodeMouseClick(System.Windows.Forms.TreeNodeMouseClickEventArgs e)
+        {
+            base.OnNodeMouseClick(e);
 
-			// is the click on the checkbox?  If not, discard it
-			System.Windows.Forms.TreeViewHitTestInfo info = HitTest(e.X, e.Y);
-			if (info == null || info.Location != System.Windows.Forms.TreeViewHitTestLocations.StateImage)
-			{
-				return;
-			}
-			
-			// toggle the node's checked status.  This will then fire OnAfterCheck
-			System.Windows.Forms.TreeNode tn = e.Node;
-			tn.Checked = !tn.Checked;
-		}
-	}
+            // is the click on the checkbox?  If not, discard it
+            System.Windows.Forms.TreeViewHitTestInfo info = HitTest(e.X, e.Y);
+            if (info == null || info.Location != System.Windows.Forms.TreeViewHitTestLocations.StateImage)
+            {
+                return;
+            }
+
+            // toggle the node's checked status.  This will then fire OnAfterCheck
+            System.Windows.Forms.TreeNode tn = e.Node;
+            tn.Checked = !tn.Checked;
+        }
+    }
 }
-
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll','System.Data.dll','System.Drawing.dll','System.Collections.dll'
 
 Add-Type -TypeDefinition @"
@@ -437,7 +438,7 @@ function populateTree {
   for ($x = 0; $x -lt 3; $x++)
   {
     # Add a root node.
-    $node = $global:t.treeView1.Nodes.Add(("Node{0}" -f ($x * 4)))
+    $node = $t.treeView1.Nodes.Add(("Node{0}" -f ($x * 4)))
     #  
     for ($y = 1; $y -lt 4; $y++)
     {
@@ -450,22 +451,22 @@ function populateTree {
 function PromptTreeView
 {
   param(
-    [string]$global:title,
+    [string]$title,
     [object]$caller = $null
   )
 
   @( 'System.Drawing','System.Collections.Generic','System.Collections','System.ComponentModel','System.Text','System.Data','System.Windows.Forms') | ForEach-Object { [void][System.Reflection.Assembly]::LoadWithPartialName($_) }
   $f = New-Object System.Windows.Forms.Form
-  $f.Text = $global:title
-  $global:t = New-Object TreeViewSample
+  $f.Text = $title
+  $t = New-Object TreeViewSample
   $components = New-Object System.ComponentModel.Container
-  $global:t.Size = New-Object System.Drawing.Size (284,256)
+  $t.Size = New-Object System.Drawing.Size (284,256)
   populateTree
   $f.SuspendLayout()
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
   $f.ClientSize = New-Object System.Drawing.Size (292,266)
-  $f.Controls.Add($global:t)
+  $f.Controls.Add($t)
   $f.ResumeLayout($false)
   $f.Topmost = $true
   if ($caller -eq $null) {
@@ -475,19 +476,19 @@ function PromptTreeView
 
   [void]$f.ShowDialog([win32window]($caller))
   $results = @()
-  $caller.Message = '' 
+  $caller.Message = ''
   $caller.Data = 0
-  if ($global:t.Count -gt 0) {
-  $caller.Data = $global:t.Count
-  $global:t.GetEnumerator() | ForEach-Object { 
-  $results  += $_
+  if ($t.Count -gt 0) {
+    $caller.Data = $t.Count
+    $t.GetEnumerator() | ForEach-Object {
+      $results += $_
+    }
+    $caller.Message = $results -join ","
+  } else {
+    $caller.Data = 0
   }
-  $caller.Message = $results -join ","
-} else { 
-  $caller.Data = 0
-}
 
-  $global:t.Dispose()
+  $t.Dispose()
   $f.Dispose()
 
 }
@@ -495,10 +496,10 @@ function PromptTreeView
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $result = PromptTreeView 'Treeview' $caller
 
-  if ($caller.Data -gt 0) {
+if ($caller.Data -gt 0) {
   $caller.Data = 1
   Write-Host ('Selection is : {0}' -f $caller.Message)
-} else { 
+} else {
   Write-Host 'Nothing was selected.'
 
 }
