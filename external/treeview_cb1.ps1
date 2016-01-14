@@ -471,8 +471,6 @@ function PromptTreeView
   if ($caller -eq $null) {
     $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
   }
-  # TODO: convert $global:t_AfterSelect = $global:t.add_AfterSelect
-  # $caller.Message +=
   $f.Add_Shown({ $f.Activate() })
 
   [void]$f.ShowDialog([win32window]($caller))
@@ -480,26 +478,27 @@ function PromptTreeView
   $caller.Message = '' 
   $caller.Data = 0
   if ($global:t.Count -gt 0) {
-  $caller.Data = 1
-  Write-Host 'Selection is : '
+  $caller.Data = $global:t.Count
   $global:t.GetEnumerator() | ForEach-Object { 
-  Write-Host $_ 
   $results  += $_
   }
   $caller.Message = $results -join ","
 } else { 
   $caller.Data = 0
-  Write-Host 'Nothing was selected.'
-
 }
 
   $global:t.Dispose()
   $f.Dispose()
-  # return $caller.MEssage
 
 }
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
 $result = PromptTreeView 'Treeview' $caller
 
-Write-Debug ('Selection is : {0}' -f $result)
+  if ($caller.Data -gt 0) {
+  $caller.Data = 1
+  Write-Host ('Selection is : {0}' -f $caller.Message)
+} else { 
+  Write-Host 'Nothing was selected.'
+
+}
