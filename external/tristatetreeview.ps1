@@ -307,12 +307,55 @@ namespace RikTheVeggie
 Add-Type -TypeDefinition @"
 using System;
 using System.Windows.Forms;
+using System.Collections;
 public class Win32Window : IWin32Window
 {
     private IntPtr _hWnd;
     private int _data;
-    private string _message;
+    private string _message; // for errors
+    //  http://www.java2s.com/Code/CSharp/Collections-Data-Structure/HashSet.htm 
 
+    private readonly Hashtable _hash_table = new Hashtable();
+
+    public void Add(object o)
+    {
+        _hash_table[o] = null;
+    }
+
+    public bool Contains(object o)
+    {
+        return _hash_table.ContainsKey(o);
+    }
+
+    public void CopyTo(Array array, int index)
+    {
+        _hash_table.Keys.CopyTo(array, index);
+    }
+
+    public int Count
+    {
+        get { return _hash_table.Count; }
+    }
+
+    public IEnumerator GetEnumerator()
+    {
+        return _hash_table.Keys.GetEnumerator();
+    }
+
+    public bool IsSynchronized
+    {
+        get { return _hash_table.IsSynchronized; }
+    }
+
+    public void Remove(object o)
+    {
+        _hash_table.Remove(o);
+    }
+
+    public object SyncRoot
+    {
+        get { return _hash_table.SyncRoot; }
+    }
     public int Data
     {
         get { return _data; }
@@ -334,24 +377,7 @@ public class Win32Window : IWin32Window
         get { return _hWnd; }
     }
 }
-
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
-function populateTreeNew {
-
-  # Add nodes
-  [System.Windows.Forms.TreeNode]$node
-  for ($x = 0; $x -lt 3; $x++)
-  {
-    # Add a root node.
-    $node = $t.Nodes.Add(("Node{0}" -f ($x * 4)))
-    #  
-    for ($y = 1; $y -lt 4; $y++)
-    {
-      # Add a node as a child of the previously added node.
-      $node = $node.Nodes.Add(("Node{0}" -f ($x * 4 + $y)))
-    }
-  }
-}
 
 function populateTree {
   param(
@@ -375,19 +401,6 @@ function populateTree {
     $parent_nodes.Add($tn)
   }
 }
-# evaluate whether the specified node has checked child nodes.
-
-function has_checked_childnodes {
-  param([System.Windows.Forms.TreeNode]$node)
-  if ($node.Nodes.Count -eq 0) { return $false }
-  $node.Nodes | ForEach-Object {
-    $childNode = $_
-    if ($childNode.Checked) { return $true }
-    #  recursively check the children of the current child node.
-    if ((has_checked_childnodes -node $childNode)) { return $true }
-  }
-  return $false
-}
 
 function PromptTreeView
 {
@@ -406,8 +419,7 @@ function PromptTreeView
   $t.Size = New-Object System.Drawing.Size (284,252)
   $t.TabIndex = 0
   # https://msdn.microsoft.com/en-us/library/system.windows.forms.treeview.nodes%28v=vs.110%29.aspx
-  # populateTree -parent_nodes $t.Nodes -Text ""
-  populateTreeNew
+  populateTree -parent_nodes $t.Nodes -Text ""
   $treeview_BeforeExpand = $t.add_BeforeExpand
   $treeview_BeforeExpand.Invoke({
       param(
@@ -423,34 +435,6 @@ function PromptTreeView
         populateTree -parent_nodes $e.Node.Nodes -Text $e.Node.Text
       }
       $tv.UseWaitCursor = $false
-
-    })
-
-  $button = New-Object System.Windows.Forms.Button
-  $button.Font = New-Object System.Drawing.Font ('Arial',10,[System.Drawing.FontStyle]::Bold,[System.Drawing.GraphicsUnit]::Point,0)
-  $button.Location = New-Object System.Drawing.Point (5,260)
-  $button.Size = New-Object System.Drawing.Size (160,23)
-  $button.Text = 'Save Selected Items'
-  $button.Enabled = $false
-  # https://msdn.microsoft.com/en-us/library/system.windows.forms.treeview.treeview%28v=vs.110%29.aspx
-  # showCheckedNodesButton_Click 
-  $button.Add_Click({
-      $t.BeginUpdate()
-      $t.CollapseAll()
-
-      $treeview_BeforeExpand = $t.add_BeforeExpand
-      $treeview_BeforeExpand.Invoke({
-          param(
-            [object]$sender,
-            [System.Windows.Forms.TreeViewCancelEventArgs]$e
-          )
-          if (-not (has_checked_childnodes -node $e.Node)) { $e.Cancel = true }
-        })
-
-
-      $t.ExpandAll()
-      $t.remove_BeforeExpand
-      $t.EndUpdate()
     })
 
   $f.SuspendLayout()
@@ -478,10 +462,14 @@ function PromptTreeView
         [object]$sender,
         [System.Windows.Forms.TreeViewEventArgs]$eventargs
       )
-      # [System.Windows.Forms.MessageBox]::Show($eventargs.Node.Text);
+      $text = $eventargs.Node.Text
       if ($eventargs.Node.Checked) {
         if ($eventargs.Node.Text -ne '') {
-          $caller.Message += ('{0},' -f $eventargs.Node.Text)
+          $caller.Add($text);
+        }
+      } else {
+        if ($caller.Contains($text)) {
+          $caller.Remove($text)
         }
       }
     })
@@ -495,7 +483,12 @@ function PromptTreeView
 }
 
 $caller = New-Object Win32Window -ArgumentList ([System.Diagnostics.Process]::GetCurrentProcess().MainWindowHandle)
-$result = PromptTreeView -Title 'Treeview' -caller $caller
+[void](PromptTreeView -Title 'Treeview' -caller $caller)
+if ($caller.Count -gt 0) {
+  Write-Output 'Selection is : '
+  $caller.GetEnumerator() | ForEach-Object { Write-Output $_ }
+} else { 
+  Write-Output 'Nothing was selected.'
 
-Write-Output ('Selection is : {0}' -f $caller.Message)
+}
 
