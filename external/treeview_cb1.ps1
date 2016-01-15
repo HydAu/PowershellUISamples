@@ -431,23 +431,94 @@ public class Win32Window : IWin32Window
 
 "@ -ReferencedAssemblies 'System.Windows.Forms.dll'
 
-function populateTree {
+# Simplified structure to generate a treeview
+# see https://communities.vmware.com/docs/DOC-17938
+# https://communities.vmware.com/servlet/JiveServlet/download/17938-4-78419/Dumper.psm1
 
-  # Add nodes
-  [System.Windows.Forms.TreeNode]$node
-  for ($x = 0; $x -lt 3; $x++)
-  {
-    # Add a root node.
-    $node = $t.treeView1.Nodes.Add(("Node{0}" -f ($x * 4)))
-    #  
-    for ($y = 1; $y -lt 4; $y++)
-    {
-      # Add a node as a child of the previously added node.
-      $node = $node.Nodes.Add(("Node{0}" -f ($x * 4 + $y)))
+$tree =
+@{
+  'a' = @{
+          'aa' = @{
+                   'aaa' = @{
+                             'aaaa' = @{
+                                        'aaaaa' = '$null';
+                                       }
+                            };
+                   'aab' = @{
+                             'aaba' = '$null';
+                            };
+                   'aac' = '$null';
+                  };
+          'ab' = @{
+                   'aba' = @{
+                             'abaa' = '$null';
+                             'abab' = '$null'
+                            }
+                  };
+          'ac' = @{
+                   'aca' = '$null';
+                   'acb' = '$null';
+                   'acc' = '$null';
+                   'acd' = '$null';
+                   'ace' = '$null';
+                   'acf' = '$null';
+                   'acg' = '$null';
+                   'ach' = '$null';
+                  };
+          'ad' = '$null';
+         };
+  'b' = @{
+          'ba' = '$null'
+          'bb' = '$null';
+          'bc' = '$null';
+          'bd' = '$null';
+          'be' = '$null';
+         };
+  'c ' = '$null';
+ }
+
+$root = 'root'
+
+function populateTreeView_print{
+  param(
+    [Object]$Object,
+    [string]$root
+  )
+
+  if ( $Object -is [hashtable] ) {
+    foreach ( $pair in $Object.GetEnumerator() ){
+      # Recursion is here
+      write-output ('add-node {0} -> {1}' -f  ${root}, $pair.Key)
+      populateTreeView_print -object $pair.Value -root $pair.Key
+    }
+  }
+}
+
+populateTreeView_print -object $tree -root $root
+
+function populateTree {
+  param(
+    [Object]$Object,
+    [System.Windows.Forms.TreeNode]$parent_node
+  )
+ 
+  [System.Windows.Forms.TreeNode]$new_node
+
+  if ( $Object -is [hashtable] ) {
+    foreach ( $pair in $Object.GetEnumerator() ){
+      # Add node
+      if ($parent_node -eq $null) { 
+        $new_node = $t.treeView1.Nodes.Add(("Node {0}" -f $pair.Key))
+      } else {
+        $new_node  = $parent_node.Nodes.Add(("Node {0}" -f $pair.Key))
+      }
+      # Recursion is here
+      populateTree -object $pair.Value -parent_node $new_node 
     }
   }
 
 }
+
 function PromptTreeView
 {
   param(
@@ -461,7 +532,7 @@ function PromptTreeView
   $t = New-Object TreeViewSample
   $components = New-Object System.ComponentModel.Container
   $t.Size = New-Object System.Drawing.Size (284,256)
-  populateTree
+  populateTree -object $tree -parent_node $null
   $f.SuspendLayout()
   $f.AutoScaleBaseSize = New-Object System.Drawing.Size (5,13)
   $f.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
