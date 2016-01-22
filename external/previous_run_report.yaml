@@ -1,58 +1,424 @@
 --- !ruby/object:Puppet::Transaction::Report
-  logs:
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym notice
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - notice
-      source: Puppet
-      message: "Notice level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym err
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - err
-      source: Puppet
-      message: "Err level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym warning
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - warning
-      source: Puppet
-      message: "Warning level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym debug
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - debug
-      source: Puppet
-      message: "Debug level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym crit
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - crit
-      source: Puppet
-      message: "Crit level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym alert
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - alert
-      source: Puppet
-      message: "Alert level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym info
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - info
-      source: Puppet
-      message: "Info level message"
-    - !ruby/object:Puppet::Util::Log
-      level: !ruby/sym emerg
-      time: 2013-09-03 14:00:41.473620 +00:00
-      tags:
-        - emerg
-      source: Puppet
-      message: "Emerg level message"
+metrics:
+  resources: !ruby/object:Puppet::Util::Metric
+    name: resources
+    label: Resources
+    values:
+    - - total
+      - Total
+      - 12
+    - - skipped
+      - Skipped
+      - 8
+    - - failed
+      - Failed
+      - 0
+    - - failed_to_restart
+      - Failed to restart
+      - 0
+    - - restarted
+      - Restarted
+      - 0
+    - - changed
+      - Changed
+      - 3
+    - - out_of_sync
+      - Out of sync
+      - 3
+    - - scheduled
+      - Scheduled
+      - 0
+  time: !ruby/object:Puppet::Util::Metric
+    name: time
+    label: Time
+    values:
+    - - exec
+      - Exec
+      - 13.062496
+    - - reboot
+      - Reboot
+      - 0.0
+    - - config_retrieval
+      - Config retrieval
+      - 1.234395
+    - - total
+      - Total
+      - 14.296890999999999
+  changes: !ruby/object:Puppet::Util::Metric
+    name: changes
+    label: Changes
+    values:
+    - - total
+      - Total
+      - 3
+  events: !ruby/object:Puppet::Util::Metric
+    name: events
+    label: Events
+    values:
+    - - total
+      - Total
+      - 3
+    - - failure
+      - Failure
+      - 0
+    - - success
+      - Success
+      - 3
+logs:
+- !ruby/object:Puppet::Util::Log
+  level: :notice
+  tags: !ruby/object:Puppet::Util::TagSet
+    hash:
+      notice: true
+      exec: true
+      puppet_log_rename_run_command_key: true
+      class: true
+  message: executed successfully
+  source: "/Stage[main]/Main/Exec[puppet_log_rename_run_command_key]/returns"
+  time: 2016-01-22 13:58:20.686438000 +00:00
+  file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+  line: 10
+- !ruby/object:Puppet::Util::Log
+  level: :notice
+  tags: !ruby/object:Puppet::Util::TagSet
+    hash:
+      notice: true
+      exec: true
+      create_registry_key: true
+      class: true
+  message: executed successfully
+  source: "/Stage[main]/Main/Exec[create_registry_key]/returns"
+  time: 2016-01-22 13:58:27.201073000 +00:00
+  file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+  line: 29
+- !ruby/object:Puppet::Util::Log
+  level: :notice
+  tags: !ruby/object:Puppet::Util::TagSet
+    hash:
+      notice: true
+      reboot: true
+      testrun: true
+      class: true
+  message: defined 'when' as 'pending'
+  source: "/Stage[main]/Main/Reboot[testrun]/when"
+  time: 2016-01-22 13:58:27.201073000 +00:00
+  file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+  line: 38
+- !ruby/object:Puppet::Util::Log
+  level: :notice
+  tags: !ruby/object:Puppet::Util::TagSet
+    hash:
+      notice: true
+  message: Applied catalog in 13.11 seconds
+  source: Puppet
+  time: 2016-01-22 13:58:27.233102000 +00:00
+resource_statuses:
+  Exec[puppet_log_rename_run_command_key]: !ruby/object:Puppet::Resource::Status
+    title: puppet_log_rename_run_command_key
+    file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+    line: 10
+    resource: Exec[puppet_log_rename_run_command_key]
+    resource_type: Exec
+    containment_path:
+    - Stage[main]
+    - Main
+    - Exec[puppet_log_rename_run_command_key]
+    evaluation_time: 6.547861
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        exec: true
+        puppet_log_rename_run_command_key: true
+        class: true
+    time: '2016-01-22T13:58:14.138577000+00:00'
+    failed: false
+    changed: true
+    out_of_sync: true
+    skipped: false
+    change_count: 1
+    out_of_sync_count: 1
+    events:
+    - !ruby/object:Puppet::Transaction::Event
+      audited: false
+      property: returns
+      previous_value: :notrun
+      desired_value:
+      - '0'
+      historical_value: 
+      message: executed successfully
+      name: :executed_command
+      status: success
+      time: 2016-01-22 13:58:14.138577000 +00:00
+  Exec[destroy_registry_key]: !ruby/object:Puppet::Resource::Status
+    title: destroy_registry_key
+    file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+    line: 18
+    resource: Exec[destroy_registry_key]
+    resource_type: Exec
+    containment_path:
+    - Stage[main]
+    - Main
+    - Exec[destroy_registry_key]
+    evaluation_time: 1.030258
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        exec: true
+        destroy_registry_key: true
+        class: true
+    time: '2016-01-22T13:58:20.686438000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: false
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Exec[create_registry_key]: !ruby/object:Puppet::Resource::Status
+    title: create_registry_key
+    file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+    line: 29
+    resource: Exec[create_registry_key]
+    resource_type: Exec
+    containment_path:
+    - Stage[main]
+    - Main
+    - Exec[create_registry_key]
+    evaluation_time: 5.484377
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        exec: true
+        create_registry_key: true
+        class: true
+    time: '2016-01-22T13:58:21.716696000+00:00'
+    failed: false
+    changed: true
+    out_of_sync: true
+    skipped: false
+    change_count: 1
+    out_of_sync_count: 1
+    events:
+    - !ruby/object:Puppet::Transaction::Event
+      audited: false
+      property: returns
+      previous_value: :notrun
+      desired_value:
+      - '0'
+      - '1'
+      historical_value: 
+      message: executed successfully
+      name: :executed_command
+      status: success
+      time: 2016-01-22 13:58:25.967686000 +00:00
+  Reboot[testrun]: !ruby/object:Puppet::Resource::Status
+    title: testrun
+    file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+    line: 38
+    resource: Reboot[testrun]
+    resource_type: Reboot
+    containment_path:
+    - Stage[main]
+    - Main
+    - Reboot[testrun]
+    evaluation_time: 0.0
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        reboot: true
+        testrun: true
+        class: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: true
+    out_of_sync: true
+    skipped: false
+    change_count: 1
+    out_of_sync_count: 1
+    events:
+    - !ruby/object:Puppet::Transaction::Event
+      audited: false
+      property: when
+      previous_value: :absent
+      desired_value: :pending
+      historical_value: 
+      message: defined 'when' as 'pending'
+      name: :when_changed
+      status: success
+      time: 2016-01-22 13:58:27.201073000 +00:00
+  Exec[after_reboot]: !ruby/object:Puppet::Resource::Status
+    title: after_reboot
+    file: C:/modules/site/reboot/tests/reboot_autoupdate_windows_2012_20152.pp
+    line: 42
+    resource: Exec[after_reboot]
+    resource_type: Exec
+    containment_path:
+    - Stage[main]
+    - Main
+    - Exec[after_reboot]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        exec: true
+        after_reboot: true
+        class: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Schedule[puppet]: !ruby/object:Puppet::Resource::Status
+    title: puppet
+    file: 
+    line: 
+    resource: Schedule[puppet]
+    resource_type: Schedule
+    containment_path:
+    - Schedule[puppet]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        schedule: true
+        puppet: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Schedule[hourly]: !ruby/object:Puppet::Resource::Status
+    title: hourly
+    file: 
+    line: 
+    resource: Schedule[hourly]
+    resource_type: Schedule
+    containment_path:
+    - Schedule[hourly]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        schedule: true
+        hourly: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Schedule[daily]: !ruby/object:Puppet::Resource::Status
+    title: daily
+    file: 
+    line: 
+    resource: Schedule[daily]
+    resource_type: Schedule
+    containment_path:
+    - Schedule[daily]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        schedule: true
+        daily: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Schedule[weekly]: !ruby/object:Puppet::Resource::Status
+    title: weekly
+    file: 
+    line: 
+    resource: Schedule[weekly]
+    resource_type: Schedule
+    containment_path:
+    - Schedule[weekly]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        schedule: true
+        weekly: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Schedule[monthly]: !ruby/object:Puppet::Resource::Status
+    title: monthly
+    file: 
+    line: 
+    resource: Schedule[monthly]
+    resource_type: Schedule
+    containment_path:
+    - Schedule[monthly]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        schedule: true
+        monthly: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Schedule[never]: !ruby/object:Puppet::Resource::Status
+    title: never
+    file: 
+    line: 
+    resource: Schedule[never]
+    resource_type: Schedule
+    containment_path:
+    - Schedule[never]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        schedule: true
+        never: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+  Filebucket[puppet]: !ruby/object:Puppet::Resource::Status
+    title: puppet
+    file: 
+    line: 
+    resource: Filebucket[puppet]
+    resource_type: Filebucket
+    containment_path:
+    - Filebucket[puppet]
+    evaluation_time: 
+    tags: !ruby/object:Puppet::Util::TagSet
+      hash:
+        filebucket: true
+        puppet: true
+    time: '2016-01-22T13:58:27.201073000+00:00'
+    failed: false
+    changed: false
+    out_of_sync: false
+    skipped: true
+    change_count: 0
+    out_of_sync_count: 0
+    events: []
+host: vagrant-2012r2
+time: 2016-01-22 13:58:14.122953000 +00:00
+kind: apply
+report_format: 4
+puppet_version: 4.2.3
+configuration_version: 1453471083
+transaction_uuid: ad87a7d4-ea77-47cf-b025-5141c57b3973
+environment: production
+status: changed
