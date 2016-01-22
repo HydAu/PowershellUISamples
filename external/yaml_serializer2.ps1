@@ -122,7 +122,7 @@ $shared_assemblies | ForEach-Object {
   Add-Type -Path $_
 }
 popd
-
+# https://raw.githubusercontent.com/puppetlabs/mcollective-puppet-agent/master/spec/fixtures/last_run_report.yaml
 $filename = 'previous_run_report.yaml'
 $filepath = [System.IO.Path]::Combine((Get-ScriptDirectory),$filename)
 $data = (Get-Content -Path $filepath ) -join "`n"
