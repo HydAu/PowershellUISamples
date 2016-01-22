@@ -80,6 +80,7 @@ function Convert-YamlMappingNodeToHash ($node) {
   }
   return $hash
 }
+
 function Convert-YamlSequenceNodeToList ($node) {
   $list = @()
   $yamlNodes = $node.Children
@@ -89,7 +90,7 @@ function Convert-YamlSequenceNodeToList ($node) {
   return $list
 }
 
-# does not work well with secondary Powershell shell instances
+# NOTE: does not work well with secondary Powershell shell instances
 function Get-ScriptDirectory
 
 {
@@ -122,11 +123,49 @@ $shared_assemblies | ForEach-Object {
   Add-Type -Path $_
 }
 popd
-# https://raw.githubusercontent.com/puppetlabs/mcollective-puppet-agent/master/spec/fixtures/last_run_report.yaml
+
 $filename = 'previous_run_report.yaml'
 $filepath = [System.IO.Path]::Combine((Get-ScriptDirectory),$filename)
-$data = (Get-Content -Path $filepath ) -join "`n"
-$yaml = Get-YamlData $data
+$data = (Get-Content -Path $filepath) -join "`n"
+$yaml = get-YamlData $data
 
-$x = Explode-Node  $yaml.Documents.RootNode 
+$puppet_agent_state_log = Explode-Node $yaml.Documents.RootNode
+Write-Host -ForegroundColor 'yellow' 'Logs:'
+$puppet_agent_state_log['logs'] |
+ForEach-Object {
+  $log = $_
+  Write-Host -ForegroundColor 'green' $log['message']
+}
 
+Write-Host -ForegroundColor 'yellow' 'Resource:'
+
+$data = $puppet_agent_state_log['resource_statuses']
+$data.Keys | Where-Object { $_ -match '^(?:\w+)\[(?:\w+)\]$' } |
+ForEach-Object {
+  $resource = $_
+
+  if ($resource -match '^(\w+)\[(\w+)\]$') {
+    $resource_type = $matches[1]
+    $resource_title = $matches[2]
+
+    if ($resource_type -eq 'Reboot' -and $resource_title -eq 'testrun') {
+      @( 'resource_type',
+        'title') | ForEach-Object {
+        $key = $_
+        Write-Host -ForegroundColor 'green' ('{0}: {1}' -f $key,$data[$resource][$key])
+      }
+
+      @(
+        'skipped',
+        'failed',
+        'changed'
+      ) | ForEach-Object {
+        $key = $_
+        Write-Host -ForegroundColor 'green' ('{0}: {1}' -f $key,($data[$resource][$key] -eq 'true'))
+      }
+
+      Write-Host -ForegroundColor 'blue' ('message: {0}' -f $data[$resource]['events']['message'])
+
+    }
+  }
+}
