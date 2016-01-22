@@ -79,3 +79,93 @@ $serializer = New-Object YamlDotNet.Serialization.Serializer ([YamlDotNet.Serial
 Write-Output ('Provider: {0}.{1}' -f $serializer.getType().Namespace,$serializer.getType().Name)
 $serializer.Serialize([System.Console]::Out,$sample_event_object)
 
+
+
+# May want to use https://github.com/scottmuc/PowerYaml/blob/master/Functions/YamlDotNet-Integration.ps1
+# http://stackoverflow.com/questions/8343767/how-to-get-the-current-directory-of-the-cmdlet-being-executed	
+
+function Get-ScriptDirectory
+
+{
+  $Invocation = (Get-Variable MyInvocation -Scope 1).Value
+  if ($Invocation.PSScriptRoot) {
+    $Invocation.PSScriptRoot
+  }
+  elseif ($Invocation.MyCommand.Path) {
+    Split-Path $Invocation.MyCommand.Path
+  } else {
+    $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf(''))
+  }
+}
+
+# https://github.com/sergueik/powershell_ui_samples/blob/3813d0932fc902195fe34ad56652eb7afadbc5b3/external/yaml_serializer.ps1
+$shared_assemblies_path = Get-ScriptDirectory
+# http://stackoverflow.com/questions/14894864/how-to-download-a-nuget-package-without-nuget-exe-or-visual-studio-extension
+[string[]]$shared_assemblies = @(
+  'YamlDotNet.dll',# http://www.nuget.org/api/v2/package/YamlDotNet/3.7.0 -> rename yamldotnet.3.7.0.nupkg
+  'YamlSerializer.dll' # http://www.nuget.org/api/v2/package/YAML-Serializer/1.2.0-beta
+  # 'nunit.core.dll' # http://www.nuget.org/api/v2/package/NUnit.Core.Engine/3.0.0-beta-4
+  # 'nunit.framework.dll' # TODO - check if still needed when 3.0 
+)
+pushd $shared_assemblies_path
+
+$shared_assemblies | ForEach-Object {
+  Unblock-File -Path $_
+  # Write-Debug $_
+  Add-Type -Path $_
+}
+popd
+
+
+$filename = 'previous_run_report.yaml'
+$data = (Get-Content -Path ([System.IO.Path]::Combine((Get-ScriptDirectory),$filename))) -join "`n"
+
+$stringReader = New-Object System.IO.StringReader ($data)
+$yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
+$yamlStream.Load([System.IO.TextReader]$stringReader)
+
+# need custom 
+$rootNode = $yamlStream.RootNode
+$item_values = $rootNode.Value
+0..($item_values.count - 1) | ForEach-Object {
+  $cnt = $_;
+  $data1 = $item_values[$cnt].Key.Value
+  if ($data1 -match '^(\w+)\[(\w+)\]$') {
+    # write-output $cnt 
+    $type1 = $matches[1]
+    $title1 = $matches[2]
+    if ($type1 -eq 'Reboot') {
+      Write-Output (("{0}{{ '{1}' : ... }} ({2})") -f $type1,$title1,$cnt)
+      # write-output  $item_values[$cnt].Value
+      $data2 = $item_values[$cnt].Value
+      # $data2 | get-member
+      $data2.Value.count
+      $data3 = $data2.Value
+      $count2 = $data2.Value.count
+      0..$count2 | ForEach-Object {
+        $count3 = $_
+        $data4 = $data3[$count3].Key.Value
+        if ($data4 -eq 'message') {
+          Write-Output $count3
+          Write-Output ('->' + $data4 + '|')
+          Write-Output $data3[$count3].Value.Value
+        }
+      }
+      # $data2.Value[11]
+      # write-output  $item_values[$cnt].Value['changed']
+      <#
+
+@(
+
+changed
+
+out_of_sync
+
+skipped)
+
+#>
+    }
+  }
+
+}
+
