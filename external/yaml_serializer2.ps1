@@ -18,32 +18,26 @@ function Add-CastingFunctions ($value) {
 }
 
 function Add-CastingFunctionsForPosh2 ($value) {
-  return Add-Member -InputObject $value -Name ToInt `
-     -MemberType ScriptMethod -PassThru -Value `
+  return Add-Member -InputObject $value -Name ToInt -MemberType ScriptMethod -PassThru -Value `
      { [int]$this } |
-  Add-Member -Name ToLong `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToLong -MemberType ScriptMethod -PassThru -Value `
      { [long]$this } |
-  Add-Member -Name ToDouble `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToDouble -MemberType ScriptMethod -PassThru -Value `
      { [double]$this } |
-  Add-Member -Name ToDecimal `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToDecimal -MemberType ScriptMethod -PassThru -Value `
      { [decimal]$this } |
-  Add-Member -Name ToByte `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToByte -MemberType ScriptMethod -PassThru -Value `
      { [byte]$this } |
-  Add-Member -Name ToBoolean `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToBoolean -MemberType ScriptMethod -PassThru -Value `
      { [System.Boolean]::Parse($this) }
 }
 
-function get-YamlData {
+function Get-YamlDocumentFromString {
   param([string]$raw_data)
   $s = New-Object System.IO.StringReader ($raw_data)
   $o = New-Object YamlDotNet.RepresentationModel.YamlStream
   $o.Load([System.IO.TextReader]$s)
-  return $o
+  return $o.Documents[0]
 }
 
 function Get-YamlStream {
@@ -55,20 +49,12 @@ function Get-YamlStream {
   return $o
 }
 
-function Get-YamlDocument { 
-  param([string]$file_path) 
+function Get-YamlDocument {
+  param([string]$file_path)
   $o = Get-YamlStream $file_path
   # BUG ? : 
   # $yamlStream.RootNode 
   return $o.Documents[0].RootNode
-}
-
-function Get-YamlDocumentFromString ([string]$yamlString) {
-  $stringReader = New-Object System.IO.StringReader ($yamlString)
-  $yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
-  $yamlStream.Load([System.IO.TextReader]$stringReader)
-  $document = $yamlStream.Documents[0]
-  return $document
 }
 
 function Explode-Node {
@@ -88,19 +74,19 @@ function Convert-YamlScalarNodeToValue ($node) {
 }
 
 function Convert-YamlMappingNodeToHash ($node) {
-  $hash = @{}
-  $yamlNodes = $node.Children
-  foreach ($key in $yamlNodes.Keys) {
-    $hash[$key.Value] = Explode-Node $yamlNodes[$key]
+  $h = @{}
+  $y = $node.Children
+  foreach ($k in $y.Keys) {
+    $h[$k.Value] = Explode-Node $y[$k]
   }
-  return $hash
+  return $h
 }
 
-function Convert-YamlSequenceNodeToList ($node) {
+function Convert-YamlSequenceNodeToList {
+  param($node)
   $list = @()
-  $yamlNodes = $node.Children
-  foreach ($yamlNode in $yamlNodes) {
-    $list += Explode-Node $yamlNode
+  foreach ($y in $node.Children) {
+    $list += Explode-Node $y
   }
   return $list
 }
@@ -123,8 +109,8 @@ function Get-ScriptDirectory
 # http://stackoverflow.com/questions/14894864/how-to-download-a-nuget-package-without-nuget-exe-or-visual-studio-extension
 # http://www.nuget.org/api/v2/package/<assembly>/<version>
 $versions = @{
-  'YamlDotNet.Configuration' = $null;  # 'YamlDotNet.Configuration' is no longer available through nuget
-  'YamlDotNet.dll' = '3.7.0'; # not used - all functionality is probably in this assembly
+  'YamlDotNet.Configuration' = $null; # 'YamlDotNet.Configuration' is no longer available through nuget
+  'YamlDotNet.dll' = '3.7.0'; # currently unused - all functionality is probably in this assembly
   'YamlDotNet.Converters' = '2.2.0';
   'YamlDotNet.RepresentationModel' = '2.2.0';
   'YamlDotNet.Core' = '2.2.0';
@@ -142,9 +128,11 @@ popd
 $filename = 'previous_run_report.yaml'
 $filepath = [System.IO.Path]::Combine((Get-ScriptDirectory),$filename)
 $data = (Get-Content -Path $filepath) -join "`n"
-$yaml = get-YamlData $data
+$yaml = Get-YamlDocumentFromString $data
 
-$puppet_agent_state_log = Explode-Node $yaml.Documents.RootNode
+$puppet_agent_state_log = Explode-Node $yaml.RootNode
+
+
 Write-Host -ForegroundColor 'yellow' 'Logs:'
 $puppet_agent_state_log['logs'] |
 ForEach-Object {
