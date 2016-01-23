@@ -1,5 +1,19 @@
+# origin: https://github.com/scottmuc/PowerYaml
+# https://github.com/aaubry/YamlDotNet
+
+$shared_assemblies_path = 'C:\developer\sergueik\csharp\SharedAssemblies'
+[string[]]$shared_assemblies = @(
+  # very old version of assembly copied from PowerYaml
+  'YamlDotNet.Configuration.dll',
+  'YamlDotNet.Converters.dll',
+  'YamlDotNet.RepresentationModel.dll',
+  'YamlDotNet.Core.dll',
+  'nunit.core.dll' # http://www.nuget.org/api/v2/package/NUnit.Core.Engine/3.0.0-beta-4
+  'nunit.framework.dll' # TODO - check if still needed when 3.0 
+)
+
 function Add-CastingFunctions ($value) {
-  if ($PSVersionTable.PSVersion -ge "3.0") { return $value }
+  if ($PSVersionTable.PSVersion -ge '3.0') { return $value }
   return Add-CastingFunctionsForPosh2 ($value)
 }
 
@@ -24,30 +38,29 @@ function Add-CastingFunctionsForPosh2 ($value) {
      { [System.Boolean]::Parse($this) }
 }
 
-function get-YamlData ([string]$data) {
-  $stringReader = New-Object System.IO.StringReader ($data)
-  $yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
-  $yamlStream.Load([System.IO.TextReader]$stringReader)
-
-  return $yamlStream
+function get-YamlData {
+  param([string]$raw_data)
+  $s = New-Object System.IO.StringReader ($raw_data)
+  $o = New-Object YamlDotNet.RepresentationModel.YamlStream
+  $o.Load([System.IO.TextReader]$s)
+  return $o
 }
 
-function Get-YamlStream ([string]$file) {
-  $streamReader = [System.IO.File]::OpenText($file)
-  $yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
-  $yamlStream.Load([System.IO.TextReader]$streamReader)
-  $streamReader.Close()
-  return $yamlStream
+function Get-YamlStream {
+  param([string]$file_path)
+  $r = [System.IO.File]::OpenText($file_path)
+  $o = New-Object YamlDotNet.RepresentationModel.YamlStream
+  $o.Load([System.IO.TextReader]$r)
+  $r.Close()
+  return $o
 }
 
-function Get-YamlDocument ([string]$file) {
-  $yamlStream = Get-YamlStream $file
-  # Cannot index into a null array.
-  $document = $yamlStream.Documents[0].RootNode
-  # BUG: occationally the $yamlStream does not 
-  # $document = $yamlStream.RootNode
-
-  return $document
+function Get-YamlDocument { 
+  param([string]$file_path) 
+  $o = Get-YamlStream $file_path
+  # BUG ? : 
+  # $yamlStream.RootNode 
+  return $o.Documents[0].RootNode
 }
 
 function Get-YamlDocumentFromString ([string]$yamlString) {
@@ -58,12 +71,14 @@ function Get-YamlDocumentFromString ([string]$yamlString) {
   return $document
 }
 
-function Explode-Node ($node) {
-  if ($node.GetType().Name -eq "YamlScalarNode") {
+function Explode-Node {
+  param($node)
+  $node_type = $node.GetType().Name
+  if ($node_type -eq 'YamlScalarNode') {
     return Convert-YamlScalarNodeToValue $node
-  } elseif ($node.GetType().Name -eq "YamlMappingNode") {
+  } elseif ($node_type -eq 'YamlMappingNode') {
     return Convert-YamlMappingNodeToHash $node
-  } elseif ($node.GetType().Name -eq "YamlSequenceNode") {
+  } elseif ($node_type -eq 'YamlSequenceNode') {
     return Convert-YamlSequenceNodeToList $node
   }
 }
@@ -105,21 +120,21 @@ function Get-ScriptDirectory
   }
 }
 
-$shared_assemblies_path = 'C:\developer\sergueik\csharp\SharedAssemblies'
 # http://stackoverflow.com/questions/14894864/how-to-download-a-nuget-package-without-nuget-exe-or-visual-studio-extension
-[string[]]$shared_assemblies = @(
-  'YamlDotNet.Configuration.dll',
-  'YamlDotNet.Converters.dll',
-  'YamlDotNet.RepresentationModel.dll',
-  'YamlDotNet.dll' # http://www.nuget.org/api/v2/package/YamlDotNet/3.7.0
-  # 'nunit.core.dll' # http://www.nuget.org/api/v2/package/NUnit.Core.Engine/3.0.0-beta-4
-  # 'nunit.framework.dll' # TODO - check if still needed when 3.0 
-)
+# http://www.nuget.org/api/v2/package/<assembly>/<version>
+$versions = @{
+  'YamlDotNet.Configuration' = $null;  # 'YamlDotNet.Configuration' is no longer available through nuget
+  'YamlDotNet.dll' = '3.7.0'; # not used - all functionality is probably in this assembly
+  'YamlDotNet.Converters' = '2.2.0';
+  'YamlDotNet.RepresentationModel' = '2.2.0';
+  'YamlDotNet.Core' = '2.2.0';
+}
+
 pushd $shared_assemblies_path
 
 $shared_assemblies | ForEach-Object {
   Unblock-File -Path $_
-  # Write-Debug $_
+  Write-Output $_
   Add-Type -Path $_
 }
 popd
