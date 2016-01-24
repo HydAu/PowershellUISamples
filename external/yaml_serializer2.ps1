@@ -112,6 +112,22 @@ function OpenLog {
 
 }
 
+<#
+.SYNOPSIS
+	Confirms the presence of a specific message from resource specific type, title in the Puppet last run log
+.DESCRIPTION
+	Inspects the Puppet last run log's declaration of resource of the caller provided type, title and finds if there is event with specific message text
+	
+.EXAMPLE
+	exec "FindResourceEventMessage '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}' -text '#{message_text}'"
+	
+.LINK
+	
+.NOTES
+	VERSION HISTORY
+	2016/01/24 Initial Version
+#>
+
 function FindResourceEventMessage {
   param(
     [string]$log,
@@ -149,6 +165,22 @@ function FindResourceEventMessage {
 }
 
 
+<#
+.SYNOPSIS
+	Confirms the presence of a resource with specific type, title, and changed state in the Puppet last run log
+.DESCRIPTION
+	Evaluates the Puppet last run log looking for declaration of resource with given type, title, and changed state
+	
+.EXAMPLE
+	exec "FindResource -log '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}'"
+	
+.LINK
+	
+.NOTES
+	VERSION HISTORY
+	2016/01/24 Initial Version
+#>
+
 function FindResource {
   param(
     [string]$log,
@@ -183,14 +215,27 @@ function FindResource {
             $found = $true
           }
         }
-
-
       }
     }
   }
   return $found
-
 }
+
+<#
+.SYNOPSIS
+	Evaluates presence of a given text in the Puppet last run log messages
+.DESCRIPTION
+	Evaluates the Puppet last run log detecing presence of specific message text fragment
+	
+.EXAMPLE
+	exec "FindMessage -text '#{text}'"
+	
+.LINK
+	
+.NOTES
+	VERSION HISTORY
+	2016/01/24 Initial Version
+#>
 
 
 function FindMessage {
@@ -206,6 +251,11 @@ function FindMessage {
     if ($entry['message'] -match $text) {
       Write-Host -ForegroundColor 'yellow' ('Logs: "{0}"' -f $text)
       Write-Host -ForegroundColor 'green' $entry['message']
+	  <#
+        TODO: correlate message with source
+        message: defined 'when' as 'pending'
+        source: "/Stage[main]/Main/Reboot[testrun]/when"
+      #>
       $found = $true
     }
   }
@@ -225,6 +275,3 @@ FindMessage -log $puppet_run_log -text "defined 'when' as 'pending'"
 
 FindResourceEventMessage -log $puppet_run_log -name $resource_name -type $resource_type -text 'defined'
 
-# exec "FindResource -log '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}'"
-# exec "FindResourceEventMessage '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}' -text '#{message_text}'"
-# exec "FindMessage -text '#{text}'"
