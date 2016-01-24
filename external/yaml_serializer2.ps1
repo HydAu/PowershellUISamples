@@ -2,71 +2,47 @@
 # https://github.com/aaubry/YamlDotNet
 
 function Add-CastingFunctions ($value) {
-  if ($PSVersionTable.PSVersion -ge "3.0") { return $value }
+  if ($PSVersionTable.PSVersion -ge '3.0') { return $value }
   return Add-CastingFunctionsForPosh2 ($value)
 }
 
 function Add-CastingFunctionsForPosh2 ($value) {
-  return Add-Member -InputObject $value -Name ToInt `
-     -MemberType ScriptMethod -PassThru -Value `
+  return Add-Member -InputObject $value -Name ToInt -MemberType ScriptMethod -PassThru -Value `
      { [int]$this } |
-  Add-Member -Name ToLong `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToLong -MemberType ScriptMethod -PassThru -Value `
      { [long]$this } |
-  Add-Member -Name ToDouble `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToDouble -MemberType ScriptMethod -PassThru -Value `
      { [double]$this } |
-  Add-Member -Name ToDecimal `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToDecimal -MemberType ScriptMethod -PassThru -Value `
      { [decimal]$this } |
-  Add-Member -Name ToByte `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToByte -MemberType ScriptMethod -PassThru -Value `
      { [byte]$this } |
-  Add-Member -Name ToBoolean `
-     -MemberType ScriptMethod -PassThru -Value `
+  Add-Member -Name ToBoolean -MemberType ScriptMethod -PassThru -Value `
      { [System.Boolean]::Parse($this) }
 }
 
-function get-YamlData ([string]$data) {
-  $stringReader = New-Object System.IO.StringReader ($data)
-  $yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
-  $yamlStream.Load([System.IO.TextReader]$stringReader)
-
-  return $yamlStream
+function get-YamlStreamFromString([string]$data) {
+  $sr = New-Object System.IO.StringReader ($data)
+  $o = New-Object YamlDotNet.RepresentationModel.YamlStream
+  $o.Load([System.IO.TextReader]$sr)
+  return $o
 }
 
-function Get-YamlStream ([string]$file) {
-  $streamReader = [System.IO.File]::OpenText($file)
-  $yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
-  $yamlStream.Load([System.IO.TextReader]$streamReader)
-  $streamReader.Close()
-  return $yamlStream
-}
-
-function Get-YamlDocument ([string]$file) {
-  $yamlStream = Get-YamlStream $file
-  # Cannot index into a null array.
-  $document = $yamlStream.Documents[0].RootNode
-  # BUG: occationally the $yamlStream does not 
-  # $document = $yamlStream.RootNode
-
-  return $document
-}
-
-function Get-YamlDocumentFromString ([string]$yamlString) {
-  $stringReader = New-Object System.IO.StringReader ($yamlString)
-  $yamlStream = New-Object YamlDotNet.RepresentationModel.YamlStream
-  $yamlStream.Load([System.IO.TextReader]$stringReader)
-  $document = $yamlStream.Documents[0]
-  return $document
+function Get-YamlStreamFromFile ([string]$file) {
+  $t = [System.IO.File]::OpenText($file)
+  $o = New-Object YamlDotNet.RepresentationModel.YamlStream
+  $o.Load([System.IO.TextReader]$t)
+  $t.Close()
+  return $o
 }
 
 function Explode-Node ($node) {
-  if ($node.GetType().Name -eq "YamlScalarNode") {
+  $node_name = $node.GetType().Name
+  if ($node_name -eq 'YamlScalarNode') {
     return Convert-YamlScalarNodeToValue $node
-  } elseif ($node.GetType().Name -eq "YamlMappingNode") {
+  } elseif ($node_name -eq 'YamlMappingNode') {
     return Convert-YamlMappingNodeToHash $node
-  } elseif ($node.GetType().Name -eq "YamlSequenceNode") {
+  } elseif ($node_name -eq 'YamlSequenceNode') {
     return Convert-YamlSequenceNodeToList $node
   }
 }
@@ -77,18 +53,17 @@ function Convert-YamlScalarNodeToValue ($node) {
 
 function Convert-YamlMappingNodeToHash ($node) {
   $hash = @{}
-  $yamlNodes = $node.Children
-  foreach ($key in $yamlNodes.Keys) {
-    $hash[$key.Value] = Explode-Node $yamlNodes[$key]
+  $c = $node.Children
+  foreach ($key in $c.Keys) {
+    $hash[$key.Value] = Explode-Node $c[$key]
   }
   return $hash
 }
 
 function Convert-YamlSequenceNodeToList ($node) {
   $list = @()
-  $yamlNodes = $node.Children
-  foreach ($yamlNode in $yamlNodes) {
-    $list += Explode-Node $yamlNode
+  foreach ($n in $node.Children) {
+    $list += Explode-Node $n
   }
   return $list
 }
@@ -131,7 +106,7 @@ function OpenLog {
   }
   popd
   $data = (Get-Content -Path $runlog) -join "`n"
-  $yaml = get-YamlData $data
+  $yaml = get-YamlStreamFromString $data
   $log = Explode-Node $yaml.RootNode
   return $log
 
@@ -157,6 +132,12 @@ function FindResourceEventMessage {
       $resource_title = $matches[2]
       if ($resource_type -eq $type -and $resource_title -eq $name) {
         if ($message -eq '' -or ($data[$resource]['changed'] -eq 'true')) {
+          Write-Host -ForegroundColor 'yellow' ('Resource:{0}[{1}] Event: {2}' -f $type,$name,$text)
+          @( 'resource_type',
+            'title') | ForEach-Object {
+            $key = $_
+            Write-Host -ForegroundColor 'green' ('{0}: {1}' -f $key,$data[$resource][$key])
+          }
           Write-Host -ForegroundColor 'blue' ('message: {0}' -f $data[$resource]['events']['message'])
           $found = $true
         }
@@ -186,6 +167,7 @@ function FindResource {
       $resource_title = $matches[2]
       if ($resource_type -eq $type -and $resource_title -eq $name) {
         if ((-not $changed) -or ($data[$resource]['changed'] -eq 'true')) {
+          Write-Host -ForegroundColor 'yellow' ('Resource:{0}[{1}]:{2}' -f $type,$name,$changed)
           @( 'resource_type',
             'title') | ForEach-Object {
             $key = $_
@@ -222,7 +204,7 @@ function FindMessage {
   ForEach-Object {
     $entry = $_
     if ($entry['message'] -match $text) {
-      Write-Host -ForegroundColor 'yellow' 'Logs:'
+      Write-Host -ForegroundColor 'yellow' ('Logs: "{0}"' -f $text)
       Write-Host -ForegroundColor 'green' $entry['message']
       $found = $true
     }
@@ -236,9 +218,13 @@ $puppet_run_log_filename = 'previous_run_report.yaml'
 $puppet_run_log = [System.IO.Path]::Combine((Get-ScriptDirectory),$puppet_run_log_filename)
 
 FindResource -log $puppet_run_log -name $resource_name -type $resource_type
+
+FindResource -log $puppet_run_log -name 'something' -type 'Exec'
 FindMessage -log $puppet_run_log -text 'defined'
+FindMessage -log $puppet_run_log -text "defined 'when' as 'pending'"
+
 FindResourceEventMessage -log $puppet_run_log -name $resource_name -type $resource_type -text 'defined'
 
-# exec "@(FindResource -log '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}').count -gt 0"
-# exec "@(FindResourceEventMessage '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}' -text '#{message_text}').count -gt 0"
-# exec "@(FindMessage -text '#{text}').count -gt 0"
+# exec "FindResource -log '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}'"
+# exec "FindResourceEventMessage '#{puppet_run_log}' -name '#{resource_name}' -type '#{resource_type}' -text '#{message_text}'"
+# exec "FindMessage -text '#{text}'"
