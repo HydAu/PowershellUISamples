@@ -1,4 +1,4 @@
-#Copyright (c) 2015 Serguei Kouzmine
+#Copyright (c) 2015,2016 Serguei Kouzmine
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
 #in the Software without restriction, including without limitation the rights
@@ -15,7 +15,7 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
 
-# 
+# origin : http://www.codeproject.com/Articles/20731/Gantt-Chart
 Add-Type -Language 'VisualBasic' -TypeDefinition @"
 
 Imports System.Drawing.Drawing2D
@@ -558,7 +558,7 @@ Public Class GanttChart
         If shownHeaderList Is Nothing Then Exit Sub
         If shownHeaderList.Count = 0 Then Exit Sub
 
-        If e.Button <> Windows.Forms.MouseButtons.Left Then
+        If e.Button <> MouseButtons.Left Then
             mouseHoverPart = MouseOverPart.Empty
 
             ' If bar has changed manually, but left mouse button is no longer pressed the BarChanged event will be raised
@@ -698,7 +698,7 @@ Public Class GanttChart
                     If AllowManualEditBar = True Then
                         Dim areaSize As Integer = 5
 
-                        If e.Button = Windows.Forms.MouseButtons.Left Then
+                        If e.Button = MouseButtons.Left Then
                             areaSize = 50
                         End If
 
@@ -725,7 +725,7 @@ Public Class GanttChart
         _mouseOverRowText = rowText
         _mouseOverRowValue = rowValue
 
-        If e.Button = Windows.Forms.MouseButtons.Left Then
+        If e.Button = MouseButtons.Left Then
             RaiseEvent MouseDragged(sender, e)
         Else
 
@@ -1225,7 +1225,7 @@ Public Class GanttChart
     End Sub
 
     Private Sub GanttChart_Click(ByVal sender As System.Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles MyBase.MouseClick
-        If e.Button = Windows.Forms.MouseButtons.Left Then
+        If e.Button = MouseButtons.Left Then
             If mouseOverBottomPart = True Then
                 ScrollOneDown()
             ElseIf mouseOverTopPart = True Then
