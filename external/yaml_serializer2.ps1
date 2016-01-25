@@ -1,3 +1,24 @@
+#Copyright (c) 2016 Serguei Kouzmine
+#
+#Permission is hereby granted, free of charge, to any person obtaining a copy
+#of this software and associated documentation files (the "Software"), to deal
+#in the Software without restriction, including without limitation the rights
+#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#copies of the Software, and to permit persons to whom the Software is
+#furnished to do so, subject to the following conditions:
+#
+#The above copyright notice and this permission notice shall be included in
+#all copies or substantial portions of the Software.
+#
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+#THE SOFTWARE.
+
+
 # origin: https://github.com/scottmuc/PowerYaml
 # https://github.com/aaubry/YamlDotNet
 
@@ -228,7 +249,7 @@ function FindResource {
 	Evaluates the Puppet last run log detecing presence of specific message text fragment
 	
 .EXAMPLE
-	exec "FindMessage -text '#{text}'"
+	exec "FindMessage -text '#{text}'" [-source '#{source}']
 	
 .LINK
 	
@@ -241,7 +262,8 @@ function FindResource {
 function FindMessage {
   param(
     [string]$log,
-    [string]$text
+    [string]$text,
+	[string]$source 
   )
   $runlog = OpenLog ($log)
   $found = $false
@@ -249,14 +271,12 @@ function FindMessage {
   ForEach-Object {
     $entry = $_
     if ($entry['message'] -match $text) {
-      Write-Host -ForegroundColor 'yellow' ('Logs: "{0}"' -f $text)
-      Write-Host -ForegroundColor 'green' $entry['message']
-	  <#
-        TODO: correlate message with source
-        message: defined 'when' as 'pending'
-        source: "/Stage[main]/Main/Reboot[testrun]/when"
-      #>
-      $found = $true
+	  if (($source -eq '') -or ($entry['source'] -match "\b${source}\b")) {
+        Write-Host -ForegroundColor 'yellow' ('Logs: "{0}"' -f $text)
+        Write-Host -ForegroundColor 'green' $entry['message']
+	    Write-Host -ForegroundColor 'green' $entry['source']
+        $found = $true
+	  }
     }
   }
   return $found
@@ -272,6 +292,7 @@ FindResource -log $puppet_run_log -name $resource_name -type $resource_type
 FindResource -log $puppet_run_log -name 'something' -type 'Exec'
 FindMessage -log $puppet_run_log -text 'defined'
 FindMessage -log $puppet_run_log -text "defined 'when' as 'pending'"
+FindMessage -log $puppet_run_log -text 'executed successfully' -source 'puppet_log_rename_run_command_key'
 
 FindResourceEventMessage -log $puppet_run_log -name $resource_name -type $resource_type -text 'defined'
 
