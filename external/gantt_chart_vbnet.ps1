@@ -1382,29 +1382,23 @@ $c.TabIndex = 3
 $c.Text = "GanttChart3"
 $c.TimeFont = New-Object System.Drawing.Font ('Verdana',8.0)
 
-$b1 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime(2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)
-$b2 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 2',(New-Object System.DateTime (2015,4,27,8,7,0)),(New-Object System.DateTime (2015,4,27,8,9,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)
-$b3 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 3',(New-Object System.DateTime (2015,4,27,8,9,0)),(New-Object System.DateTime (2015,4,27,8,11,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)
-$b4 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 4',(New-Object System.DateTime (2015,4,27,8,14,0)),(New-Object System.DateTime (2015,4,27,8,15,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,3)
-$b5 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 5',(New-Object System.DateTime (2015,4,27,8,16,0)),(New-Object System.DateTime (2015,4,27,8,19,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,4)
-$b6 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 6',(New-Object System.DateTime (2015,4,27,8,20,0)),(New-Object System.DateTime (2015,4,27,8,23,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,5)
-$b7 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,28,0)),(New-Object System.DateTime (2015,4,27,8,40,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,6)
-$b8 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,40,0)),(New-Object System.DateTime (2015,4,27,8,43,0)), [System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,7)
-$b9 = New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,43,0)),(New-Object System.DateTime (2015,4,27,8,55,0)), [System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,8)
+@(
 
-$c.AddChartBar($b1)
-$c.AddChartBar($b2)
-$c.AddChartBar($b3)
-$c.AddChartBar($b4)
-$c.AddChartBar($b5)
-$c.AddChartBar($b6)
-$c.AddChartBar($b7)
-$c.AddChartBar($b8)
-$c.AddChartBar($b9)
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 1',(New-Object System.DateTime (2015,4,27,8,6,0)),(New-Object System.DateTime (2015,4,27,8,7,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,0)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 2',(New-Object System.DateTime (2015,4,27,8,7,0)),(New-Object System.DateTime (2015,4,27,8,9,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,1)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 3',(New-Object System.DateTime (2015,4,27,8,9,0)),(New-Object System.DateTime (2015,4,27,8,11,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,2)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 4',(New-Object System.DateTime (2015,4,27,8,14,0)),(New-Object System.DateTime (2015,4,27,8,15,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,3)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 5',(New-Object System.DateTime (2015,4,27,8,16,0)),(New-Object System.DateTime (2015,4,27,8,19,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,4)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 6',(New-Object System.DateTime (2015,4,27,8,20,0)),(New-Object System.DateTime (2015,4,27,8,23,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,5)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,28,0)),(New-Object System.DateTime (2015,4,27,8,40,0)),[System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,6)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,40,0)),(New-Object System.DateTime (2015,4,27,8,43,0)),[System.Drawing.Color]::DarkGray,[System.Drawing.Color]::LightGray,7)),
+  (New-Object -TypeName 'BarInformation' -ArgumentList ('Step 7',(New-Object System.DateTime (2015,4,27,8,43,0)),(New-Object System.DateTime (2015,4,27,8,55,0)),[System.Drawing.Color]::Maroon,[System.Drawing.Color]::Khaki,8))
 
+
+) | ForEach-Object { $b = $_; $c.AddChartBar($b) }
 
 $c.FromDate = New-Object System.DateTime (2015,4,27,8,5,0)
-$c.ToDate   = New-Object System.DateTime (2015,4,27,8,40,0)
+$c.ToDate = New-Object System.DateTime (2015,4,27,8,40,0)
 
 $t = New-Object System.Windows.Forms.TextBox
 $t.Anchor = [System.Windows.Forms.AnchorStyles](`
@@ -1454,7 +1448,7 @@ $c.Add_MouseMove({
       [System.Object]$sender,
       [System.Windows.Forms.MouseEventArgs]$e
     )
-    [GanttChart]$b = [GanttChart]($sender)
+    [ganttchart]$b = [ganttchart]($sender)
     $toolTipText = @()
     if ($b.MouseOverRowText.Length -gt 0) {
 
