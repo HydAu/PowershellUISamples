@@ -138,11 +138,11 @@ public class TreeViewSample : System.Windows.Forms.Panel
         // http://stackoverflow.com/questions/5478984/treeview-with-checkboxes-in-c-sharp
         if (isDrawing) return;
         isDrawing = true;
-
+        
         if (!e.Node.Checked)
         {
 
-            if (!HasCheckedChildNodes(e.Node.Parent))
+            if (e.Node.Parent!= null && !HasCheckedChildNodes(e.Node.Parent))
             {
                 try
                 {
@@ -152,7 +152,8 @@ public class TreeViewSample : System.Windows.Forms.Panel
             }
 
 
-        }
+        } 
+        
 
         try
         {
