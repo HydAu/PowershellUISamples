@@ -11,7 +11,7 @@
 #all copies or substantial portions of the Software.
 #
 #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,e
 #FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
@@ -22,8 +22,6 @@ Add-Type -TypeDefinition @"
 
 
 // https://msdn.microsoft.com/en-us/library/system.windows.forms.treeView1.checkboxes%28v=vs.110%29.aspx
-// http://www.lidorsystems.com/support/articles/treeview-threestate.aspx
-
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -33,12 +31,16 @@ public class TreeViewSample : System.Windows.Forms.Panel
 
     private readonly Hashtable _hash_table = new Hashtable();
     public RikTheVeggie.TriStateTreeView treeView1;
+    // public System.Windows.Forms.TreeView treeView1;
+
     private Button showCheckedNodesButton;
     private TreeViewCancelEventHandler checkForCheckedChildren;
     private bool isDrawing = false;
     public TreeViewSample()
     {
         treeView1 = new RikTheVeggie.TriStateTreeView();
+        // treeView1 = new System.Windows.Forms.TreeView();
+
         showCheckedNodesButton = new Button();
         checkForCheckedChildren =
             new TreeViewCancelEventHandler(CheckForCheckedChildrenHandler);
@@ -136,6 +138,22 @@ public class TreeViewSample : System.Windows.Forms.Panel
         // http://stackoverflow.com/questions/5478984/treeview-with-checkboxes-in-c-sharp
         if (isDrawing) return;
         isDrawing = true;
+
+        if (!e.Node.Checked)
+        {
+
+            if (!HasCheckedChildNodes(e.Node.Parent))
+            {
+                try
+                {
+                    e.Node.Parent.Checked = false;
+                }
+                catch { }
+            }
+
+
+        }
+
         try
         {
             checkNodes(e.Node, e.Node.Checked);
@@ -436,7 +454,6 @@ public class Win32Window : IWin32Window
 # https://communities.vmware.com/servlet/JiveServlet/download/17938-4-78419/Dumper.psm1
 
 $tree =
-$VAR1 =
 @{
   'Fruit' = @{
               'Pepo' = '$null';
