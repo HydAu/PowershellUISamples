@@ -9,12 +9,13 @@ if [ -d $STATEDIR ] ; then
       echo "FILE_COUNT=${FILE_COUNT}"
       CNT=$FILE_COUNT
       while [ $CNT -gt 0  ] ; do
-      	NEXT_CNT=$(expr $CNT + 1)
-      	cp $LOG_FILE.$CNT $LOG_FILE.$NEXT_CNT 
-      	CNT=$(expr $CNT - 1)
+        NEXT_CNT=$(expr $CNT + 1)
+        >&2 echo "cp $LOG_FILE.$CNT $LOG_FILE.$NEXT_CNT"
+        cp $LOG_FILE.$CNT $LOG_FILE.$NEXT_CNT
+        CNT=$(expr $CNT - 1)
       done
     fi
     cp $LOG_FILE "${LOG_FILE}.1"
-  fi  
+  fi
 fi
 popd
